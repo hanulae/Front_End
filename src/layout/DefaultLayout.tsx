@@ -2,7 +2,6 @@ import React, {JSX} from 'react';
 import {StyleSheet, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Header from '../components/common/Header';
-import {NavigationProp} from '@react-navigation/native';
 
 interface IDefaultLayoutProps {
   children: React.ReactNode;
@@ -24,7 +23,7 @@ const DefaultLayout = ({
   onLogoutPress,
 }: IDefaultLayoutProps): JSX.Element => {
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       {headerShown && (
         <Header
           title={headerTitle}
@@ -49,5 +48,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'column',
+    borderWidth: 1,
   },
 });

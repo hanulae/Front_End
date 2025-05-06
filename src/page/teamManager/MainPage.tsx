@@ -1,24 +1,27 @@
-import React, {JSX} from 'react';
-import DefaultLayout from '../../layout/DefaultLayout';
-import CustomButton from '../../components/common/CustomButton';
 import {NavigationProp} from '@react-navigation/native';
-import Typo from '../../components/common/Typo';
 import {StyleSheet, View} from 'react-native';
+import DefaultLayout from '../../layout/DefaultLayout';
+import Typo from '../../components/common/Typo';
+import CustomButton from '../../components/common/CustomButton';
 import AlarmOff from '../../assets/Contents/Contents_AlarmOff.svg';
+import {useSetAtom} from 'jotai';
+import {userInfoAtom} from '../../state/local_state/userinfoAtom';
 
-interface IMainPageProps {
+interface IManagerMainPageProps {
   navigation: NavigationProp<any>;
 }
 
-const MainPage = ({navigation}: IMainPageProps): JSX.Element => {
-  const goToLoginPage = () => {
-    navigation.navigate('Login');
-  };
+const ManagerMainPage = ({navigation}: IManagerMainPageProps) => {
+  const setLogin = useSetAtom(userInfoAtom);
 
-  const goToAlarmPage = () => {
-    console.log('Alarm Page');
+  const logout = () => {
+    // 로그아웃 로직
+    setLogin({
+      userType: 'manager',
+      isLogin: false,
+    });
+    navigation.navigate('ManagerMain');
   };
-
   const goToNoticePage = () => {
     console.log('Notice Page');
   };
@@ -27,13 +30,17 @@ const MainPage = ({navigation}: IMainPageProps): JSX.Element => {
     navigation.navigate('FindFuneral');
   };
 
+  const goToAlarmPage = () => {
+    console.log('Alarm Page');
+  };
+
   return (
     <DefaultLayout>
       <View style={styles.headerContainer}>
         <Typo>하늘애</Typo>
         <View style={styles.leftHeaderContainer}>
-          <CustomButton onPress={goToLoginPage} style={styles.loginButton}>
-            <Typo>로그인</Typo>
+          <CustomButton onPress={logout} style={styles.loginButton}>
+            <Typo>로그아웃</Typo>
           </CustomButton>
           <CustomButton onPress={goToAlarmPage} style={styles.alarmButton}>
             <AlarmOff />
@@ -64,7 +71,10 @@ const MainPage = ({navigation}: IMainPageProps): JSX.Element => {
   );
 };
 
+export default ManagerMainPage;
+
 const styles = StyleSheet.create({
+  // Define your styles here
   headerContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -119,5 +129,3 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
 });
-
-export default MainPage;

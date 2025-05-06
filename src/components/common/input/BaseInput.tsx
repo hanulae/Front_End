@@ -13,6 +13,7 @@ interface IBaseInputProps extends TextInputProps {
   error?: string;
   placeholder?: string;
   clearable?: boolean;
+  disabled?: boolean;
 }
 
 const BaseInput = ({
@@ -20,6 +21,7 @@ const BaseInput = ({
   clearable = false,
   value,
   onChangeText,
+  disabled,
   ...props
 }: IBaseInputProps) => {
   const [focused, setFocused] = useState(false);
@@ -35,6 +37,7 @@ const BaseInput = ({
         onChangeText={onChangeText}
         placeholder={props.placeholder}
         style={[styles.input, error && styles.errorInput]}
+        editable={!disabled}
       />
       {showClear && (
         <TouchableOpacity
@@ -61,6 +64,7 @@ const styles = StyleSheet.create({
   input: {
     width: '100%',
     fontSize: 16,
+    height: 56,
     borderRadius: 10,
     fontWeight: '500',
     paddingVertical: 18,
