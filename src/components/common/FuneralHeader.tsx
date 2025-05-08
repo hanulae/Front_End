@@ -12,7 +12,7 @@ interface IFuneralHeaderProps {
   homeButton?: boolean;
   logoutButton?: boolean;
   homeRouteName?: string;
-  onLogoutPress?: () => void;
+  onLogoutPress: () => void;
   color?: string;
   backButtonVisible?: boolean;
   logoutColor?: string;
@@ -64,7 +64,7 @@ const FuneralHeader = ({
         </CustomButton>
       )}
       {logoutButton && (
-        <CustomButton onPress={() => onLogoutPress}>
+        <CustomButton onPress={onLogoutPress}>
           {logoutColor ? (
             <LogoutButtonBlack width={24} height={24} />
           ) : (
