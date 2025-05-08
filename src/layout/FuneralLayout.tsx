@@ -11,7 +11,7 @@ interface IFuneralLayoutProps {
   homeButton?: boolean;
   logoutButton?: boolean;
   homeRouteName?: string;
-  onLogoutPress: () => void;
+  onLogoutPress?: () => void;
   color?: string;
 }
 
@@ -33,7 +33,7 @@ const FuneralLayout = ({
           homeButton={homeButton}
           logoutButton={logoutButton}
           homeRouteName={homeRouteName}
-          onLogoutPress={onLogoutPress}
+          onLogoutPress={onLogoutPress as () => void}
           color={color}
         />
       )}
