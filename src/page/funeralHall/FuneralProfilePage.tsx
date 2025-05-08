@@ -14,8 +14,14 @@ import QuoteListIcon from '../../assets/Button/Button_QuoteRecordOff.svg';
 import AppSettingIcon from '../../assets/Button/Button_AppSettingoff.svg';
 import Typo from '../../components/common/Typo';
 import FuneralHeader from '../../components/common/FuneralHeader';
+import {useSetAtom} from 'jotai';
+import {userInfoAtom} from '../../state/local_state/userinfoAtom';
+import {useNavigation} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 
 const FuneralProfilePage = () => {
+  const setLogin = useSetAtom(userInfoAtom);
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
   useEffect(() => {
     if (Platform.OS === 'android') {
       StatusBar.setBackgroundColor('#3287F8');
@@ -54,10 +60,24 @@ const FuneralProfilePage = () => {
     console.log('App Setting');
   };
 
+  const logout = () => {
+    // 로그아웃 로직
+    setLogin({
+      userType: null,
+      isLogin: false,
+    });
+    console.log('Logout');
+    // navigation.navigate('ManagerMain');
+  };
+
   return (
     <FuneralLayout headerShown={false}>
       <View style={styles.topSection}>
-        <FuneralHeader backButtonVisible={false} logoutButton={true} />
+        <FuneralHeader
+          backButtonVisible={false}
+          logoutButton={true}
+          onLogoutPress={logout}
+        />
         <View style={styles.container}>
           <ProfileStat point={100000} hallName="김상조" />
         </View>
