@@ -27,7 +27,7 @@ const FuneralProfilePage = () => {
       StatusBar.setBackgroundColor('#3287F8');
       StatusBar.setBarStyle('light-content');
     } else {
-      StatusBar.setTranslucent(false);
+      // StatusBar.setTranslucent(false);
       StatusBar.setBarStyle('light-content');
     }
   }, []);
