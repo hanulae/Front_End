@@ -48,7 +48,7 @@ const MainPage = ({navigation}: IMainPageProps): JSX.Element => {
   };
 
   return (
-    <ManagerLayout headerShown={false} color="#3287F8">
+    <DefaultLayout headerShown={false} color="#3287F8" top={false}>
       <View style={styles.headerContainer}>
         <Typo style={styles.appName}>하늘애</Typo>
         <View style={styles.leftHeaderContainer}>
@@ -105,7 +105,7 @@ const MainPage = ({navigation}: IMainPageProps): JSX.Element => {
           <Typo style={styles.footerNumber}>02-123-4567</Typo>
         </View>
       </View>
-    </ManagerLayout>
+    </DefaultLayout>
   );
 };
 

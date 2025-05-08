@@ -11,6 +11,8 @@ interface IDefaultLayoutProps {
   logoutButton?: boolean;
   homeRouteName?: string;
   onLogoutPress?: () => void;
+  color?: string;
+  top?: boolean;
 }
 
 const DefaultLayout = ({
@@ -21,9 +23,17 @@ const DefaultLayout = ({
   logoutButton = false,
   homeRouteName,
   onLogoutPress,
+  color,
+  top,
 }: IDefaultLayoutProps): JSX.Element => {
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+    <SafeAreaView
+      style={[styles.safeArea, {backgroundColor: color}]}
+      edges={[
+        ...(top === false ? [] : ['top' as const]),
+        'left' as const,
+        'right' as const,
+      ]}>
       {headerShown && (
         <Header
           title={headerTitle}
