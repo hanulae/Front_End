@@ -30,7 +30,7 @@ const LoginPage = ({navigation}: IMainPageProps) => {
   };
   const handleLogin = () => {
     setLogin({
-      userType: 'manager',
+      userType: 'funeral',
       isLogin: true,
     });
   };
