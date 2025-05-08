@@ -8,7 +8,6 @@
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import React from 'react';
-import MainPage from './src/page/common/MainPage';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {StatusBar} from 'react-native';
@@ -16,8 +15,7 @@ import CommonStack from './src/router/CommonStack';
 import ManagerStack from './src/router/ManagerStack';
 import {useAtomValue} from 'jotai';
 import {userInfoAtom} from './src/state/local_state/userinfoAtom';
-
-const Stack = createNativeStackNavigator();
+import FuneralStack from './src/router/FuneralStack';
 
 function App(): React.JSX.Element {
   const userInfo = useAtomValue(userInfoAtom);
@@ -34,7 +32,7 @@ function App(): React.JSX.Element {
           ) : userType === 'manager' ? (
             <ManagerStack />
           ) : (
-            <ManagerStack />
+            <FuneralStack />
           )}
         </NavigationContainer>
       </QueryClientProvider>
