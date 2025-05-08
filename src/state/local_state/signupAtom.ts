@@ -1,6 +1,6 @@
 import {atom} from 'jotai';
 
-export type UserType = 'manager' | 'funeral';
+export type UserType = 'manager' | 'funeral' | null;
 
 export interface ISignupInfo {
   userType: UserType;
