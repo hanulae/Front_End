@@ -11,7 +11,7 @@ interface IFuneralLayoutProps {
   homeButton?: boolean;
   logoutButton?: boolean;
   homeRouteName?: string;
-  onLogoutPress?: () => void;
+  onLogoutPress: () => void;
   color?: string;
 }
 
