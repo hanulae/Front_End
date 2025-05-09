@@ -1,4 +1,4 @@
-import React, {JSX, useCallback, useEffect, useState} from 'react';
+import React, {JSX, useCallback, useState} from 'react';
 import DefaultLayout from '../../layout/DefaultLayout';
 import CustomButton from '../../components/common/CustomButton';
 import {NavigationProp, useFocusEffect} from '@react-navigation/native';
@@ -16,7 +16,6 @@ import MainSearchIcon from '../../assets/Main_FuneralSearch.svg';
 import MainAlarmIcon from '../../assets/Main_Alarm.svg';
 import MoveIcon from '../../components/svg/MoveIcon';
 import InfoCenterIcon from '../../assets/ServiceCenter.svg';
-import ManagerLayout from '../../layout/ManagerLayout';
 import UserSelectSheet from '../../components/common/UserSelectSheet';
 interface IMainPageProps {
   navigation: NavigationProp<any>;
@@ -109,7 +108,10 @@ const MainPage = ({navigation}: IMainPageProps): JSX.Element => {
         </View>
       </View>
       {showSelectSheet && (
-        <UserSelectSheet onClose={() => setShowSelectSheet(false)} />
+        <UserSelectSheet
+          onClose={() => setShowSelectSheet(false)}
+          targetScreen="Login"
+        />
       )}
     </DefaultLayout>
   );
