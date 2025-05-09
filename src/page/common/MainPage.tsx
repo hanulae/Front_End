@@ -1,4 +1,4 @@
-import React, {JSX, useEffect} from 'react';
+import React, {JSX, useEffect, useState} from 'react';
 import DefaultLayout from '../../layout/DefaultLayout';
 import CustomButton from '../../components/common/CustomButton';
 import {NavigationProp} from '@react-navigation/native';
@@ -17,11 +17,13 @@ import MainAlarmIcon from '../../assets/Main_Alarm.svg';
 import MoveIcon from '../../components/svg/MoveIcon';
 import InfoCenterIcon from '../../assets/ServiceCenter.svg';
 import ManagerLayout from '../../layout/ManagerLayout';
+import UserSelectSheet from '../../components/common/UserSelectSheet';
 interface IMainPageProps {
   navigation: NavigationProp<any>;
 }
 
 const MainPage = ({navigation}: IMainPageProps): JSX.Element => {
+  const [showSelectSheet, setShowSelectSheet] = useState(false);
   useEffect(() => {
     if (Platform.OS === 'android') {
       StatusBar.setBackgroundColor('#3287F8');
@@ -32,7 +34,7 @@ const MainPage = ({navigation}: IMainPageProps): JSX.Element => {
     }
   }, []);
   const goToLoginPage = () => {
-    navigation.navigate('Login');
+    setShowSelectSheet(true);
   };
 
   const goToAlarmPage = () => {
@@ -105,6 +107,9 @@ const MainPage = ({navigation}: IMainPageProps): JSX.Element => {
           <Typo style={styles.footerNumber}>02-123-4567</Typo>
         </View>
       </View>
+      {showSelectSheet && (
+        <UserSelectSheet onClose={() => setShowSelectSheet(false)} />
+      )}
     </DefaultLayout>
   );
 };
