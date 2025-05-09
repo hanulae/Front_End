@@ -7,6 +7,8 @@ import React, {JSX} from 'react';
 import {StyleSheet, View} from 'react-native';
 import CustomButton from './CustomButton';
 import Typo from './Typo';
+import BackIcon from '../../assets/Header/Header_Back.svg';
+import HomeIcon from '../../assets/Header/Header_Home.svg';
 
 interface IHeaderProps {
   title: string;
@@ -47,14 +49,14 @@ const Header = ({
   return (
     <View style={[styles.header, {backgroundColor: color}]}>
       <CustomButton onPress={goBack}>
-        <Typo>Back</Typo>
+        <BackIcon width={24} height={24} />
       </CustomButton>
       <Typo fontSize={16} color="black">
         {title}
       </Typo>
       {homeButton && (
         <CustomButton onPress={goHome}>
-          <Typo>Home</Typo>
+          <HomeIcon width={24} height={24} />
         </CustomButton>
       )}
       {logoutButton && (
