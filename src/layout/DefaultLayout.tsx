@@ -58,6 +58,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'column',
-    borderWidth: 1,
+    // borderWidth: 1,
   },
 });
