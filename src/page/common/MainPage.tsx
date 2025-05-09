@@ -1,7 +1,7 @@
-import React, {JSX, useEffect, useState} from 'react';
+import React, {JSX, useCallback, useEffect, useState} from 'react';
 import DefaultLayout from '../../layout/DefaultLayout';
 import CustomButton from '../../components/common/CustomButton';
-import {NavigationProp} from '@react-navigation/native';
+import {NavigationProp, useFocusEffect} from '@react-navigation/native';
 import Typo from '../../components/common/Typo';
 import {
   ImageBackground,
@@ -24,15 +24,16 @@ interface IMainPageProps {
 
 const MainPage = ({navigation}: IMainPageProps): JSX.Element => {
   const [showSelectSheet, setShowSelectSheet] = useState(false);
-  useEffect(() => {
-    if (Platform.OS === 'android') {
-      StatusBar.setBackgroundColor('#3287F8');
-      StatusBar.setBarStyle('light-content');
-    } else {
-      // StatusBar.setTranslucent(false);
-      StatusBar.setBarStyle('light-content');
-    }
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      if (Platform.OS === 'android') {
+        StatusBar.setBackgroundColor('#3287F8');
+        StatusBar.setBarStyle('light-content');
+      } else {
+        StatusBar.setBarStyle('light-content');
+      }
+    }, []),
+  );
   const goToLoginPage = () => {
     setShowSelectSheet(true);
   };
