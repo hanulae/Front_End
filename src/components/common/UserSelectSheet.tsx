@@ -7,9 +7,14 @@ import FuneralIcon from '../../assets/User/User_FuneralDisable.svg';
 import ManagerIcon from '../../assets/User/User_ManagerDisable.svg';
 import CheckIcon from '../../assets/User/User_Check.svg';
 
+interface ISelectSheetProps {
+  onClose: () => void;
+  targetScreen: 'Login' | 'Signup';
+}
+
 const {height} = Dimensions.get('window');
 
-const UserSelectSheet = ({onClose}: {onClose: () => void}) => {
+const UserSelectSheet = ({onClose, targetScreen}: ISelectSheetProps) => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const [selected, setSelected] = useState<'manager' | 'funeral'>('manager');
   const translateY = new Animated.Value(300);
@@ -26,7 +31,7 @@ const UserSelectSheet = ({onClose}: {onClose: () => void}) => {
     setSelected(type);
     setTimeout(() => {
       onClose(); // BottomSheet 닫기
-      navigation.navigate('Login', {userType: type});
+      navigation.navigate(targetScreen, {userType: type});
     }, 150);
   };
 
