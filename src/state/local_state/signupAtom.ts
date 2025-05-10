@@ -14,6 +14,8 @@ export interface ISignupInfo {
     accountNumber: string;
   };
   agreedTerms: boolean;
+  isEmailVerified?: boolean; // 이메일 인증 여부
+  confirmPassword: string; // 비밀번호 확인
 }
 
 export const signupAtom = atom<ISignupInfo>({
@@ -28,4 +30,6 @@ export const signupAtom = atom<ISignupInfo>({
     accountNumber: '',
   },
   agreedTerms: false,
+  isEmailVerified: false,
+  confirmPassword: '',
 });

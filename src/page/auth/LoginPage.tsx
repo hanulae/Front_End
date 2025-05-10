@@ -118,14 +118,11 @@ const styles = StyleSheet.create({
     fontFamily: 'GmarketSansTTFMedium',
   },
   formSection: {
-    // flex: 3,
-    // borderWidth: 3,
-    height: height * 0.175,
+    height: height * 0.15,
     flexDirection: 'column',
-    // justifyContent: 'center',
     paddingHorizontal: 20,
     paddingVertical: 18,
-    // gap: 20,
+    gap: 70,
     // alignItems: 'center',
   },
   formToolSection: {
@@ -134,7 +131,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     paddingHorizontal: 16,
-    gap: 8,
+    gap: 4,
   },
   buttonSection: {
     // flex: 3,
