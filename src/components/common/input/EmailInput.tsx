@@ -44,36 +44,34 @@ const EmailInput = ({input, userType}: EmailInputProps) => {
           onChangeText={input.setId}
         />
       ) : (
-        <View style={styles.row}>
+        <View style={styles.inputWrapper}>
+          {/* 이메일 아이디 입력 */}
           <TextInput
-            style={[styles.input, {flex: 1}]}
-            placeholder="이메일을 입력하세요"
+            style={styles.input}
+            placeholder="이메일"
             value={input.id}
             onChangeText={input.setId}
           />
 
-          <TouchableOpacity
-            onPress={() => setShowSheet(true)}
-            style={styles.domainButton}>
-            <Typo style={styles.domainText}>
-              {input.isDirectInput
-                ? `@${input.customDomain || '직접입력'}`
-                : `@${input.domain}`}
-            </Typo>
-          </TouchableOpacity>
+          {/* 도메인 선택 or 직접입력용 입력창 */}
+          {input.isDirectInput ? (
+            <TextInput
+              style={styles.domainInput}
+              placeholder="직접입력"
+              value={input.customDomain}
+              onChangeText={input.setCustomDomain}
+            />
+          ) : (
+            <TouchableOpacity
+              onPress={() => setShowSheet(true)}
+              style={styles.domainButton}>
+              <Typo style={styles.domainText}>
+                {input.domain === '직접입력' ? '직접입력' : `@${input.domain}`}
+              </Typo>
+            </TouchableOpacity>
+          )}
         </View>
       )}
-
-      {/* 직접입력 선택 시 도메인 입력창 */}
-      {input.isDirectInput && (
-        <TextInput
-          style={[styles.input, {marginTop: 8}]}
-          placeholder="도메인을 입력하세요 (예: mycompany.com)"
-          value={input.customDomain}
-          onChangeText={input.setCustomDomain}
-        />
-      )}
-
       {/* 도메인 선택 팝업 */}
       <EmailSelectBottomSheet
         domainList={DomainList}
@@ -94,32 +92,52 @@ export default EmailInput;
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
+    // width: '100%',
+    flex: 1,
   },
-  row: {
+  inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  input: {
-    flex: 3,
-    // height: 50,
-    borderRadius: 10,
     backgroundColor: '#eaeaea',
-    paddingHorizontal: 20,
-    paddingVertical: 18,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    height: 52,
+    // borderWidth: 1,
+  },
+
+  input: {
+    flex: 1.3,
     fontSize: 16,
+    paddingVertical: 0,
+    paddingHorizontal: 10,
+    color: '#000',
   },
   domainText: {
     fontSize: 16,
     color: '#535353',
   },
   domainButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 18,
-    justifyContent: 'center',
+    // flex: 1,
+    // height: '100%',
+    width: '50%',
     marginLeft: 8,
-    // height: 50,
-    borderRadius: 10,
     backgroundColor: '#E0E0E0',
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  domainInput: {
+    // flex: 0.5,
+    // height: '75%',
+    width: '50%',
+    marginLeft: 8,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    fontSize: 14,
+    color: '#000',
   },
 });

@@ -1,8 +1,13 @@
 import {useState} from 'react';
 
-const useEmailPartsInput = () => {
-  const [id, setId] = useState('');
-  const [domain, setDomain] = useState('naver.com');
+const useEmailPartsInput = (initialEmail = '') => {
+  const [id, setId] = useState(() => initialEmail.split('@')[0] || '');
+  const [domain, setDomain] = useState(() => {
+    const parts = initialEmail.split('@');
+    const domainPart = parts[1] || 'naver.com';
+    if (domainPart === '직원') return '직원';
+    return domainPart;
+  });
   const [customDomain, setCustomDomain] = useState('');
 
   const isEmployee = domain === '직원';
