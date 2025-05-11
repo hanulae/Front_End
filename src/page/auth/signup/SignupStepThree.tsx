@@ -4,7 +4,6 @@ import {signupAtom} from '../../../state/local_state/signupAtom';
 import {
   StyleSheet,
   View,
-  Text,
   TextInput,
   TouchableOpacity,
   ScrollView,

@@ -34,7 +34,6 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
   const phoneNumber = usePhoneInput();
   const authCode = useInputBase();
 
-  const [selectedUris, setSelectedUris] = useState<string[]>([]);
   const [selectedImages, setSelectedImages] = useState<IImage[]>([]);
   const [showAlbum, setShowAlbum] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<LocalFile[]>([]);
@@ -45,7 +44,6 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
     // setSelectedUris([]);
   };
 
-  console.log('selectedUris', selectedUris);
   console.log('selectedImages', selectedImages);
 
   const handleNext = () => {

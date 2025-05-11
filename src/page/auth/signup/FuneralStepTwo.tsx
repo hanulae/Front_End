@@ -1,9 +1,6 @@
 import {useSetAtom} from 'jotai';
 import {
-  Button,
-  TextInput,
   View,
-  Text,
   StyleSheet,
   TouchableWithoutFeedback,
   Keyboard,
@@ -16,7 +13,7 @@ import {useInputBase} from '../../../hooks/input/useInputBase';
 import {Input} from '../../../components/common/input/Input';
 import CustomButton from '../../../components/common/CustomButton';
 import Typo from '../../../components/common/Typo';
-import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import ImagePreviewList, {
   IImage,
 } from '../../../components/common/ImagePreviewList';
@@ -39,7 +36,6 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
   const authCode = useInputBase();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
 
-  const [selectedUris, setSelectedUris] = useState<string[]>([]);
   const [selectedImages, setSelectedImages] = useState<IImage[]>([]);
   const [showAlbum, setShowAlbum] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<LocalFile[]>([]);

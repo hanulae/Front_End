@@ -2,7 +2,6 @@ import {useAtom} from 'jotai';
 import {
   View,
   StyleSheet,
-  Touchable,
   TouchableWithoutFeedback,
   Keyboard,
 } from 'react-native';
