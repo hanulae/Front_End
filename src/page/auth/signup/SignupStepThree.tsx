@@ -1,57 +1,3 @@
-// import {useSetAtom} from 'jotai';
-
-// import {Button, TextInput, View, Text} from 'react-native';
-// import {useState} from 'react';
-// import {signupAtom} from '../../../state/local_state/signupAtom';
-
-// interface Props {
-//   onSubmit: () => void;
-//   onPrev: () => void;
-// }
-
-// const SignupStepThree = ({onSubmit, onPrev}: Props) => {
-//   const setSignupInfo = useSetAtom(signupAtom);
-//   const [bankName, setBankName] = useState('');
-//   const [accountNumber, setAccountNumber] = useState('');
-//   const [agreed, setAgreed] = useState(false);
-
-//   const handleSubmit = () => {
-//     setSignupInfo(prev => ({
-//       ...prev,
-//       accountInfo: {bankName, accountNumber},
-//       agreedTerms: agreed,
-//     }));
-//     onSubmit();
-//   };
-
-//   return (
-//     <View style={{padding: 16}}>
-//       <Text>계좌 정보 입력</Text>
-//       <TextInput
-//         placeholder="은행명"
-//         value={bankName}
-//         onChangeText={setBankName}
-//         style={{borderWidth: 1, marginVertical: 8}}
-//       />
-//       <TextInput
-//         placeholder="계좌번호"
-//         value={accountNumber}
-//         onChangeText={setAccountNumber}
-//         style={{borderWidth: 1, marginVertical: 8}}
-//       />
-
-//       <Button
-//         title={agreed ? '약관 동의 완료' : '약관 동의하기'}
-//         onPress={() => setAgreed(!agreed)}
-//       />
-
-//       <Button title="회원가입 완료" onPress={handleSubmit} />
-//     </View>
-//   );
-// };
-
-// export default SignupStepThree;
-
 import {useSetAtom} from 'jotai';
 import {useState} from 'react';
 import {signupAtom} from '../../../state/local_state/signupAtom';
@@ -64,7 +10,12 @@ import {
   ScrollView,
 } from 'react-native';
 import Typo from '../../../components/common/Typo';
-
+import CustomButton from '../../../components/common/CustomButton';
+import BankSelectBottomSheet from '../../../components/common/BankSelecSheet';
+import CheckCircleOffIcon from '../../../assets/Check/Check01=Check01_default.svg';
+import CheckCircleOnIcon from '../../../assets/Check/Check01=Check01_Active.svg';
+import SmallCheckIconOff from '../../../assets/Check/Check_03=Check_03_Default.svg';
+import SmallCheckIconOn from '../../../assets/Check/Check_03=Check_03_Active.svg';
 interface Props {
   onSubmit: () => void;
   onPrev: () => void;
@@ -72,6 +23,8 @@ interface Props {
 
 const SignupStepThree = ({onSubmit, onPrev}: Props) => {
   const setSignupInfo = useSetAtom(signupAtom);
+
+  const [showBankSelectSheet, setShowBankSelectSheet] = useState(false);
 
   const [bankName, setBankName] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
@@ -84,6 +37,14 @@ const SignupStepThree = ({onSubmit, onPrev}: Props) => {
     age: false,
     marketing: false,
   });
+
+  const openBankSelectSheet = () => {
+    setShowBankSelectSheet(true);
+  };
+
+  const closeBankSelectSheet = () => {
+    setShowBankSelectSheet(false);
+  };
 
   const handleToggle = (key: keyof typeof agrees) => {
     if (key === 'all') {
@@ -122,12 +83,11 @@ const SignupStepThree = ({onSubmit, onPrev}: Props) => {
       {/* 계좌 인증 */}
       <View style={styles.accountSection}>
         <View style={styles.row}>
-          <TextInput
-            style={[styles.input, {flex: 1}]}
-            placeholder="은행선택"
-            value={bankName}
-            onChangeText={setBankName}
-          />
+          <CustomButton
+            onPress={openBankSelectSheet}
+            style={styles.selectBankButton}>
+            <Typo style={styles.bankText}>{bankName || '은행 선택'}</Typo>
+          </CustomButton>
           <TextInput
             style={[styles.input, {flex: 1, marginLeft: 8}]}
             placeholder="000-0000-0000"
@@ -157,54 +117,93 @@ const SignupStepThree = ({onSubmit, onPrev}: Props) => {
       {/* 약관 동의 */}
       <View style={styles.termsSection}>
         <TouchableOpacity
-          style={styles.checkboxRow}
+          style={styles.allCheckboxRow}
           onPress={() => handleToggle('all')}>
-          <Text style={styles.checkbox}>{agrees.all ? '☑️' : '⬜️'}</Text>
+          {agrees.all ? (
+            <CheckCircleOnIcon width={24} height={24} />
+          ) : (
+            <CheckCircleOffIcon width={24} height={24} />
+          )}
           <Typo>전체 약관 동의</Typo>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.checkboxRow}
           onPress={() => handleToggle('service')}>
-          <Text style={styles.checkbox}>{agrees.service ? '☑️' : '⬜️'}</Text>
+          {agrees.service ? (
+            <SmallCheckIconOn width={18} height={18} />
+          ) : (
+            <SmallCheckIconOff width={18} height={18} />
+          )}
           <Typo>(필수) 서비스 이용약관동의</Typo>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.checkboxRow}
           onPress={() => handleToggle('privacy')}>
-          <Text style={styles.checkbox}>{agrees.privacy ? '☑️' : '⬜️'}</Text>
+          {agrees.privacy ? (
+            <SmallCheckIconOn width={18} height={18} />
+          ) : (
+            <SmallCheckIconOff width={18} height={18} />
+          )}
           <Typo>(필수) 개인정보 수집 및 이용동의</Typo>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.checkboxRow}
           onPress={() => handleToggle('location')}>
-          <Text style={styles.checkbox}>{agrees.location ? '☑️' : '⬜️'}</Text>
+          {agrees.location ? (
+            <SmallCheckIconOn width={18} height={18} />
+          ) : (
+            <SmallCheckIconOff width={18} height={18} />
+          )}
           <Typo>(필수) 위치정보 수집 및 이용동의</Typo>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.checkboxRow}
           onPress={() => handleToggle('age')}>
-          <Text style={styles.checkbox}>{agrees.age ? '☑️' : '⬜️'}</Text>
+          {agrees.age ? (
+            <SmallCheckIconOn width={18} height={18} />
+          ) : (
+            <SmallCheckIconOff width={18} height={18} />
+          )}
           <Typo>(필수) 만 14세 이상 동의</Typo>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.checkboxRow}
           onPress={() => handleToggle('marketing')}>
-          <Text style={styles.checkbox}>{agrees.marketing ? '☑️' : '⬜️'}</Text>
+          {agrees.marketing ? (
+            <SmallCheckIconOn width={18} height={18} />
+          ) : (
+            <SmallCheckIconOff width={18} height={18} />
+          )}
           <Typo>(선택) 마케팅 정보 수신 동의</Typo>
         </TouchableOpacity>
       </View>
 
       {/* 회원가입 버튼 */}
-      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-        <Typo color="white" fontSize={16} fontWeight="bold">
-          회원가입
-        </Typo>
-      </TouchableOpacity>
+      <View style={{flexDirection: 'column', gap: 16}}>
+        <TouchableOpacity style={styles.submitButton} onPress={onPrev}>
+          <Typo color="white" fontSize={16} style={{fontWeight: '700'}}>
+            이전
+          </Typo>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+          <Typo color="white" fontSize={16} style={{fontWeight: '700'}}>
+            회원가입
+          </Typo>
+        </TouchableOpacity>
+      </View>
+      <BankSelectBottomSheet
+        visible={showBankSelectSheet}
+        onClose={closeBankSelectSheet}
+        onSelect={bank => {
+          setBankName(bank);
+          closeBankSelectSheet();
+        }}
+      />
     </ScrollView>
   );
 };
@@ -219,6 +218,21 @@ const styles = StyleSheet.create({
   accountSection: {
     marginBottom: 32,
   },
+  selectBankButton: {
+    backgroundColor: '#dadada',
+    borderRadius: 10,
+    // paddingVertical: 10,
+    paddingHorizontal: 20,
+    justifyContent: 'center',
+    height: 46,
+  },
+  bankText: {
+    color: '#000000',
+    fontSize: 16,
+    textAlign: 'center',
+    fontWeight: '500',
+    fontFamily: 'Pretendard-Light',
+  },
   row: {
     flexDirection: 'row',
     marginBottom: 8,
@@ -227,19 +241,23 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
     padding: 12,
-    borderRadius: 8,
+    fontSize: 16,
+    borderRadius: 10,
     marginBottom: 12,
+    paddingHorizontal: 20,
   },
   buttonGray: {
     backgroundColor: '#888',
+    borderColor: '#888',
+    borderWidth: 2,
     borderRadius: 8,
     alignItems: 'center',
     paddingVertical: 14,
     marginBottom: 12,
   },
   buttonOutline: {
-    borderWidth: 1,
-    borderColor: '#888',
+    borderWidth: 2,
+    borderColor: 'rgba(137, 175, 248, 0.75)',
     borderRadius: 8,
     alignItems: 'center',
     paddingVertical: 14,
@@ -248,19 +266,35 @@ const styles = StyleSheet.create({
   termsSection: {
     marginBottom: 32,
   },
-  checkboxRow: {
+  allCheckboxRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 24,
+    gap: 16,
+  },
+  allCheckboxText: {
+    fontSize: 24,
+    marginRight: 8,
+    fontWeight: '600',
+    fontFamily: 'Pretendard-Light',
+  },
+  checkboxRow: {
+    flexDirection: 'row',
+    marginVertical: 10,
+    alignItems: 'center',
+
+    gap: 16,
   },
   checkbox: {
     marginRight: 8,
     fontSize: 18,
   },
   submitButton: {
-    backgroundColor: '#4F7CFF',
-    paddingVertical: 16,
-    borderRadius: 8,
+    backgroundColor: '#007AFF',
+    padding: 10,
+    paddingVertical: 18,
+    borderRadius: 5,
     alignItems: 'center',
+    flex: 1,
   },
 });
