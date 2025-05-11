@@ -1,4 +1,4 @@
-import {FlatList, StyleSheet, View} from 'react-native';
+import {Dimensions, FlatList, StyleSheet, TextInput, View} from 'react-native';
 import DefaultLayout from '../../layout/DefaultLayout';
 import {useInputBase} from '../../hooks/input/useInputBase';
 import {Input} from '../../components/common/input/Input';
@@ -9,15 +9,20 @@ import FuneralCard from '../../components/common/FuneralCard';
 import CustomButton from '../../components/common/CustomButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useRoute} from '@react-navigation/native';
+import ManagerLayout from '../../layout/ManagerLayout';
 interface IFuneralSearchPageProps {
   variant: 'main' | 'signup';
 }
 
+const {height} = Dimensions.get('window');
 const FuneralSearchPage = () => {
+  const [location, setLocation] = useState<string>('');
+
   const route = useRoute();
 
-  const params = route.params;
-  const {variant} = params as IFuneralSearchPageProps;
+  // const params = route.params;
+  // const {variant} = params as {variant: 'main' | 'signup'};
+  // console.log('variant', variant);
   const hallName = useInputBase();
   // const [selectedIds, setSelectedIds] = useState<number[]>([]); // 수정: 배열로 관리
   const [selectedItems, setSelectedItems] = useState<
@@ -47,24 +52,32 @@ const FuneralSearchPage = () => {
   };
 
   return (
-    <DefaultLayout
+    <ManagerLayout
       headerShown={true}
       headerTitle="장례식장 검색"
-      homeButton={false}
+      color="white"
+      homeButton={true}
       logoutButton={false}>
       <View style={styles.wrapper}>
         <View style={styles.searchContainer}>
           <Input input={hallName} placeholder="검색" />
-          <View style={styles.specLocation}>
-            <Typo fontSize={14} style={styles.specLocationText}>
+          <View style={styles.locationContainer}>
+            <TextInput editable={false} value={location} style={styles.input} />
+            <CustomButton
+              onPress={() => console.log('위치 선택')}
+              style={styles.locationButton}>
+              <Typo style={styles.locationButtonText}>위치 선택</Typo>
+            </CustomButton>
+
+            {/* <Typo fontSize={14} style={styles.specLocationText}>
               시 / 도
             </Typo>
             <Typo fontSize={14} style={styles.specLocationText}>
               군 / 구
-            </Typo>
+            </Typo> */}
           </View>
         </View>
-        <View>
+        <View style={styles.listContainer}>
           <FlatList
             data={funeralHomeDummyData}
             keyExtractor={item => item.id.toString()}
@@ -91,7 +104,7 @@ const FuneralSearchPage = () => {
           </CustomButton>
         </View>
       </View>
-    </DefaultLayout>
+    </ManagerLayout>
   );
 };
 
@@ -103,6 +116,40 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     flexDirection: 'column',
+    paddingBottom: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: '#dedede',
+    marginBottom: 16,
+    gap: 8,
+  },
+  locationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 16,
+    gap: 12,
+  },
+  input: {
+    flex: 8,
+    borderRadius: 10,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    fontSize: 14,
+    backgroundColor: '#dedede',
+  },
+  locationButton: {
+    flex: 2,
+    backgroundColor: '#5b86ea',
+    borderRadius: 10,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    // marginLeft: 16,
+  },
+  locationButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '400',
   },
   specLocation: {
     flexDirection: 'row',
@@ -120,11 +167,22 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     textAlign: 'center',
   },
+  listContainer: {
+    // flex: 1,
+    maxHeight: height * 0.55,
+    // marginTop: 16,
+    // marginBottom: 50,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#dedede',
+  },
   buttonContainer: {
+    // flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    // paddingHorizontal: 16,
+    // paddingBottom: 16,
   },
   button: {
     flex: 1,
