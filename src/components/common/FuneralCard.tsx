@@ -92,9 +92,20 @@ const styles = StyleSheet.create({
     paddingRight: 20,
     paddingVertical: 8,
   },
-  deleteButton: {},
+  deleteButton: {
+    alignSelf: 'flex-start',
+    paddingVertical: 5,
+    borderRadius: 10,
+  },
   deleteButtonText: {
-    fontWeight: '700',
-    color: '#ff0000',
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#F04452',
+    backgroundColor: 'rgba(240, 68, 82, 0.1)',
+    marginTop: 10,
+    borderRadius: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    fontFamily: 'Pretendard-Black',
   },
 });
