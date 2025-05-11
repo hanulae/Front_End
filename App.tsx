@@ -7,15 +7,11 @@
 
 import {NavigationContainer} from '@react-navigation/native';
 import React from 'react';
-import {Provider as JotaiProvider} from 'jotai';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {StatusBar} from 'react-native';
-import CommonStack from './src/router/CommonStack';
-import ManagerStack from './src/router/ManagerStack';
 import {useAtomValue} from 'jotai';
 import {userInfoAtom} from './src/state/local_state/userinfoAtom';
-import FuneralStack from './src/router/FuneralStack';
 import RootStack from './src/router/RootStack';
 
 const queryClient = new QueryClient();
