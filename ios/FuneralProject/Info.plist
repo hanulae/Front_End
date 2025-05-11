@@ -41,6 +41,14 @@
 			<string>KIMM_bold.ttf</string>
 			<string>KIMM_Light.ttf</string>
 		</array>
+		<key>NSCameraUsageDescription</key>
+		<string>카메라 사용을 허용해주세요</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>사진 앨범 접근을 허용해주세요</string>
+		<key>NSPhotoLibraryAddUsageDescription</key>
+		<string>사진 저장을 허용해주세요</string>
+		<key>NSDocumentsUsageDescription</key>
+		<string>이 앱은 파일을 첨부하기 위해 문서에 접근합니다.</string>
 		<key>NSAppTransportSecurity</key>
 		<dict>
 			<!-- Do not change NSAllowsArbitraryLoads to true, or you will risk app rejection! -->
