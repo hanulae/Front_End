@@ -70,33 +70,38 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
           <MoveWhiteIcon width={24} height={24} />
         </CustomButton>
         <View style={styles.whiteSection}>
-          <CustomButton onPress={goToEstimateList} style={styles.button}>
-            <View style={styles.buttonNameContainer}>
-              <QuoteIcon width={24} height={24} />
-              <Typo style={styles.buttonText}>견적 내역</Typo>
-            </View>
-            <MoveGrayIcon width={24} height={24} />
-          </CustomButton>
-          <CustomButton onPress={goToPointHistory} style={styles.button}>
-            <View style={styles.buttonNameContainer}>
-              <PointRecordIcon width={24} height={24} />
-              <Typo style={styles.buttonText}>포인트 내역</Typo>
-            </View>
-            <MoveGrayIcon width={24} height={24} />
-          </CustomButton>
-          <CustomButton onPress={goToPointRefund} style={styles.button}>
-            <View style={styles.buttonNameContainer}>
-              <PointRefundIcon width={24} height={24} />
-              <Typo style={styles.buttonText}>포인트 환급</Typo>
-            </View>
-            <MoveGrayIcon width={24} height={24} />
-          </CustomButton>
-          <CustomButton onPress={goToAppSetting} style={styles.button}>
-            <View style={styles.buttonNameContainer}>
-              <AppSettingIcon width={24} height={24} />
-              <Typo style={styles.buttonText}>앱 설정</Typo>
-            </View>
-            <MoveGrayIcon width={24} height={24} />
+          <View style={styles.customButtonContainer}>
+            <CustomButton onPress={goToEstimateList} style={styles.button}>
+              <View style={styles.buttonNameContainer}>
+                <QuoteIcon width={24} height={24} />
+                <Typo style={styles.buttonText}>견적 내역</Typo>
+              </View>
+              <MoveGrayIcon width={24} height={24} />
+            </CustomButton>
+            <CustomButton onPress={goToPointHistory} style={styles.button}>
+              <View style={styles.buttonNameContainer}>
+                <PointRecordIcon width={24} height={24} />
+                <Typo style={styles.buttonText}>포인트 내역</Typo>
+              </View>
+              <MoveGrayIcon width={24} height={24} />
+            </CustomButton>
+            <CustomButton onPress={goToPointRefund} style={styles.button}>
+              <View style={styles.buttonNameContainer}>
+                <PointRefundIcon width={24} height={24} />
+                <Typo style={styles.buttonText}>포인트 환급</Typo>
+              </View>
+              <MoveGrayIcon width={24} height={24} />
+            </CustomButton>
+            <CustomButton onPress={goToAppSetting} style={styles.button}>
+              <View style={styles.buttonNameContainer}>
+                <AppSettingIcon width={24} height={24} />
+                <Typo style={styles.buttonText}>앱 설정</Typo>
+              </View>
+              <MoveGrayIcon width={24} height={24} />
+            </CustomButton>
+          </View>
+          <CustomButton onPress={goToCallHistory} style={styles.dispatchButton}>
+            <Typo style={styles.dispatchButtonText}>출동 내역</Typo>
           </CustomButton>
         </View>
       </ManagerLayout>
@@ -157,8 +162,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
     paddingTop: 390, // ProfileStat 높이 만큼 여백 확보
     paddingHorizontal: 20,
-    gap: 5,
+    // gap: 5,
     zIndex: 1,
+    justifyContent: 'space-between',
+  },
+  customButtonContainer: {
+    gap: 5,
   },
   topButton: {
     backgroundColor: '#58A1FF',
@@ -192,7 +201,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     lineHeight: 20,
   },
-
   wrapper: {
     flex: 1,
     padding: 16,
@@ -226,14 +234,17 @@ const styles = StyleSheet.create({
   buttonContainer: {
     gap: 12,
   },
-  // button: {
-  //   backgroundColor: '#eee',
-  //   paddingVertical: 14,
-  //   borderRadius: 8,
-  //   alignItems: 'center',
-  // },
-  // buttonText: {
-  //   fontSize: 16,
-  //   color: '#333',
-  // },
+  dispatchButton: {
+    backgroundColor: '#2D81F1',
+    borderRadius: 10,
+    paddingVertical: 18,
+    alignItems: 'center',
+    marginBottom: 18,
+  },
+  dispatchButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    fontFamily: 'Pretendard-Black',
+  },
 });
