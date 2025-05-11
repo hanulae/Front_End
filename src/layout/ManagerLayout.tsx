@@ -12,6 +12,7 @@ interface IManagerLayoutProps {
   homeRouteName?: string;
   onLogoutPress?: () => void;
   color?: string;
+  top?: boolean;
 }
 
 const ManagerLayout = ({
@@ -23,11 +24,16 @@ const ManagerLayout = ({
   homeRouteName,
   onLogoutPress,
   color,
+  top,
 }: IManagerLayoutProps): JSX.Element => {
   return (
     <SafeAreaView
       style={[styles.safeArea, {backgroundColor: color}]}
-      edges={['left', 'right']}>
+      edges={[
+        ...(top === false ? [] : ['top' as const]),
+        'left' as const,
+        'right' as const,
+      ]}>
       {headerShown && (
         <Header
           title={headerTitle}
@@ -52,6 +58,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'column',
-    borderWidth: 1,
   },
 });

@@ -24,12 +24,16 @@ import EmailInput from '../../components/common/input/EmailInput';
 import useEmailPartsInput from '../../hooks/input/useEmailPartsInput';
 import UserSelectSheet from '../../components/common/UserSelectSheet';
 
-interface IMainPageProps {
+interface ILoginPageProps {
   navigation: NavigationProp<any>;
 }
+// interface ILoginPageParam {
+//   userType: 'manager' | 'funeral';
+// }
 const {height} = Dimensions.get('window');
-const LoginPage = ({navigation}: IMainPageProps) => {
+const LoginPage = ({navigation}: ILoginPageProps) => {
   const [showSelectSheet, setShowSelectSheet] = useState(false);
+
   useFocusEffect(
     useCallback(() => {
       if (Platform.OS === 'android') {
@@ -59,7 +63,7 @@ const LoginPage = ({navigation}: IMainPageProps) => {
   };
   const handleLogin = () => {
     setLogin({
-      userType: 'funeral',
+      userType: userType,
       isLogin: true,
     });
   };

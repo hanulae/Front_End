@@ -51,9 +51,7 @@ const Header = ({
       <CustomButton onPress={goBack}>
         <BackIcon width={24} height={24} />
       </CustomButton>
-      <Typo fontSize={16} color="black">
-        {title}
-      </Typo>
+      <Typo style={styles.title}>{title}</Typo>
       {homeButton && (
         <CustomButton onPress={goHome}>
           <HomeIcon width={24} height={24} />
@@ -77,5 +75,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     backgroundColor: '#fff',
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '600',
+    fontFamily: 'Pretendard-Black',
   },
 });
