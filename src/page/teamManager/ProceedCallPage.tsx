@@ -6,6 +6,7 @@ import {
 import {ScrollView, StyleSheet, TouchableOpacity, View} from 'react-native';
 import DefaultLayout from '../../layout/DefaultLayout';
 import Typo from '../../components/common/Typo';
+import ManagerLayout from '../../layout/ManagerLayout';
 
 const ProceedCallPage = () => {
   const navigation = useNavigation<NavigationProp<any>>();
@@ -28,9 +29,10 @@ const ProceedCallPage = () => {
     console.log('취소');
   };
   return (
-    <DefaultLayout
+    <ManagerLayout
       headerShown={true}
       headerTitle="출동 진행 내역"
+      color="white"
       homeButton={true}
       homeRouteName="ManagerMain"
       logoutButton={false}>
@@ -39,27 +41,27 @@ const ProceedCallPage = () => {
         <View style={styles.section}>
           <Typo style={styles.label}>주소</Typo>
           <View style={styles.inputBox}>
-            <Typo>하늘시 하늘구 하늘동</Typo>
+            <Typo style={styles.text}>하늘시 하늘구 하늘동</Typo>
           </View>
 
           <Typo style={styles.label}>상세주소</Typo>
           <View style={styles.inputBox}>
-            <Typo>하늘 빌딩 하늘동</Typo>
+            <Typo style={styles.text}>하늘 빌딩 하늘동</Typo>
           </View>
 
           <Typo style={styles.label}>가족 연락처</Typo>
           <View style={styles.inputBox}>
-            <Typo>01066668888</Typo>
+            <Typo style={styles.text}>01066668888</Typo>
           </View>
 
           <Typo style={styles.label}>팀장 연락처</Typo>
           <View style={styles.inputBox}>
-            <Typo>01066668888</Typo>
+            <Typo style={styles.text}>01066668888</Typo>
           </View>
 
           <Typo style={styles.label}>비상 연락처</Typo>
           <View style={styles.inputBox}>
-            <Typo>01029292999</Typo>
+            <Typo style={styles.text}>01029292999</Typo>
           </View>
         </View>
 
@@ -85,7 +87,7 @@ const ProceedCallPage = () => {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </DefaultLayout>
+    </ManagerLayout>
   );
 };
 
@@ -93,22 +95,27 @@ export default ProceedCallPage;
 
 const styles = StyleSheet.create({
   wrapper: {
-    flexGrow: 1,
-    padding: 16,
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingBottom: 32,
   },
   section: {
     marginBottom: 24,
   },
   label: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 8,
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'Pretendard-Light',
+    marginLeft: 10,
+    marginBottom: 16,
+    marginTop: 16,
   },
   inputBox: {
     backgroundColor: '#f2f2f2',
-    padding: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 18,
     borderRadius: 8,
-    marginBottom: 16,
+    // marginBottom: 4,
   },
   buttonRow: {
     flexDirection: 'row',
@@ -133,7 +140,7 @@ const styles = StyleSheet.create({
   },
   confirmButton: {
     backgroundColor: '#4F7CFF',
-    paddingVertical: 14,
+    paddingVertical: 18,
     borderRadius: 8,
     alignItems: 'center',
     marginBottom: 12,
@@ -147,7 +154,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#4F7CFF',
-    paddingVertical: 14,
+    paddingVertical: 18,
     borderRadius: 8,
     alignItems: 'center',
   },
@@ -155,5 +162,11 @@ const styles = StyleSheet.create({
     color: '#4F7CFF',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  text: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: 'rgba(175, 179, 187, 0.5)',
+    fontFamily: 'Pretendard-Black',
   },
 });
