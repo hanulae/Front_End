@@ -1,5 +1,11 @@
 import {useAtom} from 'jotai';
-import {View, StyleSheet} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Touchable,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from 'react-native';
 import {signupAtom} from '../../../state/local_state/signupAtom';
 import {usePasswordInput} from '../../../hooks/input/usePasswordInput';
 import {useConfirmPasswordInput} from '../../../hooks/input/useConfirmPasswordInput';
@@ -63,79 +69,81 @@ const SignupStepOne = ({onNext}: Props) => {
   };
 
   return (
-    <View
-      style={{
-        flex: 1,
-        paddingHorizontal: 16,
-        paddingVertical: 18,
-      }}>
-      <View style={styles.authContainer}>
-        <Typo fontSize={16} style={styles.containerTitle}>
-          이메일 인증
-        </Typo>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.wrapperContainer}>
+        <View style={styles.authContainer}>
+          <Typo fontSize={16} style={styles.containerTitle}>
+            이메일 인증
+          </Typo>
+          <View style={styles.authSection}>
+            <EmailInput input={email} />
+            <CustomButton
+              onPress={handleRequestCode}
+              style={styles.requestButton}>
+              <Typo color="white" fontSize={14} style={styles.buttonText}>
+                인증코드받기
+              </Typo>
+            </CustomButton>
+          </View>
+        </View>
         <View style={styles.authSection}>
-          <EmailInput input={email} />
+          <Input input={authCode} placeholder="인증코드를 입력하세요." />
           <CustomButton
-            onPress={handleRequestCode}
-            style={styles.requestButton}>
-            <Typo color="white" fontSize={14} style={styles.buttonText}>
-              인증코드받기
+            onPress={handleVerifyCode}
+            style={[
+              styles.verifyButton,
+              isEmailVerified && {backgroundColor: '#D3D3D3'},
+            ]}>
+            <Typo color="white" fontSize={14} style={styles.verifyButtonText}>
+              {isEmailVerified ? '인증확인완료' : '인증코드확인'}
             </Typo>
           </CustomButton>
         </View>
-      </View>
-      <View style={styles.authSection}>
-        <Input input={authCode} placeholder="인증코드를 입력하세요." />
+        <View style={styles.container}>
+          <Typo fontSize={16} style={styles.containerTitle}>
+            비밀번호
+          </Typo>
+          <Input
+            input={password}
+            placeholder="비밀번호를 입력하세요"
+            type="password"
+          />
+        </View>
+        <View style={styles.container}>
+          <Typo fontSize={16} style={styles.containerTitle}>
+            비밀번호 확인
+          </Typo>
+          <Input
+            input={confirmPassword}
+            label="비밀번호 확인"
+            placeholder="비밀번호를 다시 입력하세요"
+            type="password"
+          />
+        </View>
         <CustomButton
-          onPress={handleVerifyCode}
+          onPress={handleNext}
           style={[
-            styles.verifyButton,
-            isEmailVerified && {backgroundColor: '#D3D3D3'},
-          ]}>
-          <Typo color="white" fontSize={14} style={styles.verifyButtonText}>
-            {isEmailVerified ? '인증확인완료' : '인증코드확인'}
+            styles.confirmButton,
+            !isFormValid && {backgroundColor: '#D3D3D3'},
+          ]}
+          disabled={!isFormValid}>
+          <Typo color="white" fontSize={14} style={styles.confrimButtonText}>
+            다음
           </Typo>
         </CustomButton>
       </View>
-      <View style={styles.container}>
-        <Typo fontSize={16} style={styles.containerTitle}>
-          비밀번호
-        </Typo>
-        <Input
-          input={password}
-          placeholder="비밀번호를 입력하세요"
-          type="password"
-        />
-      </View>
-      <View style={styles.container}>
-        <Typo fontSize={16} style={styles.containerTitle}>
-          비밀번호 확인
-        </Typo>
-        <Input
-          input={confirmPassword}
-          label="비밀번호 확인"
-          placeholder="비밀번호를 다시 입력하세요"
-          type="password"
-        />
-      </View>
-      <CustomButton
-        onPress={handleNext}
-        style={[
-          styles.confirmButton,
-          !isFormValid && {backgroundColor: '#D3D3D3'},
-        ]}
-        disabled={!isFormValid}>
-        <Typo color="white" fontSize={14} style={styles.confrimButtonText}>
-          다음
-        </Typo>
-      </CustomButton>
-    </View>
+    </TouchableWithoutFeedback>
   );
 };
 
 export default SignupStepOne;
 
 const styles = StyleSheet.create({
+  wrapperContainer: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 18,
+  },
   typeContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
