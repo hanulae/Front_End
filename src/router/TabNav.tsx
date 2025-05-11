@@ -21,6 +21,7 @@ const TabNav = () => {
       <Tab.Screen
         name="FindFuneral"
         component={FuneralSearchPage}
+        initialParams={{variant: 'main'}}
         options={{
           tabBarLabel: '홈',
           tabBarIcon: ({focused, size}) =>

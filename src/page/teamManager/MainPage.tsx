@@ -51,7 +51,8 @@ const ManagerMainPage = ({navigation}: IManagerMainPageProps) => {
 
   const goToSearchPage = () => {
     navigation.navigate('FindFuneral', {
-      variant: 'main',
+      screen: 'FuneralSearchPage', // Tab.Screen 이름
+      params: {variant: 'main'},
     });
   };
 

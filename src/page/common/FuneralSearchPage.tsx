@@ -20,9 +20,9 @@ const FuneralSearchPage = () => {
 
   const route = useRoute();
 
-  // const params = route.params;
-  // const {variant} = params as {variant: 'main' | 'signup'};
-  // console.log('variant', variant);
+  const params = route.params;
+  const {variant} = params as {variant: string};
+  console.log('variant', variant);
   const hallName = useInputBase();
   // const [selectedIds, setSelectedIds] = useState<number[]>([]); // 수정: 배열로 관리
   const [selectedItems, setSelectedItems] = useState<
