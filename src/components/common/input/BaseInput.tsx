@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     fontWeight: '500',
     paddingVertical: 18,
-    backgroundColor: '#eaeaea',
+    backgroundColor: '#F5F6F8',
     paddingHorizontal: 20,
   },
   errorInput: {},

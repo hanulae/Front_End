@@ -7,7 +7,8 @@ import {Input} from '../../components/common/input/Input';
 import {useRoute} from '@react-navigation/native';
 import DateWheelBottomSheet from '../../components/common/DateWheel';
 import CustomButton from '../../components/common/CustomButton';
-
+import ManagerLayout from '../../layout/ManagerLayout';
+import CalandarIcon from '../../assets/Button/Button_Calandar.svg';
 const EstimateFormPage = () => {
   const clientName = useInputBase();
   const visitorCount = useInputBase();
@@ -49,81 +50,103 @@ const EstimateFormPage = () => {
   };
 
   return (
-    <DefaultLayout
+    <ManagerLayout
       headerShown={true}
       headerTitle="견적 신청서"
       homeButton={true}
+      color="white"
       homeRouteName="ManagerMain"
       logoutButton={false}>
       <View style={styles.wrapper}>
         <View style={styles.formContainer}>
           <View style={styles.form}>
-            <View style={styles.field}>
-              <Typo style={styles.label}>상주 이름</Typo>
-              <Input input={clientName} placeholder="상주 이름을 입력하세요" />
-            </View>
-            <View style={styles.field}>
-              <Typo style={styles.label}>조문객 수</Typo>
-              <Input
-                input={visitorCount}
-                placeholder="예상 조문객 수를 입력하세요"
-              />
-            </View>
-            <View style={styles.dateField}>
-              <View style={styles.field}>
-                <Typo style={styles.label}>입실 일자</Typo>
-                <CustomButton
-                  // title={admissionDate ? admissionDate.toDateString() : '입실일자 선택'}
-                  onPress={() => setShowAdmissionPicker(true)}>
-                  <Typo>
-                    {admissionDate
-                      ? formatSimpleDate(admissionDate)
-                      : '입실일자 선택'}
-                  </Typo>
-                </CustomButton>
+            <View style={styles.authContainer}>
+              <Typo fontSize={16} style={styles.containerTitle}>
+                상주 이름
+              </Typo>
+              <View style={styles.authSection}>
+                <Input
+                  input={clientName}
+                  placeholder="상주이름을 입력하세요."
+                />
               </View>
-
               <View style={styles.field}>
-                <Typo style={styles.label}>퇴실 일자</Typo>
-                <CustomButton
-                  // title={departureDate ? departureDate.toDateString() : '퇴실일자 선택'}
-                  onPress={() => setShowDeparturePicker(true)}>
-                  <Typo>
-                    {departureDate
-                      ? formatSimpleDate(departureDate)
-                      : '퇴실일자 선택'}
+                <Typo fontSize={16} style={styles.containerTitle}>
+                  조문객 수
+                </Typo>
+                <Input
+                  input={visitorCount}
+                  placeholder="예상 조문객 수를 입력하세요"
+                />
+              </View>
+              <View style={styles.dateField}>
+                <View style={styles.field}>
+                  <Typo fontSize={16} style={styles.containerTitle}>
+                    입실일자
                   </Typo>
-                </CustomButton>
+                  <CustomButton
+                    style={styles.dateButton}
+                    // title={admissionDate ? admissionDate.toDateString() : '입실일자 선택'}
+                    onPress={() => setShowAdmissionPicker(true)}>
+                    <Typo>
+                      {admissionDate
+                        ? formatSimpleDate(admissionDate)
+                        : formatSimpleDate(currentDate)}
+                    </Typo>
+                    <CalandarIcon width={20} height={20} />
+                  </CustomButton>
+                </View>
+
+                <View style={styles.field}>
+                  <Typo fontSize={16} style={styles.containerTitle}>
+                    퇴실일자
+                  </Typo>
+                  <CustomButton
+                    style={styles.dateButton}
+                    // title={departureDate ? departureDate.toDateString() : '퇴실일자 선택'}
+                    onPress={() => setShowDeparturePicker(true)}>
+                    <Typo>
+                      {departureDate
+                        ? formatSimpleDate(departureDate)
+                        : formatSimpleDate(
+                            new Date(
+                              currentDate.getTime() + 1000 * 60 * 60 * 24 * 2,
+                            ),
+                          )}
+                    </Typo>
+                    <CalandarIcon width={20} height={20} />
+                  </CustomButton>
+                </View>
               </View>
             </View>
           </View>
-        </View>
-        <View style={styles.buttonContainer}>
-          <CustomButton
-            onPress={() => console.log('견적 신청서 제출')}
-            style={styles.button}>
-            <Typo fontSize={14} color="white">
-              견적서 발송
-            </Typo>
-          </CustomButton>
-        </View>
-        {/* 입실일자 선택용 바텀시트 */}
-        <DateWheelBottomSheet
-          visible={showAdmissionPicker}
-          initialDate={currentDate}
-          onConfirm={handleAdmissionConfirm}
-          onClose={() => setShowAdmissionPicker(false)}
-        />
+          <View style={styles.buttonContainer}>
+            <CustomButton
+              onPress={() => console.log('견적 신청서 제출')}
+              style={styles.button}>
+              <Typo fontSize={14} color="white">
+                견적서 발송
+              </Typo>
+            </CustomButton>
+          </View>
+          {/* 입실일자 선택용 바텀시트 */}
+          <DateWheelBottomSheet
+            visible={showAdmissionPicker}
+            initialDate={currentDate}
+            onConfirm={handleAdmissionConfirm}
+            onClose={() => setShowAdmissionPicker(false)}
+          />
 
-        {/* 퇴실일자 선택용 바텀시트 */}
-        <DateWheelBottomSheet
-          visible={showDeparturePicker}
-          initialDate={currentDate}
-          onConfirm={handleDepartureConfirm}
-          onClose={() => setShowDeparturePicker(false)}
-        />
+          {/* 퇴실일자 선택용 바텀시트 */}
+          <DateWheelBottomSheet
+            visible={showDeparturePicker}
+            initialDate={currentDate}
+            onConfirm={handleDepartureConfirm}
+            onClose={() => setShowDeparturePicker(false)}
+          />
+        </View>
       </View>
-    </DefaultLayout>
+    </ManagerLayout>
   );
 };
 
@@ -133,6 +156,24 @@ const styles = StyleSheet.create({
   wrapper: {
     padding: 16,
     flex: 1,
+  },
+  authSection: {
+    // marginTop: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+    // paddingHorizontal: 16,
+  },
+  authContainer: {
+    flexDirection: 'column',
+  },
+  containerTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'Pretendard-Light',
+    // marginBottom: 10,
+    marginLeft: 10,
   },
   formContainer: {
     flex: 9,
@@ -152,14 +193,27 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   dateField: {
+    // flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 16,
-    marginTop: 16,
+    gap: 8,
+    marginTop: 32,
+  },
+  dateButton: {
+    // flex: 1,
+    flexDirection: 'row',
+    backgroundColor: '#F5F6F8',
+    borderRadius: 10,
+    paddingHorizontal: 48,
+    paddingVertical: 18,
+    alignItems: 'center',
+    gap: 8,
   },
   buttonContainer: {
     flex: 1,
     marginTop: 16,
+    paddingBottom: 16,
+    justifyContent: 'flex-end',
     // 여기에 버튼 스타일 추가
   },
   button: {
