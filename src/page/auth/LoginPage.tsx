@@ -1,4 +1,12 @@
-import {Dimensions, Platform, StatusBar, StyleSheet, View} from 'react-native';
+import {
+  Dimensions,
+  Keyboard,
+  Platform,
+  StatusBar,
+  StyleSheet,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
 import DefaultLayout from '../../layout/DefaultLayout';
 import Typo from '../../components/common/Typo';
 import {Input} from '../../components/common/input/Input';
