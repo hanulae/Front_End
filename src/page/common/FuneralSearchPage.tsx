@@ -8,11 +8,16 @@ import {useState} from 'react';
 import FuneralCard from '../../components/common/FuneralCard';
 import CustomButton from '../../components/common/CustomButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useRoute} from '@react-navigation/native';
 interface IFuneralSearchPageProps {
   variant: 'main' | 'signup';
 }
 
 const FuneralSearchPage = () => {
+  const route = useRoute();
+
+  const params = route.params;
+  const {variant} = params as IFuneralSearchPageProps;
   const hallName = useInputBase();
   // const [selectedIds, setSelectedIds] = useState<number[]>([]); // 수정: 배열로 관리
   const [selectedItems, setSelectedItems] = useState<

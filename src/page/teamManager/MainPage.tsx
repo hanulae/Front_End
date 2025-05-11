@@ -27,7 +27,9 @@ const ManagerMainPage = ({navigation}: IManagerMainPageProps) => {
   };
 
   const goToSearchPage = () => {
-    navigation.navigate('FindFuneral');
+    navigation.navigate('FindFuneral', {
+      variant: 'main',
+    });
   };
 
   const goToAlarmPage = () => {

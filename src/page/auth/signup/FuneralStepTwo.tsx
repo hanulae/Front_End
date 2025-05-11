@@ -167,7 +167,9 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
           </Typo>
           <CustomButton
             onPress={() => {
-              navigation.navigate('FindFuneral');
+              navigation.navigate('FindFuneral', {
+                variant: 'signup',
+              });
             }}
             style={styles.findButton}>
             <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>

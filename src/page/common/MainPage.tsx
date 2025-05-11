@@ -46,7 +46,9 @@ const MainPage = ({navigation}: IMainPageProps): JSX.Element => {
   };
 
   const goToSearchPage = () => {
-    navigation.navigate('FindFuneral');
+    navigation.navigate('FindFuneral', {
+      variant: 'main',
+    });
   };
 
   return (
