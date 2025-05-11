@@ -125,7 +125,7 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.wrapper}>
+      <ScrollView style={styles.wrapper}>
         <View style={styles.container}>
           <Typo fontSize={16} style={styles.containerTitle}>
             휴대전화번호 인증
@@ -223,7 +223,7 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
           onClose={closeFilePicker}
           onPick={handleAddFile}
         /> */}
-      </View>
+      </ScrollView>
     </TouchableWithoutFeedback>
   );
 };
@@ -301,10 +301,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   button: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#2D81F1',
     padding: 10,
     paddingVertical: 18,
-    borderRadius: 5,
+    borderRadius: 10,
     alignItems: 'center',
     // flex: 1,
   },
