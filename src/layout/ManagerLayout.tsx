@@ -2,6 +2,7 @@ import React, {JSX} from 'react';
 import {StyleSheet, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Header from '../components/common/Header';
+import ManagerHeader from '../components/common/ManagerHeader';
 
 interface IManagerLayoutProps {
   children: React.ReactNode;
@@ -35,7 +36,7 @@ const ManagerLayout = ({
         'right' as const,
       ]}>
       {headerShown && (
-        <Header
+        <ManagerHeader
           title={headerTitle}
           homeButton={homeButton}
           logoutButton={logoutButton}
