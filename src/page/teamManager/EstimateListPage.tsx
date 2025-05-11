@@ -2,6 +2,7 @@ import {ScrollView, StyleSheet, TouchableOpacity, View} from 'react-native';
 import DefaultLayout from '../../layout/DefaultLayout';
 import Typo from '../../components/common/Typo';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
+import EstimateCard from '../../components/manager/EstimateCard';
 
 const EstimateListPage = () => {
   const navigation = useNavigation<NavigationProp<any>>();
@@ -17,29 +18,20 @@ const EstimateListPage = () => {
       logoutButton={false}>
       <ScrollView contentContainerStyle={styles.wrapper}>
         {[
-          {name: '김철수 고객님', date: '2025.04.01', count: 14},
-          {name: '김영희 고객님', date: '2025.04.01', count: 8},
-          {name: '홍길동 고객님', date: '2025.04.01', count: 7},
-          {name: '금잔디 고객님', date: '2025.04.01', count: 18},
-          {name: '김철수 고객님', date: '2025.04.01', count: 2},
+          {name: '김철수', date: '2025.04.01', count: 14},
+          {name: '김영희', date: '2025.04.01', count: 8},
+          {name: '홍길동', date: '2025.04.01', count: 7},
+          {name: '금잔디', date: '2025.04.01', count: 18},
+          {name: '김철수', date: '2025.04.01', count: 2},
         ].map((item, index) => (
-          <TouchableOpacity
+          <EstimateCard
             key={index}
-            style={styles.card}
-            onPress={goToClientEstimate}>
-            <Typo>{item.name}</Typo>
-
-            <View style={styles.bottomRow}>
-              <View style={styles.leftInfo}>
-                <View style={styles.tag}>
-                  <Typo style={styles.tagText}>견적요청</Typo>
-                </View>
-                <Typo style={styles.dateText}>{item.date}</Typo>
-              </View>
-
-              <Typo style={styles.countText}>{item.count}건</Typo>
-            </View>
-          </TouchableOpacity>
+            name={item.name}
+            date={item.date}
+            count={item.count}
+            index={index}
+            onPress={goToClientEstimate}
+          />
         ))}
       </ScrollView>
     </DefaultLayout>
