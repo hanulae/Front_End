@@ -1,11 +1,32 @@
-import {ScrollView, StyleSheet, TouchableOpacity, View} from 'react-native';
+import {Platform, ScrollView, StatusBar, StyleSheet} from 'react-native';
 import DefaultLayout from '../../layout/DefaultLayout';
-import Typo from '../../components/common/Typo';
-import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {
+  NavigationProp,
+  useFocusEffect,
+  useNavigation,
+} from '@react-navigation/native';
 import EstimateCard from '../../components/manager/EstimateCard';
+import {useCallback} from 'react';
 
 const EstimateListPage = () => {
   const navigation = useNavigation<NavigationProp<any>>();
+
+  useFocusEffect(
+    useCallback(() => {
+      if (Platform.OS === 'android') {
+        StatusBar.setBackgroundColor('#3287F8');
+        StatusBar.setBarStyle('dark-content');
+      } else {
+        StatusBar.setBarStyle('dark-content');
+      }
+
+      return () => {
+        // 화면 포커스 해제 시 필요하다면 초기화 작업
+        // 예: StatusBar.setStyle('default')
+      };
+    }, []),
+  );
+
   const goToClientEstimate = () => {
     navigation.navigate('ClientEstimate', {clientId: 1});
   };

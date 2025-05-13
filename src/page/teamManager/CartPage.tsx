@@ -1,8 +1,8 @@
-import {FlatList, StyleSheet, View} from 'react-native';
+import {FlatList, Platform, StatusBar, StyleSheet, View} from 'react-native';
 import DefaultLayout from '../../layout/DefaultLayout';
 // import {funeralHomeDummyData} from '../../state/local_state/dummy';
 import FuneralCard from '../../components/common/FuneralCard';
-import {useCallback, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {NavigationProp, useFocusEffect} from '@react-navigation/native';
 import CustomButton from '../../components/common/CustomButton';
@@ -22,6 +22,23 @@ const CartPage = ({navigation}: ICartPageProps) => {
       funeralHallId: selectedId,
     });
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      if (Platform.OS === 'android') {
+        StatusBar.setBackgroundColor('#3287F8');
+        StatusBar.setBarStyle('dark-content');
+      } else {
+        StatusBar.setBarStyle('dark-content');
+      }
+
+      return () => {
+        // 화면 포커스 해제 시 필요하다면 초기화 작업
+        // 예: StatusBar.setStyle('default')
+      };
+    }, []),
+  );
+
   useFocusEffect(
     useCallback(() => {
       const loadCartItems = async () => {
@@ -91,9 +108,7 @@ const CartPage = ({navigation}: ICartPageProps) => {
           <CustomButton onPress={requestEstimate} style={styles.button}>
             <View style={styles.buttonIcon}>
               <RequestIcon width={24} height={24} />
-              <Typo fontSize={14} color="white">
-                견적요청
-              </Typo>
+              <Typo style={styles.buttonText}>견적요청</Typo>
             </View>
             <MoveIcon width={24} height={24} />
           </CustomButton>
@@ -142,7 +157,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#5b86ea',
+    backgroundColor: '#2D81F1',
     borderRadius: 8,
     paddingVertical: 16,
     paddingHorizontal: 20,
@@ -153,5 +168,11 @@ const styles = StyleSheet.create({
     gap: 8,
     flex: 1,
     // marginLeft: 16,
+  },
+  buttonText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    fontFamily: 'Pretendard-Black',
   },
 });

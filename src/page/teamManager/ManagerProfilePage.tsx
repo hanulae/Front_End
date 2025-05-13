@@ -1,8 +1,8 @@
-import {NavigationProp} from '@react-navigation/native';
+import {NavigationProp, useFocusEffect} from '@react-navigation/native';
 import {Platform, StatusBar, StyleSheet, View} from 'react-native';
 import Typo from '../../components/common/Typo';
 import CustomButton from '../../components/common/CustomButton';
-import {useEffect, useState} from 'react';
+import {useCallback, useState} from 'react';
 import PhoneAuthSheet from '../../components/manager/PhoneAuthSheet';
 import ManagerLayout from '../../layout/ManagerLayout';
 import ManagerProfileStat from '../../components/manager/ManagerProfileStat';
@@ -18,15 +18,21 @@ interface IManagerProfilePageProps {
 }
 
 const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
-  useEffect(() => {
-    if (Platform.OS === 'android') {
-      StatusBar.setBackgroundColor('#3287F8');
-      StatusBar.setBarStyle('light-content');
-    } else {
-      // StatusBar.setTranslucent(false);
-      StatusBar.setBarStyle('light-content');
-    }
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      if (Platform.OS === 'android') {
+        StatusBar.setBackgroundColor('#3287F8');
+        StatusBar.setBarStyle('light-content');
+      } else {
+        StatusBar.setBarStyle('light-content');
+      }
+
+      return () => {
+        // 화면 포커스 해제 시 필요하다면 초기화 작업
+        // 예: StatusBar.setStyle('default')
+      };
+    }, []),
+  );
   const [showPhoneAuthSheet, setShowPhoneAuthSheet] = useState(false);
   const goToModifyUserInfo = () => {
     console.log('Modify User Info');

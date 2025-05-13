@@ -1,12 +1,20 @@
-import {ScrollView, StyleSheet, TouchableOpacity, View} from 'react-native';
+import {
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import DefaultLayout from '../../layout/DefaultLayout';
 import {
   NavigationProp,
+  useFocusEffect,
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
 import Typo from '../../components/common/Typo';
-import {useState} from 'react';
+import {useCallback, useState} from 'react';
 import FuneralQuoteCard from '../../components/manager/FuneralQuoteCard';
 import CustomButton from '../../components/common/CustomButton';
 const estimates = [
@@ -38,6 +46,22 @@ const ClientEstimatePage = () => {
   const {clientId} = route.params as {clientId: number};
   console.log('clientId', clientId);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (Platform.OS === 'android') {
+        StatusBar.setBackgroundColor('#3287F8');
+        StatusBar.setBarStyle('dark-content');
+      } else {
+        StatusBar.setBarStyle('dark-content');
+      }
+
+      return () => {
+        // 화면 포커스 해제 시 필요하다면 초기화 작업
+        // 예: StatusBar.setStyle('default')
+      };
+    }, []),
+  );
 
   const handleSelect = (id: number) => {
     setSelectedId(prev => (prev === id ? null : id));

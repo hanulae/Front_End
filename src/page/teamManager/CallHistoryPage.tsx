@@ -1,7 +1,14 @@
-import {NavigationProp} from '@react-navigation/native';
-import {ScrollView, StyleSheet, TouchableOpacity, View} from 'react-native';
+import {NavigationProp, useFocusEffect} from '@react-navigation/native';
+import {
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import DefaultLayout from '../../layout/DefaultLayout';
-import {useState} from 'react';
+import {useCallback, useState} from 'react';
 import Typo from '../../components/common/Typo';
 import ManagerLayout from '../../layout/ManagerLayout';
 
@@ -19,6 +26,22 @@ const dummyData = [
 
 const CallHistoryPage = ({navigation}: ICallHistoryPageProps) => {
   const [selectedTab, setSelectedTab] = useState<'진행중' | '완료'>('진행중');
+
+  useFocusEffect(
+    useCallback(() => {
+      if (Platform.OS === 'android') {
+        StatusBar.setBackgroundColor('#3287F8');
+        StatusBar.setBarStyle('dark-content');
+      } else {
+        StatusBar.setBarStyle('dark-content');
+      }
+
+      return () => {
+        // 화면 포커스 해제 시 필요하다면 초기화 작업
+        // 예: StatusBar.setStyle('default')
+      };
+    }, []),
+  );
 
   const handleCardPress = (item: any) => {
     if (selectedTab === '진행중') {
