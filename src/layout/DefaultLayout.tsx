@@ -11,6 +11,8 @@ interface IDefaultLayoutProps {
   logoutButton?: boolean;
   homeRouteName?: string;
   onLogoutPress?: () => void;
+  backButton?: boolean;
+  close?: boolean;
   color?: string;
   top?: boolean;
 }
@@ -21,6 +23,8 @@ const DefaultLayout = ({
   headerTitle = '',
   homeButton = false,
   logoutButton = false,
+  backButton = true,
+  close = false,
   homeRouteName,
   onLogoutPress,
   color,
@@ -36,6 +40,8 @@ const DefaultLayout = ({
       ]}>
       {headerShown && (
         <Header
+          backButton={backButton}
+          close={close}
           title={headerTitle}
           homeButton={homeButton}
           logoutButton={logoutButton}

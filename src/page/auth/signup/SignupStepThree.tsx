@@ -15,6 +15,8 @@ import CheckCircleOffIcon from '../../../assets/Check/Check01=Check01_default.sv
 import CheckCircleOnIcon from '../../../assets/Check/Check01=Check01_Active.svg';
 import SmallCheckIconOff from '../../../assets/Check/Check_03=Check_03_Default.svg';
 import SmallCheckIconOn from '../../../assets/Check/Check_03=Check_03_Active.svg';
+import {useNavigation} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 interface Props {
   onSubmit: () => void;
   onPrev: () => void;
@@ -22,7 +24,7 @@ interface Props {
 
 const SignupStepThree = ({onSubmit, onPrev}: Props) => {
   const setSignupInfo = useSetAtom(signupAtom);
-
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const [showBankSelectSheet, setShowBankSelectSheet] = useState(false);
 
   const [bankName, setBankName] = useState('');
@@ -43,6 +45,12 @@ const SignupStepThree = ({onSubmit, onPrev}: Props) => {
 
   const closeBankSelectSheet = () => {
     setShowBankSelectSheet(false);
+  };
+
+  const navigateMoreInfo = (type: string) => {
+    navigation.navigate('AgreementDetail', {
+      type: type,
+    });
   };
 
   const handleToggle = (key: keyof typeof agrees) => {
@@ -123,76 +131,101 @@ const SignupStepThree = ({onSubmit, onPrev}: Props) => {
           ) : (
             <CheckCircleOffIcon width={24} height={24} />
           )}
-          <Typo>전체 약관 동의</Typo>
+          <Typo style={styles.allAgreeText}>전체 약관 동의</Typo>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.checkboxRow}
           onPress={() => handleToggle('service')}>
-          {agrees.service ? (
-            <SmallCheckIconOn width={18} height={18} />
-          ) : (
-            <SmallCheckIconOff width={18} height={18} />
-          )}
-          <Typo>(필수) 서비스 이용약관동의</Typo>
+          <View style={styles.checkTermContainer}>
+            {agrees.service ? (
+              <SmallCheckIconOn width={18} height={18} />
+            ) : (
+              <SmallCheckIconOff width={18} height={18} />
+            )}
+            <Typo style={styles.termsText}>(필수) 서비스 이용약관동의</Typo>
+          </View>
+          <TouchableOpacity onPress={() => navigateMoreInfo('service')}>
+            <Typo style={styles.moreInfoText}>보기</Typo>
+          </TouchableOpacity>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.checkboxRow}
           onPress={() => handleToggle('privacy')}>
-          {agrees.privacy ? (
-            <SmallCheckIconOn width={18} height={18} />
-          ) : (
-            <SmallCheckIconOff width={18} height={18} />
-          )}
-          <Typo>(필수) 개인정보 수집 및 이용동의</Typo>
+          <View style={styles.checkTermContainer}>
+            {agrees.privacy ? (
+              <SmallCheckIconOn width={18} height={18} />
+            ) : (
+              <SmallCheckIconOff width={18} height={18} />
+            )}
+            <Typo style={styles.termsText}>
+              (필수) 개인정보 수집 및 이용동의
+            </Typo>
+          </View>
+          <TouchableOpacity onPress={() => navigateMoreInfo('privacy')}>
+            <Typo style={styles.moreInfoText}>보기</Typo>
+          </TouchableOpacity>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.checkboxRow}
           onPress={() => handleToggle('location')}>
-          {agrees.location ? (
-            <SmallCheckIconOn width={18} height={18} />
-          ) : (
-            <SmallCheckIconOff width={18} height={18} />
-          )}
-          <Typo>(필수) 위치정보 수집 및 이용동의</Typo>
+          <View style={styles.checkTermContainer}>
+            {agrees.location ? (
+              <SmallCheckIconOn width={18} height={18} />
+            ) : (
+              <SmallCheckIconOff width={18} height={18} />
+            )}
+            <Typo style={styles.termsText}>
+              (필수) 위치정보 수집 및 이용동의
+            </Typo>
+          </View>
+          <TouchableOpacity onPress={() => navigateMoreInfo('location')}>
+            <Typo style={styles.moreInfoText}>보기</Typo>
+          </TouchableOpacity>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.checkboxRow}
           onPress={() => handleToggle('age')}>
-          {agrees.age ? (
-            <SmallCheckIconOn width={18} height={18} />
-          ) : (
-            <SmallCheckIconOff width={18} height={18} />
-          )}
-          <Typo>(필수) 만 14세 이상 동의</Typo>
+          <View style={styles.checkTermContainer}>
+            {agrees.age ? (
+              <SmallCheckIconOn width={18} height={18} />
+            ) : (
+              <SmallCheckIconOff width={18} height={18} />
+            )}
+            <Typo style={styles.termsText}>(필수) 만 14세 이상 동의</Typo>
+          </View>
+          <TouchableOpacity onPress={() => navigateMoreInfo('age')}>
+            <Typo style={styles.moreInfoText}>보기</Typo>
+          </TouchableOpacity>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.checkboxRow}
           onPress={() => handleToggle('marketing')}>
-          {agrees.marketing ? (
-            <SmallCheckIconOn width={18} height={18} />
-          ) : (
-            <SmallCheckIconOff width={18} height={18} />
-          )}
-          <Typo>(선택) 마케팅 정보 수신 동의</Typo>
+          <View style={styles.checkTermContainer}>
+            {agrees.marketing ? (
+              <SmallCheckIconOn width={18} height={18} />
+            ) : (
+              <SmallCheckIconOff width={18} height={18} />
+            )}
+            <Typo>(선택) 마케팅 정보 수신 동의</Typo>
+          </View>
+          <TouchableOpacity onPress={() => navigateMoreInfo('marketing')}>
+            <Typo style={styles.moreInfoText}>보기</Typo>
+          </TouchableOpacity>
         </TouchableOpacity>
       </View>
 
       {/* 회원가입 버튼 */}
-      <View style={{flexDirection: 'column', gap: 16}}>
+      <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.submitButton} onPress={onPrev}>
-          <Typo color="white" fontSize={16} style={{fontWeight: '700'}}>
-            이전
-          </Typo>
+          <Typo style={styles.buttonText}>이전</Typo>
         </TouchableOpacity>
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Typo color="white" fontSize={16} style={{fontWeight: '700'}}>
-            회원가입
-          </Typo>
+          <Typo style={styles.buttonText}>회원가입</Typo>
         </TouchableOpacity>
       </View>
       <BankSelectBottomSheet
@@ -265,6 +298,30 @@ const styles = StyleSheet.create({
   termsSection: {
     marginBottom: 32,
   },
+  checkTermContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  moreInfoText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#6F717D',
+    fontFamily: 'Pretendard-Light',
+    textDecorationLine: 'underline',
+  },
+  allAgreeText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1C212A',
+    fontFamily: 'Pretendard-Light',
+  },
+  termsText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#283042',
+    fontFamily: 'Pretendard-Light',
+  },
   allCheckboxRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -281,8 +338,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginVertical: 10,
     alignItems: 'center',
-
-    gap: 16,
+    justifyContent: 'space-between',
+    paddingRight: 16,
   },
   checkbox: {
     marginRight: 8,
@@ -290,10 +347,22 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     backgroundColor: '#2D81F1',
-    padding: 10,
+    // padding: 10,
     paddingVertical: 18,
     borderRadius: 5,
     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: 'white',
+    fontFamily: 'Pretendard-Light',
+  },
+  buttonContainer: {
+    gap: 16,
     flex: 1,
+    justifyContent: 'flex-end',
+    marginBottom: 16,
   },
 });

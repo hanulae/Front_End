@@ -111,15 +111,17 @@ const FuneralSearchPage = () => {
             )}
           />
         </View>
-        <View style={styles.buttonContainer}>
-          <CustomButton onPress={handleAddToCart} style={styles.button}>
-            <View style={styles.buttonIcon}>
-              <CartIcon width={24} height={24} />
-              <Typo style={styles.buttonText}>장바구니 담기</Typo>
-            </View>
-            <MoveIcon width={24} height={24} />
-          </CustomButton>
-        </View>
+        {variant === 'Main' && (
+          <View style={styles.buttonContainer}>
+            <CustomButton onPress={handleAddToCart} style={styles.button}>
+              <View style={styles.buttonIcon}>
+                <CartIcon width={24} height={24} />
+                <Typo style={styles.buttonText}>장바구니 담기</Typo>
+              </View>
+              <MoveIcon width={24} height={24} />
+            </CustomButton>
+          </View>
+        )}
       </View>
     </ManagerLayout>
   );

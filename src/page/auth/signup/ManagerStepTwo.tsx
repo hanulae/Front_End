@@ -124,6 +124,7 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <ScrollView style={styles.wrapper}>
+        {/* 휴대전화번호 인증 */}
         <View style={styles.container}>
           <Typo fontSize={16} style={styles.containerTitle}>
             휴대전화번호 인증
@@ -143,6 +144,7 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
             </CustomButton>
           </View>
         </View>
+        {/* 인증코드 확인 */}
         <View style={styles.container}>
           <Typo fontSize={16} style={styles.containerTitle}>
             인증코드 확인
@@ -162,7 +164,7 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
             </CustomButton>
           </View>
         </View>
-
+        {/* 첨부파일 */}
         <View style={styles.container}>
           <Typo fontSize={16} style={styles.containerTitle}>
             첨부파일 ({selectedImages.length}/10)
@@ -197,18 +199,14 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
             </CustomButton>
           </View>
         </View>
-
+        {/* 버튼 */}
         <View style={styles.bottomButtonContainer}>
           <CustomButton onPress={handlePrev} style={styles.button}>
-            <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
-              이전
-            </Typo>
+            <Typo style={styles.buttonText}>이전</Typo>
           </CustomButton>
 
           <CustomButton onPress={handleNext} style={styles.button}>
-            <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
-              다음
-            </Typo>
+            <Typo style={styles.buttonText}>다음</Typo>
           </CustomButton>
         </View>
         <AlbumBottomSheet
@@ -230,7 +228,7 @@ export default ManagerStepTwo;
 
 const styles = StyleSheet.create({
   wrapper: {
-    // flex: 1,
+    flexGrow: 1,
     padding: 16,
   },
   container: {
@@ -306,9 +304,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     // flex: 1,
   },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: 'white',
+    fontFamily: 'Pretendard-Light',
+  },
   bottomButtonContainer: {
+    flex: 1,
     flexDirection: 'column',
-    justifyContent: 'space-between',
     gap: 10,
     marginTop: 20,
   },
