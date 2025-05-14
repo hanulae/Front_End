@@ -19,9 +19,11 @@ import {useRoute} from '@react-navigation/native';
 import ManagerLayout from '../../layout/ManagerLayout';
 import MoveIcon from '../../assets/Button/Button_MoveTransparent.svg';
 import CartIcon from '../../assets/Button/Button_Cart.svg';
+import FindLocationModal from '../../components/funeralHall/FindLocation';
 
 const {height} = Dimensions.get('window');
 const FuneralSearchPage = () => {
+  const [showLocationModal, setShowLocationModal] = useState(false);
   const [location, setLocation] = useState<string>('');
 
   useEffect(() => {
@@ -66,6 +68,17 @@ const FuneralSearchPage = () => {
     }
   };
 
+  const selectFuneral = async () => {
+    try {
+      const selectedFuneral = await AsyncStorage.getItem('funeralCart');
+      if (selectedFuneral !== null) {
+        console.log('장례식장 선택 완료', JSON.parse(selectedFuneral));
+      }
+    } catch (error) {
+      console.error('장례식장 선택 실패', error);
+    }
+  };
+
   return (
     <ManagerLayout
       headerShown={true}
@@ -79,7 +92,7 @@ const FuneralSearchPage = () => {
           <View style={styles.locationContainer}>
             <TextInput editable={false} value={location} style={styles.input} />
             <CustomButton
-              onPress={() => console.log('위치 선택')}
+              onPress={() => setShowLocationModal(true)}
               style={styles.locationButton}>
               <Typo style={styles.locationButtonText}>위치 선택</Typo>
             </CustomButton>
@@ -122,7 +135,26 @@ const FuneralSearchPage = () => {
             </CustomButton>
           </View>
         )}
+        {variant === 'signup' && (
+          <View style={styles.buttonContainer}>
+            <CustomButton onPress={selectFuneral} style={styles.button}>
+              <View style={styles.buttonIcon}>
+                <CartIcon width={24} height={24} />
+                <Typo style={styles.buttonText}>선택</Typo>
+              </View>
+              <MoveIcon width={24} height={24} />
+            </CustomButton>
+          </View>
+        )}
       </View>
+      <FindLocationModal
+        visible={showLocationModal}
+        onClose={() => setShowLocationModal(false)}
+        onComplete={selectedLocation => {
+          setLocation(selectedLocation);
+          // fetchFuneralList(selectedLocation); // 장례식장 API 호출
+        }}
+      />
     </ManagerLayout>
   );
 };
