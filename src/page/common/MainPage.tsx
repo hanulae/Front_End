@@ -82,26 +82,28 @@ const MainPage = ({navigation}: IMainPageProps): JSX.Element => {
           style={styles.buttonContainer}
           source={require('../../assets/mainImage.png')}
           resizeMode="contain">
-          <CustomButton onPress={goToSearchPage} style={styles.SearchButton}>
-            <MainSearchIcon />
-            <View style={styles.buttonTextContainer}>
-              <Typo style={styles.buttonTitle}>장례식장</Typo>
-              <View style={styles.buttonTextSubContainer}>
-                <Typo style={styles.buttonSub}>찾아보기</Typo>
-                <MoveIcon stroke="#397CFF" color="#397CFF" />
+          <View style={styles.innerButtonContainer}>
+            <CustomButton onPress={goToSearchPage} style={styles.SearchButton}>
+              <MainSearchIcon />
+              <View style={styles.buttonTextContainer}>
+                <Typo style={styles.buttonTitle}>장례식장</Typo>
+                <View style={styles.buttonTextSubContainer}>
+                  <Typo style={styles.buttonSub}>찾아보기</Typo>
+                  <MoveIcon stroke="#397CFF" color="#397CFF" />
+                </View>
               </View>
-            </View>
-          </CustomButton>
-          <CustomButton onPress={goToNoticePage} style={styles.NoticeButton}>
-            <MainAlarmIcon />
-            <View style={styles.buttonTextContainer}>
-              <Typo style={styles.buttonTitle2}>공지사항</Typo>
-              <View style={styles.buttonTextSubContainer}>
-                <Typo style={styles.buttonSub2}>확인하기</Typo>
-                <MoveIcon stroke="#FFFFFF" color="#FFFFFF" />
+            </CustomButton>
+            <CustomButton onPress={goToNoticePage} style={styles.NoticeButton}>
+              <MainAlarmIcon />
+              <View style={styles.buttonTextContainer}>
+                <Typo style={styles.buttonTitle2}>공지사항</Typo>
+                <View style={styles.buttonTextSubContainer}>
+                  <Typo style={styles.buttonSub2}>확인하기</Typo>
+                  <MoveIcon stroke="#FFFFFF" color="#FFFFFF" />
+                </View>
               </View>
-            </View>
-          </CustomButton>
+            </CustomButton>
+          </View>
         </ImageBackground>
         <View style={styles.footerContainer}>
           <InfoCenterIcon width={21.5} height={22} />
@@ -163,6 +165,7 @@ const styles = StyleSheet.create({
   mainContainer: {
     flexDirection: 'column',
     backgroundColor: '#3287F8',
+    flex: 1,
   },
   mainTitleTextContainer: {
     marginTop: 55,
@@ -190,13 +193,21 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   buttonContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    paddingHorizontal: 16,
+    paddingTop: 290,
+    // paddingBottom: 60,
+    gap: 12,
+  },
+  innerButtonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 290,
-    paddingBottom: 60,
-    gap: 12,
+    gap: 10,
+    width: '100%',
   },
   SearchButton: {
     flex: 1,

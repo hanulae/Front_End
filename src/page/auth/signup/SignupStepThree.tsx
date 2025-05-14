@@ -20,9 +20,10 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 interface Props {
   onSubmit: () => void;
   onPrev: () => void;
+  userType?: 'manager' | 'funeral';
 }
 
-const SignupStepThree = ({onSubmit, onPrev}: Props) => {
+const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
   const setSignupInfo = useSetAtom(signupAtom);
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const [showBankSelectSheet, setShowBankSelectSheet] = useState(false);
@@ -83,6 +84,9 @@ const SignupStepThree = ({onSubmit, onPrev}: Props) => {
       agreedTerms: agrees,
     }));
     onSubmit();
+    navigation.navigate('SignupComplete', {
+      userType: userType,
+    });
   };
 
   return (

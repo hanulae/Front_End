@@ -55,6 +55,7 @@ const SignupPage = () => {
         <SignupStepThree
           onSubmit={handleSignupSubmit}
           onPrev={() => setStep(2)}
+          userType={userType}
         />
       )}
     </DefaultLayout>

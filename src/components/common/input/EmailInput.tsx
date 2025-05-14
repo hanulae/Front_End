@@ -37,12 +37,14 @@ const EmailInput = ({input, userType}: EmailInputProps) => {
     <View style={styles.container}>
       {/* 직원이면 이름만 입력 */}
       {input.isEmployee ? (
-        <TextInput
-          style={styles.input}
-          placeholder="이름을 입력하세요"
-          value={input.id}
-          onChangeText={input.setId}
-        />
+        <View style={styles.inputWrapper}>
+          <TextInput
+            style={[styles.input]}
+            placeholder="이름을 입력하세요"
+            value={input.id}
+            onChangeText={input.setId}
+          />
+        </View>
       ) : (
         <View style={styles.inputWrapper}>
           {/* 이메일 아이디 입력 */}
@@ -98,7 +100,7 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#eaeaea',
+    backgroundColor: '#F5F6F8',
     borderRadius: 10,
     paddingHorizontal: 12,
     height: 52,
@@ -121,7 +123,7 @@ const styles = StyleSheet.create({
     // height: '100%',
     width: '50%',
     marginLeft: 8,
-    backgroundColor: '#E0E0E0',
+    backgroundColor: '#eaeaea',
     borderRadius: 6,
     justifyContent: 'center',
     alignItems: 'center',
@@ -133,7 +135,7 @@ const styles = StyleSheet.create({
     // height: '75%',
     width: '50%',
     marginLeft: 8,
-    backgroundColor: '#E0E0E0',
+    backgroundColor: '#eaeaea',
     borderRadius: 6,
     paddingHorizontal: 12,
     paddingVertical: 8,

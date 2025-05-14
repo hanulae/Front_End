@@ -71,6 +71,7 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
     <DefaultLayout
       headerShown={true}
       // headerTitle="로그인"
+      color="white"
       homeButton={true}
       logoutButton={false}
       homeRouteName="Main">
