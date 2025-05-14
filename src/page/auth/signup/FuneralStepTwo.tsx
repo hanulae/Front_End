@@ -5,6 +5,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ScrollView,
+  TextInput,
 } from 'react-native';
 import {useState} from 'react';
 import {signupAtom} from '../../../state/local_state/signupAtom';
@@ -35,7 +36,7 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
   const phoneNumber = usePhoneInput();
   const authCode = useInputBase();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
-
+  const myFuneralName = useInputBase();
   const [selectedImages, setSelectedImages] = useState<IImage[]>([]);
   const [showAlbum, setShowAlbum] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<LocalFile[]>([]);
@@ -165,6 +166,11 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
           <Typo fontSize={16} style={styles.containerTitle}>
             내 장례식장 찾기
           </Typo>
+          {/* <TextInput
+            value={myFuneralName.value}
+            placeholder="인증코드를 입력하세요."
+            editable={false}
+          /> */}
           <CustomButton
             onPress={() => {
               navigation.navigate('FindFuneral', {
