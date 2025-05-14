@@ -39,6 +39,7 @@ const SignupPage = () => {
     <DefaultLayout
       headerShown={true}
       // headerTitle="회원가입"
+      color="white"
       homeButton={true}
       logoutButton={false}
       homeRouteName="Main">
