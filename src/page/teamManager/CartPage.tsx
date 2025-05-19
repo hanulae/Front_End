@@ -1,13 +1,15 @@
-import {FlatList, StyleSheet, View} from 'react-native';
+import {FlatList, Platform, StatusBar, StyleSheet, View} from 'react-native';
 import DefaultLayout from '../../layout/DefaultLayout';
 // import {funeralHomeDummyData} from '../../state/local_state/dummy';
 import FuneralCard from '../../components/common/FuneralCard';
-import {useCallback, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {NavigationProp, useFocusEffect} from '@react-navigation/native';
 import CustomButton from '../../components/common/CustomButton';
 import Typo from '../../components/common/Typo';
-
+import ManagerLayout from '../../layout/ManagerLayout';
+import RequestIcon from '../../assets/Button/Button_RequestQuote.svg';
+import MoveIcon from '../../assets/Button/Button_MoveTransparent.svg';
 interface ICartPageProps {
   navigation: NavigationProp<any>;
 }
@@ -20,6 +22,23 @@ const CartPage = ({navigation}: ICartPageProps) => {
       funeralHallId: selectedId,
     });
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      if (Platform.OS === 'android') {
+        StatusBar.setBackgroundColor('#3287F8');
+        StatusBar.setBarStyle('dark-content');
+      } else {
+        StatusBar.setBarStyle('dark-content');
+      }
+
+      return () => {
+        // 화면 포커스 해제 시 필요하다면 초기화 작업
+        // 예: StatusBar.setStyle('default')
+      };
+    }, []),
+  );
+
   useFocusEffect(
     useCallback(() => {
       const loadCartItems = async () => {
@@ -59,9 +78,10 @@ const CartPage = ({navigation}: ICartPageProps) => {
   };
 
   return (
-    <DefaultLayout
-      headerShown={false}
-      headerTitle="장례식장"
+    <ManagerLayout
+      headerShown={true}
+      headerTitle="장바구니"
+      color="white"
       homeButton={true}
       logoutButton={false}
       // homeRouteName="Main"
@@ -86,13 +106,15 @@ const CartPage = ({navigation}: ICartPageProps) => {
         </View>
         <View style={styles.buttonContainer}>
           <CustomButton onPress={requestEstimate} style={styles.button}>
-            <Typo fontSize={14} color="white">
-              견적요청
-            </Typo>
+            <View style={styles.buttonIcon}>
+              <RequestIcon width={24} height={24} />
+              <Typo style={styles.buttonText}>견적요청</Typo>
+            </View>
+            <MoveIcon width={24} height={24} />
           </CustomButton>
         </View>
       </View>
-    </DefaultLayout>
+    </ManagerLayout>
   );
 };
 
@@ -132,11 +154,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   button: {
+    flexDirection: 'row',
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#5b86ea',
+    backgroundColor: '#2D81F1',
     borderRadius: 8,
     paddingVertical: 16,
-    paddingHorizontal: 10,
+    paddingHorizontal: 20,
+  },
+  buttonIcon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flex: 1,
+    // marginLeft: 16,
+  },
+  buttonText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    fontFamily: 'Pretendard-Black',
   },
 });

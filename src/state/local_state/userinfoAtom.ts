@@ -7,6 +7,6 @@ export interface IUserInfo {
 }
 
 export const userInfoAtom = atom<IUserInfo>({
-  userType: 'manager',
+  userType: null,
   isLogin: false,
 });

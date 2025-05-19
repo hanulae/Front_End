@@ -1,12 +1,22 @@
-import {ScrollView, StyleSheet, TouchableOpacity, View} from 'react-native';
+import {
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import DefaultLayout from '../../layout/DefaultLayout';
 import {
   NavigationProp,
+  useFocusEffect,
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
 import Typo from '../../components/common/Typo';
-import {useState} from 'react';
+import {useCallback, useState} from 'react';
+import FuneralQuoteCard from '../../components/manager/FuneralQuoteCard';
+import CustomButton from '../../components/common/CustomButton';
 const estimates = [
   {
     id: 1,
@@ -20,7 +30,7 @@ const estimates = [
     name: '서울대학교병원 장례식장',
     address: '서울시 종로구 대학로 101',
     selected: false,
-    status: '입찰대기',
+    status: '입찰완료',
   },
   {
     id: 3,
@@ -37,6 +47,25 @@ const ClientEstimatePage = () => {
   console.log('clientId', clientId);
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
+  useFocusEffect(
+    useCallback(() => {
+      if (Platform.OS === 'android') {
+        StatusBar.setBackgroundColor('#3287F8');
+        StatusBar.setBarStyle('dark-content');
+      } else {
+        StatusBar.setBarStyle('dark-content');
+      }
+
+      return () => {
+        // 화면 포커스 해제 시 필요하다면 초기화 작업
+        // 예: StatusBar.setStyle('default')
+      };
+    }, []),
+  );
+
+  const handleSelect = (id: number) => {
+    setSelectedId(prev => (prev === id ? null : id));
+  };
   const goToEstimateDetail = () => {
     navigation.navigate('EstimateDetail');
   };
@@ -53,68 +82,30 @@ const ClientEstimatePage = () => {
           const isCompleted = item.status === '입찰완료';
 
           return (
-            <TouchableOpacity
+            <FuneralQuoteCard
               key={item.id}
-              activeOpacity={0.8}
-              style={[
-                styles.card,
-                isSelected ? styles.cardSelected : styles.cardUnselected,
-              ]}
-              onPress={() => setSelectedId(item.id)}
-              disabled={item.status !== '입찰완료'} // 입찰대기 중이면 클릭 막을 수도 있음 (선택사항)
-            >
-              <View style={styles.row}>
-                <View>
-                  <Typo
-                    style={[
-                      styles.nameText,
-                      isSelected && styles.selectedText,
-                    ]}>
-                    {item.name}
-                  </Typo>
-                  <Typo style={styles.addressText}>{item.address}</Typo>
-                </View>
-
-                <View style={styles.checkWrapper}>
-                  <View
-                    style={[
-                      styles.checkCircle,
-                      isSelected
-                        ? styles.checkCircleSelected
-                        : isCompleted
-                        ? styles.checkCircleCompletedOnly
-                        : styles.checkCircleUnselected,
-                    ]}
-                  />
-                </View>
-              </View>
-
-              <View style={styles.statusButton}>
-                <Typo
-                  style={[
-                    styles.statusButtonText,
-                    isCompleted ? styles.statusComplete : styles.statusPending,
-                  ]}>
-                  {item.status}
-                </Typo>
-              </View>
-            </TouchableOpacity>
+              id={item.id}
+              handleSelect={handleSelect}
+              selected={isSelected}
+              name={item.name}
+              address={item.address}
+              completed={isCompleted}
+              status={item.status}
+            />
           );
         })}
 
         {/* 하단 버튼 */}
-        <TouchableOpacity
-          onPress={goToEstimateDetail}
-          style={[
-            styles.submitButton,
-            selectedId
-              ? styles.submitButtonEnabled
-              : styles.submitButtonDisabled,
-          ]}
-          disabled={!selectedId}>
-          <Typo style={styles.submitButtonText}>출동신청</Typo>
-        </TouchableOpacity>
       </ScrollView>
+      <CustomButton
+        onPress={goToEstimateDetail}
+        style={[
+          styles.submitButton,
+          selectedId ? styles.submitButtonEnabled : styles.submitButtonDisabled,
+        ]}
+        disabled={!selectedId}>
+        <Typo style={styles.submitButtonText}>출동신청</Typo>
+      </CustomButton>
     </DefaultLayout>
   );
 };
@@ -126,83 +117,13 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 16,
   },
-  card: {
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-  },
-  cardSelected: {
-    borderColor: '#4F7CFF',
-    backgroundColor: '#eef3ff',
-  },
-  cardUnselected: {
-    borderColor: '#ddd',
-    backgroundColor: '#f9f9f9',
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  nameText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 6,
-  },
-  selectedText: {
-    color: '#4F7CFF',
-  },
-  addressText: {
-    fontSize: 12,
-    color: '#666',
-  },
-  checkWrapper: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkCircle: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-  },
-  checkCircleSelected: {
-    borderColor: '#4F7CFF',
-    backgroundColor: '#4F7CFF',
-  },
-  checkCircleCompletedOnly: {
-    borderColor: '#4F7CFF',
-    backgroundColor: '#ffffff',
-  },
-  checkCircleUnselected: {
-    borderColor: '#ccc',
-    backgroundColor: '#eee',
-  },
-  statusButton: {
-    marginTop: 12,
-    alignSelf: 'flex-start',
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    backgroundColor: '#ddd',
-  },
-  statusButtonText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  statusComplete: {
-    color: '#4F7CFF',
-  },
-  statusPending: {
-    color: '#999',
-  },
   submitButton: {
-    marginTop: 40,
+    marginTop: 20,
     paddingVertical: 14,
+    marginHorizontal: 16,
     borderRadius: 8,
     alignItems: 'center',
+    marginBottom: 32,
   },
   submitButtonEnabled: {
     backgroundColor: '#4F7CFF',

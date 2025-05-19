@@ -11,6 +11,10 @@ interface IDefaultLayoutProps {
   logoutButton?: boolean;
   homeRouteName?: string;
   onLogoutPress?: () => void;
+  backButton?: boolean;
+  close?: boolean;
+  color?: string;
+  top?: boolean;
 }
 
 const DefaultLayout = ({
@@ -19,13 +23,25 @@ const DefaultLayout = ({
   headerTitle = '',
   homeButton = false,
   logoutButton = false,
+  backButton = true,
+  close = false,
   homeRouteName,
   onLogoutPress,
+  color,
+  top,
 }: IDefaultLayoutProps): JSX.Element => {
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+    <SafeAreaView
+      style={[styles.safeArea, {backgroundColor: color}]}
+      edges={[
+        ...(top === false ? [] : ['top' as const]),
+        'left' as const,
+        'right' as const,
+      ]}>
       {headerShown && (
         <Header
+          backButton={backButton}
+          close={close}
           title={headerTitle}
           homeButton={homeButton}
           logoutButton={logoutButton}
@@ -48,6 +64,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'column',
-    borderWidth: 1,
+    // borderWidth: 1,
   },
 });

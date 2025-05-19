@@ -55,32 +55,42 @@ const PhoneAuthSheet = ({
   }
   return (
     <>
-      <Pressable style={styles.backdrop} onPress={onClose} />
+      {visible && <Pressable style={styles.backdrop} onPress={onClose} />}
       <Animated.View
         style={[styles.sheetContainer, {transform: [{translateY}]}]}>
         <View style={styles.placeholder}>
           <View style={styles.header}>
-            <Typo fontSize={20}>전화번호 인증</Typo>
+            <Typo style={styles.headerTitle}>전화번호 인증</Typo>
             <Pressable onPress={onClose}>
               <CloseIcon />
             </Pressable>
+          </View>
+          <View style={styles.label}>
+            <Typo fontSize={16} style={styles.containerTitle}>
+              휴대전화번호
+            </Typo>
           </View>
           <View style={styles.authSection}>
             <Input input={phoneNumber} placeholder="전화번호를 입력하세요." />
             <CustomButton
               onPress={handleRequestCode}
               style={styles.requestButton}>
-              <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
+              <Typo color="white" style={styles.verifyButtonText}>
                 인증코드요청
               </Typo>
             </CustomButton>
+          </View>
+          <View style={styles.label}>
+            <Typo fontSize={16} style={styles.containerTitle}>
+              인증코드
+            </Typo>
           </View>
           <View style={styles.authSection}>
             <Input input={authCode} placeholder="인증코드를 입력하세요." />
           </View>
           <View style={styles.authSection}>
             <CustomButton onPress={confirmCode} style={styles.confirmButton}>
-              <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
+              <Typo color="white" style={styles.confirmButtonText}>
                 인증코드확인
               </Typo>
             </CustomButton>
@@ -101,13 +111,27 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: 'rgba(0,0,0,0.3)',
+    // zIndex: 10,
+  },
+  label: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    width: '100%',
+    // marginBottom: 10,
+  },
+  containerTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'Pretendard-Light',
+    // marginBottom: 10,
+    marginLeft: 10,
   },
   sheetContainer: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    height: 360, // 바텀시트 높이 (추후 조정 가능)
+    height: 380, // 바텀시트 높이 (추후 조정 가능)
     backgroundColor: 'white',
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
@@ -125,7 +149,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
-    marginBottom: 20,
+    marginBottom: 40,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#1C212A',
+    fontFamily: 'Pretendard-Black',
   },
   authSection: {
     flexDirection: 'row',
@@ -134,18 +164,32 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   requestButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#8990A0',
     padding: 10,
     paddingVertical: 18,
-    borderRadius: 5,
+    borderRadius: 10,
     alignItems: 'center',
   },
+  verifyButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    fontFamily: 'Pretendard-Black',
+  },
   confirmButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#FFFFFF',
     padding: 10,
     paddingVertical: 18,
-    borderRadius: 5,
+    borderWidth: 2,
+    borderColor: 'rgba(137, 175, 248, 0.75)',
+    borderRadius: 10,
     alignItems: 'center',
     width: '100%',
+  },
+  confirmButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: 'rgba(58, 131, 227, 1)',
+    fontFamily: 'Pretendard-Black',
   },
 });

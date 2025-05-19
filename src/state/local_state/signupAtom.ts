@@ -1,7 +1,15 @@
 import {atom} from 'jotai';
 
-export type UserType = 'manager' | 'funeral';
+export type UserType = 'manager' | 'funeral' | null;
 
+interface IAgreement {
+  all: boolean;
+  service: boolean;
+  privacy: boolean;
+  location: boolean;
+  age: boolean;
+  marketing: boolean;
+}
 export interface ISignupInfo {
   userType: UserType;
   email: string;
@@ -13,7 +21,9 @@ export interface ISignupInfo {
     bankName: string;
     accountNumber: string;
   };
-  agreedTerms: boolean;
+  agreedTerms: IAgreement;
+  isEmailVerified?: boolean; // 이메일 인증 여부
+  confirmPassword: string; // 비밀번호 확인
 }
 
 export const signupAtom = atom<ISignupInfo>({
@@ -27,5 +37,14 @@ export const signupAtom = atom<ISignupInfo>({
     bankName: '',
     accountNumber: '',
   },
-  agreedTerms: false,
+  agreedTerms: {
+    all: false,
+    service: false,
+    privacy: false,
+    location: false,
+    age: false,
+    marketing: false,
+  },
+  isEmailVerified: false,
+  confirmPassword: '',
 });

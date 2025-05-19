@@ -1,18 +1,41 @@
-import {NavigationProp} from '@react-navigation/native';
-import {StyleSheet, View} from 'react-native';
-import DefaultLayout from '../../layout/DefaultLayout';
+import {NavigationProp, useFocusEffect} from '@react-navigation/native';
+import {
+  ImageBackground,
+  Platform,
+  StatusBar,
+  StyleSheet,
+  View,
+} from 'react-native';
 import Typo from '../../components/common/Typo';
 import CustomButton from '../../components/common/CustomButton';
-import AlarmOff from '../../assets/Contents/Contents_AlarmOff.svg';
 import {useSetAtom} from 'jotai';
 import {userInfoAtom} from '../../state/local_state/userinfoAtom';
-
+import ManagerLayout from '../../layout/ManagerLayout';
+import {useCallback} from 'react';
+import LoginIcon from '../../assets/Header/Header_Login.svg';
+import AlarmIcon from '../../assets/Header/Header_Alarm.svg';
+import MainSearchIcon from '../../assets/Main_FuneralSearch.svg';
+import MainAlarmIcon from '../../assets/Main_Alarm.svg';
+import MoveIcon from '../../components/svg/MoveIcon';
+import InfoCenterIcon from '../../assets/ServiceCenter.svg';
+import ManagerProfileStat from '../../components/manager/ManagerProfileStat';
 interface IManagerMainPageProps {
   navigation: NavigationProp<any>;
 }
 
 const ManagerMainPage = ({navigation}: IManagerMainPageProps) => {
   const setLogin = useSetAtom(userInfoAtom);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (Platform.OS === 'android') {
+        StatusBar.setBackgroundColor('#3287F8');
+        StatusBar.setBarStyle('light-content');
+      } else {
+        StatusBar.setBarStyle('light-content');
+      }
+    }, []),
+  );
 
   const logout = () => {
     // 로그아웃 로직
@@ -27,7 +50,10 @@ const ManagerMainPage = ({navigation}: IManagerMainPageProps) => {
   };
 
   const goToSearchPage = () => {
-    navigation.navigate('FindFuneral');
+    navigation.navigate('FindFuneral', {
+      screen: 'FuneralSearchPage', // Tab.Screen 이름
+      params: {variant: 'main'},
+    });
   };
 
   const goToAlarmPage = () => {
@@ -35,39 +61,56 @@ const ManagerMainPage = ({navigation}: IManagerMainPageProps) => {
   };
 
   return (
-    <DefaultLayout>
+    <ManagerLayout headerShown={false} color="#3287F8" top={false}>
       <View style={styles.headerContainer}>
-        <Typo>하늘애</Typo>
+        <Typo style={styles.appName}>하늘애</Typo>
         <View style={styles.leftHeaderContainer}>
           <CustomButton onPress={logout} style={styles.loginButton}>
-            <Typo>로그아웃</Typo>
+            <Typo color="white" style={styles.buttonText}>
+              로그아웃
+            </Typo>
+            <LoginIcon />
           </CustomButton>
           <CustomButton onPress={goToAlarmPage} style={styles.alarmButton}>
-            <AlarmOff />
+            <AlarmIcon />
+            {/* <AlarmOff /> */}
           </CustomButton>
         </View>
       </View>
       <View style={styles.mainContainer}>
-        <Typo fontSize={30}>
-          하늘애와 함께 차분하게
-          {'\n'}
-          준비하세요.
-        </Typo>
-        <Typo>
-          검증된 장례 업체를 통해
-          {'\n'}
-          고품격 서비스를 제공합니다.
-        </Typo>
-        <View style={styles.buttonContainer}>
+        <ManagerProfileStat point={100000} cash={100000} managerName="김상조" />
+        <ImageBackground
+          style={styles.buttonContainer}
+          source={require('../../assets/mainImage.png')}
+          resizeMode="contain">
           <CustomButton onPress={goToSearchPage} style={styles.SearchButton}>
-            <Typo>장례식장{'\n'}찾아보기</Typo>
+            <MainSearchIcon />
+            <View style={styles.buttonTextContainer}>
+              <Typo style={styles.buttonTitle}>장례식장</Typo>
+              <View style={styles.buttonTextSubContainer}>
+                <Typo style={styles.buttonSub}>찾아보기</Typo>
+                <MoveIcon stroke="#397CFF" color="#397CFF" />
+              </View>
+            </View>
           </CustomButton>
           <CustomButton onPress={goToNoticePage} style={styles.NoticeButton}>
-            <Typo>공지사항{'\n'}바로가기</Typo>
+            <MainAlarmIcon />
+            <View style={styles.buttonTextContainer}>
+              <Typo style={styles.buttonTitle2}>공지사항</Typo>
+              <View style={styles.buttonTextSubContainer}>
+                <Typo style={styles.buttonSub2}>확인하기</Typo>
+                <MoveIcon stroke="#FFFFFF" color="#FFFFFF" />
+              </View>
+            </View>
           </CustomButton>
+        </ImageBackground>
+        <View style={styles.footerContainer}>
+          <InfoCenterIcon width={21.5} height={22} />
+          <Typo style={styles.footerText}>고객센터</Typo>
+          <Typo style={styles.footerNumber}>02-123-4567</Typo>
         </View>
       </View>
-    </DefaultLayout>
+    </ManagerLayout>
   );
 };
 
@@ -78,54 +121,159 @@ const styles = StyleSheet.create({
   headerContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    backgroundColor: '#3287F8',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingBottom: 20,
+  },
+  appName: {
+    fontSize: 18,
+    fontWeight: '300',
+    color: '#FFFFFF',
+    fontFamily: 'KIMM_Light',
   },
   leftHeaderContainer: {
     flexDirection: 'row',
     gap: 10,
   },
   loginButton: {
-    backgroundColor: '#fff',
-    justifyContent: 'center',
+    flexDirection: 'row',
+    // justifyContent: 'center',
+    alignItems: 'center',
     // borderWidth: 1,
+    gap: 10,
     borderColor: '#000',
     paddingVertical: 5,
     paddingHorizontal: 10,
   },
+  buttonText: {
+    fontWeight: '500',
+    fontSize: 14,
+  },
   alarmButton: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff',
     // borderWidth: 1,
     borderColor: '#000',
     paddingVertical: 5,
     paddingHorizontal: 10,
   },
   mainContainer: {
+    flex: 1,
     flexDirection: 'column',
+  },
+  container: {
+    flex: 1,
+    backgroundColor: '#3287F8',
+  },
+  mainTitleTextContainer: {
+    marginTop: 55,
+    marginHorizontal: 31,
+    marginBottom: 20,
+    gap: 10,
+  },
+  mainTitleText: {
+    fontSize: 30,
+    fontWeight: '500',
+    color: '#FFFFFF',
+    fontFamily: 'GmarketSansTTFMedium',
+    textAlign: 'center',
+  },
+  mainSubTextContainer: {
+    // marginHorizontal: 31,
+    marginBottom: 60,
+    gap: 5,
+  },
+  mainSubText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#FFFFFF',
+    fontFamily: 'Pretendard-Medium',
+    textAlign: 'center',
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    borderWidth: 1,
+    paddingTop: 290,
+    gap: 12,
   },
   SearchButton: {
     flex: 1,
-    alignItems: 'center',
     backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#000',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
+    borderRadius: 20,
+    paddingVertical: 20,
+    paddingHorizontal: 20,
   },
   NoticeButton: {
     flex: 1,
+    backgroundColor: '#59A1FF',
+    borderRadius: 20,
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+  },
+  buttonTextContainer: {
+    flexDirection: 'column',
+    marginTop: 30,
+    // alignItems: 'center',
+    gap: 10,
+  },
+  buttonTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#397CFF',
+    fontFamily: 'Pretendard-Medium',
+    textAlign: 'left',
+  },
+  buttonTitle2: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    fontFamily: 'Pretendard-Medium',
+    textAlign: 'left',
+  },
+  buttonTextSubContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#000',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
+    gap: 5,
+    marginTop: 5,
+  },
+  buttonSub: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#397CFF',
+    fontFamily: 'Pretendard-Medium',
+    textAlign: 'left',
+  },
+  buttonSub2: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#FFFFFF',
+    fontFamily: 'Pretendard-Medium',
+    textAlign: 'left',
+  },
+  footerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 20,
+    backgroundColor: '#3287F8',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  footerText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#9FC9FF',
+    fontFamily: 'Pretendard-Medium',
+  },
+  footerNumber: {
+    fontSize: 16,
+    fontWeight: '400',
+    color: '#FFFFFF',
+    fontFamily: 'GmarketSansTTFMedium',
   },
 });

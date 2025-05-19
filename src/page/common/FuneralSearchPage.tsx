@@ -1,18 +1,45 @@
-import {FlatList, StyleSheet, View} from 'react-native';
-import DefaultLayout from '../../layout/DefaultLayout';
+import {
+  Dimensions,
+  FlatList,
+  Platform,
+  StatusBar,
+  StyleSheet,
+  TextInput,
+  View,
+} from 'react-native';
 import {useInputBase} from '../../hooks/input/useInputBase';
 import {Input} from '../../components/common/input/Input';
 import Typo from '../../components/common/Typo';
 import {funeralHomeDummyData} from '../../state/local_state/dummy';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import FuneralCard from '../../components/common/FuneralCard';
 import CustomButton from '../../components/common/CustomButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-interface IFuneralSearchPageProps {
-  variant: 'main' | 'signup';
-}
+import {useRoute} from '@react-navigation/native';
+import ManagerLayout from '../../layout/ManagerLayout';
+import MoveIcon from '../../assets/Button/Button_MoveTransparent.svg';
+import CartIcon from '../../assets/Button/Button_Cart.svg';
+import FindLocationModal from '../../components/funeralHall/FindLocation';
 
+const {height} = Dimensions.get('window');
 const FuneralSearchPage = () => {
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [location, setLocation] = useState<string>('');
+
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      StatusBar.setBackgroundColor('#3287F8');
+      StatusBar.setBarStyle('dark-content');
+    } else {
+      StatusBar.setBarStyle('dark-content');
+    }
+  }, []);
+
+  const route = useRoute();
+
+  const params = route.params;
+  const {variant} = params as {variant: string};
+  console.log('variant', variant);
   const hallName = useInputBase();
   // const [selectedIds, setSelectedIds] = useState<number[]>([]); // 수정: 배열로 관리
   const [selectedItems, setSelectedItems] = useState<
@@ -41,25 +68,44 @@ const FuneralSearchPage = () => {
     }
   };
 
+  const selectFuneral = async () => {
+    try {
+      const selectedFuneral = await AsyncStorage.getItem('funeralCart');
+      if (selectedFuneral !== null) {
+        console.log('장례식장 선택 완료', JSON.parse(selectedFuneral));
+      }
+    } catch (error) {
+      console.error('장례식장 선택 실패', error);
+    }
+  };
+
   return (
-    <DefaultLayout
+    <ManagerLayout
       headerShown={true}
       headerTitle="장례식장 검색"
-      homeButton={false}
+      color="white"
+      homeButton={true}
       logoutButton={false}>
       <View style={styles.wrapper}>
         <View style={styles.searchContainer}>
           <Input input={hallName} placeholder="검색" />
-          <View style={styles.specLocation}>
-            <Typo fontSize={14} style={styles.specLocationText}>
+          <View style={styles.locationContainer}>
+            <TextInput editable={false} value={location} style={styles.input} />
+            <CustomButton
+              onPress={() => setShowLocationModal(true)}
+              style={styles.locationButton}>
+              <Typo style={styles.locationButtonText}>위치 선택</Typo>
+            </CustomButton>
+
+            {/* <Typo fontSize={14} style={styles.specLocationText}>
               시 / 도
             </Typo>
             <Typo fontSize={14} style={styles.specLocationText}>
               군 / 구
-            </Typo>
+            </Typo> */}
           </View>
         </View>
-        <View>
+        <View style={styles.listContainer}>
           <FlatList
             data={funeralHomeDummyData}
             keyExtractor={item => item.id.toString()}
@@ -78,15 +124,38 @@ const FuneralSearchPage = () => {
             )}
           />
         </View>
-        <View style={styles.buttonContainer}>
-          <CustomButton style={styles.button} onPress={handleAddToCart}>
-            <Typo fontSize={14} color="white">
-              장바구니 담기
-            </Typo>
-          </CustomButton>
-        </View>
+        {variant === 'Main' && (
+          <View style={styles.buttonContainer}>
+            <CustomButton onPress={handleAddToCart} style={styles.button}>
+              <View style={styles.buttonIcon}>
+                <CartIcon width={24} height={24} />
+                <Typo style={styles.buttonText}>장바구니 담기</Typo>
+              </View>
+              <MoveIcon width={24} height={24} />
+            </CustomButton>
+          </View>
+        )}
+        {variant === 'signup' && (
+          <View style={styles.buttonContainer}>
+            <CustomButton onPress={selectFuneral} style={styles.button}>
+              <View style={styles.buttonIcon}>
+                <CartIcon width={24} height={24} />
+                <Typo style={styles.buttonText}>선택</Typo>
+              </View>
+              <MoveIcon width={24} height={24} />
+            </CustomButton>
+          </View>
+        )}
       </View>
-    </DefaultLayout>
+      <FindLocationModal
+        visible={showLocationModal}
+        onClose={() => setShowLocationModal(false)}
+        onComplete={selectedLocation => {
+          setLocation(selectedLocation);
+          // fetchFuneralList(selectedLocation); // 장례식장 API 호출
+        }}
+      />
+    </ManagerLayout>
   );
 };
 
@@ -98,6 +167,40 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     flexDirection: 'column',
+    paddingBottom: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: '#dedede',
+    marginBottom: 16,
+    gap: 8,
+  },
+  locationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 16,
+    gap: 12,
+  },
+  input: {
+    flex: 8,
+    borderRadius: 10,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    fontSize: 14,
+    backgroundColor: '#dedede',
+  },
+  locationButton: {
+    flex: 2,
+    backgroundColor: '#2D81F1',
+    borderRadius: 10,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    // marginLeft: 16,
+  },
+  locationButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '400',
   },
   specLocation: {
     flexDirection: 'row',
@@ -115,18 +218,42 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     textAlign: 'center',
   },
+  listContainer: {
+    // flex: 1,
+    maxHeight: height * 0.54,
+    // marginTop: 16,
+    // marginBottom: 50,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#dedede',
+  },
   buttonContainer: {
+    // flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
   },
   button: {
+    flexDirection: 'row',
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#5b86ea',
+    backgroundColor: '#2D81F1',
     borderRadius: 8,
     paddingVertical: 16,
-    paddingHorizontal: 10,
+    paddingHorizontal: 20,
+  },
+  buttonIcon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flex: 1,
+    // marginLeft: 16,
+  },
+  buttonText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    fontFamily: 'Pretendard-Black',
   },
 });

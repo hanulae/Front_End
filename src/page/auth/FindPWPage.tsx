@@ -8,6 +8,7 @@ import CustomButton from '../../components/common/CustomButton';
 import {useInputBase} from '../../hooks/input/useInputBase';
 import {usePhoneInput} from '../../hooks/input/usePhoneInput';
 import Typo from '../../components/common/Typo';
+import {useState} from 'react';
 
 interface IFindPWPageProps {
   navigation: NavigationProp<any>;
@@ -17,14 +18,21 @@ const FindPWpage = ({navigation}: IFindPWPageProps) => {
   const phoneNumber = usePhoneInput();
   const password = usePasswordInput();
   const authCode = useInputBase();
-  const confirmPassword = useConfirmPasswordInput(() => password.value);
 
+  const [isPhoneVerified, setIsPhoneVerified] = useState(false);
+  const confirmPassword = useConfirmPasswordInput(
+    () => password.value,
+    password.value,
+  );
+  const isFormValid =
+    isPhoneVerified && password.isValid && confirmPassword.isValid;
   const handleRequestCode = () => {
     // 휴대전화 인증 코드 요청 로직
   };
 
   const handleVerifyCode = () => {
     // 인증 코드 확인 로직
+    setIsPhoneVerified(true);
   };
 
   const handleChangePassword = () => {
@@ -35,44 +43,98 @@ const FindPWpage = ({navigation}: IFindPWPageProps) => {
   return (
     <DefaultLayout
       headerShown={true}
-      headerTitle="로그인"
+      headerTitle="비밀번호 변경"
+      color="white"
       homeButton={true}
       logoutButton={false}
       homeRouteName="Main">
-      <View style={styles.authSection}>
-        <Input input={phoneNumber} placeholder="전화번호를 입력하세요." />
-        <CustomButton onPress={handleRequestCode} style={styles.requestButton}>
-          <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
-            인증코드요청
+      <View style={styles.wrapper}>
+        <View style={styles.container}>
+          <Typo fontSize={16} style={styles.containerTitle}>
+            휴대전화번호 인증
           </Typo>
-        </CustomButton>
-      </View>
-      <View style={styles.verifySection}>
-        <Input input={authCode} placeholder="인증코드를 입력하세요." />
-        <CustomButton onPress={handleVerifyCode} style={styles.requestButton}>
-          <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
-            인증코드확인
+          <View style={styles.authSection}>
+            <Input
+              input={phoneNumber}
+              placeholder="전화번호를 입력하세요."
+              type="phone"
+            />
+            <CustomButton
+              onPress={handleRequestCode}
+              style={styles.requestButton}>
+              <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
+                인증코드받기
+              </Typo>
+            </CustomButton>
+          </View>
+        </View>
+        <View style={styles.container}>
+          <Typo fontSize={16} style={styles.containerTitle}>
+            인증코드 확인
           </Typo>
+          <View style={styles.verifySection}>
+            <Input
+              input={authCode}
+              placeholder="인증코드를 입력하세요."
+              type="number"
+            />
+            <CustomButton
+              onPress={handleVerifyCode}
+              style={styles.verifyButton}>
+              <Typo color="white" style={styles.verifyButtonText}>
+                인증코드확인
+              </Typo>
+            </CustomButton>
+          </View>
+        </View>
+        <View style={styles.passwordContainer}>
+          <Typo fontSize={16} style={styles.containerTitle}>
+            새로운 비밀번호
+          </Typo>
+          <View style={styles.passwordSection}>
+            <Input
+              input={password}
+              placeholder="비밀번호를 입력하세요"
+              type="password"
+            />
+          </View>
+        </View>
+        <View style={styles.container}>
+          <Typo fontSize={16} style={styles.containerTitle}>
+            새로운 비밀번호 확인
+          </Typo>
+          <View style={styles.passwordSection}>
+            <Input
+              input={confirmPassword}
+              label="비밀번호 확인"
+              placeholder="비밀번호를 다시 입력하세요"
+              type="password"
+            />
+          </View>
+        </View>
+      </View>
+      <View style={styles.buttonConatiner}>
+        <CustomButton
+          onPress={handleChangePassword}
+          style={[
+            styles.confirmButton,
+            !isFormValid && {backgroundColor: '#D3D3D3'},
+          ]}
+          disabled={!isFormValid}>
+          <Typo style={styles.confimButtonText}>확인</Typo>
         </CustomButton>
+        {/*  <CustomButton
+          onPress={handleNext}
+          style={[
+            styles.confirmButton,
+            !isFormValid && {backgroundColor: '#D3D3D3'},
+          ]}
+          disabled={!isFormValid}>
+          <Typo color="white" fontSize={14} style={styles.confrimButtonText}>
+            다음
+          </Typo>
+        </CustomButton> */}
       </View>
-      <View style={styles.passwordSection}>
-        <Input
-          input={password}
-          placeholder="비밀번호를 입력하세요"
-          type="password"
-        />
-        <Input
-          input={confirmPassword}
-          label="비밀번호 확인"
-          placeholder="비밀번호를 다시 입력하세요"
-          type="password"
-        />
-      </View>
-      <CustomButton onPress={handleChangePassword} style={styles.changeButton}>
-        <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
-          비밀번호변경
-        </Typo>
-      </CustomButton>
     </DefaultLayout>
   );
 };
@@ -80,42 +142,92 @@ const FindPWpage = ({navigation}: IFindPWPageProps) => {
 export default FindPWpage;
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+    padding: 16,
+  },
+  container: {
+    // borderWidth: 1,
+  },
+  passwordContainer: {
+    marginTop: 32,
+  },
+  containerTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'Pretendard-Light',
+    // marginBottom: 5,
+    marginLeft: 10,
+  },
   authSection: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 16,
-    paddingHorizontal: 16,
   },
   requestButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#8990A0',
     padding: 10,
     paddingVertical: 18,
-    borderRadius: 5,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  requestButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    fontFamily: 'Pretendard-Light',
   },
   verifySection: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 16,
-    paddingHorizontal: 16,
+  },
+  verifyButton: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: 'rgba(137, 175, 248, 0.75)',
+    paddingHorizontal: 9,
+    paddingVertical: 17,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  verifyButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#3A83E3',
+    fontFamily: 'Pretendard-Light',
   },
   passwordSection: {
-    height: 200,
-    flexDirection: 'column',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 16,
-    paddingHorizontal: 16,
-    // borderWidth: 1,
-    paddingVertical: 18,
   },
-  changeButton: {
-    backgroundColor: '#007AFF',
-    padding: 10,
+  checkSection: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 16,
+  },
+  buttonConatiner: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    marginBottom: 24,
+    paddingHorizontal: 16,
+  },
+  confirmButton: {
+    backgroundColor: '#2D81F1',
+    padding: 10,
     paddingVertical: 18,
-    marginHorizontal: 16,
-    borderRadius: 5,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  confimButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    fontFamily: 'Pretendard-Light',
   },
 });

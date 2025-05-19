@@ -7,6 +7,9 @@ import React, {JSX} from 'react';
 import {StyleSheet, View} from 'react-native';
 import CustomButton from './CustomButton';
 import Typo from './Typo';
+import BackIcon from '../../assets/Header/Header_Back.svg';
+import HomeIcon from '../../assets/Header/Header_Home.svg';
+import CloseIcon from '../../assets/Icon/Icon_BtnClose01.svg';
 
 interface IHeaderProps {
   title: string;
@@ -14,16 +17,20 @@ interface IHeaderProps {
   logoutButton?: boolean;
   homeRouteName?: string;
   onLogoutPress?: () => void;
+  backButton?: boolean;
   color?: string;
+  close?: boolean;
 }
 
 const Header = ({
   title,
   color,
+  backButton = true,
   homeButton = false,
   logoutButton = false,
   homeRouteName,
   onLogoutPress,
+  close = false,
 }: IHeaderProps): JSX.Element => {
   const navigation = useNavigation<NavigationProp<any>>();
   const goBack = navigation.goBack;
@@ -46,20 +53,28 @@ const Header = ({
   };
   return (
     <View style={[styles.header, {backgroundColor: color}]}>
-      <CustomButton onPress={goBack}>
-        <Typo>Back</Typo>
-      </CustomButton>
-      <Typo fontSize={16} color="black">
-        {title}
-      </Typo>
+      {/* <CustomButton onPress={goBack}>
+        <BackIcon width={24} height={24} />
+      </CustomButton> */}
+      {backButton && (
+        <CustomButton onPress={goBack}>
+          <BackIcon width={24} height={24} />
+        </CustomButton>
+      )}
+      <Typo style={styles.title}>{title}</Typo>
       {homeButton && (
         <CustomButton onPress={goHome}>
-          <Typo>Home</Typo>
+          <HomeIcon width={24} height={24} />
         </CustomButton>
       )}
       {logoutButton && (
         <CustomButton onPress={() => onLogoutPress}>
           <Typo>로그아웃</Typo>
+        </CustomButton>
+      )}
+      {close && (
+        <CustomButton onPress={goBack}>
+          <CloseIcon width={24} height={24} />
         </CustomButton>
       )}
     </View>
@@ -75,5 +90,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     backgroundColor: '#fff',
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '600',
+    fontFamily: 'Pretendard-Black',
   },
 });

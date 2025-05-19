@@ -5,6 +5,8 @@ import FindEmailPage from '../page/auth/FindEmailPage';
 import FindPWpage from '../page/auth/FindPWPage';
 import SignupPage from '../page/auth/SignupPage';
 import FuneralSearchPage from '../page/common/FuneralSearchPage';
+import AgreementDetailPage from '../page/auth/signup/AgreementDetialPage';
+import SignupComplete from '../page/auth/signup/SignupComplete';
 
 const Stack = createNativeStackNavigator();
 
@@ -16,9 +18,11 @@ const CommonStack = () => {
       <Stack.Screen name="Main" component={MainPage} />
       <Stack.Screen name="Login" component={LoginPage} />
       <Stack.Screen name="Signup" component={SignupPage} />
+      <Stack.Screen name="SignupComplete" component={SignupComplete} />
       <Stack.Screen name="FindEmail" component={FindEmailPage} />
       <Stack.Screen name="FindPW" component={FindPWpage} />
       <Stack.Screen name="FindFuneral" component={FuneralSearchPage} />
+      <Stack.Screen name="AgreementDetail" component={AgreementDetailPage} />
     </Stack.Navigator>
   );
 };

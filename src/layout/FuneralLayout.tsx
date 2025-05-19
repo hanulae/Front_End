@@ -33,7 +33,7 @@ const FuneralLayout = ({
           homeButton={homeButton}
           logoutButton={logoutButton}
           homeRouteName={homeRouteName}
-          onLogoutPress={onLogoutPress}
+          onLogoutPress={onLogoutPress as () => void}
           color={color}
         />
       )}
