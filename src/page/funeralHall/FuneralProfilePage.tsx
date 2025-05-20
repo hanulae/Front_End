@@ -34,6 +34,7 @@ const FuneralProfilePage = () => {
 
   const goToModifyFuneralInfo = () => {
     console.log('Modify Funeral Info');
+    navigation.navigate('FuneralModify');
   };
 
   const goToManageRomms = () => {
