@@ -1,4 +1,4 @@
-import {Platform, ScrollView, StatusBar, StyleSheet, View} from 'react-native';
+import {Platform, StatusBar, StyleSheet, View} from 'react-native';
 import ProfileStat from '../../components/funeralHall/ProfileStat';
 import {useEffect} from 'react';
 import FuneralLayout from '../../layout/FuneralLayout';
