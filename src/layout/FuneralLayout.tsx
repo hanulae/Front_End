@@ -31,7 +31,7 @@ const FuneralLayout = ({
   // top이 true일 때 SafeAreaView의 edges에 'top' 추가
   return (
     <SafeAreaView
-      style={styles.safeArea}
+      style={[styles.safeArea, {backgroundColor: color}]}
       edges={top ? ['top', 'left', 'right'] : []}>
       {headerShown && (
         <FuneralHeader
@@ -41,7 +41,7 @@ const FuneralLayout = ({
           logoutButton={logoutButton}
           homeRouteName={homeRouteName}
           onLogoutPress={onLogoutPress as () => void}
-          color={color}
+          // color={color}
         />
       )}
       <View style={styles.container}>{children}</View>

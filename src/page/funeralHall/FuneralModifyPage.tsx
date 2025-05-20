@@ -25,6 +25,23 @@ import {usePhoneInput} from '../../hooks/input/usePhoneInput';
 import CustomButton from '../../components/common/CustomButton';
 
 const FuneralModiftyPage = () => {
+  // StatusBar 설정
+  useFocusEffect(
+    useCallback(() => {
+      if (Platform.OS === 'android') {
+        StatusBar.setBackgroundColor('#3287F8');
+        StatusBar.setBarStyle('dark-content');
+      } else {
+        StatusBar.setBarStyle('dark-content');
+      }
+      return () => {
+        // 화면 포커스 해제 시 필요하다면 초기화 작업
+        // 예: StatusBar.setStyle('default')
+      };
+    }, []),
+  );
+
+  // 상태 관리
   const [showBottomSheet, setShowBottomSheet] = useState(false);
   const [selectedImages, setSelectedImages] = useState<IImage[]>([]);
   const [infoData, setInfoData] = useState({
@@ -107,21 +124,6 @@ const FuneralModiftyPage = () => {
   const handleDeleteImage = (index: number) => {
     setSelectedImages(prev => prev.filter((_, i) => i !== index));
   };
-  // StatusBar 설정
-  useFocusEffect(
-    useCallback(() => {
-      if (Platform.OS === 'android') {
-        StatusBar.setBackgroundColor('#3287F8');
-        StatusBar.setBarStyle('dark-content');
-      } else {
-        StatusBar.setBarStyle('dark-content');
-      }
-      return () => {
-        // 화면 포커스 해제 시 필요하다면 초기화 작업
-        // 예: StatusBar.setStyle('default')
-      };
-    }, []),
-  );
 
   // 주소 검색 핸들러
   const handleAddressSearch = () => {

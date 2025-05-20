@@ -1,6 +1,6 @@
 import {Platform, StatusBar, StyleSheet, View} from 'react-native';
 import ProfileStat from '../../components/funeralHall/ProfileStat';
-import {useEffect} from 'react';
+import {useCallback, useEffect} from 'react';
 import FuneralLayout from '../../layout/FuneralLayout';
 import CustomButton from '../../components/common/CustomButton';
 import MoveWhiteIcon from '../../assets/Button/Button_MoveTransparent.svg';
@@ -16,10 +16,26 @@ import Typo from '../../components/common/Typo';
 import FuneralHeader from '../../components/common/FuneralHeader';
 import {useSetAtom} from 'jotai';
 import {userInfoAtom} from '../../state/local_state/userinfoAtom';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 
 const FuneralProfilePage = () => {
+  // StatusBar 설정
+  useFocusEffect(
+    useCallback(() => {
+      if (Platform.OS === 'android') {
+        StatusBar.setBackgroundColor('#3287F8');
+        StatusBar.setBarStyle('light-content');
+      } else {
+        StatusBar.setBarStyle('light-content');
+      }
+      return () => {
+        // 화면 포커스 해제 시 필요하다면 초기화 작업
+        // 예: StatusBar.setStyle('default')
+      };
+    }, []),
+  );
+
   const setLogin = useSetAtom(userInfoAtom);
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   useEffect(() => {
@@ -33,16 +49,18 @@ const FuneralProfilePage = () => {
   }, []);
 
   const goToModifyFuneralInfo = () => {
-    console.log('Modify Funeral Info');
+    // console.log('Modify Funeral Info');
     navigation.navigate('FuneralModify');
   };
 
   const goToManageRomms = () => {
-    console.log('Manage Rooms');
+    // console.log('Manage Rooms');
+    navigation.navigate('RoomManagement');
   };
 
   const goToManageMembers = () => {
-    console.log('Manage Members');
+    // console.log('Manage Members');
+    navigation.navigate('StaffManagement');
   };
 
   const goToDispatchHistory = () => {
