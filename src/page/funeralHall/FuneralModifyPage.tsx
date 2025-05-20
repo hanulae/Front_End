@@ -134,6 +134,7 @@ const FuneralModiftyPage = () => {
       headerShown={true}
       backButtonVisible={true}
       homeButton={true}
+      homeRouteName="FuneralMain"
       top={true}
       color="white"
       headerTitle="장례식장 정보 수정">
