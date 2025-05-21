@@ -21,16 +21,22 @@ const RoomCard = ({
   toggleEdit,
   handleDelete,
 }: IRoomCardProps) => {
-  // const navigation = useNavigation<NativeStackNavigationProp<any>>();
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
 
   const MoveRoomDetail = () => {
-    console.log('RoomDetail');
-    // navigation.navigate('RoomDetail', { roomId });
+    navigation.navigate('AddRoom', {
+      roomId: roomId,
+      roomName: roomName,
+      purpose: 'detail',
+    });
   };
 
   const MoveRoomModify = () => {
-    console.log('RoomModify');
-    // navigation.navigate('RoomModify', { roomId });
+    navigation.navigate('AddRoom', {
+      roomId: roomId,
+      roomName: roomName,
+      purpose: 'modify',
+    });
   };
 
   return (

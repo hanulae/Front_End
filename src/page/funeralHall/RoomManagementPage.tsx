@@ -1,4 +1,4 @@
-import {useFocusEffect} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {useCallback, useState} from 'react';
 import {Platform, StatusBar, StyleSheet, View} from 'react-native';
 import FuneralLayout from '../../layout/FuneralLayout';
@@ -7,6 +7,7 @@ import Typo from '../../components/common/Typo';
 import RoomCard from '../../components/funeralHall/management/RoomCard';
 import AddRoomIcon from '../../assets/Button/Button_AddRoom.svg';
 import MoveIcon from '../../assets/Button/Button_MoveTransparent.svg';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 
 const DummyData = [
   {roomId: '1', roomName: '1호실'},
@@ -32,6 +33,8 @@ const RoomManagementPage = () => {
       };
     }, []),
   );
+
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
 
   // 상태 관리
   const [isEdit, setIsEdit] = useState(false);
@@ -61,7 +64,7 @@ const RoomManagementPage = () => {
 
   const addRoom = () => {
     // 방 추가 처리 로직
-    console.log('Adding new room');
+    navigation.navigate('AddRoom', {purpose: 'add'});
   };
 
   // 호실 fetch

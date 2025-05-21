@@ -7,12 +7,14 @@ interface IFuneralInputProps {
   type?: 'text' | 'password' | 'phone' | 'number' | 'email';
   placeholder?: string;
   label?: string;
+  disabled?: boolean;
 }
 
 export const FuneralInput = ({
   input,
   type = 'text',
   placeholder,
+  disabled = false,
 }: // label,
 IFuneralInputProps) => {
   // const [secure, setSecure] = useState(type === 'password');
@@ -34,6 +36,7 @@ IFuneralInputProps) => {
 
   return (
     <CommonInput
+      disabled={disabled}
       value={input.value}
       onChangeText={input.onChangeText}
       onBlur={() => {

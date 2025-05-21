@@ -3,6 +3,7 @@ import FuneralProfilePage from '../page/funeralHall/FuneralProfilePage';
 import FuneralModiftyPage from '../page/funeralHall/FuneralModifyPage';
 import RoomManagementPage from '../page/funeralHall/RoomManagementPage';
 import StaffManagementPage from '../page/funeralHall/StaffManagementPage';
+import AddRoomPage from '../page/funeralHall/AddRoomPage';
 
 const Stack = createNativeStackNavigator();
 
@@ -15,6 +16,7 @@ const FuneralStack = () => {
       <Stack.Screen name="FuneralModify" component={FuneralModiftyPage} />
       <Stack.Screen name="RoomManagement" component={RoomManagementPage} />
       <Stack.Screen name="StaffManagement" component={StaffManagementPage} />
+      <Stack.Screen name="AddRoom" component={AddRoomPage} />
     </Stack.Navigator>
   );
 };
