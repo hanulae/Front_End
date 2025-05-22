@@ -12,6 +12,7 @@ interface IFuneralLayoutProps {
   homeRouteName?: string;
   onLogoutPress?: () => void;
   color?: string;
+  headerColor?: string;
   backButtonVisible?: boolean;
   top?: boolean;
 }
@@ -25,6 +26,7 @@ const FuneralLayout = ({
   homeRouteName,
   onLogoutPress,
   color,
+  headerColor,
   backButtonVisible = false,
   top = false,
 }: IFuneralLayoutProps) => {
@@ -35,6 +37,7 @@ const FuneralLayout = ({
       edges={top ? ['top', 'left', 'right'] : []}>
       {headerShown && (
         <FuneralHeader
+          color={headerColor}
           title={headerTitle}
           backButtonVisible={backButtonVisible}
           homeButton={homeButton}

@@ -64,7 +64,8 @@ const FuneralProfilePage = () => {
   };
 
   const goToDispatchHistory = () => {
-    console.log('Dispatch History');
+    // console.log('Dispatch History');
+    navigation.navigate('DispatchHistory');
   };
 
   const goToDispatchRequest = () => {
