@@ -70,6 +70,7 @@ const FuneralProfilePage = () => {
 
   const goToDispatchRequest = () => {
     console.log('Dispatch Request');
+    navigation.navigate('PendingDispatch');
   };
 
   const goToQuoteList = () => {
