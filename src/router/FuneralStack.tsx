@@ -6,6 +6,8 @@ import StaffManagementPage from '../page/funeralHall/StaffManagementPage';
 import AddRoomPage from '../page/funeralHall/AddRoomPage';
 import DispatchHistoryPage from '../page/funeralHall/DispatchHistoryPage';
 import DispatchDetailPage from '../page/funeralHall/DispatchDetailPage';
+import EstimateHistoryPage from '../page/funeralHall/EstimateHistoryPage';
+import QuoteProposalPage from '../page/funeralHall/QuoteProposalPage';
 
 const Stack = createNativeStackNavigator();
 
@@ -21,6 +23,8 @@ const FuneralStack = () => {
       <Stack.Screen name="AddRoom" component={AddRoomPage} />
       <Stack.Screen name="DispatchHistory" component={DispatchHistoryPage} />
       <Stack.Screen name="DispatchDetail" component={DispatchDetailPage} />
+      <Stack.Screen name="EstimateHistory" component={EstimateHistoryPage} />
+      <Stack.Screen name="QuoteProposal" component={QuoteProposalPage} />
     </Stack.Navigator>
   );
 };

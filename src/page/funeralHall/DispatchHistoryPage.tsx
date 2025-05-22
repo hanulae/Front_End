@@ -1,10 +1,27 @@
-import {ScrollView, StyleSheet, View} from 'react-native';
+import {Platform, ScrollView, StatusBar, StyleSheet, View} from 'react-native';
 import FuneralLayout from '../../layout/FuneralLayout';
 import DispatchCard from '../../components/funeralHall/DispatchCard';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {useCallback} from 'react';
 
 const DispatchHistoryPage = () => {
+  // StatusBar 설정
+  useFocusEffect(
+    useCallback(() => {
+      if (Platform.OS === 'android') {
+        StatusBar.setBackgroundColor('#3287F8');
+        StatusBar.setBarStyle('dark-content');
+      } else {
+        StatusBar.setBarStyle('dark-content');
+      }
+      return () => {
+        // 화면 포커스 해제 시 필요하다면 초기화 작업
+        // 예: StatusBar.setStyle('default')
+      };
+    }, []),
+  );
+
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const goToDispatchDetail = (name: string) => {
     // console.log('Dispatch Detail');

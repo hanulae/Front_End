@@ -74,6 +74,7 @@ const FuneralProfilePage = () => {
 
   const goToQuoteList = () => {
     console.log('Quote List');
+    navigation.navigate('EstimateHistory');
   };
 
   const goToAppSetting = () => {
