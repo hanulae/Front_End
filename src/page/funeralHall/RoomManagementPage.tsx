@@ -1,6 +1,6 @@
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {useCallback, useState} from 'react';
-import {Platform, StatusBar, StyleSheet, View} from 'react-native';
+import {Platform, ScrollView, StatusBar, StyleSheet, View} from 'react-native';
 import FuneralLayout from '../../layout/FuneralLayout';
 import CustomButton from '../../components/common/CustomButton';
 import Typo from '../../components/common/Typo';
@@ -87,7 +87,9 @@ const RoomManagementPage = () => {
             </Typo>
           </CustomButton>
         </View>
-        <View style={styles.cardContainer}>
+        <ScrollView
+          style={styles.cardContainer}
+          contentContainerStyle={{gap: 10}}>
           {rooms.map(room => (
             <RoomCard
               key={room.roomId}
@@ -98,7 +100,7 @@ const RoomManagementPage = () => {
               handleDelete={() => handleDeletePress(room.roomId)}
             />
           ))}
-        </View>
+        </ScrollView>
         <View style={styles.buttonContainer}>
           <CustomButton onPress={addRoom} style={styles.addRoomButton}>
             <View style={styles.addRoomButtonContent}>
