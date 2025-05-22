@@ -10,6 +10,7 @@ import EstimateHistoryPage from '../page/funeralHall/EstimateHistoryPage';
 import QuoteProposalPage from '../page/funeralHall/QuoteProposalPage';
 import PendingDispatchPage from '../page/funeralHall/PendingDispatchPage';
 import DispatchRequestDetailPage from '../page/funeralHall/DispatchRequestDetailPage';
+import ConfirmTransactionPage from '../page/funeralHall/ConfirmTransactionPage';
 
 const Stack = createNativeStackNavigator();
 
@@ -31,6 +32,10 @@ const FuneralStack = () => {
       <Stack.Screen
         name="DispatchRequestDetail"
         component={DispatchRequestDetailPage}
+      />
+      <Stack.Screen
+        name="ConfirmTransaction"
+        component={ConfirmTransactionPage}
       />
     </Stack.Navigator>
   );

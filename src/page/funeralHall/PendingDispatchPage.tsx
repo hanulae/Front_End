@@ -41,7 +41,7 @@ const PendingDispatchPage = () => {
     if (status === '출동요청') {
       navigation.navigate('DispatchRequestDetail');
     } else if (status === '출동중') {
-      console.log('Dispatching');
+      navigation.navigate('ConfirmTransaction');
     }
   };
 
