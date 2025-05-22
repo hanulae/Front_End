@@ -52,6 +52,7 @@ const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
     backgroundColor: '#F5F6F8',
+    paddingHorizontal: 10,
   },
   scrollView: {
     flexGrow: 1,
