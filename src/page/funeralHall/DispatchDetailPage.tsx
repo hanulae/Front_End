@@ -12,6 +12,7 @@ const DispatchDetailPage = () => {
     name: '',
     address: '',
     familyContact: '',
+    familyContact2: '',
     teamLeaderContact: '',
     emergencyContact: '',
   });
@@ -44,6 +45,11 @@ const DispatchDetailPage = () => {
             value={clientInfo.address}
             editable={false}
             style={styles.input}
+          />
+          <TextInput
+            value={clientInfo.familyContact2}
+            editable={false}
+            style={styles.input2}
           />
         </View>
         <View style={styles.detailContainer}>
@@ -106,6 +112,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     fontSize: 16,
     fontFamily: 'Pretendard-Black',
+    marginHorizontal: 10,
+  },
+  input2: {
+    alignSelf: 'stretch',
+    height: 50,
+    borderRadius: 10,
+    backgroundColor: '#F5F6F8',
+    paddingHorizontal: 20,
+    fontSize: 16,
+    fontFamily: 'Pretendard-Black',
+    marginTop: 10,
     marginHorizontal: 10,
   },
 });
