@@ -9,6 +9,7 @@ import DispatchDetailPage from '../page/funeralHall/DispatchDetailPage';
 import EstimateHistoryPage from '../page/funeralHall/EstimateHistoryPage';
 import QuoteProposalPage from '../page/funeralHall/QuoteProposalPage';
 import PendingDispatchPage from '../page/funeralHall/PendingDispatchPage';
+import DispatchRequestDetailPage from '../page/funeralHall/DispatchRequestDetailPage';
 
 const Stack = createNativeStackNavigator();
 
@@ -27,6 +28,10 @@ const FuneralStack = () => {
       <Stack.Screen name="EstimateHistory" component={EstimateHistoryPage} />
       <Stack.Screen name="QuoteProposal" component={QuoteProposalPage} />
       <Stack.Screen name="PendingDispatch" component={PendingDispatchPage} />
+      <Stack.Screen
+        name="DispatchRequestDetail"
+        component={DispatchRequestDetailPage}
+      />
     </Stack.Navigator>
   );
 };

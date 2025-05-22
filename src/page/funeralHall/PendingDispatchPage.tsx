@@ -39,7 +39,7 @@ const PendingDispatchPage = () => {
   // handle navigation to Dispatch Detail
   const goToDispatchDetail = (id: number, status: string) => {
     if (status === '출동요청') {
-      console.log('Dispatch Detail');
+      navigation.navigate('DispatchRequestDetail');
     } else if (status === '출동중') {
       console.log('Dispatching');
     }
