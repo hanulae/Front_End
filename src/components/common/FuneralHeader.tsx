@@ -8,6 +8,7 @@ import LogoutButtonBlack from '../../assets/Header/Header_DoorBlack.svg';
 import LogoutButtonWhite from '../../assets/Header/Header_DoorWhite.svg';
 import BackIcon from '../../assets/Header/Header_Back.svg';
 import HomeIcon from '../../assets/Header/Header_Home.svg';
+import CloseIcon from '../../assets/Icon/Icon_BtnClose01.svg';
 
 interface IFuneralHeaderProps {
   title?: string;
@@ -18,6 +19,7 @@ interface IFuneralHeaderProps {
   color?: string;
   backButtonVisible?: boolean;
   logoutColor?: string;
+  closeButton?: boolean;
 }
 
 const FuneralHeader = ({
@@ -29,6 +31,7 @@ const FuneralHeader = ({
   homeRouteName,
   onLogoutPress,
   backButtonVisible = false,
+  closeButton = false,
 }: IFuneralHeaderProps): JSX.Element => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const goBack = navigation.goBack;
@@ -70,6 +73,11 @@ const FuneralHeader = ({
           ) : (
             <LogoutButtonWhite width={24} height={24} />
           )}
+        </CustomButton>
+      )}
+      {closeButton && (
+        <CustomButton onPress={goBack}>
+          <CloseIcon width={24} height={24} />
         </CustomButton>
       )}
     </View>

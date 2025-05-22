@@ -1,11 +1,16 @@
 import {ScrollView, StyleSheet, View} from 'react-native';
 import FuneralLayout from '../../layout/FuneralLayout';
 import DispatchCard from '../../components/funeralHall/DispatchCard';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {useNavigation} from '@react-navigation/native';
 
 const DispatchHistoryPage = () => {
-  const goToDispatchDetail = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
+  const goToDispatchDetail = (name: string) => {
     // console.log('Dispatch Detail');
-    // navigation.navigate('DispatchDetail');
+    navigation.navigate('DispatchDetail', {
+      name: name,
+    });
   };
   return (
     <FuneralLayout
@@ -37,7 +42,7 @@ const DispatchHistoryPage = () => {
               name={item.name}
               date={item.date}
               index={index}
-              onPress={goToDispatchDetail}
+              onPress={() => goToDispatchDetail(item.name)}
             />
           ))}
         </ScrollView>

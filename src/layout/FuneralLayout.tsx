@@ -15,6 +15,7 @@ interface IFuneralLayoutProps {
   headerColor?: string;
   backButtonVisible?: boolean;
   top?: boolean;
+  closeButton?: boolean;
 }
 
 const FuneralLayout = ({
@@ -29,6 +30,7 @@ const FuneralLayout = ({
   headerColor,
   backButtonVisible = false,
   top = false,
+  closeButton = false,
 }: IFuneralLayoutProps) => {
   // top이 true일 때 SafeAreaView의 edges에 'top' 추가
   return (
@@ -44,6 +46,7 @@ const FuneralLayout = ({
           logoutButton={logoutButton}
           homeRouteName={homeRouteName}
           onLogoutPress={onLogoutPress as () => void}
+          closeButton={closeButton}
           // color={color}
         />
       )}
