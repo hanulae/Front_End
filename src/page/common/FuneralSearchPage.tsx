@@ -124,7 +124,7 @@ const FuneralSearchPage = () => {
             )}
           />
         </View>
-        {variant === 'Main' && (
+        {variant === 'main' && (
           <View style={styles.buttonContainer}>
             <CustomButton onPress={handleAddToCart} style={styles.button}>
               <View style={styles.buttonIcon}>
@@ -232,7 +232,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    // paddingHorizontal: 16,
+    marginTop: 16,
   },
   button: {
     flexDirection: 'row',

@@ -33,6 +33,7 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
       };
     }, []),
   );
+  console.log('StatusBar.currentHeight', StatusBar.currentHeight);
   const [showPhoneAuthSheet, setShowPhoneAuthSheet] = useState(false);
   const goToModifyUserInfo = () => {
     console.log('Modify User Info');
@@ -131,14 +132,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#3287F8',
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
-    paddingTop: Platform.OS === 'ios' ? 20 : 40,
-    paddingBottom: 30,
+    paddingTop: Platform.OS === 'ios' ? 20 : 0,
+    paddingBottom: Platform.OS === 'ios' ? 30 : 30,
     paddingHorizontal: 20,
     zIndex: 2,
   },
   floatingButton: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 320 : 200, // ProfileStat 아래 적당한 위치로 조정
+    top: Platform.OS === 'ios' ? 320 : 330,
     left: 20,
     right: 20,
     zIndex: 6,
@@ -148,7 +149,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     paddingVertical: 20,
     borderRadius: 15,
-    elevation: 4,
+    // elevation: 4,
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 6,
@@ -166,9 +167,8 @@ const styles = StyleSheet.create({
   whiteSection: {
     flex: 1,
     backgroundColor: '#F5F5F5',
-    paddingTop: 390, // ProfileStat 높이 만큼 여백 확보
+    paddingTop: Platform.OS === 'ios' ? 390 : 400,
     paddingHorizontal: 20,
-    // gap: 5,
     zIndex: 1,
     justifyContent: 'space-between',
   },
