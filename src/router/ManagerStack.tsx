@@ -13,6 +13,7 @@ import ProceedCallPage from '../page/teamManager/ProceedCallPage';
 import CallHistoryPage from '../page/teamManager/CallHistoryPage';
 import PointHistoryPage from '../page/common/PointHistoryPage';
 import PointRefundPage from '../page/common/PointRefundPage';
+import ClientDetailPage from '../page/teamManager/ClientDetailPage';
 
 const Stack = createNativeStackNavigator();
 
@@ -27,6 +28,7 @@ const ManagerStack = () => {
       <Stack.Screen name="ModifyUserInfo" component={ModifyUserInfoPage} />
       <Stack.Screen name="EstimateList" component={EstimateListPage} />
       <Stack.Screen name="ClientEstimate" component={ClientEstimatePage} />
+      <Stack.Screen name="ClientDetail" component={ClientDetailPage} />
       <Stack.Screen name="EstimateDetail" component={EstimateDetailPage} />
       <Stack.Screen name="CallForm" component={CallFormPage} />
       <Stack.Screen name="ProceedCall" component={ProceedCallPage} />
