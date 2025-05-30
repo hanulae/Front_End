@@ -13,6 +13,8 @@ import QuoteIcon from '../../assets/Button/Button_QuoteRecordOff.svg';
 import PointRecordIcon from '../../assets/Button/Button_PointsOff.svg';
 import PointRefundIcon from '../../assets/Button/Button_Refund.svg';
 import AppSettingIcon from '../../assets/Button/Button_AppSettingoff.svg';
+// import Toast from 'react-native-toast-message';
+
 interface IManagerProfilePageProps {
   navigation: NavigationProp<any>;
 }
@@ -43,7 +45,14 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
     navigation.navigate('EstimateList');
   };
   const goToPointHistory = () => {
-    console.log('Point History');
+    navigation.navigate('PointHistory', {variant: 'manager'});
+    // Toast.show({
+    //   type: 'success',
+    //   text1: '포인트 내역',
+    //   text2: '포인트 내역 페이지로 이동합니다.',
+    //   position: 'top',
+    //   visibilityTime: 2000,
+    // });
   };
   const goToPointRefund = () => {
     console.log('Point Refund');
@@ -117,6 +126,7 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
         onClose={() => setShowPhoneAuthSheet(false)}
         navigation={navigation}
       />
+      {/* <Toast /> */}
     </>
   );
 };
