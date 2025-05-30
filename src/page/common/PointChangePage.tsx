@@ -8,7 +8,7 @@ import CustomButton from '../../components/common/CustomButton';
 
 const REFUND_AMOUNTS = [100000, 75000, 50000, 25000, 50000, 5000];
 
-const PointRefundPage = () => {
+const PointChangePage = () => {
   useFocusEffect(
     useCallback(() => {
       if (Platform.OS === 'android') {
@@ -59,7 +59,7 @@ const PointRefundPage = () => {
       backButton={true}
       homeButton={true}
       homeRouteName={variant === 'manager' ? 'ManagerMain' : 'FuneralMain'}
-      headerTitle="환급">
+      headerTitle="포인트 전환">
       <View style={styles.wrapper}>
         <View style={styles.balanceContainer}>
           <Typo style={styles.balanceTitle}>현재잔액</Typo>
@@ -111,7 +111,7 @@ const PointRefundPage = () => {
   );
 };
 
-export default PointRefundPage;
+export default PointChangePage;
 
 const styles = StyleSheet.create({
   wrapper: {

@@ -11,6 +11,8 @@ import QuoteProposalPage from '../page/funeralHall/QuoteProposalPage';
 import PendingDispatchPage from '../page/funeralHall/PendingDispatchPage';
 import DispatchRequestDetailPage from '../page/funeralHall/DispatchRequestDetailPage';
 import ConfirmTransactionPage from '../page/funeralHall/ConfirmTransactionPage';
+import PointHistoryPage from '../page/common/PointHistoryPage';
+import PointRefundPage from '../page/common/PointRefundPage';
 
 const Stack = createNativeStackNavigator();
 
@@ -37,6 +39,8 @@ const FuneralStack = () => {
         name="ConfirmTransaction"
         component={ConfirmTransactionPage}
       />
+      <Stack.Screen name="PointHistory" component={PointHistoryPage} />
+      <Stack.Screen name="PointRefund" component={PointRefundPage} />
     </Stack.Navigator>
   );
 };

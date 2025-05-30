@@ -55,7 +55,7 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
     // });
   };
   const goToPointRefund = () => {
-    console.log('Point Refund');
+    navigation.navigate('PointRefund', {variant: 'manager'});
   };
   const goToAppSetting = () => {
     console.log('App Setting');
@@ -104,7 +104,7 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
             <CustomButton onPress={goToPointRefund} style={styles.button}>
               <View style={styles.buttonNameContainer}>
                 <PointRefundIcon width={24} height={24} />
-                <Typo style={styles.buttonText}>포인트 환급</Typo>
+                <Typo style={styles.buttonText}>환급</Typo>
               </View>
               <MoveGrayIcon width={24} height={24} />
             </CustomButton>
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 18,
     alignItems: 'center',
-    marginBottom: 18,
+    marginBottom: 10,
   },
   dispatchButtonText: {
     fontSize: 16,
