@@ -59,7 +59,7 @@ const PointRefundPage = () => {
       backButton={true}
       homeButton={true}
       homeRouteName={variant === 'manager' ? 'ManagerMain' : 'FuneralMain'}
-      headerTitle="환급">
+      headerTitle={variant === 'manager' ? '환급' : '포인트 충전'}>
       <View style={styles.wrapper}>
         <View style={styles.balanceContainer}>
           <Typo style={styles.balanceTitle}>현재잔액</Typo>
@@ -95,7 +95,11 @@ const PointRefundPage = () => {
               value={inputAmount}
               onChangeText={handleInputChange}
               keyboardType="numeric"
-              placeholder="환급 금액을 입력하세요"
+              placeholder={
+                variant === 'manager'
+                  ? '환급 금액을 입력하세요'
+                  : '충전 금액을 입력하세요'
+              }
               placeholderTextColor="#A7A9B0"
             />
           </View>
@@ -103,7 +107,9 @@ const PointRefundPage = () => {
           <CustomButton
             style={styles.refundButton}
             onPress={handleRefundRequest}>
-            <Typo style={styles.refundButtonText}>환급 신청</Typo>
+            <Typo style={styles.refundButtonText}>
+              {variant === 'manager' ? '환급 신청' : '충전 신청'}
+            </Typo>
           </CustomButton>
         </View>
       </View>

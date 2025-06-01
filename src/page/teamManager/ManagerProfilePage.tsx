@@ -1,5 +1,6 @@
+import React from 'react';
 import {NavigationProp, useFocusEffect} from '@react-navigation/native';
-import {Platform, StatusBar, StyleSheet, View} from 'react-native';
+import {Platform, StatusBar, StyleSheet, View, ScrollView} from 'react-native';
 import Typo from '../../components/common/Typo';
 import CustomButton from '../../components/common/CustomButton';
 import {useCallback, useState} from 'react';
@@ -85,7 +86,10 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
           </View>
           <MoveWhiteIcon width={24} height={24} />
         </CustomButton>
-        <View style={styles.whiteSection}>
+        <ScrollView
+          style={styles.whiteSection}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}>
           <View style={styles.customButtonContainer}>
             <CustomButton onPress={goToEstimateList} style={styles.button}>
               <View style={styles.buttonNameContainer}>
@@ -119,7 +123,7 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
           <CustomButton onPress={goToCallHistory} style={styles.dispatchButton}>
             <Typo style={styles.dispatchButtonText}>출동 내역</Typo>
           </CustomButton>
-        </View>
+        </ScrollView>
       </ManagerLayout>
       <PhoneAuthSheet
         visible={showPhoneAuthSheet}
@@ -177,9 +181,13 @@ const styles = StyleSheet.create({
   whiteSection: {
     flex: 1,
     backgroundColor: '#F5F5F5',
-    paddingTop: Platform.OS === 'ios' ? 390 : 400,
-    paddingHorizontal: 20,
+    marginTop: Platform.OS === 'ios' ? 390 : 400,
     zIndex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    flexGrow: 1,
     justifyContent: 'space-between',
   },
   customButtonContainer: {

@@ -1,4 +1,4 @@
-import {Platform, StatusBar, StyleSheet, View} from 'react-native';
+import {Platform, StatusBar, StyleSheet, View, ScrollView} from 'react-native';
 import ProfileStat from '../../components/funeralHall/ProfileStat';
 import {useCallback, useEffect} from 'react';
 import FuneralLayout from '../../layout/FuneralLayout';
@@ -115,14 +115,10 @@ const FuneralProfilePage = () => {
         <MoveWhiteIcon width={24} height={24} />
       </CustomButton>
 
-      <View style={styles.whiteSection}>
-        {/* <CustomButton onPress={goToModifyFuneralInfo} style={styles.topButton}>
-          <View style={styles.buttonNameContainer}>
-            <ModifyInfoIcon width={24} height={24} />
-            <Typo style={styles.topButtonText}>정보 수정</Typo>
-          </View>
-          <MoveGrayIcon width={24} height={24} />
-        </CustomButton> */}
+      <ScrollView
+        style={styles.whiteSection}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}>
         <CustomButton onPress={goToManageRomms} style={styles.button}>
           <View style={styles.buttonNameContainer}>
             <ManageRoomIcon width={24} height={24} />
@@ -165,7 +161,7 @@ const FuneralProfilePage = () => {
           </View>
           <MoveGrayIcon width={24} height={24} />
         </CustomButton>
-      </View>
+      </ScrollView>
     </FuneralLayout>
   );
 };
@@ -188,7 +184,7 @@ const styles = StyleSheet.create({
   },
   floatingButton: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 380 : 200, // ProfileStat 아래 적당한 위치로 조정
+    top: Platform.OS === 'ios' ? 380 : 380, // ProfileStat 아래 적당한 위치로 조정
     left: 20,
     right: 20,
     zIndex: 5,
@@ -198,7 +194,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     paddingVertical: 20,
     borderRadius: 15,
-    elevation: 4,
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 6,
@@ -216,10 +211,14 @@ const styles = StyleSheet.create({
   whiteSection: {
     flex: 1,
     backgroundColor: '#F5F5F5',
-    paddingTop: 450, // ProfileStat 높이 만큼 여백 확보
-    paddingHorizontal: 20,
-    gap: 5,
+    marginTop: 450, // ProfileStat 높이 만큼 여백 확보
     zIndex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 40,
+    gap: 5,
   },
   topButton: {
     backgroundColor: '#58A1FF',

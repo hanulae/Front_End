@@ -16,11 +16,11 @@ interface IProfileStatProps {
 const ProfileStat = ({point, hallName}: IProfileStatProps) => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const goToPointHistory = () => {
-    console.log('Point History');
+    navigation.navigate('PointHistory', {variant: 'funeral'});
   };
 
   const goToChargePoint = () => {
-    console.log('Charge Point');
+    navigation.navigate('PointRefund', {variant: 'funeral'});
   };
   return (
     <View>
@@ -78,7 +78,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    elevation: 1, // Android shadow
     shadowColor: '#000', // iOS shadow
     shadowOpacity: 0.05,
     shadowRadius: 5,
@@ -94,7 +93,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    elevation: 1, // Android shadow
     shadowColor: '#000', // iOS shadow
     shadowOpacity: 0.05,
     shadowRadius: 5,
