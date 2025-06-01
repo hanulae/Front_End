@@ -1,4 +1,11 @@
-import {ScrollView, StyleSheet, TouchableOpacity, View} from 'react-native';
+import {
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import DefaultLayout from '../../layout/DefaultLayout';
 import {useInputBase} from '../../hooks/input/useInputBase';
 
@@ -6,8 +13,25 @@ import {Input} from '../../components/common/input/Input';
 import {usePasswordInput} from '../../hooks/input/usePasswordInput';
 import {useConfirmPasswordInput} from '../../hooks/input/useConfirmPasswordInput';
 import Typo from '../../components/common/Typo';
+import {useFocusEffect} from '@react-navigation/native';
+import {useCallback} from 'react';
 
 const ModifyUserInfoPage = () => {
+  useFocusEffect(
+    useCallback(() => {
+      if (Platform.OS === 'android') {
+        StatusBar.setBackgroundColor('#3287F8');
+        StatusBar.setBarStyle('dark-content');
+      } else {
+        StatusBar.setBarStyle('dark-content');
+      }
+
+      return () => {
+        // 화면 포커스 해제 시 필요하다면 초기화 작업
+        // 예: StatusBar.setStyle('default')
+      };
+    }, []),
+  );
   const newPassword = usePasswordInput();
   const confirmPassword = useConfirmPasswordInput(() => newPassword.value);
   const phoneNumber = useInputBase();
@@ -20,6 +44,7 @@ const ModifyUserInfoPage = () => {
       headerShown={true}
       headerTitle="개인정보 수정"
       homeButton={true}
+      color="white"
       logoutButton={false}
       homeRouteName="ManagerMain">
       <ScrollView contentContainerStyle={styles.wrapper}>

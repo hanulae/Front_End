@@ -58,13 +58,6 @@ const ManagerProfileStat = ({
           </View>
           {/* <MoveIcon width={24} height={24} /> */}
         </CustomButton>
-        <CustomButton style={styles.rightbutton} onPress={goToChargePoint}>
-          <View style={styles.buttonNameContainer}>
-            <LogIcon width={24} height={24} />
-            <Typo style={styles.buttonText}>충전</Typo>
-          </View>
-          {/* <MoveIcon width={24} height={24} /> */}
-        </CustomButton>
       </View>
     </View>
   );

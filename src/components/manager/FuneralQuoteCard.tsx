@@ -2,6 +2,8 @@ import {StyleSheet, TouchableOpacity, View} from 'react-native';
 import Typo from '../common/Typo';
 import CheckActiveIcon from '../../assets/Check/Check01=Check01_Active.svg';
 import CheckinActiveIcon from '../../assets/Check/Check01=Check01_default.svg';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {useNavigation} from '@react-navigation/native';
 
 interface IFuneralQuoteCardProps {
   id: number;
@@ -22,6 +24,12 @@ const FuneralQuoteCard = ({
   completed,
   status,
 }: IFuneralQuoteCardProps) => {
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
+
+  const goToClientDetail = () => {
+    navigation.navigate('ClientDetail', {clientId: id});
+  };
+
   return (
     <TouchableOpacity
       key={id}
@@ -60,10 +68,7 @@ const FuneralQuoteCard = ({
         <View style={styles.thirdRow}>
           <TouchableOpacity
             style={styles.detailButton}
-            onPress={() => {
-              console.log('상세보기 이동');
-              // navigation.navigate('DetailPage', { id }) 처럼 연결
-            }}>
+            onPress={goToClientDetail}>
             <Typo style={styles.detailText}>상세보기</Typo>
           </TouchableOpacity>
         </View>
@@ -140,7 +145,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#283042',
     marginBottom: 6,
-    fontFamily: 'Pretendard-Black',
+    fontFamily: 'Pretendard-Bold',
   },
   selectedText: {
     color: '#4F7CFF',
@@ -149,7 +154,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: 'rgba(111, 113, 125, 0.75)',
-    fontFamily: 'Pretendard-Black',
+    fontFamily: 'Pretendard-Medium',
+    // lineHeight: 22,
   },
   checkWrapper: {
     justifyContent: 'center',
@@ -184,6 +190,7 @@ const styles = StyleSheet.create({
   statusButtonText: {
     fontSize: 12,
     fontWeight: 'bold',
+    fontFamily: 'Pretendard-Bold',
   },
   statusComplete: {
     color: '#2D81F1',
@@ -209,7 +216,7 @@ const styles = StyleSheet.create({
     color: '#3A83E3',
     textDecorationLine: 'underline',
     textDecorationColor: '#3A83E3',
-    fontFamily: 'Pretendard-Black',
+    fontFamily: 'Pretendard-Bold',
   },
   completedButton: {
     backgroundColor: '#E2F2FF',

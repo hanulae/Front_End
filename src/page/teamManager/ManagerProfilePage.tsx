@@ -1,5 +1,6 @@
+import React from 'react';
 import {NavigationProp, useFocusEffect} from '@react-navigation/native';
-import {Platform, StatusBar, StyleSheet, View} from 'react-native';
+import {Platform, StatusBar, StyleSheet, View, ScrollView} from 'react-native';
 import Typo from '../../components/common/Typo';
 import CustomButton from '../../components/common/CustomButton';
 import {useCallback, useState} from 'react';
@@ -13,6 +14,8 @@ import QuoteIcon from '../../assets/Button/Button_QuoteRecordOff.svg';
 import PointRecordIcon from '../../assets/Button/Button_PointsOff.svg';
 import PointRefundIcon from '../../assets/Button/Button_Refund.svg';
 import AppSettingIcon from '../../assets/Button/Button_AppSettingoff.svg';
+// import Toast from 'react-native-toast-message';
+
 interface IManagerProfilePageProps {
   navigation: NavigationProp<any>;
 }
@@ -33,6 +36,7 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
       };
     }, []),
   );
+  console.log('StatusBar.currentHeight', StatusBar.currentHeight);
   const [showPhoneAuthSheet, setShowPhoneAuthSheet] = useState(false);
   const goToModifyUserInfo = () => {
     console.log('Modify User Info');
@@ -42,10 +46,17 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
     navigation.navigate('EstimateList');
   };
   const goToPointHistory = () => {
-    console.log('Point History');
+    navigation.navigate('PointHistory', {variant: 'manager'});
+    // Toast.show({
+    //   type: 'success',
+    //   text1: '포인트 내역',
+    //   text2: '포인트 내역 페이지로 이동합니다.',
+    //   position: 'top',
+    //   visibilityTime: 2000,
+    // });
   };
   const goToPointRefund = () => {
-    console.log('Point Refund');
+    navigation.navigate('PointRefund', {variant: 'manager'});
   };
   const goToAppSetting = () => {
     console.log('App Setting');
@@ -75,7 +86,10 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
           </View>
           <MoveWhiteIcon width={24} height={24} />
         </CustomButton>
-        <View style={styles.whiteSection}>
+        <ScrollView
+          style={styles.whiteSection}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}>
           <View style={styles.customButtonContainer}>
             <CustomButton onPress={goToEstimateList} style={styles.button}>
               <View style={styles.buttonNameContainer}>
@@ -94,7 +108,7 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
             <CustomButton onPress={goToPointRefund} style={styles.button}>
               <View style={styles.buttonNameContainer}>
                 <PointRefundIcon width={24} height={24} />
-                <Typo style={styles.buttonText}>포인트 환급</Typo>
+                <Typo style={styles.buttonText}>환급</Typo>
               </View>
               <MoveGrayIcon width={24} height={24} />
             </CustomButton>
@@ -109,13 +123,14 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
           <CustomButton onPress={goToCallHistory} style={styles.dispatchButton}>
             <Typo style={styles.dispatchButtonText}>출동 내역</Typo>
           </CustomButton>
-        </View>
+        </ScrollView>
       </ManagerLayout>
       <PhoneAuthSheet
         visible={showPhoneAuthSheet}
         onClose={() => setShowPhoneAuthSheet(false)}
         navigation={navigation}
       />
+      {/* <Toast /> */}
     </>
   );
 };
@@ -131,14 +146,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#3287F8',
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
-    paddingTop: Platform.OS === 'ios' ? 20 : 40,
-    paddingBottom: 30,
+    paddingTop: Platform.OS === 'ios' ? 20 : 0,
+    paddingBottom: Platform.OS === 'ios' ? 30 : 30,
     paddingHorizontal: 20,
     zIndex: 2,
   },
   floatingButton: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 320 : 200, // ProfileStat 아래 적당한 위치로 조정
+    top: Platform.OS === 'ios' ? 320 : 330,
     left: 20,
     right: 20,
     zIndex: 6,
@@ -148,7 +163,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     paddingVertical: 20,
     borderRadius: 15,
-    elevation: 4,
+    // elevation: 4,
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 6,
@@ -166,10 +181,13 @@ const styles = StyleSheet.create({
   whiteSection: {
     flex: 1,
     backgroundColor: '#F5F5F5',
-    paddingTop: 390, // ProfileStat 높이 만큼 여백 확보
-    paddingHorizontal: 20,
-    // gap: 5,
+    marginTop: Platform.OS === 'ios' ? 390 : 400,
     zIndex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    flexGrow: 1,
     justifyContent: 'space-between',
   },
   customButtonContainer: {
@@ -245,7 +263,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 18,
     alignItems: 'center',
-    marginBottom: 18,
+    marginBottom: 10,
   },
   dispatchButtonText: {
     fontSize: 16,

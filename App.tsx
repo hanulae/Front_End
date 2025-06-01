@@ -14,10 +14,12 @@ import {useAtomValue} from 'jotai';
 import {userInfoAtom} from './src/state/local_state/userinfoAtom';
 import RootStack from './src/router/RootStack';
 import BootSplash from 'react-native-bootsplash';
+import {LogBox} from 'react-native';
 
 const queryClient = new QueryClient();
 
 function App(): React.JSX.Element {
+  LogBox.ignoreAllLogs();
   const userInfo = useAtomValue(userInfoAtom);
   console.log('userInfo', userInfo);
   const isLogin = userInfo?.isLogin;

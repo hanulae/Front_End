@@ -15,14 +15,19 @@ import {useInputBase} from '../../../hooks/input/useInputBase';
 import {useState} from 'react';
 import EmailInput from '../../../components/common/input/EmailInput';
 import useEmailPartsInput from '../../../hooks/input/useEmailPartsInput';
+import {useRoute} from '@react-navigation/native';
 
 interface Props {
   onNext: () => void;
 }
 
 const SignupStepOne = ({onNext}: Props) => {
+  const route = useRoute();
+  const {userType} = route.params as {userType: 'manager' | 'funeral'};
+  console.log('userType', userType);
   const [signupInfo, setSignupInfo] = useAtom(signupAtom);
   const email = useEmailPartsInput(signupInfo.email);
+  console.log('email', email);
   const password = usePasswordInput(signupInfo.password);
   const authCode = useInputBase();
   const confirmPassword = useConfirmPasswordInput(

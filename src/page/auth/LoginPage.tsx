@@ -2,6 +2,8 @@ import {
   Dimensions,
   Keyboard,
   Platform,
+  Pressable,
+  ScrollView,
   StatusBar,
   StyleSheet,
   TouchableWithoutFeedback,
@@ -75,42 +77,45 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
       homeButton={true}
       logoutButton={false}
       homeRouteName="Main">
-      <View style={styles.logoSection}>
-        <Typo style={styles.logoText}>하늘애</Typo>
-      </View>
-      <View style={styles.formSection}>
-        <EmailInput input={email} userType={userType} />
-        <Input
-          input={password}
-          type="password"
-          placeholder="비밀번호를 입력하세요."
-        />
-      </View>
-
-      <View style={styles.buttonSection}>
-        <CustomButton onPress={handleLogin} style={styles.button}>
-          <Typo>로그인</Typo>
-        </CustomButton>
-      </View>
-      <View style={styles.formToolSection}>
-        <CustomButton onPress={goToFindEmail}>
-          <Typo style={styles.toolText}>이메일 찾기</Typo>
-        </CustomButton>
-        <Typo style={styles.divider}> | </Typo>
-        <CustomButton onPress={goToFindPassword}>
-          <Typo style={styles.toolText}>비밀번호 찾기</Typo>
-        </CustomButton>
-        <Typo style={styles.divider}> | </Typo>
-        <CustomButton onPress={goToSignup}>
-          <Typo style={[styles.toolText, {color: '#2D81F1'}]}>회원가입</Typo>
-        </CustomButton>
-      </View>
-      {showSelectSheet && (
-        <UserSelectSheet
-          onClose={() => setShowSelectSheet(false)}
-          targetScreen="Signup"
-        />
-      )}
+      <Pressable onPress={Keyboard.dismiss}>
+        {/* <ScrollView style={styles.wrapper}> */}
+        <View style={styles.logoSection}>
+          <Typo style={styles.logoText}>하늘애</Typo>
+        </View>
+        <View style={styles.formSection}>
+          <EmailInput input={email} userType={userType} />
+          <Input
+            input={password}
+            type="password"
+            placeholder="비밀번호를 입력하세요."
+          />
+        </View>
+        <View style={styles.buttonSection}>
+          <CustomButton onPress={handleLogin} style={styles.button}>
+            <Typo>로그인</Typo>
+          </CustomButton>
+        </View>
+        <View style={styles.formToolSection}>
+          <CustomButton onPress={goToFindEmail}>
+            <Typo style={styles.toolText}>이메일 찾기</Typo>
+          </CustomButton>
+          <Typo style={styles.divider}> | </Typo>
+          <CustomButton onPress={goToFindPassword}>
+            <Typo style={styles.toolText}>비밀번호 찾기</Typo>
+          </CustomButton>
+          <Typo style={styles.divider}> | </Typo>
+          <CustomButton onPress={goToSignup}>
+            <Typo style={[styles.toolText, {color: '#2D81F1'}]}>회원가입</Typo>
+          </CustomButton>
+        </View>
+        {showSelectSheet && (
+          <UserSelectSheet
+            onClose={() => setShowSelectSheet(false)}
+            targetScreen="Signup"
+          />
+        )}
+        {/* </ScrollView> */}
+      </Pressable>
     </DefaultLayout>
   );
 };
@@ -118,6 +123,9 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
 export default LoginPage;
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+  },
   logoSection: {
     // flex: 3,
     height: height * 0.3,

@@ -6,6 +6,9 @@ import Typo from './Typo';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import LogoutButtonBlack from '../../assets/Header/Header_DoorBlack.svg';
 import LogoutButtonWhite from '../../assets/Header/Header_DoorWhite.svg';
+import BackIcon from '../../assets/Header/Header_Back.svg';
+import HomeIcon from '../../assets/Header/Header_Home.svg';
+import CloseIcon from '../../assets/Icon/Icon_BtnClose01.svg';
 
 interface IFuneralHeaderProps {
   title?: string;
@@ -16,6 +19,7 @@ interface IFuneralHeaderProps {
   color?: string;
   backButtonVisible?: boolean;
   logoutColor?: string;
+  closeButton?: boolean;
 }
 
 const FuneralHeader = ({
@@ -27,6 +31,7 @@ const FuneralHeader = ({
   homeRouteName,
   onLogoutPress,
   backButtonVisible = false,
+  closeButton = false,
 }: IFuneralHeaderProps): JSX.Element => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const goBack = navigation.goBack;
@@ -51,16 +56,14 @@ const FuneralHeader = ({
     <View style={[styles.header, {backgroundColor: color}]}>
       {backButtonVisible && (
         <CustomButton onPress={goBack}>
-          <Typo>Back</Typo>
+          <BackIcon width={24} height={24} />
         </CustomButton>
       )}
 
-      <Typo fontSize={16} color="black">
-        {title}
-      </Typo>
+      <Typo style={styles.title}>{title}</Typo>
       {homeButton && (
         <CustomButton onPress={goHome}>
-          <Typo>Home</Typo>
+          <HomeIcon width={24} height={24} />
         </CustomButton>
       )}
       {logoutButton && (
@@ -70,6 +73,11 @@ const FuneralHeader = ({
           ) : (
             <LogoutButtonWhite width={24} height={24} />
           )}
+        </CustomButton>
+      )}
+      {closeButton && (
+        <CustomButton onPress={goBack}>
+          <CloseIcon width={24} height={24} />
         </CustomButton>
       )}
     </View>
@@ -83,9 +91,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    // padding: 16,
-    // borderWidth: 1,
-    marginVertical: 8,
-    backgroundColor: '#fff',
+    padding: 16,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '600',
+    fontFamily: 'Pretendard-Bold',
   },
 });

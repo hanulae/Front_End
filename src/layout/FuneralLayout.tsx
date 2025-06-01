@@ -1,6 +1,5 @@
 import {StyleSheet, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import Header from '../components/common/Header';
 import FuneralHeader from '../components/common/FuneralHeader';
 // import {Header} from 'react-native/Libraries/NewAppScreen';
 
@@ -13,6 +12,10 @@ interface IFuneralLayoutProps {
   homeRouteName?: string;
   onLogoutPress?: () => void;
   color?: string;
+  headerColor?: string;
+  backButtonVisible?: boolean;
+  top?: boolean;
+  closeButton?: boolean;
 }
 
 const FuneralLayout = ({
@@ -24,17 +27,27 @@ const FuneralLayout = ({
   homeRouteName,
   onLogoutPress,
   color,
+  headerColor,
+  backButtonVisible = false,
+  top = false,
+  closeButton = false,
 }: IFuneralLayoutProps) => {
+  // top이 true일 때 SafeAreaView의 edges에 'top' 추가
   return (
-    <SafeAreaView style={styles.safeArea} edges={['left', 'right']}>
+    <SafeAreaView
+      style={[styles.safeArea, {backgroundColor: color}]}
+      edges={top ? ['top', 'left', 'right'] : []}>
       {headerShown && (
         <FuneralHeader
+          color={headerColor}
           title={headerTitle}
+          backButtonVisible={backButtonVisible}
           homeButton={homeButton}
           logoutButton={logoutButton}
           homeRouteName={homeRouteName}
           onLogoutPress={onLogoutPress as () => void}
-          color={color}
+          closeButton={closeButton}
+          // color={color}
         />
       )}
       <View style={styles.container}>{children}</View>
@@ -47,11 +60,10 @@ export default FuneralLayout;
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F5F6F8',
+    backgroundColor: '#FFFFFF',
   },
   container: {
     flex: 1,
     flexDirection: 'column',
-    borderWidth: 1,
   },
 });
