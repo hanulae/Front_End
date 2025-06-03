@@ -17,6 +17,7 @@ import AppSettingIcon from '../../assets/Button/Button_AppSettingoff.svg';
 import Toast from 'react-native-toast-message';
 import {userInfoAtom} from '../../state/local_state/userinfoAtom';
 import {useSetAtom} from 'jotai';
+import ManagerHeader from '../../components/common/ManagerHeader';
 // import Toast from 'react-native-toast-message';
 
 interface IManagerProfilePageProps {
@@ -88,11 +89,17 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
     <>
       <ManagerLayout
         color="#3287F8"
-        headerShown={true}
-        logoutButton={true}
-        backIconColor="white"
-        onLogoutPress={logout}>
+        headerShown={false}
+        logoutButton={false}
+        backIconColor="white">
         <View style={styles.topSection}>
+          <ManagerHeader
+            title=""
+            logoutButton={true}
+            backIconColor="white"
+            onLogoutPress={logout}
+            color="transparent"
+          />
           <View style={styles.container}>
             <ManagerProfileStat
               point={100000}
