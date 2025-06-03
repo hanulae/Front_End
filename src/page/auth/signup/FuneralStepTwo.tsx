@@ -5,7 +5,6 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ScrollView,
-  TextInput,
 } from 'react-native';
 import {useState} from 'react';
 import {signupAtom} from '../../../state/local_state/signupAtom';
@@ -191,14 +190,15 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
           <Typo fontSize={16} style={styles.containerTitle}>
             첨부파일 ({selectedImages.length}/10)
           </Typo>
-          <ScrollView style={{flexGrow: 0, overflow: 'visible'}}>
+          <View style={styles.imagePreviewContainer}>
             <ImagePreviewList
               images={selectedImages}
               onDelete={index => {
                 setSelectedImages(prev => prev.filter((_, i) => i !== index));
               }}
+              scrollEnabled={true}
             />
-          </ScrollView>
+          </View>
           <FileList files={selectedFiles} onDelete={handleDeleteFile} />
 
           <View style={styles.buttonContainer}>
@@ -358,5 +358,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 10,
     marginTop: 20,
+    marginBottom: 100,
+  },
+  imagePreviewContainer: {
+    flexGrow: 0,
+    overflow: 'visible',
   },
 });

@@ -27,7 +27,8 @@ const getIconByFileName = (name: string) => {
   if (ext === 'xls' || ext === 'xlsx') {
     return <XlsIcon width={20} height={20} />;
   }
-  return null;
+  // 그 외 모든 확장자는 기본 아이콘 사용
+  return <PdfIcon width={20} height={20} />;
 };
 
 const FileList = ({files, onDelete}: Props) => {
