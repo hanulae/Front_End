@@ -15,6 +15,8 @@ import PointRecordIcon from '../../assets/Button/Button_PointsOff.svg';
 import PointRefundIcon from '../../assets/Button/Button_Refund.svg';
 import AppSettingIcon from '../../assets/Button/Button_AppSettingoff.svg';
 import Toast from 'react-native-toast-message';
+import {userInfoAtom} from '../../state/local_state/userinfoAtom';
+import {useSetAtom} from 'jotai';
 // import Toast from 'react-native-toast-message';
 
 interface IManagerProfilePageProps {
@@ -37,6 +39,7 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
       };
     }, []),
   );
+  const setLogin = useSetAtom(userInfoAtom);
   console.log('StatusBar.currentHeight', StatusBar.currentHeight);
   const [showPhoneAuthSheet, setShowPhoneAuthSheet] = useState(false);
   const goToModifyUserInfo = () => {
@@ -72,9 +75,23 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
     navigation.navigate('CallHistory');
   };
 
+  const logout = () => {
+    // 로그아웃 로직
+    setLogin({
+      userType: 'manager',
+      isLogin: false,
+    });
+    navigation.navigate('ManagerMain');
+  };
+
   return (
     <>
-      <ManagerLayout color="#3287F8">
+      <ManagerLayout
+        color="#3287F8"
+        headerShown={true}
+        logoutButton={true}
+        backIconColor="white"
+        onLogoutPress={logout}>
         <View style={styles.topSection}>
           <View style={styles.container}>
             <ManagerProfileStat

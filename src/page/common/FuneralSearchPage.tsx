@@ -21,8 +21,9 @@ import FindCityBottomSheet from '../../components/funeralHall/FindLocation/FindC
 import FindGuBottomSheet from '../../components/funeralHall/FindLocation/FindGuBottomSheet';
 import api from '../../api/config';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useSetAtom} from 'jotai';
+import {useAtomValue, useSetAtom} from 'jotai';
 import {myFuneralAtom} from '../../state/local_state/myFuneralAtom';
+import {userInfoAtom} from '../../state/local_state/userinfoAtom';
 
 // const {height} = Dimensions.get('window');
 
@@ -41,7 +42,7 @@ const FuneralSearchPage = () => {
   const [selectedGu, setSelectedGu] = useState<string>('군 / 구');
   const [funeralList, setFuneralList] = useState<FuneralItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-
+  const isLogin = useAtomValue(userInfoAtom);
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const setMyFuneral = useSetAtom(myFuneralAtom);
 
@@ -150,7 +151,9 @@ const FuneralSearchPage = () => {
       // 중복 항목 체크 및 새 항목 추가
       const newCartItems = selectedItems.filter(
         newItem =>
-          !cartItems.some(existingItem => existingItem.id === newItem.id),
+          !cartItems.some(
+            (existingItem: any) => existingItem.id === newItem.id,
+          ),
       );
 
       if (newCartItems.length === 0) {
@@ -265,7 +268,7 @@ const FuneralSearchPage = () => {
 
         {/* 하단 고정 버튼 */}
         <View style={styles.fixedButtonContainer}>
-          {variant === 'main' && (
+          {variant === 'main' && isLogin.isLogin && (
             <CustomButton onPress={handleAddToCart} style={styles.button}>
               <View style={styles.buttonIcon}>
                 <CartIcon width={24} height={24} />

@@ -109,7 +109,7 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
 
         <TouchableOpacity style={styles.buttonGray}>
           <Typo color="white" fontSize={14}>
-            인증 코드 받기
+            계좌 인증
           </Typo>
         </TouchableOpacity>
 
@@ -119,10 +119,10 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
           value={authCode}
           onChangeText={setAuthCode}
         />
-
+        {/* 
         <TouchableOpacity style={styles.buttonOutline}>
           <Typo fontSize={14}>인증 코드 확인</Typo>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {/* 약관 동의 */}
