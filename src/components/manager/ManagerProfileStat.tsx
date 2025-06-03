@@ -50,15 +50,15 @@ const ManagerProfileStat = ({
         </View>
       </View>
 
-      <View style={styles.buttonContainer}>
+      {/* <View style={styles.buttonContainer}>
         <CustomButton style={styles.leftbutton} onPress={goToPointHistory}>
           <View style={styles.buttonNameContainer}>
             <LogIcon width={24} height={24} />
             <Typo style={styles.buttonText}>내역</Typo>
-          </View>
-          {/* <MoveIcon width={24} height={24} /> */}
-        </CustomButton>
-      </View>
+          </View> */}
+      {/* <MoveIcon width={24} height={24} /> */}
+      {/* </CustomButton> */}
+      {/* </View> */}
     </View>
   );
 };

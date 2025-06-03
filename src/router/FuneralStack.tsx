@@ -13,6 +13,7 @@ import DispatchRequestDetailPage from '../page/funeralHall/DispatchRequestDetail
 import ConfirmTransactionPage from '../page/funeralHall/ConfirmTransactionPage';
 import PointHistoryPage from '../page/common/PointHistoryPage';
 import PointRefundPage from '../page/common/PointRefundPage';
+import AppSettingPage from '../page/common/AppSettingPage';
 
 const Stack = createNativeStackNavigator();
 
@@ -41,6 +42,7 @@ const FuneralStack = () => {
       />
       <Stack.Screen name="PointHistory" component={PointHistoryPage} />
       <Stack.Screen name="PointRefund" component={PointRefundPage} />
+      <Stack.Screen name="AppSetting" component={AppSettingPage} />
     </Stack.Navigator>
   );
 };

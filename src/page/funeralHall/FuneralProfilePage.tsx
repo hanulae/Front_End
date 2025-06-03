@@ -137,6 +137,7 @@ const FuneralProfilePage = () => {
     // if (!checkPermission('app_settings', '앱 설정')) return;
 
     console.log('App Setting');
+    navigation.navigate('AppSetting', {userType: 'funeral'});
   };
 
   const logout = () => {

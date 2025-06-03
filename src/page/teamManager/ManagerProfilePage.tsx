@@ -65,12 +65,7 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
   };
   const goToAppSetting = () => {
     console.log('App Setting');
-    Toast.show({
-      type: 'success',
-      text1: '앱 설정 클릭',
-      position: 'top',
-      visibilityTime: 1000,
-    });
+    navigation.navigate('AppSetting', {userType: 'manager'});
   };
   const goToCallHistory = () => {
     navigation.navigate('CallHistory');
@@ -177,14 +172,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#3287F8',
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
-    paddingTop: Platform.OS === 'ios' ? 20 : 0,
-    paddingBottom: Platform.OS === 'ios' ? 30 : 30,
+    paddingTop: Platform.OS === 'ios' ? 20 : 40,
+    paddingBottom: 40,
     paddingHorizontal: 20,
     zIndex: 2,
   },
   floatingButton: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 320 : 330,
+    top: Platform.OS === 'ios' ? 340 : 390,
     left: 20,
     right: 20,
     zIndex: 6,
@@ -194,14 +189,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     paddingVertical: 20,
     borderRadius: 15,
-    // elevation: 4,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    shadowOffset: {width: 0, height: 4},
   },
   container: {
-    flex: 1,
     backgroundColor: '#3287F8',
   },
   blueBackground: {
@@ -212,7 +201,8 @@ const styles = StyleSheet.create({
   whiteSection: {
     flex: 1,
     backgroundColor: '#F5F5F5',
-    marginTop: Platform.OS === 'ios' ? 390 : 400,
+    marginTop: Platform.OS === 'ios' ? 360 : 400,
+    paddingTop: 20,
     zIndex: 1,
   },
   scrollContent: {
@@ -223,6 +213,7 @@ const styles = StyleSheet.create({
   },
   customButtonContainer: {
     gap: 5,
+    marginTop: Platform.OS === 'ios' ? 10 : 20,
   },
   topButton: {
     backgroundColor: '#58A1FF',
@@ -294,7 +285,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 18,
     alignItems: 'center',
-    marginBottom: 10,
+    // marginBottom: 10,
   },
   dispatchButtonText: {
     fontSize: 16,
