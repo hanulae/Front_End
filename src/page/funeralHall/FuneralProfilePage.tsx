@@ -18,6 +18,44 @@ import {useSetAtom} from 'jotai';
 import {userInfoAtom} from '../../state/local_state/userinfoAtom';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import Toast from 'react-native-toast-message';
+
+// ===== 접근 권한 관련 타입 및 로직 (주석 처리) =====
+/*
+interface IUserPermissions {
+  room_management: boolean; // 호실 관리
+  info_edit: boolean; // 정보 수정
+  dispatch_history: boolean; // 지난 출동 내역
+  dispatch_pending: boolean; // 출동 대기 내역
+  estimate_history: boolean; // 견적 내역
+  app_settings: boolean; // 앱 설정
+}
+
+// 임시 사용자 권한 정보 (추후 전역 상태에서 가져올 예정)
+const mockUserPermissions: IUserPermissions = {
+  room_management: true,
+  info_edit: true,
+  dispatch_history: false, // 테스트용으로 false 설정
+  dispatch_pending: true,
+  estimate_history: false, // 테스트용으로 false 설정
+  app_settings: true,
+};
+
+// 권한 체크 함수
+const checkPermission = (permission: keyof IUserPermissions, actionName: string): boolean => {
+  if (!mockUserPermissions[permission]) {
+    Toast.show({
+      type: 'error',
+      text1: '접근 권한 없음',
+      text2: `${actionName}에 대한 접근 권한이 없습니다.`,
+      position: 'top',
+      visibilityTime: 3000,
+    });
+    return false;
+  }
+  return true;
+};
+*/
 
 const FuneralProfilePage = () => {
   // StatusBar 설정
@@ -49,36 +87,55 @@ const FuneralProfilePage = () => {
   }, []);
 
   const goToModifyFuneralInfo = () => {
+    // 권한 체크 (주석 처리)
+    // if (!checkPermission('info_edit', '정보 수정')) return;
+
     // console.log('Modify Funeral Info');
     navigation.navigate('FuneralModify');
   };
 
   const goToManageRomms = () => {
+    // 권한 체크 (주석 처리)
+    // if (!checkPermission('room_management', '호실 관리')) return;
+
     // console.log('Manage Rooms');
     navigation.navigate('RoomManagement');
   };
 
   const goToManageMembers = () => {
+    // 직원 관리는 항상 접근 가능 (관리자 기능)
     // console.log('Manage Members');
     navigation.navigate('StaffManagement');
   };
 
   const goToDispatchHistory = () => {
+    // 권한 체크 (주석 처리)
+    // if (!checkPermission('dispatch_history', '지난 출동 내역')) return;
+
     // console.log('Dispatch History');
     navigation.navigate('DispatchHistory');
   };
 
   const goToDispatchRequest = () => {
+    // 권한 체크 (주석 처리)
+    // if (!checkPermission('dispatch_pending', '출동 대기 내역')) return;
+
     console.log('Dispatch Request');
     navigation.navigate('PendingDispatch');
   };
 
   const goToQuoteList = () => {
+    // 권한 체크 (주석 처리)
+    // if (!checkPermission('estimate_history', '견적 내역')) return;
+
     console.log('Quote List');
     navigation.navigate('EstimateHistory');
   };
 
   const goToAppSetting = () => {
+    // 권한 체크 (주석 처리)
+    // if (!checkPermission('app_settings', '앱 설정')) return;
+
     console.log('App Setting');
   };
 
@@ -162,6 +219,7 @@ const FuneralProfilePage = () => {
           <MoveGrayIcon width={24} height={24} />
         </CustomButton>
       </ScrollView>
+      <Toast />
     </FuneralLayout>
   );
 };

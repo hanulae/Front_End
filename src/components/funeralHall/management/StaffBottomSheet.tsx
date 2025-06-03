@@ -1,79 +1,4 @@
-// import {useEffect, useRef} from 'react';
-// import {Animated, Dimensions, Modal, StyleSheet, View} from 'react-native';
-// import Typo from '../../common/Typo';
-
-// interface IStaffBottomSheetProps {
-//   visible?: boolean;
-//   onClose: () => void;
-//   onConfirm: () => void;
-//   mode: 'add' | 'edit' | null;
-// }
-
-// const {height} = Dimensions.get('window');
-// const StaffBottomSheet = ({
-//   visible,
-//   onClose,
-//   onConfirm,
-//   mode,
-// }: IStaffBottomSheetProps) => {
-//   const translateY = useRef(new Animated.Value(height)).current;
-//   console.log('mode', mode);
-//   useEffect(() => {
-//     if (visible) {
-//       Animated.timing(translateY, {
-//         toValue: 0,
-//         duration: 200,
-//         useNativeDriver: true,
-//       }).start();
-//     } else {
-//       Animated.timing(translateY, {
-//         toValue: height,
-//         duration: 200,
-//         useNativeDriver: true,
-//       }).start(() => onClose());
-//     }
-//   }, [visible]);
-
-//   return (
-//     <Modal visible={visible} transparent animationType="slide">
-//       <Animated.View style={[styles.overlay, {transform: [{translateY}]}]}>
-//         <View style={styles.titleContainer}>
-//           <Typo style={styles.titleText}>직원 관리</Typo>
-//         </View>
-//         <View style={styles.inputContainer}></View>
-//         <View style={styles.inputContainer}></View>
-//         <View style={styles.inputContainer}></View>
-//         <View style={styles.inputContainer}></View>
-//         <View style={styles.buttonContainer}></View>
-//       </Animated.View>
-//     </Modal>
-//   );
-// };
-
-// export default StaffBottomSheet;
-
-// const styles = StyleSheet.create({
-//   overlay: {
-//     flex: 1,
-//     // backgroundColor: 'rgba(0,0,0,0.6)',
-//     justifyContent: 'flex-end',
-//   },
-//   titleContainer: {},
-//   titleText: {
-//     fontSize: 18,
-//     marginLeft: 20,
-//     fontWeight: '700',
-//     color: '#283042',
-//     fontFamily: 'Pretendard-Black',
-//     marginBottom: 10,
-//   },
-//   inputContainer: {},
-//   buttonContainer: {},
-//   button: {},
-//   buttonText: {},
-// });
-
-import {useEffect, useRef} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {
   Animated,
   Dimensions,
@@ -81,9 +6,10 @@ import {
   Pressable,
   StyleSheet,
   View,
-  Text,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  TouchableOpacity,
 } from 'react-native';
 import Typo from '../../common/Typo';
 import {IStaff} from '../../../page/funeralHall/StaffManagementPage';
@@ -91,7 +17,29 @@ import {usePhoneInput} from '../../../hooks/input/usePhoneInput';
 import {useInputBase} from '../../../hooks/input/useInputBase';
 import {FuneralInput} from '../../common/input/FuneralInput';
 import CustomButton from '../../common/CustomButton';
-import {check} from 'react-native-permissions';
+import CheckCircleOffIcon from '../../../assets/Check/Check01=Check01_default.svg';
+import CheckCircleOnIcon from '../../../assets/Check/Check01=Check01_Active.svg';
+
+interface IPermissions {
+  room_management: boolean;
+  info_edit: boolean;
+  dispatch_history: boolean;
+  dispatch_pending: boolean;
+  estimate_history: boolean;
+  app_settings: boolean;
+}
+
+const PERMISSION_LABELS: {
+  label: string;
+  key: keyof IPermissions;
+}[] = [
+  {label: '호실 관리', key: 'room_management'},
+  {label: '정보 수정', key: 'info_edit'},
+  {label: '지난 출동 내역', key: 'dispatch_history'},
+  {label: '출동 대기 내역', key: 'dispatch_pending'},
+  {label: '견적 내역', key: 'estimate_history'},
+  {label: '앱 설정', key: 'app_settings'},
+];
 
 interface IStaffBottomSheetProps {
   visible?: boolean;
@@ -108,10 +56,27 @@ const StaffBottomSheet = ({
   onClose,
   onConfirm,
   mode,
-  staff,
+  staff: _staff,
 }: IStaffBottomSheetProps) => {
   const translateY = useRef(new Animated.Value(height)).current;
   console.log('mode', mode);
+
+  const [permissions, setPermissions] = useState<IPermissions>({
+    room_management: false,
+    info_edit: false,
+    dispatch_history: false,
+    dispatch_pending: false,
+    estimate_history: false,
+    app_settings: false,
+  });
+
+  const togglePermission = (key: keyof IPermissions) => {
+    setPermissions(prev => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
+
   useEffect(() => {
     if (visible) {
       Animated.timing(translateY, {
@@ -126,7 +91,7 @@ const StaffBottomSheet = ({
         useNativeDriver: true,
       }).start(() => onClose());
     }
-  }, [visible]);
+  }, [visible, translateY]);
 
   const phoneNumber = usePhoneInput();
   const authCode = useInputBase();
@@ -141,50 +106,93 @@ const StaffBottomSheet = ({
           style={{width: '100%'}}>
           <Animated.View
             style={[styles.sheet, {transform: [{translateY}]}]}
-            onStartShouldSetResponder={() => true} // 바텀시트 안쪽 터치 방지
-          >
+            onStartShouldSetResponder={() => true}>
             <View style={styles.titleContainer}>
               <Typo style={styles.titleText}>직원 관리</Typo>
             </View>
-            <View style={styles.inputContainer}>
-              <Typo style={styles.inputTitle}>휴대전화번호</Typo>
-              {/* <View style={styles.phoneInputContainer}> */}
-              <FuneralInput input={phoneNumber} placeholder="휴대전화번호" />
-              <CustomButton
-                onPress={() => console.log('인증번호 발송')}
-                style={styles.button}>
-                <Typo style={styles.buttonText}>인증코드요청</Typo>
-              </CustomButton>
-              {/* </View> */}
-            </View>
-            <View style={styles.inputContainer}>
-              <Typo style={styles.inputTitle}>인증코드</Typo>
-              <FuneralInput
-                input={authCode}
-                placeholder="인증코드를 입력하세요"
-              />
-              <CustomButton
-                onPress={() => console.log('인증번호 확인')}
-                style={styles.checkButton}>
-                <Typo style={styles.checkButtonText}>인증번호확인</Typo>
-              </CustomButton>
-            </View>
-            <View style={styles.inputContainer}>
-              <Typo style={styles.inputTitle}>직급</Typo>
-              <FuneralInput
-                input={staffGrade}
-                placeholder="직급을 입력하세요"
-              />
-            </View>
-            <View style={styles.inputContainer}>
-              <Typo style={styles.inputTitle}>이름</Typo>
-              <FuneralInput input={staffName} placeholder="이름을 입력하세요" />
-            </View>
-            <View style={styles.buttonContainer}>
-              <Pressable onPress={onConfirm} style={styles.confirmButton}>
-                <Typo style={styles.confirmText}>등록</Typo>
-              </Pressable>
-            </View>
+            <ScrollView
+              style={styles.scrollContainer}
+              contentContainerStyle={styles.scrollContent}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled">
+              <View style={styles.inputContainer}>
+                <Typo style={styles.inputTitle}>휴대전화번호</Typo>
+                <FuneralInput input={phoneNumber} placeholder="휴대전화번호" />
+                <CustomButton
+                  onPress={() => console.log('인증번호 발송')}
+                  style={styles.button}>
+                  <Typo style={styles.buttonText}>인증코드요청</Typo>
+                </CustomButton>
+              </View>
+              <View style={styles.inputContainer}>
+                <Typo style={styles.inputTitle}>인증코드</Typo>
+                <FuneralInput
+                  input={authCode}
+                  placeholder="인증코드를 입력하세요"
+                />
+                <CustomButton
+                  onPress={() => console.log('인증번호 확인')}
+                  style={styles.checkButton}>
+                  <Typo style={styles.checkButtonText}>인증번호확인</Typo>
+                </CustomButton>
+              </View>
+              <View style={styles.inputContainer}>
+                <Typo style={styles.inputTitle}>직급</Typo>
+                <FuneralInput
+                  input={staffGrade}
+                  placeholder="직급을 입력하세요"
+                />
+              </View>
+              <View style={styles.inputContainer}>
+                <Typo style={styles.inputTitle}>이름</Typo>
+                <FuneralInput
+                  input={staffName}
+                  placeholder="이름을 입력하세요"
+                />
+              </View>
+              <View style={styles.inputContainer}>
+                <Typo style={styles.inputTitle}>접근 권한</Typo>
+                <View style={styles.permissionContainer}>
+                  {Array.from({length: 3}).map((_, rowIndex) => (
+                    <View key={rowIndex} style={styles.permissionRow}>
+                      {PERMISSION_LABELS.slice(
+                        rowIndex * 2,
+                        rowIndex * 2 + 2,
+                      ).map(({label, key}) => (
+                        <TouchableOpacity
+                          key={key}
+                          style={styles.permissionButton}
+                          onPress={() => togglePermission(key)}>
+                          <View style={styles.permissionContentWrapper}>
+                            {permissions[key] ? (
+                              <CheckCircleOnIcon
+                                width={18}
+                                height={18}
+                                style={styles.permissionIcon}
+                              />
+                            ) : (
+                              <CheckCircleOffIcon
+                                width={18}
+                                height={18}
+                                style={styles.permissionIcon}
+                              />
+                            )}
+                            <Typo style={styles.permissionLabelText}>
+                              {label}
+                            </Typo>
+                          </View>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  ))}
+                </View>
+              </View>
+              <View style={styles.buttonContainer}>
+                <Pressable onPress={onConfirm} style={styles.confirmButton}>
+                  <Typo style={styles.confirmText}>등록</Typo>
+                </Pressable>
+              </View>
+            </ScrollView>
           </Animated.View>
         </KeyboardAvoidingView>
       </Pressable>
@@ -219,7 +227,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard-Black',
   },
   inputContainer: {
-    // flex: 1,
     flexDirection: 'column',
     alignItems: 'flex-start',
     justifyContent: 'center',
@@ -231,7 +238,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 10,
-    // flex: 1,
   },
   checkButton: {
     alignSelf: 'stretch',
@@ -278,8 +284,7 @@ const styles = StyleSheet.create({
     color: '#999',
   },
   buttonContainer: {
-    marginTop: 24,
-    flex: 1,
+    marginVertical: 16,
     justifyContent: 'flex-end',
   },
   confirmButton: {
@@ -293,5 +298,44 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     fontFamily: 'Pretendard-Black',
+  },
+  scrollContainer: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  permissionContainer: {
+    width: '100%',
+    gap: 12,
+  },
+  permissionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  permissionButton: {
+    flex: 1,
+    padding: 12,
+    backgroundColor: '#F5F6F8',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E6EAF3',
+  },
+  permissionContentWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  permissionIcon: {
+    width: 18,
+    height: 18,
+  },
+  permissionLabelText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#283042',
+    fontFamily: 'Pretendard-Medium',
+    flexShrink: 1,
   },
 });
