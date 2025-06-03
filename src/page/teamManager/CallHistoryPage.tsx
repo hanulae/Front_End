@@ -43,11 +43,19 @@ const CallHistoryPage = ({navigation}: ICallHistoryPageProps) => {
     }, []),
   );
 
+  // const goToClientDetail = (clientId: number) => {
+
+  // }
+
+  const goToClientDetailDevMode = () => {
+    navigation.navigate('ClientDetail', {clientId: 1});
+  };
+
   const handleCardPress = (item: any) => {
     if (selectedTab === '진행중') {
       navigation.navigate('ProceedCall', {callId: item.id});
     } else {
-      console.log('완료된 출동 클릭', item.id);
+      navigation.navigate('ProceedCall', {callId: item.id, status: '완료'});
     }
   };
   return (
@@ -105,13 +113,23 @@ const CallHistoryPage = ({navigation}: ICallHistoryPageProps) => {
                 <Typo style={styles.clientDesc}>고객님</Typo>
               </View>
               <View style={styles.bottomRow}>
-                <View style={styles.tag}>
-                  <Typo style={styles.tagText}>출동신청</Typo>
+                <View
+                  style={[
+                    styles.tag,
+                    item.status === '완료' && styles.completeTag,
+                  ]}>
+                  <Typo
+                    style={[
+                      styles.tagText,
+                      item.status === '완료' && styles.completeTagTexts,
+                    ]}>
+                    {item.status === '완료' ? '출동완료' : '출동신청'}
+                  </Typo>
                 </View>
                 <TouchableOpacity
                   style={styles.detailButton}
                   onPress={() => {
-                    console.log('상세보기 이동');
+                    goToClientDetailDevMode();
                     // navigation.navigate('DetailPage', { id }) 처럼 연결
                   }}>
                   <Typo style={styles.detailText}>상세보기</Typo>
@@ -186,7 +204,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     color: '#F04452',
-    fontFamily: 'Pretendard-Black',
+    fontFamily: 'Pretendard-Bold',
+  },
+  completeTag: {
+    backgroundColor: 'white',
+    borderColor: '#2D81F1',
+  },
+  completeTagTexts: {
+    color: '#2D81F1',
   },
   topRow: {
     flexDirection: 'row',
@@ -230,6 +255,6 @@ const styles = StyleSheet.create({
     color: '#6F717D',
     textDecorationLine: 'underline',
     textDecorationColor: '#6F717D',
-    fontFamily: 'Pretendard-Black',
+    fontFamily: 'Pretendard-Bold',
   },
 });

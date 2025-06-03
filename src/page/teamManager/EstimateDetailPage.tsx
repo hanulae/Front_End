@@ -88,7 +88,7 @@ const EstimateDetailPage = () => {
           <View style={styles.buttonIcon}>
             <DispatchIcon width={24} height={24} />
             <Typo fontSize={14} color="white">
-              견적요청
+              출동신청
             </Typo>
           </View>
           <MoveIcon width={24} height={24} />
@@ -130,11 +130,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     // marginBottom: 32,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    // shadowColor: '#000',
+    // shadowOffset: {width: 0, height: 2},
+    // shadowOpacity: 0.05,
+    // shadowRadius: 4,
+    // elevation: 2,
   },
   listItem: {
     flexDirection: 'row',
@@ -177,8 +177,8 @@ const styles = StyleSheet.create({
   },
   button: {
     flexDirection: 'row',
-    backgroundColor: '#2D81F1',
-    paddingVertical: 16,
+    backgroundColor: '#C4C7CF',
+    paddingVertical: 18,
     paddingHorizontal: 20,
     marginHorizontal: 16,
     borderRadius: 12,
