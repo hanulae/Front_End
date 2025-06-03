@@ -158,7 +158,7 @@ const FuneralProfilePage = () => {
           onLogoutPress={logout}
         />
         <View style={styles.container}>
-          <ProfileStat point={100000} hallName="김상조" />
+          <ProfileStat point={100000} cash={50000} hallName="김상조" />
         </View>
       </View>
 
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
   },
   floatingButton: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 380 : 380, // ProfileStat 아래 적당한 위치로 조정
+    top: Platform.OS === 'ios' ? 420 : 420, // ProfileStat 아래 적당한 위치로 조정
     left: 20,
     right: 20,
     zIndex: 5,
@@ -252,10 +252,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     paddingVertical: 20,
     borderRadius: 15,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    shadowOffset: {width: 0, height: 4},
+    // shadowColor: '#000',
+    // shadowOpacity: 0.1,
+    // shadowRadius: 6,
+    // shadowOffset: {width: 0, height: 4},
   },
   container: {
     flex: 1,
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
   whiteSection: {
     flex: 1,
     backgroundColor: '#F5F5F5',
-    marginTop: 450, // ProfileStat 높이 만큼 여백 확보
+    marginTop: 470, // ProfileStat 높이 만큼 여백 확보
     zIndex: 1,
   },
   scrollContent: {

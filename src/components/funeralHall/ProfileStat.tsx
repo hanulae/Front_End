@@ -5,15 +5,18 @@ import CustomButton from '../common/CustomButton';
 import ChargeIcon from '../../assets/Button/Button_Charge.svg';
 import LogIcon from '../../assets/Button/Button_Log.svg';
 import MoveIcon from '../../assets/Button/Button_Move.svg';
+import PointIcon from '../../assets/Bullet/Bullet_PointCircle.svg';
+import CashIcon from '../../assets/Bullet/Bullet_CoinYellow.svg';
 import Hello from './Hello';
 import {useNavigation} from '@react-navigation/native';
 
 interface IProfileStatProps {
   point: number;
+  cash: number;
   hallName: string;
 }
 
-const ProfileStat = ({point, hallName}: IProfileStatProps) => {
+const ProfileStat = ({point, cash, hallName}: IProfileStatProps) => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const goToPointHistory = () => {
     navigation.navigate('PointHistory', {variant: 'funeral'});
@@ -22,11 +25,31 @@ const ProfileStat = ({point, hallName}: IProfileStatProps) => {
   const goToChargePoint = () => {
     navigation.navigate('PointRefund', {variant: 'funeral'});
   };
+
   return (
-    <View>
+    <View style={styles.container}>
       <Hello />
-      <Typo style={styles.nameText}>{hallName} 님</Typo>
-      <Typo style={styles.pointText}>{point.toLocaleString()} P</Typo>
+      <View style={styles.nameContainer}>
+        <Typo style={styles.nameText}>{hallName}</Typo>
+        <Typo style={styles.roleText}>장례식장님</Typo>
+      </View>
+
+      <View style={styles.pointContainer}>
+        <Typo style={styles.pointDesc}>보유 포인트</Typo>
+        <View style={styles.flexRow}>
+          <Typo style={styles.pointText}>{point.toLocaleString()}</Typo>
+          <PointIcon width={24} height={24} />
+        </View>
+      </View>
+
+      <View style={styles.cashContainer}>
+        <Typo style={styles.cashDesc}>보유 캐쉬</Typo>
+        <View style={styles.flexRow}>
+          <Typo style={styles.cashText}>{cash.toLocaleString()}</Typo>
+          <CashIcon width={24} height={24} />
+        </View>
+      </View>
+
       <View style={styles.buttonContainer}>
         <CustomButton style={styles.leftbutton} onPress={goToPointHistory}>
           <View style={styles.buttonNameContainer}>
@@ -50,27 +73,86 @@ const ProfileStat = ({point, hallName}: IProfileStatProps) => {
 export default ProfileStat;
 
 const styles = StyleSheet.create({
+  container: {
+    // padding: 8,
+  },
+  nameContainer: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    marginLeft: 16,
+  },
   nameText: {
     fontSize: 34,
     fontWeight: '700',
     color: '#FFFFFF',
     marginTop: 13,
     marginBottom: 18,
+    marginLeft: 16,
+  },
+  roleText: {
+    fontSize: 20,
+    fontWeight: '400',
+    color: '#FFFFFF',
+    marginLeft: 4,
+  },
+  flexRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  pointContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#3D8FFB',
+    paddingVertical: 16,
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    borderTopRightRadius: 20,
+    borderTopLeftRadius: 20,
+    marginBottom: 4,
+  },
+  pointDesc: {
+    fontSize: 18,
+    fontWeight: '500',
+    color: '#FFFFFF',
+    fontFamily: 'Pretendard-Regular',
   },
   pointText: {
-    fontSize: 30,
+    fontSize: 24,
     fontWeight: '700',
     color: '#FFFFFF',
-    marginBottom: 30,
+    fontFamily: 'GMarketSansTTFBold',
+  },
+  cashContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#3D8FFB',
+    paddingVertical: 16,
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    borderBottomRightRadius: 20,
+    borderBottomLeftRadius: 20,
+    marginBottom: 8,
+  },
+  cashDesc: {
+    fontSize: 18,
+    fontWeight: '500',
+    color: '#FFFFFF',
+    fontFamily: 'Pretendard-Regular',
+  },
+  cashText: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    fontFamily: 'GMarketSansTTFBold',
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 10,
+    gap: 8,
+    marginTop: 4,
   },
   leftbutton: {
     flex: 1,
-    paddingVertical: 20,
+    paddingVertical: 16,
     paddingHorizontal: 20,
     backgroundColor: '#4B99FE',
     borderRadius: 12,
@@ -78,14 +160,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    shadowColor: '#000', // iOS shadow
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    shadowOffset: {width: 0, height: 2},
+    // shadowColor: '#000', // iOS shadow
+    // shadowOpacity: 0.05,
+    // shadowRadius: 5,
+    // shadowOffset: {width: 0, height: 2},
   },
   rightbutton: {
     flex: 1,
-    paddingVertical: 20,
+    paddingVertical: 16,
     paddingHorizontal: 20,
     backgroundColor: '#1C75E9',
     borderRadius: 12,
@@ -93,10 +175,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    shadowColor: '#000', // iOS shadow
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    shadowOffset: {width: 0, height: 2},
+    // shadowColor: '#000', // iOS shadow
+    // shadowOpacity: 0.05,
+    // shadowRadius: 5,
+    // shadowOffset: {width: 0, height: 2},
   },
   buttonNameContainer: {
     flexDirection: 'row',
