@@ -25,6 +25,9 @@ import {useCallback, useState} from 'react';
 import EmailInput from '../../components/common/input/EmailInput';
 import useEmailPartsInput from '../../hooks/input/useEmailPartsInput';
 import UserSelectSheet from '../../components/common/UserSelectSheet';
+import Toast from 'react-native-toast-message';
+import axios from 'axios';
+import api from '../../api/config';
 
 interface ILoginPageProps {
   navigation: NavigationProp<any>;
@@ -53,8 +56,10 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
   const email = useEmailPartsInput();
   const password = usePasswordInput();
   const setLogin = useSetAtom(userInfoAtom);
-
+  console.log('email', email.fullEmail);
+  console.log('password', password.value);
   const goToFindEmail = () => {
+    console.log('goToFindEmail');
     navigation.navigate('FindEmail');
   };
   const goToFindPassword = () => {
@@ -68,6 +73,36 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
       userType: userType,
       isLogin: true,
     });
+  };
+
+  // 로그인 핸들러
+  const handleSignin = async () => {
+    if (!email.fullEmail || !password.value) {
+      Toast.show({
+        type: 'error',
+        text1: '이메일과 비밀번호를 입력해주세요.',
+        position: 'top',
+        topOffset: 100,
+      });
+      return;
+    }
+    try {
+      if (userType === 'manager') {
+        const response = await api.post('/manager/auth/login', {
+          managerEmail: email.fullEmail,
+          managerPassword: password.value,
+        });
+        console.log('response', response);
+      } else if (userType === 'funeral') {
+        const response = await api.post('/funeral/auth/login', {
+          funeralEmail: email.fullEmail,
+          funeralPassword: password.value,
+        });
+        console.log('response', response);
+      }
+    } catch (error) {
+      console.log('error', error);
+    }
   };
   return (
     <DefaultLayout
@@ -108,14 +143,14 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
             <Typo style={[styles.toolText, {color: '#2D81F1'}]}>회원가입</Typo>
           </CustomButton>
         </View>
-        {showSelectSheet && (
+        {/* </ScrollView> */}
+      </Pressable>
+      {showSelectSheet && (
           <UserSelectSheet
             onClose={() => setShowSelectSheet(false)}
             targetScreen="Signup"
           />
         )}
-        {/* </ScrollView> */}
-      </Pressable>
     </DefaultLayout>
   );
 };

@@ -6,8 +6,8 @@ import CheckOffIcon from '../../assets/Contents/Contents_CheckOff.svg';
 
 interface FuneralCardProps {
   item: {
-    id: number;
-    imageUrl: any;
+    id: string;
+    imageUrl?: any;
     name: string;
     address: string;
   };

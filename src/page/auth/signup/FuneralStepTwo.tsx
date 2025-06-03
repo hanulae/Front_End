@@ -1,4 +1,4 @@
-import {useSetAtom} from 'jotai';
+import {useAtomValue, useSetAtom} from 'jotai';
 import {
   View,
   StyleSheet,
@@ -26,6 +26,7 @@ import AlbumIcon from '../../../assets/Attachment/Attach_ImageActive.svg';
 import FileIcon from '../../../assets/Attachment/Attach_FileDisable.svg';
 import FileList from '../../../components/common/FileList';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {myFuneralAtom} from '../../../state/local_state/myFuneralAtom';
 interface Props {
   onNext: () => void;
   onPrev: () => void;
@@ -36,7 +37,8 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
   const phoneNumber = usePhoneInput();
   const authCode = useInputBase();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
-  const myFuneralName = useInputBase();
+  // const myFuneralName = useInputBase();
+  const myFuneral = useAtomValue(myFuneralAtom);
   const [selectedImages, setSelectedImages] = useState<IImage[]>([]);
   const [showAlbum, setShowAlbum] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<LocalFile[]>([]);
@@ -166,22 +168,24 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
           <Typo fontSize={16} style={styles.containerTitle}>
             내 장례식장 찾기
           </Typo>
-          {/* <TextInput
-            value={myFuneralName.value}
-            placeholder="인증코드를 입력하세요."
-            editable={false}
-          /> */}
-          <CustomButton
-            onPress={() => {
-              navigation.navigate('FindFuneral', {
-                variant: 'signup',
-              });
-            }}
-            style={styles.findButton}>
-            <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
-              장례식장 찾기
-            </Typo>
-          </CustomButton>
+          <View style={styles.funeralNameContainer}>
+            <View style={styles.funeralNameInputContainer}>
+              <Typo style={styles.funeralNameText}>
+                {myFuneral.funeralName}
+              </Typo>
+            </View>
+            <CustomButton
+              onPress={() => {
+                navigation.navigate('FindFuneral', {
+                  variant: 'signup',
+                });
+              }}
+              style={styles.findButton}>
+              <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
+                장례식장 찾기
+              </Typo>
+            </CustomButton>
+          </View>
         </View>
         <View style={styles.container}>
           <Typo fontSize={16} style={styles.containerTitle}>
@@ -256,9 +260,26 @@ const styles = StyleSheet.create({
   containerTitle: {
     fontSize: 16,
     fontWeight: '600',
-    fontFamily: 'Pretendard-Light',
+    fontFamily: 'Pretendard-Bold',
     // marginBottom: 5,
     marginLeft: 10,
+  },
+  funeralNameContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  funeralNameInputContainer: {
+    flex: 1,
+    backgroundColor: '#F5F5F5',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+  },
+  funeralNameText: {
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'Pretendard-Bold',
   },
   buttonContainer: {
     flexDirection: 'row',

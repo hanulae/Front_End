@@ -33,6 +33,7 @@ const BaseInput = ({
         {...props}
         value={value}
         onFocus={() => setFocused(true)}
+        placeholderTextColor="#283042"
         onBlur={() => setFocused(false)}
         onChangeText={onChangeText}
         placeholder={props.placeholder}

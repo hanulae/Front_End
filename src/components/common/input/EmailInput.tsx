@@ -41,6 +41,7 @@ const EmailInput = ({input, userType}: EmailInputProps) => {
           <TextInput
             style={[styles.input]}
             placeholder="이름을 입력하세요"
+            placeholderTextColor="#283042"
             value={input.id}
             onChangeText={input.setId}
           />
@@ -51,6 +52,7 @@ const EmailInput = ({input, userType}: EmailInputProps) => {
           <TextInput
             style={styles.input}
             placeholder="이메일"
+            placeholderTextColor="#283042"
             value={input.id}
             onChangeText={input.setId}
           />
@@ -60,6 +62,7 @@ const EmailInput = ({input, userType}: EmailInputProps) => {
             <TextInput
               style={styles.domainInput}
               placeholder="직접입력"
+              placeholderTextColor="#283042"
               value={input.customDomain}
               onChangeText={input.setCustomDomain}
             />

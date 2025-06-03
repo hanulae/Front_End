@@ -14,6 +14,7 @@ import QuoteIcon from '../../assets/Button/Button_QuoteRecordOff.svg';
 import PointRecordIcon from '../../assets/Button/Button_PointsOff.svg';
 import PointRefundIcon from '../../assets/Button/Button_Refund.svg';
 import AppSettingIcon from '../../assets/Button/Button_AppSettingoff.svg';
+import Toast from 'react-native-toast-message';
 // import Toast from 'react-native-toast-message';
 
 interface IManagerProfilePageProps {
@@ -60,6 +61,12 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
   };
   const goToAppSetting = () => {
     console.log('App Setting');
+    Toast.show({
+      type: 'success',
+      text1: '앱 설정 클릭',
+      position: 'top',
+      visibilityTime: 1000,
+    });
   };
   const goToCallHistory = () => {
     navigation.navigate('CallHistory');
@@ -130,7 +137,7 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
         onClose={() => setShowPhoneAuthSheet(false)}
         navigation={navigation}
       />
-      {/* <Toast /> */}
+      <Toast />
     </>
   );
 };

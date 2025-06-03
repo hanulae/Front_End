@@ -80,7 +80,7 @@ const SignupStepOne = ({onNext}: Props) => {
             이메일 인증
           </Typo>
           <View style={styles.authSection}>
-            <EmailInput input={email} />
+            <EmailInput input={email} userType={userType} />
             <CustomButton
               onPress={handleRequestCode}
               style={styles.requestButton}>
@@ -124,6 +124,7 @@ const SignupStepOne = ({onNext}: Props) => {
             type="password"
           />
         </View>
+        <View style={styles.confirmButtonContainer}>
         <CustomButton
           onPress={handleNext}
           style={[
@@ -135,6 +136,7 @@ const SignupStepOne = ({onNext}: Props) => {
             다음
           </Typo>
         </CustomButton>
+        </View>
       </View>
     </TouchableWithoutFeedback>
   );
@@ -222,6 +224,11 @@ const styles = StyleSheet.create({
   typeButtonTextSelected: {
     color: '#fff', // 텍스트 색도 바꿔주기
     fontWeight: 'bold',
+  },
+  confirmButtonContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    paddingBottom: 10,
   },
   confirmButton: {
     paddingVertical: 18,

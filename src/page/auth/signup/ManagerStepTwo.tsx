@@ -313,6 +313,8 @@ const styles = StyleSheet.create({
   bottomButtonContainer: {
     flex: 1,
     flexDirection: 'column',
+    justifyContent: 'flex-end',
+    // borderWidth: 1,
     gap: 10,
     marginTop: 20,
   },
