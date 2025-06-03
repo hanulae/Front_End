@@ -35,6 +35,7 @@ const CommonInput = ({
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         onChangeText={onChangeText}
+        placeholderTextColor={'#8990A0'}
         placeholder={props.placeholder}
         style={[styles.input, error && styles.errorInput]}
         editable={!disabled}
@@ -64,6 +65,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     height: 56,
     borderRadius: 10,
+    color: '#283042',
     fontWeight: '500',
     paddingVertical: 18,
     backgroundColor: '#F5F6F8',
