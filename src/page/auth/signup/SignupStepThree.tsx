@@ -1,4 +1,4 @@
-import {useSetAtom} from 'jotai';
+import {useAtom, useSetAtom} from 'jotai';
 import {useState} from 'react';
 import {signupAtom} from '../../../state/local_state/signupAtom';
 import {
@@ -24,7 +24,8 @@ interface Props {
 }
 
 const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
-  const setSignupInfo = useSetAtom(signupAtom);
+  // const setSignupInfo = useSetAtom(signupAtom);
+  const [signupInfo, setSignupInfo] = useAtom(signupAtom);
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const [showBankSelectSheet, setShowBankSelectSheet] = useState(false);
 
@@ -77,17 +78,28 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
     }
   };
 
-  const handleSubmit = () => {
-    setSignupInfo(prev => ({
-      ...prev,
-      accountInfo: {bankName, accountNumber},
-      agreedTerms: agrees,
-    }));
-    onSubmit();
-    navigation.navigate('SignupComplete', {
-      userType: userType,
-    });
-  };
+  // const handleSubmit = () => {
+  //   setSignupInfo(prev => ({
+  //     ...prev,
+  //     accountInfo: {bankName, accountNumber},
+  //     agreedTerms: agrees,
+  //   }));
+  //   onSubmit();
+  //   navigation.navigate('SignupComplete', {
+  //     userType: userType,
+  //   });
+  // };
+
+  // const handleSubmit = () => {
+  //   setSignupInfo(prev => ({
+  //     ...prev,
+  //     accountInfo: {bankName, accountNumber},
+  //     agreedTerms: agrees,
+  //   }));
+
+  // };
+
+  console.log('signupInf123123o', signupInfo);
 
   return (
     <ScrollView contentContainerStyle={styles.wrapper}>
