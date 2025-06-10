@@ -3,13 +3,15 @@ import {Image, Pressable, StyleSheet, View} from 'react-native';
 import Typo from '../../components/common/Typo';
 import CheckOnIcon from '../../assets/Contents/Contents_CheckOn.svg';
 import CheckOffIcon from '../../assets/Contents/Contents_CheckOff.svg';
+import dummyHallImage from '../../assets/dummyHall.png';
 
 interface FuneralCardProps {
   item: {
-    id: number;
-    imageUrl: any;
-    name: string;
-    address: string;
+    funeralListId: string;
+    funeralId: string | null;
+    funeralName: string;
+    funeralAddress: string;
+    imageUrl?: any;
   };
   selected: boolean;
   onPressCard: () => void;
@@ -30,10 +32,20 @@ const FuneralCard = ({
         {selected ? <CheckOnIcon /> : <CheckOffIcon />}
       </Pressable>
       <Pressable style={styles.contentArea} onPress={onPressCard}>
-        <Image source={item.imageUrl} style={styles.image} />
+        {/* 🆕 imageUrl이 없으면 더미 이미지 사용 */}
+        <Image 
+          source={item.imageUrl || dummyHallImage}
+          style={styles.image}
+        />
         <View style={styles.infoContainer}>
-          <Typo style={styles.infoName}>{item.name}</Typo>
-          <Typo style={styles.infoAddress}>{item.address}</Typo>
+          <Typo style={styles.infoName}>{item.funeralName}</Typo>
+          <Typo 
+          style={styles.infoAddress}
+          numberOfLines={2}
+          ellipsizeMode="tail"
+          >
+            {item.funeralAddress}
+          </Typo>
           {onPressDelete && (
             <Pressable style={styles.deleteButton} onPress={onPressDelete}>
               <Typo fontSize={12} color="red" style={styles.deleteButtonText}>
@@ -73,19 +85,23 @@ const styles = StyleSheet.create({
     height: 100,
     paddingTop: 10,
     flexDirection: 'column',
+    justifyContent: 'flex-start',
   },
   infoName: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '500',
     color: '#283042',
     marginBottom: 10,
     fontFamily: 'Pretendard-Black',
   },
   infoAddress: {
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 12,
+    fontWeight: '400',
     color: '#6F717D',
     fontFamily: 'Pretendard-Black',
+    lineHeight: 14,
+    flexWrap: 'wrap',
+    flex: 1,
   },
   checkContainer: {
     paddingLeft: 8,
