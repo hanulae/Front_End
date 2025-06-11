@@ -28,6 +28,7 @@ import usePhoneAuthInput from '../../hooks/input/usePhoneAuthInput';
 import UserSelectSheet from '../../components/common/UserSelectSheet';
 import Toast from 'react-native-toast-message';
 import api from '../../api/config';
+import {storeTokens, storeUserInfo} from '../../utils/tokenStorage';
 
 interface ILoginPageProps {
   navigation: NavigationProp<any>;
@@ -127,6 +128,16 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
           verificationCode: phoneAuth.authCode,
         });
         console.log('Employee login response:', response);
+
+        // JWT 토큰과 사용자 정보 저장
+        const {accessToken, refreshToken, employee} = response.data;
+        await storeTokens(accessToken, refreshToken);
+        await storeUserInfo({
+          userType: 'funeral',
+          userId: employee.employeeId,
+          data: employee,
+        });
+
         handleLogin();
       } catch (error) {
         console.log('Employee login error', error);
@@ -157,18 +168,38 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
           managerEmail: email.fullEmail,
           managerPassword: password.value,
         });
-        console.log('response', response);
+        console.log('Manager login response:', response);
+
+        // JWT 토큰과 사용자 정보 저장
+        const {accessToken, refreshToken, manager} = response.data;
+        await storeTokens(accessToken, refreshToken);
+        await storeUserInfo({
+          userType: 'manager',
+          userId: manager.managerId,
+          data: manager,
+        });
+
         handleLogin();
       } else if (userType === 'funeral') {
         const response = await api.post('/funeral/auth/login', {
           funeralEmail: email.fullEmail,
           funeralPassword: password.value,
         });
-        console.log('response', response);
+        console.log('Funeral login response:', response);
+
+        // JWT 토큰과 사용자 정보 저장
+        const {accessToken, refreshToken, funeral} = response.data;
+        await storeTokens(accessToken, refreshToken);
+        await storeUserInfo({
+          userType: 'funeral',
+          userId: funeral.funeralId,
+          data: funeral,
+        });
+
         handleLogin();
       }
     } catch (error) {
-      console.log('error', error);
+      console.log('Login error', error);
       Toast.show({
         type: 'error',
         text1: '로그인에 실패했습니다.',
