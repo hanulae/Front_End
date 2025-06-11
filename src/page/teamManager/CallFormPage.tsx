@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: '600',
-    fontFamily: 'Pretendard-Light',
+    fontFamily: 'Pretendard-Bold',
     marginLeft: 10,
     marginBottom: 16,
     marginTop: 16,
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
   },
   nextButton: {
     marginTop: 40,
-    backgroundColor: '#4F7CFF',
+    backgroundColor: '#2D81F1',
     paddingVertical: 18,
     borderRadius: 8,
     alignItems: 'center',

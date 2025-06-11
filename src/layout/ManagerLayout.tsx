@@ -12,6 +12,7 @@ interface IManagerLayoutProps {
   logoutButton?: boolean;
   homeRouteName?: string;
   onLogoutPress?: () => void;
+  backIconColor?: string;
   color?: string;
   top?: boolean;
 }
@@ -25,6 +26,7 @@ const ManagerLayout = ({
   homeRouteName,
   onLogoutPress,
   color,
+  backIconColor,
   top,
 }: IManagerLayoutProps): JSX.Element => {
   return (
@@ -42,6 +44,7 @@ const ManagerLayout = ({
           logoutButton={logoutButton}
           homeRouteName={homeRouteName}
           onLogoutPress={onLogoutPress}
+          backIconColor={backIconColor}
         />
       )}
       <View style={styles.container}>{children}</View>

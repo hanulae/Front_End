@@ -1,4 +1,4 @@
-import {useSetAtom} from 'jotai';
+import {useAtomValue, useSetAtom} from 'jotai';
 import {
   View,
   StyleSheet,
@@ -6,13 +6,13 @@ import {
   TouchableWithoutFeedback,
   ScrollView,
 } from 'react-native';
-import {signupAtom} from '../../../state/local_state/signupAtom';
+import {signupAtom, AttachedFile} from '../../../state/local_state/signupAtom';
 import {Input} from '../../../components/common/input/Input';
 import {usePhoneInput} from '../../../hooks/input/usePhoneInput';
 import {useInputBase} from '../../../hooks/input/useInputBase';
 import CustomButton from '../../../components/common/CustomButton';
 import Typo from '../../../components/common/Typo';
-import {useState} from 'react';
+import {useState, useMemo, useEffect} from 'react';
 import AlbumBottomSheet from '../../../components/common/AlbumBottomSheet';
 import AlbumIcon from '../../../assets/Attachment/Attach_ImageActive.svg';
 import FileIcon from '../../../assets/Attachment/Attach_FileDisable.svg';
@@ -23,6 +23,8 @@ import {convertUrisToFiles} from '../../../util/image';
 import {getLocalFileCopies, LocalFile} from '../../../util/file';
 import {pick} from '@react-native-documents/picker';
 import FileList from '../../../components/common/FileList';
+import Toast from 'react-native-toast-message';
+// import api from '../../../api/config';
 
 interface Props {
   onNext: () => void;
@@ -30,6 +32,7 @@ interface Props {
 }
 
 const ManagerStepTwo = ({onNext, onPrev}: Props) => {
+  const signupInfo = useAtomValue(signupAtom);
   const setSignupInfo = useSetAtom(signupAtom);
   const phoneNumber = usePhoneInput();
   const authCode = useInputBase();
@@ -37,6 +40,44 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
   const [selectedImages, setSelectedImages] = useState<IImage[]>([]);
   const [showAlbum, setShowAlbum] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<LocalFile[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // 총 첨부파일 개수 계산
+  const totalAttachedCount = useMemo(() => {
+    return selectedImages.length + selectedFiles.length;
+  }, [selectedImages.length, selectedFiles.length]);
+
+  // signupInfo에서 첨부파일 복원
+  useEffect(() => {
+    if (!isInitialized && signupInfo.attachedFiles.length > 0) {
+      const images: IImage[] = [];
+      const files: LocalFile[] = [];
+
+      signupInfo.attachedFiles.forEach(file => {
+        if (file.file) {
+          // 이미지 파일
+          images.push({
+            uri: file.uri,
+            name: file.name,
+            type: file.type || '',
+            file: file.file,
+          });
+        } else {
+          // 일반 파일
+          files.push({
+            uri: file.uri,
+            name: file.name,
+            type: file.type || 'application/octet-stream',
+            size: 0,
+          });
+        }
+      });
+
+      setSelectedImages(images);
+      setSelectedFiles(files);
+      setIsInitialized(true);
+    }
+  }, [signupInfo.attachedFiles, isInitialized]);
 
   console.log('selectedFiles', selectedFiles);
   const closeAlbum = () => {
@@ -70,11 +111,65 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
     if (nonDuplicateFiles.length === 0) {
       return;
     }
-    setSelectedFiles(prev => [...prev, ...nonDuplicateFiles]);
+
+    // 최대 개수 체크
+    if (totalAttachedCount + nonDuplicateFiles.length > 10) {
+      Toast.show({
+        type: 'error',
+        text1: '첨부파일 개수 초과',
+        text2: '최대 10개까지만 첨부할 수 있습니다.',
+        position: 'top',
+      });
+      return;
+    }
+
+    const newSelectedFiles = [...selectedFiles, ...nonDuplicateFiles];
+    setSelectedFiles(newSelectedFiles);
+
+    // 즉시 signupInfo 업데이트
+    const attachedFiles: AttachedFile[] = [
+      ...selectedImages.map(img => ({
+        uri: img.uri,
+        name: img.name,
+        type: img.type,
+        file: img.file,
+      })),
+      ...newSelectedFiles.map(file => ({
+        uri: file.uri,
+        name: file.name,
+        type: file.type,
+      })),
+    ];
+
+    setSignupInfo(prev => ({
+      ...prev,
+      attachedFiles,
+    }));
   };
 
   const handleDeleteFile = (index: number) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+    const newSelectedFiles = selectedFiles.filter((_, i) => i !== index);
+    setSelectedFiles(newSelectedFiles);
+
+    // 즉시 signupInfo 업데이트
+    const attachedFiles: AttachedFile[] = [
+      ...selectedImages.map(img => ({
+        uri: img.uri,
+        name: img.name,
+        type: img.type,
+        file: img.file,
+      })),
+      ...newSelectedFiles.map(file => ({
+        uri: file.uri,
+        name: file.name,
+        type: file.type,
+      })),
+    ];
+
+    setSignupInfo(prev => ({
+      ...prev,
+      attachedFiles,
+    }));
   };
 
   const handleSelectImages = async (uris: string[]) => {
@@ -82,6 +177,17 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
       uri => !selectedImages.some(img => img.uri === uri),
     );
     if (newUris.length === 0) return;
+
+    // 최대 개수 체크
+    if (totalAttachedCount + newUris.length > 10) {
+      Toast.show({
+        type: 'error',
+        text1: '첨부파일 개수 초과',
+        text2: '최대 10개까지만 첨부할 수 있습니다.',
+        position: 'top',
+      });
+      return;
+    }
 
     const converted = await convertUrisToFiles(newUris);
     const formatted: IImage[] = converted.map(item => ({
@@ -91,16 +197,52 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
       file: item.file,
     }));
 
-    setSelectedImages(prev => [...prev, ...formatted]);
+    const newSelectedImages = [...selectedImages, ...formatted];
+    setSelectedImages(newSelectedImages);
+
+    // 즉시 signupInfo 업데이트
+    const attachedFiles: AttachedFile[] = [
+      ...newSelectedImages.map(img => ({
+        uri: img.uri,
+        name: img.name,
+        type: img.type,
+        file: img.file,
+      })),
+      ...selectedFiles.map(file => ({
+        uri: file.uri,
+        name: file.name,
+        type: file.type,
+      })),
+    ];
+
+    setSignupInfo(prev => ({
+      ...prev,
+      attachedFiles,
+    }));
   };
 
-  const handleRequestCode = () => {
+  const handleRequestCode = async () => {
     // 인증 코드 요청 로직
+    // try {
+    //   await api.post('/manager/sms/send', {
+    //     managerPhone: phoneNumber.value,
+    //   });
+    // } catch (error) {
+    //   console.log('error', error);
+    // }
     console.log('인증 코드 요청:', phoneNumber.value);
   };
 
-  const handleVerifyCode = () => {
+  const handleVerifyCode = async () => {
     // 인증 코드 확인 로직
+    // try {
+    //   await api.post('/manager/sms/verify', {
+    //     managerPhone: phoneNumber.value,
+    //     code: authCode.value,
+    //   });
+    // } catch (error) {
+    //   console.log('error', error);
+    // }
     console.log('인증 코드 확인:', authCode.value);
   };
 
@@ -167,23 +309,41 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
         {/* 첨부파일 */}
         <View style={styles.container}>
           <Typo fontSize={16} style={styles.containerTitle}>
-            첨부파일 ({selectedImages.length}/10)
+            첨부파일 ({totalAttachedCount}/10)
           </Typo>
-          <ScrollView style={{flexGrow: 0, overflow: 'visible'}}>
+          <View style={styles.imagePreviewContainer}>
             <ImagePreviewList
               images={selectedImages}
               onDelete={index => {
-                setSelectedImages(prev => prev.filter((_, i) => i !== index));
+                const newSelectedImages = selectedImages.filter(
+                  (_, i) => i !== index,
+                );
+                setSelectedImages(newSelectedImages);
+
+                // 즉시 signupInfo 업데이트
+                const attachedFiles: AttachedFile[] = [
+                  ...newSelectedImages.map(img => ({
+                    uri: img.uri,
+                    name: img.name,
+                    type: img.type,
+                    file: img.file,
+                  })),
+                  ...selectedFiles.map(file => ({
+                    uri: file.uri,
+                    name: file.name,
+                    type: file.type,
+                  })),
+                ];
+
+                setSignupInfo(prev => ({
+                  ...prev,
+                  attachedFiles,
+                }));
               }}
+              scrollEnabled={true}
             />
-          </ScrollView>
+          </View>
           <FileList files={selectedFiles} onDelete={handleDeleteFile} />
-          {/* <ImagePreviewList
-            images={selectedImages}
-            onDelete={index => {
-              setSelectedImages(prev => prev.filter((_, i) => i !== index));
-            }}
-          /> */}
           <View style={styles.buttonContainer}>
             <CustomButton style={styles.imageButton} onPress={handleOpenAlbum}>
               <AlbumIcon width={24} height={24} />
@@ -198,6 +358,7 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
               </Typo>
             </CustomButton>
           </View>
+          <Toast />
         </View>
         {/* 버튼 */}
         <View style={styles.bottomButtonContainer}>
@@ -214,11 +375,6 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
           visible={showAlbum}
           onClose={closeAlbum}
         />
-        {/* <FilePicker
-          visible={!showFilePicker}
-          onClose={closeFilePicker}
-          onPick={handleAddFile}
-        /> */}
       </ScrollView>
     </TouchableWithoutFeedback>
   );
@@ -233,6 +389,10 @@ const styles = StyleSheet.create({
   },
   container: {
     // borderWidth: 1,
+  },
+  imagePreviewContainer: {
+    flexGrow: 0,
+    overflow: 'visible',
   },
   containerTitle: {
     fontSize: 16,
@@ -313,6 +473,8 @@ const styles = StyleSheet.create({
   bottomButtonContainer: {
     flex: 1,
     flexDirection: 'column',
+    justifyContent: 'flex-end',
+    // borderWidth: 1,
     gap: 10,
     marginTop: 20,
   },

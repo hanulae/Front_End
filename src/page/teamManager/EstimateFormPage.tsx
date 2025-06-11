@@ -9,6 +9,7 @@ import DateWheelBottomSheet from '../../components/common/DateWheel';
 import CustomButton from '../../components/common/CustomButton';
 import ManagerLayout from '../../layout/ManagerLayout';
 import CalandarIcon from '../../assets/Button/Button_Calandar.svg';
+import Toast from 'react-native-toast-message';
 const EstimateFormPage = () => {
   const clientName = useInputBase();
   const visitorCount = useInputBase();
@@ -47,6 +48,21 @@ const EstimateFormPage = () => {
     console.log('퇴실일자 선택됨:', formatSimpleDate(date));
     setDepartureDate(date);
     setShowDeparturePicker(false);
+  };
+
+  const handleDispatchEstimate = async () => {
+    // try {
+
+    // } catch (error) {
+
+    // }
+    Toast.show({
+      type: 'success',
+      text1: '견적서 발송 완료',
+      text2: '견적서가 발송되었습니다.',
+      position: 'top',
+      topOffset: -150,
+    });
   };
 
   return (
@@ -122,7 +138,7 @@ const EstimateFormPage = () => {
           </View>
           <View style={styles.buttonContainer}>
             <CustomButton
-              onPress={() => console.log('견적 신청서 제출')}
+              onPress={handleDispatchEstimate}
               style={styles.button}>
               <Typo fontSize={14} color="white">
                 견적서 발송
@@ -146,6 +162,7 @@ const EstimateFormPage = () => {
           />
         </View>
       </View>
+      <Toast />
     </ManagerLayout>
   );
 };
@@ -219,7 +236,7 @@ const styles = StyleSheet.create({
   button: {
     // flex: 1,
     alignItems: 'center',
-    backgroundColor: '#5b86ea',
+    backgroundColor: '#2D81F1',
     borderRadius: 8,
     paddingVertical: 16,
     paddingHorizontal: 10,

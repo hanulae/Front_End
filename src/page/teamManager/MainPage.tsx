@@ -46,7 +46,7 @@ const ManagerMainPage = ({navigation}: IManagerMainPageProps) => {
     navigation.navigate('ManagerMain');
   };
   const goToNoticePage = () => {
-    console.log('Notice Page');
+    navigation.navigate('EstimateList');
   };
 
   const goToSearchPage = () => {
@@ -96,7 +96,7 @@ const ManagerMainPage = ({navigation}: IManagerMainPageProps) => {
           <CustomButton onPress={goToNoticePage} style={styles.NoticeButton}>
             <MainAlarmIcon />
             <View style={styles.buttonTextContainer}>
-              <Typo style={styles.buttonTitle2}>공지사항</Typo>
+              <Typo style={styles.buttonTitle2}>견적내역</Typo>
               <View style={styles.buttonTextSubContainer}>
                 <Typo style={styles.buttonSub2}>확인하기</Typo>
                 <MoveIcon stroke="#FFFFFF" color="#FFFFFF" />

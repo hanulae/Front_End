@@ -10,12 +10,21 @@ interface IAgreement {
   age: boolean;
   marketing: boolean;
 }
+
+// 첨부파일 타입 정의
+export interface AttachedFile {
+  uri: string;
+  name: string;
+  type?: string;
+  file?: File;
+}
+
 export interface ISignupInfo {
   userType: UserType;
   email: string;
   password: string;
   phoneNumber: string;
-  attachedFile: File | null;
+  attachedFiles: AttachedFile[]; // 배열로 변경
   funeralName?: string; // 장례식장만 사용.
   accountInfo: {
     bankName: string;
@@ -31,7 +40,7 @@ export const signupAtom = atom<ISignupInfo>({
   email: '',
   password: '',
   phoneNumber: '',
-  attachedFile: null,
+  attachedFiles: [], // 빈 배열로 초기화
   funeralName: '',
   accountInfo: {
     bankName: '',

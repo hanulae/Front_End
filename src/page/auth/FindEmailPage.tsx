@@ -17,8 +17,13 @@ const FindEmailPage = ({navigation}: IFindEmailPageProps) => {
   const phoneNumber = usePhoneInput();
   const authCode = useInputBase();
   const dummyEmail = 'example@example.com';
-  const handleRequestCode = () => {
+  const handleRequestCode = async() => {
     // 휴대전화 인증 코드 요청 로직
+    // try {
+    //   const response = await api.post('')
+    // } catch (error) {
+      
+    // }
   };
 
   const handleVerifyCode = () => {

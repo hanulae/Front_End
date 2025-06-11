@@ -4,15 +4,18 @@ import {
   useRoute,
 } from '@react-navigation/native';
 import {ScrollView, StyleSheet, TouchableOpacity, View} from 'react-native';
-import DefaultLayout from '../../layout/DefaultLayout';
 import Typo from '../../components/common/Typo';
 import ManagerLayout from '../../layout/ManagerLayout';
+import SMSIcon from '../../assets/Attachment/Attach_SMSActive.svg';
+import PhoneIcon from '../../assets/Attachment/Attach_PhoneDisable.svg';
+import {isValidPhoneNumber} from '../../util/validation';
 
 const ProceedCallPage = () => {
   const navigation = useNavigation<NavigationProp<any>>();
   const route = useRoute();
   // const {callId} = route.params as {callId: number};
   // console.log('callId:', callId);
+  const {callId, status} = route.params as {callId: number; status: string};
   const handleMessage = () => {
     console.log('문자 보내기');
   };
@@ -22,7 +25,7 @@ const ProceedCallPage = () => {
   };
 
   const handleConfirm = () => {
-    console.log('거래확정');
+    navigation.goBack();
   };
 
   const handleCancel = () => {
@@ -66,26 +69,44 @@ const ProceedCallPage = () => {
         </View>
 
         {/* 문자/전화 버튼 */}
-        <View style={styles.buttonRow}>
-          <TouchableOpacity style={styles.iconButton} onPress={handleMessage}>
-            <Typo style={styles.iconButtonText}>문자</Typo>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton} onPress={handleCall}>
-            <Typo style={styles.iconButtonText}>전화</Typo>
-          </TouchableOpacity>
-        </View>
+        {status !== '완료' && (
+          <View style={styles.buttonRow}>
+            <TouchableOpacity
+              style={styles.messageButton}
+              onPress={handleMessage}>
+              <SMSIcon width={18} height={18} />
+              <Typo style={styles.messageIconButtonText}>문자</Typo>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.phoneButton} onPress={handleCall}>
+              <PhoneIcon width={18} height={18} />
+              <Typo style={styles.phoneIconButtonText}>전화</Typo>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* 거래확정/취소 버튼 */}
-        <View style={styles.bottomButtons}>
-          <TouchableOpacity
-            style={styles.confirmButton}
-            onPress={handleConfirm}>
-            <Typo style={styles.confirmButtonText}>거래확정</Typo>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
-            <Typo style={styles.cancelButtonText}>취소</Typo>
-          </TouchableOpacity>
-        </View>
+        {status === '완료' ? (
+          <View style={styles.bottomButtons}>
+            <TouchableOpacity
+              style={styles.confirmButton}
+              onPress={handleConfirm}>
+              <Typo style={styles.confirmButtonText}>확인</Typo>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.bottomButtons}>
+            <TouchableOpacity
+              style={styles.confirmButton}
+              onPress={handleConfirm}>
+              <Typo style={styles.confirmButtonText}>거래확정</Typo>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={handleCancel}>
+              <Typo style={styles.cancelButtonText}>취소</Typo>
+            </TouchableOpacity>
+          </View>
+        )}
       </ScrollView>
     </ManagerLayout>
   );
@@ -121,25 +142,50 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginBottom: 24,
+    gap: 10,
   },
-  iconButton: {
+  messageButton: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 10,
     flex: 1,
-    backgroundColor: '#f2f2f2',
-    paddingVertical: 14,
+    backgroundColor: 'rgba(226, 242, 255, 0.5)',
+    paddingVertical: 18,
     borderRadius: 8,
     alignItems: 'center',
-    marginHorizontal: 8,
   },
-  iconButtonText: {
-    fontWeight: 'bold',
-    fontSize: 16,
-    color: '#666',
+  phoneButton: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 10,
+    flex: 1,
+    backgroundColor: 'rgba(250, 250, 251, 0.75)',
+    paddingVertical: 18,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  // iconButtonText: {
+  //   fontWeight: 'bold',
+  //   fontSize: 16,
+  //   color: '#666',
+  // },
+  messageIconButtonText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#2D81F1',
+    fontFamily: 'Pretendard-Bold',
+  },
+  phoneIconButtonText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#8990A0',
+    fontFamily: 'Pretendard-Bold',
   },
   bottomButtons: {
     marginTop: 'auto',
   },
   confirmButton: {
-    backgroundColor: '#4F7CFF',
+    backgroundColor: '#2D81F1',
     paddingVertical: 18,
     borderRadius: 8,
     alignItems: 'center',
@@ -153,13 +199,13 @@ const styles = StyleSheet.create({
   cancelButton: {
     backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: '#4F7CFF',
+    borderColor: '#2D81F1',
     paddingVertical: 18,
     borderRadius: 8,
     alignItems: 'center',
   },
   cancelButtonText: {
-    color: '#4F7CFF',
+    color: '#2D81F1',
     fontWeight: 'bold',
     fontSize: 16,
   },

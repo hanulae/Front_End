@@ -7,13 +7,16 @@ import React, {JSX} from 'react';
 import {StyleSheet, View} from 'react-native';
 import CustomButton from './CustomButton';
 import Typo from './Typo';
-import BackIcon from '../../assets/Header/Header_Back.svg';
+// import BackIcon from '../../assets/Header/Header_Back.svg';
 import HomeIcon from '../../assets/Header/Header_Home.svg';
+import LogoutButtonWhite from '../../assets/Header/Header_DoorWhite.svg';
+import {BackIcon} from '../svg/BackIcon';
 
 interface IManagerHeaderProps {
   title: string;
   homeButton?: boolean;
   logoutButton?: boolean;
+  backIconColor?: string;
   homeRouteName?: string;
   onLogoutPress?: () => void;
   color?: string;
@@ -22,6 +25,7 @@ interface IManagerHeaderProps {
 const ManagerHeader = ({
   title,
   color,
+  backIconColor = 'black',
   homeButton = false,
   logoutButton = false,
   homeRouteName,
@@ -49,7 +53,7 @@ const ManagerHeader = ({
   return (
     <View style={[styles.header, {backgroundColor: color}]}>
       <CustomButton onPress={goBack}>
-        <BackIcon width={24} height={24} />
+        <BackIcon color={backIconColor} fill={'none'} width={24} height={24} />
       </CustomButton>
       <Typo style={styles.title}>{title}</Typo>
       {homeButton && (
@@ -58,8 +62,8 @@ const ManagerHeader = ({
         </CustomButton>
       )}
       {logoutButton && (
-        <CustomButton onPress={() => onLogoutPress}>
-          <Typo>로그아웃</Typo>
+        <CustomButton onPress={onLogoutPress || (() => {})}>
+          <LogoutButtonWhite width={24} height={24} />
         </CustomButton>
       )}
     </View>
@@ -79,6 +83,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: '600',
-    fontFamily: 'Pretendard-Black',
+    fontFamily: 'Pretendard-Bold',
   },
 });

@@ -33,6 +33,7 @@ const BaseInput = ({
         {...props}
         value={value}
         onFocus={() => setFocused(true)}
+        placeholderTextColor="#283042"
         onBlur={() => setFocused(false)}
         onChangeText={onChangeText}
         placeholder={props.placeholder}
@@ -67,6 +68,7 @@ const styles = StyleSheet.create({
     height: 56,
     borderRadius: 10,
     fontWeight: '500',
+    color: '#283042',
     paddingVertical: 18,
     backgroundColor: '#F5F6F8',
     paddingHorizontal: 20,

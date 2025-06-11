@@ -16,6 +16,7 @@ import {useState} from 'react';
 import EmailInput from '../../../components/common/input/EmailInput';
 import useEmailPartsInput from '../../../hooks/input/useEmailPartsInput';
 import {useRoute} from '@react-navigation/native';
+import api from '../../../api/config';
 
 interface Props {
   onNext: () => void;
@@ -24,17 +25,14 @@ interface Props {
 const SignupStepOne = ({onNext}: Props) => {
   const route = useRoute();
   const {userType} = route.params as {userType: 'manager' | 'funeral'};
-  console.log('userType', userType);
   const [signupInfo, setSignupInfo] = useAtom(signupAtom);
   const email = useEmailPartsInput(signupInfo.email);
-  console.log('email', email);
   const password = usePasswordInput(signupInfo.password);
   const authCode = useInputBase();
   const confirmPassword = useConfirmPasswordInput(
     () => password.value,
     signupInfo.confirmPassword,
   );
-  console.log('confirmPassword', confirmPassword);
   const [isEmailVerified, setIsEmailVerified] = useState(
     signupInfo.isEmailVerified,
   );
@@ -52,15 +50,47 @@ const SignupStepOne = ({onNext}: Props) => {
     onNext();
   };
 
-  const handleRequestCode = () => {
+  const handleRequestCode = async () => {
     // 인증 코드 요청 로직
     console.log('인증 코드 요청:', email.fullEmail);
+    // try {
+    //   // userType이 manager인 경우
+    //   if (userType === 'manager') {
+    //     await api.post('/manager/email/send', {
+    //       email: email.fullEmail,
+    //     });
+    //   }
+    //   // userType이 funeral인 경우
+    //   if (userType === 'funeral') {
+    //     await api.post('/funeral/email/send', {
+    //       email: email.fullEmail,
+    //     });
+    //   }
+    // } catch (error) {
+    //   console.log('error', error);
+    // }
   };
 
-  const handleVerifyCode = () => {
+  const handleVerifyCode = async () => {
     // 인증 코드 확인 로직
-    // TODO: 실제 인증 API 호출해서 성공 여부 확인
-    console.log('인증 코드 확인:', authCode.value);
+    // try {
+    //   // userType이 manager인 경우
+    //   if (userType === 'manager') {
+    //     await api.post('/manager/email/verify', {
+    //       email: email.fullEmail,
+    //       code: authCode.value,
+    //     });
+    //   }
+    //   // userType이 funeral인 경우
+    //   if (userType === 'funeral') {
+    //     await api.post('/funeral/email/verify', {
+    //       email: email.fullEmail,
+    //       code: authCode.value,
+    //     });
+    //   }
+    // } catch (error) {
+    //   console.log('error', error);
+    // }
 
     // 테스트용: 값이 '1234'일 때 인증 성공 처리
     if (authCode.value === '1234') {
@@ -80,7 +110,7 @@ const SignupStepOne = ({onNext}: Props) => {
             이메일 인증
           </Typo>
           <View style={styles.authSection}>
-            <EmailInput input={email} />
+            <EmailInput input={email} userType={userType} />
             <CustomButton
               onPress={handleRequestCode}
               style={styles.requestButton}>
@@ -124,17 +154,19 @@ const SignupStepOne = ({onNext}: Props) => {
             type="password"
           />
         </View>
-        <CustomButton
-          onPress={handleNext}
-          style={[
-            styles.confirmButton,
-            !isFormValid && {backgroundColor: '#D3D3D3'},
-          ]}
-          disabled={!isFormValid}>
-          <Typo color="white" fontSize={14} style={styles.confrimButtonText}>
-            다음
-          </Typo>
-        </CustomButton>
+        <View style={styles.confirmButtonContainer}>
+          <CustomButton
+            onPress={handleNext}
+            style={[
+              styles.confirmButton,
+              !isFormValid && {backgroundColor: '#D3D3D3'},
+            ]}
+            disabled={!isFormValid}>
+            <Typo color="white" fontSize={14} style={styles.confrimButtonText}>
+              다음
+            </Typo>
+          </CustomButton>
+        </View>
       </View>
     </TouchableWithoutFeedback>
   );
@@ -222,6 +254,11 @@ const styles = StyleSheet.create({
   typeButtonTextSelected: {
     color: '#fff', // 텍스트 색도 바꿔주기
     fontWeight: 'bold',
+  },
+  confirmButtonContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    paddingBottom: 10,
   },
   confirmButton: {
     paddingVertical: 18,

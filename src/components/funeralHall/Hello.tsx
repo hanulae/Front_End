@@ -15,11 +15,14 @@ const Hello = () => {
 export default Hello;
 
 const styles = StyleSheet.create({
-  helloContainer: {alignItems: 'flex-start', marginBottom: 8},
+  helloContainer: {
+    alignItems: 'flex-start',
+    // marginBottom: 8,
+  },
   bubble: {
     backgroundColor: 'white',
     borderRadius: 20,
-    paddingVertical: 6,
+    paddingVertical: 4,
     paddingHorizontal: 12,
   },
   helloText: {

@@ -30,6 +30,7 @@ const SignupComplete = () => {
           <Typo style={styles.subText}>하늘애의 소중한 회원이 되신 것을</Typo>
           <Typo style={styles.subText}>진심으로 환영합니다.</Typo>
           <Typo style={styles.sub2Text}>승인까지 1~2일 소요됩니다.</Typo>
+          <Typo style={styles.telText}>012-3456-7890</Typo>
         </View>
         <View style={styles.buttonContainer}>
           <CustomButton onPress={goToLoginPage} style={styles.loginButton}>
@@ -102,5 +103,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#FFFFFF',
     ...fontBase,
+  },
+  telText: {
+    ...fontBase,
+    fontSize: 14,
+    fontWeight: '400',
+    marginTop: 20,
   },
 });

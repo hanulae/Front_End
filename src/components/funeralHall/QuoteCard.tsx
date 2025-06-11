@@ -38,14 +38,14 @@ const QuoteCard = ({
         <View style={styles.requestBox}>
           <View style={styles.requestTitle}>
             <Typo style={styles.bottomText}>요청시각</Typo>
-            <RequestIcon width={24} height={24} />
+            <RequestIcon width={20} height={20} />
           </View>
           <Typo style={styles.requestDate}>{requestedAt}</Typo>
         </View>
         <View style={styles.sendBox}>
           <View style={styles.sendTitle}>
             <Typo style={styles.bottomText}>발송시각</Typo>
-            <SendIcon width={24} height={24} />
+            <SendIcon width={20} height={20} />
           </View>
           <Typo style={styles.sendDate}>{sentAt}</Typo>
         </View>
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#1C212A',
-    fontFamily: 'Pretendard-Black',
+    fontFamily: 'Pretendard-Bold',
     lineHeight: 20,
   },
   divider: {
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     color: '#8990A0',
-    fontFamily: 'Pretendard-Black',
+    fontFamily: 'Pretendard-Bold',
     lineHeight: 20,
   },
   topRowStatus: {
@@ -113,17 +113,15 @@ const styles = StyleSheet.create({
   },
   bottomRow: {
     flexDirection: 'row',
-    // borderBottomLeftRadius: 15,
-    // borderBottomRightRadius: 15,
-    paddingBottom: 23,
-    paddingTop: 15,
-    paddingHorizontal: 20,
-    justifyContent: 'space-between',
+    paddingVertical: 16,
+    justifyContent: 'center',
   },
   requestBox: {
     paddingVertical: 10,
     paddingHorizontal: 35,
     backgroundColor: 'rgba(231, 232, 242, 0.2)',
+    borderTopLeftRadius: 10,
+    borderBottomLeftRadius: 10,
   },
   requestTitle: {
     flexDirection: 'row',
@@ -133,14 +131,18 @@ const styles = StyleSheet.create({
   requestDate: {
     fontSize: 12,
     fontWeight: '500',
-    lineHeight: 20,
+    lineHeight: 24,
     color: '#4B99FE',
-    fontFamily: 'Pretendard-Black',
+    fontFamily: 'Pretendard-Bold',
   },
   sendBox: {
     paddingVertical: 10,
     paddingHorizontal: 35,
     backgroundColor: 'rgba(231, 232, 242, 0.2)',
+    borderTopRightRadius: 10,
+    borderBottomRightRadius: 10,
+    borderLeftWidth: 1,
+    borderLeftColor: 'rgba(90, 90, 90, 0.2)',
   },
   sendTitle: {
     flexDirection: 'row',
@@ -152,7 +154,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     lineHeight: 20,
     color: '#4B99FE',
-    fontFamily: 'Pretendard-Black',
+    fontFamily: 'Pretendard-Bold',
   },
   bottomText: {
     fontSize: 12,

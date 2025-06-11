@@ -16,16 +16,21 @@ export interface IImage {
 interface IImagePreviewListProps {
   images: IImage[];
   onDelete: (index: number) => void;
+  scrollEnabled?: boolean;
 }
 
-const ImagePreviewList = ({images, onDelete}: IImagePreviewListProps) => {
+const ImagePreviewList = ({
+  images,
+  onDelete,
+  scrollEnabled = true,
+}: IImagePreviewListProps) => {
   return (
     <FlatList
       data={images}
       style={styles.flatList}
       horizontal={true}
-      scrollEnabled={true}
-      showsHorizontalScrollIndicator={true}
+      scrollEnabled={scrollEnabled}
+      showsHorizontalScrollIndicator={scrollEnabled}
       contentContainerStyle={styles.container}
       keyExtractor={(_, index) => index.toString()}
       renderItem={({item, index}) => (

@@ -1,10 +1,11 @@
+import React from 'react';
 import {
   Dimensions,
   Keyboard,
   Platform,
+  Pressable,
   StatusBar,
   StyleSheet,
-  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import DefaultLayout from '../../layout/DefaultLayout';
@@ -22,7 +23,11 @@ import {userInfoAtom} from '../../state/local_state/userinfoAtom';
 import {useCallback, useState} from 'react';
 import EmailInput from '../../components/common/input/EmailInput';
 import useEmailPartsInput from '../../hooks/input/useEmailPartsInput';
+import PhoneAuthInput from '../../components/common/input/PhoneAuthInput';
+import usePhoneAuthInput from '../../hooks/input/usePhoneAuthInput';
 import UserSelectSheet from '../../components/common/UserSelectSheet';
+import Toast from 'react-native-toast-message';
+import api from '../../api/config';
 
 interface ILoginPageProps {
   navigation: NavigationProp<any>;
@@ -46,13 +51,16 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
   );
   const route = useRoute();
   const {userType} = route.params as {userType: 'manager' | 'funeral'};
-  console.log('userType', userType);
-  // const email = useEmailInput();
   const email = useEmailPartsInput();
+  const phoneAuth = usePhoneAuthInput();
   const password = usePasswordInput();
   const setLogin = useSetAtom(userInfoAtom);
 
+  // 직원 로그인 여부 확인
+  const isEmployeeLogin = userType === 'funeral' && email.isEmployee;
+
   const goToFindEmail = () => {
+    console.log('goToFindEmail');
     navigation.navigate('FindEmail');
   };
   const goToFindPassword = () => {
@@ -67,6 +75,108 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
       isLogin: true,
     });
   };
+
+  // 인증코드 발송 함수
+  const handleSendCode = async (phoneNumber: string) => {
+    try {
+      const response = await api.post('/funeral/auth/send-verification-code', {
+        phoneNumber: phoneNumber,
+      });
+      console.log('Code sent response:', response);
+    } catch (error) {
+      console.error('Send code error:', error);
+      throw error;
+    }
+  };
+
+  // 인증코드 확인 함수
+  const handleVerifyCode = async (
+    phoneNumber: string,
+    authCode: string,
+  ): Promise<boolean> => {
+    try {
+      const response = await api.post('/funeral/auth/verify-code', {
+        phoneNumber: phoneNumber,
+        verificationCode: authCode,
+      });
+      console.log('Verify code response:', response);
+      return response.data.success === true;
+    } catch (error) {
+      console.error('Verify code error:', error);
+      return false;
+    }
+  };
+
+  // 로그인 핸들러
+  const handleSignin = async () => {
+    // 직원 로그인의 경우
+    if (isEmployeeLogin) {
+      if (!phoneAuth.isVerified) {
+        Toast.show({
+          type: 'error',
+          text1: '휴대전화 인증을 완료해주세요.',
+          position: 'top',
+          topOffset: 100,
+        });
+        return;
+      }
+
+      try {
+        const response = await api.post('/funeral/auth/employee-login', {
+          phoneNumber: phoneAuth.phoneNumber.replace(/[^0-9]/g, ''),
+          verificationCode: phoneAuth.authCode,
+        });
+        console.log('Employee login response:', response);
+        handleLogin();
+      } catch (error) {
+        console.log('Employee login error', error);
+        Toast.show({
+          type: 'error',
+          text1: '로그인에 실패했습니다.',
+          position: 'top',
+          topOffset: 100,
+        });
+      }
+      return;
+    }
+
+    // 기존 이메일/비밀번호 로그인
+    if (!email.fullEmail || !password.value) {
+      Toast.show({
+        type: 'error',
+        text1: '이메일과 비밀번호를 입력해주세요.',
+        position: 'top',
+        topOffset: 100,
+      });
+      return;
+    }
+
+    try {
+      if (userType === 'manager') {
+        const response = await api.post('/manager/auth/login', {
+          managerEmail: email.fullEmail,
+          managerPassword: password.value,
+        });
+        console.log('response', response);
+        handleLogin();
+      } else if (userType === 'funeral') {
+        const response = await api.post('/funeral/auth/login', {
+          funeralEmail: email.fullEmail,
+          funeralPassword: password.value,
+        });
+        console.log('response', response);
+        handleLogin();
+      }
+    } catch (error) {
+      console.log('error', error);
+      Toast.show({
+        type: 'error',
+        text1: '로그인에 실패했습니다.',
+        position: 'top',
+        topOffset: 100,
+      });
+    }
+  };
   return (
     <DefaultLayout
       headerShown={true}
@@ -75,36 +185,53 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
       homeButton={true}
       logoutButton={false}
       homeRouteName="Main">
-      <View style={styles.logoSection}>
-        <Typo style={styles.logoText}>하늘애</Typo>
-      </View>
-      <View style={styles.formSection}>
-        <EmailInput input={email} userType={userType} />
-        <Input
-          input={password}
-          type="password"
-          placeholder="비밀번호를 입력하세요."
-        />
-      </View>
-
-      <View style={styles.buttonSection}>
-        <CustomButton onPress={handleLogin} style={styles.button}>
-          <Typo>로그인</Typo>
-        </CustomButton>
-      </View>
-      <View style={styles.formToolSection}>
-        <CustomButton onPress={goToFindEmail}>
-          <Typo style={styles.toolText}>이메일 찾기</Typo>
-        </CustomButton>
-        <Typo style={styles.divider}> | </Typo>
-        <CustomButton onPress={goToFindPassword}>
-          <Typo style={styles.toolText}>비밀번호 찾기</Typo>
-        </CustomButton>
-        <Typo style={styles.divider}> | </Typo>
-        <CustomButton onPress={goToSignup}>
-          <Typo style={[styles.toolText, {color: '#2D81F1'}]}>회원가입</Typo>
-        </CustomButton>
-      </View>
+      <Pressable onPress={Keyboard.dismiss}>
+        {/* <ScrollView style={styles.wrapper}> */}
+        <View style={styles.logoSection}>
+          <Typo style={styles.logoText}>하늘애</Typo>
+        </View>
+        <View
+          style={[
+            styles.formSection,
+            isEmployeeLogin && {height: height * 0.25, gap: 16},
+          ]}>
+          {isEmployeeLogin ? (
+            <PhoneAuthInput
+              input={phoneAuth}
+              onSendCode={handleSendCode}
+              onVerifyCode={handleVerifyCode}
+            />
+          ) : (
+            <>
+              <EmailInput input={email} userType={userType} />
+              <Input
+                input={password}
+                type="password"
+                placeholder="비밀번호를 입력하세요."
+              />
+            </>
+          )}
+        </View>
+        <View style={styles.buttonSection}>
+          <CustomButton onPress={handleSignin} style={styles.button}>
+            <Typo>로그인</Typo>
+          </CustomButton>
+        </View>
+        <View style={styles.formToolSection}>
+          <CustomButton onPress={goToFindEmail}>
+            <Typo style={styles.toolText}>이메일 찾기</Typo>
+          </CustomButton>
+          <Typo style={styles.divider}> | </Typo>
+          <CustomButton onPress={goToFindPassword}>
+            <Typo style={styles.toolText}>비밀번호 찾기</Typo>
+          </CustomButton>
+          <Typo style={styles.divider}> | </Typo>
+          <CustomButton onPress={goToSignup}>
+            <Typo style={[styles.toolText, {color: '#2D81F1'}]}>회원가입</Typo>
+          </CustomButton>
+        </View>
+        {/* </ScrollView> */}
+      </Pressable>
       {showSelectSheet && (
         <UserSelectSheet
           onClose={() => setShowSelectSheet(false)}
@@ -118,6 +245,9 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
 export default LoginPage;
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+  },
   logoSection: {
     // flex: 3,
     height: height * 0.3,

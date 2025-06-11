@@ -1,10 +1,9 @@
 import {
-  Dimensions,
+  Alert,
   FlatList,
   Platform,
   StatusBar,
   StyleSheet,
-  TextInput,
   View,
   ActivityIndicator,
   TouchableOpacity,
@@ -44,11 +43,14 @@ const FuneralSearchPage = () => {
     } else {
       StatusBar.setBarStyle('dark-content');
     }
+    // 초기 로드 시 전체 리스트 조회
+    searchFunerals();
   }, []);
 
   const route = useRoute();
   const params = route.params;
   const {variant} = params as {variant: string};
+
 
   const hallName = useInputBase();
   const {
@@ -323,7 +325,25 @@ const FuneralSearchPage = () => {
               </View>
               <MoveIcon width={24} height={24} />
             </CustomButton>
-          </View>
+          )}
+        </View>
+
+        {showFindCityBottomSheet && (
+          <FindCityBottomSheet
+            visible={showFindCityBottomSheet}
+            onClose={() => setShowFindCityBottomSheet(false)}
+            onSelect={handleSelectCity}
+            selectedRegion={selectedCity}
+          />
+        )}
+        {showGuBottomSheet && (
+          <FindGuBottomSheet
+            visible={showGuBottomSheet}
+            onClose={() => setShowGuBottomSheet(false)}
+            onSelect={handleSelectGu}
+            selectedDistrict={selectedGu}
+            selectedRegion={selectedCity}
+          />
         )}
       </View>
 
@@ -340,6 +360,7 @@ export default FuneralSearchPage;
 
 const styles = StyleSheet.create({
   wrapper: {
+    flex: 1,
     padding: 16,
   },
   searchContainer: {

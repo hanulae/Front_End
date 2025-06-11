@@ -1,8 +1,7 @@
 import {FlatList, StyleSheet, TouchableOpacity, View} from 'react-native';
-import {IDistrict} from '../../../interface/location';
 import Typo from '../../common/Typo';
 
-const formatList = (list: IDistrict[], numColumns: number) => {
+const formatList = (list: string[], numColumns: number) => {
   const remainder = list.length % numColumns;
   if (remainder === 0) return list;
 
@@ -11,9 +10,9 @@ const formatList = (list: IDistrict[], numColumns: number) => {
 };
 
 interface IDistrictSelectorProps {
-  districts: IDistrict[];
-  selectedDistrict: IDistrict | null;
-  onSelect: (district: IDistrict) => void;
+  districts: string[];
+  selectedDistrict: string;
+  onSelect: (district: string) => void;
 }
 
 const DistrictSelector = ({
@@ -33,11 +32,17 @@ const DistrictSelector = ({
           <TouchableOpacity
             style={[
               styles.button,
-              selectedDistrict?.districtId === item.districtId &&
-                styles.selectedButton,
+              selectedDistrict === item && styles.selectedButton,
             ]}
             onPress={() => onSelect(item)}>
-            <Typo fontSize={14}>{item.name}</Typo>
+            <Typo
+              fontSize={14}
+              style={[
+                styles.buttonText,
+                selectedDistrict === item && styles.selectedButtonText,
+              ]}>
+              {item}
+            </Typo>
           </TouchableOpacity>
         ) : (
           <View style={styles.emptyButton} />
@@ -59,8 +64,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 6,
   },
+  buttonText: {
+    color: '#280342',
+  },
   selectedButton: {
-    backgroundColor: '#F8E334',
+    backgroundColor: '#280342',
+  },
+  selectedButtonText: {
+    color: '#fff',
   },
   emptyButton: {
     flex: 1,

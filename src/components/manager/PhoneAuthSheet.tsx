@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: 380, // 바텀시트 높이 (추후 조정 가능)
+    height: 400, // 바텀시트 높이 (추후 조정 가능)
     backgroundColor: 'white',
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,

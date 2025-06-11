@@ -1,4 +1,4 @@
-import {Platform, StatusBar, StyleSheet, View} from 'react-native';
+import {Platform, StatusBar, StyleSheet, View, ScrollView} from 'react-native';
 import ProfileStat from '../../components/funeralHall/ProfileStat';
 import {useCallback, useEffect} from 'react';
 import FuneralLayout from '../../layout/FuneralLayout';
@@ -18,6 +18,44 @@ import {useSetAtom} from 'jotai';
 import {userInfoAtom} from '../../state/local_state/userinfoAtom';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import Toast from 'react-native-toast-message';
+
+// ===== 접근 권한 관련 타입 및 로직 (주석 처리) =====
+/*
+interface IUserPermissions {
+  room_management: boolean; // 호실 관리
+  info_edit: boolean; // 정보 수정
+  dispatch_history: boolean; // 지난 출동 내역
+  dispatch_pending: boolean; // 출동 대기 내역
+  estimate_history: boolean; // 견적 내역
+  app_settings: boolean; // 앱 설정
+}
+
+// 임시 사용자 권한 정보 (추후 전역 상태에서 가져올 예정)
+const mockUserPermissions: IUserPermissions = {
+  room_management: true,
+  info_edit: true,
+  dispatch_history: false, // 테스트용으로 false 설정
+  dispatch_pending: true,
+  estimate_history: false, // 테스트용으로 false 설정
+  app_settings: true,
+};
+
+// 권한 체크 함수
+const checkPermission = (permission: keyof IUserPermissions, actionName: string): boolean => {
+  if (!mockUserPermissions[permission]) {
+    Toast.show({
+      type: 'error',
+      text1: '접근 권한 없음',
+      text2: `${actionName}에 대한 접근 권한이 없습니다.`,
+      position: 'top',
+      visibilityTime: 3000,
+    });
+    return false;
+  }
+  return true;
+};
+*/
 
 const FuneralProfilePage = () => {
   // StatusBar 설정
@@ -49,37 +87,57 @@ const FuneralProfilePage = () => {
   }, []);
 
   const goToModifyFuneralInfo = () => {
+    // 권한 체크 (주석 처리)
+    // if (!checkPermission('info_edit', '정보 수정')) return;
+
     // console.log('Modify Funeral Info');
     navigation.navigate('FuneralModify');
   };
 
   const goToManageRomms = () => {
+    // 권한 체크 (주석 처리)
+    // if (!checkPermission('room_management', '호실 관리')) return;
+
     // console.log('Manage Rooms');
     navigation.navigate('RoomManagement');
   };
 
   const goToManageMembers = () => {
+    // 직원 관리는 항상 접근 가능 (관리자 기능)
     // console.log('Manage Members');
     navigation.navigate('StaffManagement');
   };
 
   const goToDispatchHistory = () => {
+    // 권한 체크 (주석 처리)
+    // if (!checkPermission('dispatch_history', '지난 출동 내역')) return;
+
     // console.log('Dispatch History');
     navigation.navigate('DispatchHistory');
   };
 
   const goToDispatchRequest = () => {
+    // 권한 체크 (주석 처리)
+    // if (!checkPermission('dispatch_pending', '출동 대기 내역')) return;
+
     console.log('Dispatch Request');
     navigation.navigate('PendingDispatch');
   };
 
   const goToQuoteList = () => {
+    // 권한 체크 (주석 처리)
+    // if (!checkPermission('estimate_history', '견적 내역')) return;
+
     console.log('Quote List');
     navigation.navigate('EstimateHistory');
   };
 
   const goToAppSetting = () => {
+    // 권한 체크 (주석 처리)
+    // if (!checkPermission('app_settings', '앱 설정')) return;
+
     console.log('App Setting');
+    navigation.navigate('AppSetting', {userType: 'funeral'});
   };
 
   const logout = () => {
@@ -101,7 +159,7 @@ const FuneralProfilePage = () => {
           onLogoutPress={logout}
         />
         <View style={styles.container}>
-          <ProfileStat point={100000} hallName="김상조" />
+          <ProfileStat point={100000} cash={50000} hallName="김상조" />
         </View>
       </View>
 
@@ -115,14 +173,10 @@ const FuneralProfilePage = () => {
         <MoveWhiteIcon width={24} height={24} />
       </CustomButton>
 
-      <View style={styles.whiteSection}>
-        {/* <CustomButton onPress={goToModifyFuneralInfo} style={styles.topButton}>
-          <View style={styles.buttonNameContainer}>
-            <ModifyInfoIcon width={24} height={24} />
-            <Typo style={styles.topButtonText}>정보 수정</Typo>
-          </View>
-          <MoveGrayIcon width={24} height={24} />
-        </CustomButton> */}
+      <ScrollView
+        style={styles.whiteSection}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}>
         <CustomButton onPress={goToManageRomms} style={styles.button}>
           <View style={styles.buttonNameContainer}>
             <ManageRoomIcon width={24} height={24} />
@@ -165,7 +219,8 @@ const FuneralProfilePage = () => {
           </View>
           <MoveGrayIcon width={24} height={24} />
         </CustomButton>
-      </View>
+      </ScrollView>
+      <Toast />
     </FuneralLayout>
   );
 };
@@ -188,7 +243,7 @@ const styles = StyleSheet.create({
   },
   floatingButton: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 380 : 200, // ProfileStat 아래 적당한 위치로 조정
+    top: Platform.OS === 'ios' ? 420 : 420, // ProfileStat 아래 적당한 위치로 조정
     left: 20,
     right: 20,
     zIndex: 5,
@@ -198,11 +253,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     paddingVertical: 20,
     borderRadius: 15,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    shadowOffset: {width: 0, height: 4},
+    // shadowColor: '#000',
+    // shadowOpacity: 0.1,
+    // shadowRadius: 6,
+    // shadowOffset: {width: 0, height: 4},
   },
   container: {
     flex: 1,
@@ -216,10 +270,14 @@ const styles = StyleSheet.create({
   whiteSection: {
     flex: 1,
     backgroundColor: '#F5F5F5',
-    paddingTop: 450, // ProfileStat 높이 만큼 여백 확보
-    paddingHorizontal: 20,
-    gap: 5,
+    marginTop: 470, // ProfileStat 높이 만큼 여백 확보
     zIndex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 40,
+    gap: 5,
   },
   topButton: {
     backgroundColor: '#58A1FF',
