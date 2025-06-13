@@ -15,7 +15,7 @@ const API_URL =
     : 'http://localhost:3000/api';
 
 const api = axios.create({
-  baseURL: getApiUrl(),
+  baseURL: API_URL,
   timeout: 10000, // 10초
   headers: {
     'Content-Type': 'application/json',
@@ -28,7 +28,6 @@ api.interceptors.request.use(
     const token = await getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-
     }
     return config;
   },
@@ -36,7 +35,6 @@ api.interceptors.request.use(
     return Promise.reject(error);
   },
 );
-
 
 // 응답 인터셉터: 401 에러 시 토큰 갱신 시도
 api.interceptors.response.use(
