@@ -28,6 +28,7 @@ import usePhoneAuthInput from '../../hooks/input/usePhoneAuthInput';
 import UserSelectSheet from '../../components/common/UserSelectSheet';
 import Toast from 'react-native-toast-message';
 import api from '../../api/config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface ILoginPageProps {
   navigation: NavigationProp<any>;
@@ -69,11 +70,23 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
   const goToSignup = () => {
     setShowSelectSheet(true);
   };
-  const handleLogin = () => {
-    setLogin({
-      userType: userType,
-      isLogin: true,
-    });
+  const handleLogin = async (response: any) => {
+    try {
+      // 토큰 저장
+      await AsyncStorage.setItem('accessToken', response.data.accessToken);
+      await AsyncStorage.setItem('refreshToken', response.data.refreshToken);
+
+      // 사용자 정보 저장 필요시 추가
+
+      setLogin({
+        userType: userType,
+        isLogin: true,
+      });
+
+      console.log('Login success', response.data.accessToken);
+    } catch (error) {
+      console.error('Login error:', error);
+    }
   };
 
   // 인증코드 발송 함수
@@ -127,7 +140,7 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
           verificationCode: phoneAuth.authCode,
         });
         console.log('Employee login response:', response);
-        handleLogin();
+        handleLogin(response);
       } catch (error) {
         console.log('Employee login error', error);
         Toast.show({
@@ -152,23 +165,31 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
     }
 
     try {
+      let response;
       if (userType === 'manager') {
-        const response = await api.post('/manager/auth/login', {
+        response = await api.post('/manager/auth/login', {
           managerEmail: email.fullEmail,
           managerPassword: password.value,
         });
-        console.log('response', response);
-        handleLogin();
       } else if (userType === 'funeral') {
-        const response = await api.post('/funeral/auth/login', {
+        response = await api.post('/funeral/auth/login', {
           funeralEmail: email.fullEmail,
           funeralPassword: password.value,
         });
-        console.log('response', response);
-        handleLogin();
+      }
+
+      if (response?.data) {
+        await handleLogin(response);
+
+        Toast.show({
+          type: 'success',
+          text1: response.data.message || '정상적으로 로그인 되었습니다.',
+          position: 'top',
+          topOffset: 100,
+        });
       }
     } catch (error) {
-      console.log('error', error);
+      console.log('Login error:', error);
       Toast.show({
         type: 'error',
         text1: '로그인에 실패했습니다.',

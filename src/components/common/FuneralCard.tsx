@@ -7,11 +7,16 @@ import dummyHallImage from '../../assets/dummyHall.png';
 
 interface FuneralCardProps {
   item: {
-    funeralListId: string;
-    funeralId: string | null;
-    funeralName: string;
-    funeralAddress: string;
+    funeralListId?: string;
+    funeralId?: string | null;
+    funeralName?: string;
+    funeralAddress?: string;
     imageUrl?: any;
+    id?: string;
+    name?: string;
+    address?: string;
+    phone?: string;
+    image?: string;
   };
   selected: boolean;
   onPressCard: () => void;
@@ -26,25 +31,28 @@ const FuneralCard = ({
   onPressCheck,
   onPressDelete,
 }: FuneralCardProps) => {
+  const itemName = item.funeralName || item.name || '장례식장 이름';
+  const itemAddress = item.funeralAddress || item.address || '주소 정보 없음';
+  const itemImage = item.imageUrl || item.image || dummyHallImage;
+
   return (
     <View style={styles.card}>
       <Pressable style={styles.checkContainer} onPress={onPressCheck}>
         {selected ? <CheckOnIcon /> : <CheckOffIcon />}
       </Pressable>
       <Pressable style={styles.contentArea} onPress={onPressCard}>
-        {/* 🆕 imageUrl이 없으면 더미 이미지 사용 */}
         <Image 
-          source={item.imageUrl || dummyHallImage}
+          source={itemImage}
           style={styles.image}
         />
         <View style={styles.infoContainer}>
-          <Typo style={styles.infoName}>{item.funeralName}</Typo>
+          <Typo style={styles.infoName}>{itemName}</Typo>
           <Typo 
-          style={styles.infoAddress}
-          numberOfLines={2}
-          ellipsizeMode="tail"
+            style={styles.infoAddress}
+            numberOfLines={2}
+            ellipsizeMode="tail"
           >
-            {item.funeralAddress}
+            {itemAddress}
           </Typo>
           {onPressDelete && (
             <Pressable style={styles.deleteButton} onPress={onPressDelete}>
@@ -82,8 +90,8 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     flex: 1,
-    height: 100,
-    paddingTop: 10,
+    height: 110,
+    paddingTop: 8,
     flexDirection: 'column',
     justifyContent: 'flex-start',
   },
@@ -99,7 +107,7 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     color: '#6F717D',
     fontFamily: 'Pretendard-Black',
-    lineHeight: 14,
+    lineHeight: 12,
     flexWrap: 'wrap',
     flex: 1,
   },
@@ -118,7 +126,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#F04452',
     backgroundColor: 'rgba(240, 68, 82, 0.1)',
-    marginTop: 10,
+    // marginTop: 10,
     borderRadius: 10,
     paddingVertical: 5,
     paddingHorizontal: 10,

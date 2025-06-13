@@ -26,6 +26,8 @@ import StoreIcon from '../../assets/Icon/Icon_Store.svg';
 import FamilyWaitingRoomIcon from '../../assets/Icon/Icon_FamilyWaitingRoom.svg';
 import DisabledFacilityIcon from '../../assets/Icon/Icon_DisabledFacility.svg';
 import {funeralService, FuneralDetail} from '../../services/api/funeralService';
+import { useManagerCart } from '../../hooks/useManagerCart';
+import Toast from 'react-native-toast-message';
 
 const {width} = Dimensions.get('window');
 
@@ -53,6 +55,12 @@ const FuneralDetailPage = ({navigation}: IFuneralDetailPageProps) => {
   const [funeralInfo, setFuneralInfo] = useState<FuneralDetail | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  const {
+    addToCart,
+    loading: cartLoading,
+    error: cartError,
+  } = useManagerCart();
 
   useEffect(() => {
     // 🚧 실제 API로 상세 정보 가져오기
@@ -87,13 +95,26 @@ const FuneralDetailPage = ({navigation}: IFuneralDetailPageProps) => {
         return;
       }
 
-      await AsyncStorage.setItem(
-        'funeralCart',
-        JSON.stringify({
-          funeralListId: funeralInfo.funeralListId,
-          funeralId: funeralInfo.funeralId,
-        }),
-      );
+      const result = await addToCart([funeralInfo]);
+      if (result) {
+        console.log('장바구니 추가 성공');
+        Toast.show({
+          type: 'success',
+          text1: '장바구니에 추가되었습니다.',
+          position: 'top',
+          topOffset: -150,
+          visibilityTime: 2000,
+        })
+      } else {
+        console.error('장바구니 추가 실패');
+        Toast.show({
+          type: 'error',
+          text1: '장바구니 추가 실패',
+          position: 'top',
+          topOffset: -150,
+          visibilityTime: 2000,
+        })
+      }
     } catch (err) {
       console.error('❌ 장바구니 저장 실패', err);
     }
@@ -334,6 +355,7 @@ const FuneralDetailPage = ({navigation}: IFuneralDetailPageProps) => {
           <MoveIcon width={ICON_SIZES.button} height={ICON_SIZES.button} />
         </CustomButton>
       </View>
+      <Toast />
     </ManagerLayout>
   );
 };
