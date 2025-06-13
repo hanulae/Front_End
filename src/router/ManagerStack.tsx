@@ -15,6 +15,7 @@ import PointHistoryPage from '../page/common/PointHistoryPage';
 import PointRefundPage from '../page/common/PointRefundPage';
 import ClientDetailPage from '../page/teamManager/ClientDetailPage';
 import AppSettingPage from '../page/common/AppSettingPage';
+import FuneralDetailPage from '../page/teamManager/FuneralDetailPage';
 
 const Stack = createNativeStackNavigator();
 
@@ -37,6 +38,7 @@ const ManagerStack = () => {
       <Stack.Screen name="PointHistory" component={PointHistoryPage} />
       <Stack.Screen name="PointRefund" component={PointRefundPage} />
       <Stack.Screen name="AppSetting" component={AppSettingPage} />
+      <Stack.Screen name="FuneralDetail" component={FuneralDetailPage} />
     </Stack.Navigator>
   );
 };

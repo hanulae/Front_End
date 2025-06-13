@@ -4,31 +4,43 @@ import {useInputBase} from '../../hooks/input/useInputBase';
 import {useState} from 'react';
 import Typo from '../../components/common/Typo';
 import {Input} from '../../components/common/input/Input';
-import {useRoute} from '@react-navigation/native';
+import {useRoute, useNavigation} from '@react-navigation/native';
 import DateWheelBottomSheet from '../../components/common/DateWheel';
 import CustomButton from '../../components/common/CustomButton';
 import ManagerLayout from '../../layout/ManagerLayout';
 import CalandarIcon from '../../assets/Button/Button_Calandar.svg';
 import Toast from 'react-native-toast-message';
+import RequestIcon from '../../assets/Button/Button_RequestQuote.svg';
+import MoveIcon from '../../assets/Button/Button_MoveTransparent.svg';
+import {useManagerForm} from '../../hooks/useManagerForm';
+
 const EstimateFormPage = () => {
+  const navigation = useNavigation();
   const clientName = useInputBase();
   const visitorCount = useInputBase();
-  const route = useRoute();
-  const {funeralHallId} = route.params as {funeralHallId: number};
-  console.log('funeralHallId', funeralHallId);
-  const currentDate = new Date();
+  const deceasedName = useInputBase();
 
+  const route = useRoute();
+  const {selectedFunerals, funeralHallIds} = route.params as {
+    selectedFunerals: string[];
+    funeralHallIds: string[];
+  };
+
+  const currentDate = new Date();
   const [admissionDate, setAdmissionDate] = useState<Date | null>(null); // 입실일자
   const [departureDate, setDepartureDate] = useState<Date | null>(null); // 퇴실일자
-
   const [showAdmissionPicker, setShowAdmissionPicker] = useState(false);
   const [showDeparturePicker, setShowDeparturePicker] = useState(false);
+  
+  // 견적서 발송 훅
+  const { loading, error, createManagerForm, clearError } = useManagerForm();
 
+  // 날짜 포맷팅 (YYYY-MM-DD)
   const formatSimpleDate = (date: Date) => {
-    return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
       2,
       '0',
-    )}.${String(date.getDate()).padStart(2, '0')}`;
+    )}-${String(date.getDate()).padStart(2, '0')}`;
   };
 
   // 입실일자 선택 완료
@@ -50,20 +62,43 @@ const EstimateFormPage = () => {
     setShowDeparturePicker(false);
   };
 
+  // 견적서 발송 함수 (견적서 생성)
   const handleDispatchEstimate = async () => {
-    // try {
-
-    // } catch (error) {
-
-    // }
+    try {
+      // 필수 입력 항목 검증
+      if (!clientName.value.trim()) {
+        Toast.show({
+          type: 'error',
+          text1: '필수 입력 항목이 누락되었습니다.',
+          text2: '상주 이름을 입력해주세요.',
+          position: 'top',
+          topOffset: -150,
+        });
+        return;
+      }
+      if (!visitorCount.value.trim()) {
+        Toast.show({
+          type: 'error',
+          text1: '필수 입력 항목이 누락되었습니다.',
+          text2: '조문객 수를 입력해주세요.',
+          position: 'top',
+          topOffset: -150,
+        });
+        return;
+      }
+  } catch (error: any) {
+    console.error('견적서 발송 실패: ', error);
     Toast.show({
-      type: 'success',
-      text1: '견적서 발송 완료',
-      text2: '견적서가 발송되었습니다.',
+      type: 'error',
+      text1: '견적서 발송 실패',
+      text2: error.message || '알 수 없는 오류가 발생했습니다.',
       position: 'top',
       topOffset: -150,
     });
-  };
+  } finally {
+    clearError();
+  }
+};
 
   return (
     <ManagerLayout
@@ -140,9 +175,13 @@ const EstimateFormPage = () => {
             <CustomButton
               onPress={handleDispatchEstimate}
               style={styles.button}>
-              <Typo fontSize={14} color="white">
-                견적서 발송
-              </Typo>
+              <View style={styles.buttonIcon}>
+                <RequestIcon width={24} height={24} />
+                <Typo style={styles.buttonText}>
+                  견적서 발송
+                </Typo>
+              </View>
+              <MoveIcon width={24} height={24} />
             </CustomButton>
           </View>
           {/* 입실일자 선택용 바텀시트 */}
@@ -227,18 +266,32 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   buttonContainer: {
+    flexDirection: 'row',
     flex: 1,
-    marginTop: 16,
-    paddingBottom: 16,
-    justifyContent: 'flex-end',
+    alignItems: 'flex-end',
+    marginTop: 8,
+    paddingBottom: 8,
     // 여기에 버튼 스타일 추가
   },
   button: {
-    // flex: 1,
+    flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#2D81F1',
     borderRadius: 8,
     paddingVertical: 16,
-    paddingHorizontal: 10,
+    paddingHorizontal: 20,
+  },
+  buttonText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    fontFamily: 'Pretendard-Black',
+  },
+  buttonIcon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flex: 1,
   },
 });

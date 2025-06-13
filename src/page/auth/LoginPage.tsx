@@ -70,11 +70,23 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
   const goToSignup = () => {
     setShowSelectSheet(true);
   };
-  const handleLogin = () => {
-    setLogin({
-      userType: userType,
-      isLogin: true,
-    });
+  const handleLogin = async (response: any) => {
+    try {
+      // 토큰 저장
+      await AsyncStorage.setItem('accessToken', response.data.accessToken);
+      await AsyncStorage.setItem('refreshToken', response.data.refreshToken);
+
+      // 사용자 정보 저장 필요시 추가
+
+      setLogin({
+        userType: userType,
+        isLogin: true,
+      });
+
+      console.log('Login success', response.data.accessToken);
+    } catch (error) {
+      console.error('Login error:', error);
+    }
   };
 
   // 인증코드 발송 함수
@@ -139,6 +151,7 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
         });
 
         handleLogin();
+
       } catch (error) {
         console.log('Employee login error', error);
         Toast.show({
@@ -163,11 +176,13 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
     }
 
     try {
+      let response;
       if (userType === 'manager') {
-        const response = await api.post('/manager/auth/login', {
+        response = await api.post('/manager/auth/login', {
           managerEmail: email.fullEmail,
           managerPassword: password.value,
         });
+
         console.log('Manager login response:', response);
 
         // JWT 토큰과 사용자 정보 저장
@@ -181,10 +196,11 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
 
         handleLogin();
       } else if (userType === 'funeral') {
-        const response = await api.post('/funeral/auth/login', {
+        response = await api.post('/funeral/auth/login', {
           funeralEmail: email.fullEmail,
           funeralPassword: password.value,
         });
+
         console.log('Funeral login response:', response);
 
         // JWT 토큰과 사용자 정보 저장
@@ -200,6 +216,7 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
       }
     } catch (error) {
       console.log('Login error', error);
+
       Toast.show({
         type: 'error',
         text1: '로그인에 실패했습니다.',
