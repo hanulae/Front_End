@@ -1,4 +1,5 @@
 import {useAtom, useSetAtom} from 'jotai';
+import axios from 'axios';
 import {useState} from 'react';
 import {signupAtom} from '../../../state/local_state/signupAtom';
 import {
@@ -7,6 +8,7 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from 'react-native';
 import Typo from '../../../components/common/Typo';
 import CustomButton from '../../../components/common/CustomButton';
@@ -17,6 +19,7 @@ import SmallCheckIconOff from '../../../assets/Check/Check_03=Check_03_Default.s
 import SmallCheckIconOn from '../../../assets/Check/Check_03=Check_03_Active.svg';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import api from '../../../api/config';
 interface Props {
   onSubmit: () => void;
   onPrev: () => void;
@@ -24,6 +27,7 @@ interface Props {
 }
 
 const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
+  console.log('SignupStepThree');
   // const setSignupInfo = useSetAtom(signupAtom);
   const [signupInfo, setSignupInfo] = useAtom(signupAtom);
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
@@ -40,6 +44,34 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
     age: false,
     marketing: false,
   });
+  const [name, setName] = useState('');
+  const [bankCode, setBankCode] = useState('');
+
+
+  const BANK_LIST = [
+    { name: 'KB국민은행', code: '004' },
+    { name: 'SC제일은행', code: '023' },
+    { name: '경남은행', code: '039' },
+    { name: '광주은행', code: '034' },
+    { name: '기업은행', code: '003' },
+    { name: '농협', code: '011' },
+    { name: '대구은행', code: '031' },
+    { name: '부산은행', code: '032' },
+    { name: '산업은행', code: '002' },
+    { name: '수협', code: '007' },
+    { name: '신한은행', code: '088' },
+    { name: '신협', code: '048' },
+    { name: '외환은행', code: '005' },
+    { name: '우리은행', code: '020' },
+    { name: '우체국', code: '071' },
+    { name: '전북은행', code: '037' },
+    { name: '제주은행', code: '035' },
+    { name: '축협', code: '012' },
+    { name: '하나은행(서울은행)', code: '081' },
+    { name: '한국씨티은행(한미은행)', code: '027' },
+    { name: 'K뱅크', code: '089' },
+    { name: '카카오뱅크', code: '090' },
+  ];
 
   const openBankSelectSheet = () => {
     setShowBankSelectSheet(true);
@@ -78,17 +110,75 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
     }
   };
 
-  // const handleSubmit = () => {
-  //   setSignupInfo(prev => ({
-  //     ...prev,
-  //     accountInfo: {bankName, accountNumber},
-  //     agreedTerms: agrees,
-  //   }));
-  //   onSubmit();
-  //   navigation.navigate('SignupComplete', {
-  //     userType: userType,
-  //   });
-  // };
+  const handleSubmit = async () => {
+    try {
+      const formData = new FormData();
+      if (userType === 'manager') {
+        formData.append('managerEmail', signupInfo.email);
+        formData.append('managerPassword', signupInfo.password);
+        formData.append('managerName', name);
+        formData.append('managerPhone', signupInfo.phoneNumber.replace(/-/g, ''));
+        formData.append('managerBankName', bankName);
+        formData.append('managerBankNumber', accountNumber);
+        formData.append('agreements', JSON.stringify(agrees));
+      } else if (userType === 'funeral') {
+        formData.append('funeralEmail', signupInfo.email);
+        formData.append('funeralPassword', signupInfo.password);
+        formData.append('funeralName', name);
+        formData.append('funeralPhoneNumber', signupInfo.phoneNumber.replace(/-/g, ''));
+        formData.append('funeralBankName', bankName);
+        formData.append('funeralBankNumber', accountNumber);
+        formData.append('funeralBankHolder', name); // 필요 시 계좌주명 따로 입력받아 사용
+        formData.append('agreements', JSON.stringify(agrees));
+      }
+  
+      // 🔹 파일 key 분기
+    const fileKey = userType === 'funeral' ? 'funeralAddFile' : 'managerAddFile';
+
+    signupInfo.attachedFiles.forEach(file => {
+      formData.append(fileKey, {
+        uri: file.uri,
+        type: file.type,
+        name: file.name,
+      });
+    });
+      
+      console.log("userType:", userType);
+      console.log("🚀 ~ handleSubmit ~ formData:", formData);
+  
+      // ✅ userType에 따라 API 분기
+      const endpoint =
+        userType === 'manager'
+          ? '/manager/user/signup'
+          : '/funeral/user/signup';
+  
+      const res = await api.post(endpoint, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+  
+      Alert.alert('가입 완료', res.data.message);
+      navigation.navigate('SignupComplete', {
+        userType,
+      });
+    } catch (error: any) {
+      let alertMessage = '알 수 없는 오류가 발생했습니다.';
+  
+      if (axios.isAxiosError(error)) {
+        if (error.response?.data?.message) {
+          alertMessage = error.response.data.message;
+        } else if (error.message) {
+          alertMessage = error.message;
+        }
+      } else if (error instanceof Error) {
+        alertMessage = error.message;
+      }
+  
+      console.error('회원가입 에러 로그:', error);
+      Alert.alert('회원가입 실패', alertMessage);
+    }
+  };
 
   // const handleSubmit = () => {
   //   setSignupInfo(prev => ({
@@ -98,32 +188,101 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
   //   }));
 
   // };
+
+  const handleAccountVerify = async () => {
+    console.log('bankName:', bankName);
+    console.log('bankCode:', bankCode);
+    console.log('accountNumber:', accountNumber);
+    console.log('name:', name);
+    if (!bankCode || !accountNumber || !name) {
+      Alert.alert('입력 오류', '은행, 계좌번호, 이름을 모두 입력해주세요.');
+      return;
+    }
+  
+    try {
+      const res = await api.post('/manager/bank/verify', {
+        bankCode,
+        bankNumber: accountNumber,
+        name,
+      });
+  
+      Alert.alert('인증 성공', '계좌 인증이 완료되었습니다.');
+  
+      setSignupInfo(prev => ({
+        ...prev,
+        name,
+        accountInfo: {
+          bankName,
+          accountNumber,
+          verified: true,
+        },
+      }));
+    } catch (err: any) {
+      console.log('계좌 인증 실패:', err.response?.data || err.message);
+      Alert.alert('인증 실패', err.response?.data?.message || '계좌 인증에 실패했습니다.');
+    }
+  };
 
   console.log('signupInf123123o', signupInfo);
 
   return (
     <ScrollView contentContainerStyle={styles.wrapper}>
+
+      {/* 이름 입력 */}
+  <Typo style={styles.label}>예금주 이름</Typo>
+  <TextInput
+    style={styles.input}
+    placeholder="이름을 입력하세요"
+    value={name}
+    onChangeText={setName}
+  />
+      
       {/* 계좌 인증 */}
       <View style={styles.accountSection}>
         <View style={styles.row}>
-          <CustomButton
-            onPress={openBankSelectSheet}
-            style={styles.selectBankButton}>
-            <Typo style={styles.bankText}>{bankName || '은행 선택'}</Typo>
-          </CustomButton>
-          <TextInput
-            style={[styles.input, {flex: 1, marginLeft: 8}]}
-            placeholder="000-0000-0000"
-            value={accountNumber}
-            onChangeText={setAccountNumber}
-          />
+        <CustomButton
+      onPress={() => setShowBankSelectSheet(true)}
+      style={styles.selectBankButton}>
+      <Typo style={styles.bankText}>{bankName || '은행 선택'}</Typo>
+    </CustomButton>
+    <TextInput
+      style={[styles.input, { flex: 1, marginLeft: 8 }]}
+      placeholder="000-0000-0000"
+      value={accountNumber}
+      onChangeText={setAccountNumber}
+    />
         </View>
 
-        <TouchableOpacity style={styles.buttonGray}>
-          <Typo color="white" fontSize={14}>
-            계좌 인증
-          </Typo>
-        </TouchableOpacity>
+        {/* 인증 버튼 */}
+  <TouchableOpacity style={styles.verifyButton} onPress={handleAccountVerify}>
+    <Typo color="white" fontSize={14}>계좌 인증</Typo>
+  </TouchableOpacity>
+
+  {/* 은행 선택 바텀시트 */}
+  <BankSelectBottomSheet
+  visible={showBankSelectSheet}
+  onClose={() => setShowBankSelectSheet(false)}
+  onSelect={(selectedBankName) => {
+    setBankName(selectedBankName);
+
+    console.log('📌 선택된 은행명:', JSON.stringify(selectedBankName));
+    
+    const matched = BANK_LIST.find(b => {
+      console.log('🔍 비교:', JSON.stringify(b.name), 'vs', JSON.stringify(selectedBankName));
+      return b.name.trim() === selectedBankName.trim();
+    });
+
+    if (matched) {
+      console.log('✅ 매칭된 코드:', matched.code);
+      setBankCode(matched.code);
+    } else {
+      console.warn('⚠️ 은행 코드 매칭 실패:', selectedBankName);
+      setBankCode('');
+    }
+
+    setShowBankSelectSheet(false);
+  }}
+/>
 
         <TextInput
           style={styles.input}
@@ -244,14 +403,14 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
           <Typo style={styles.buttonText}>회원가입</Typo>
         </TouchableOpacity>
       </View>
-      <BankSelectBottomSheet
+      {/* <BankSelectBottomSheet
         visible={showBankSelectSheet}
         onClose={closeBankSelectSheet}
         onSelect={bank => {
           setBankName(bank);
           closeBankSelectSheet();
         }}
-      />
+      /> */}
     </ScrollView>
   );
 };
@@ -380,5 +539,22 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-end',
     marginBottom: 16,
+  },
+  inputGroup: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginBottom: 8,
+    marginLeft: 4,
+    fontFamily: 'Pretendard-Light',
+  },
+  verifyButton: {
+    backgroundColor: '#2D81F1',
+    borderRadius: 8,
+    alignItems: 'center',
+    paddingVertical: 14,
+    marginTop: 16,
   },
 });

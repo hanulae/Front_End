@@ -37,6 +37,7 @@ interface ILoginPageProps {
 // }
 const {height} = Dimensions.get('window');
 const LoginPage = ({navigation}: ILoginPageProps) => {
+  console.log('LoginPage');
   const [showSelectSheet, setShowSelectSheet] = useState(false);
 
   useFocusEffect(
@@ -67,6 +68,7 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
     navigation.navigate('FindPW');
   };
   const goToSignup = () => {
+    console.log('goToSignup');
     setShowSelectSheet(true);
   };
   const handleLogin = () => {

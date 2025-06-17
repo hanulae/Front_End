@@ -19,6 +19,8 @@ import {FuneralInput} from '../../common/input/FuneralInput';
 import CustomButton from '../../common/CustomButton';
 import CheckCircleOffIcon from '../../../assets/Check/Check01=Check01_default.svg';
 import CheckCircleOnIcon from '../../../assets/Check/Check01=Check01_Active.svg';
+import Toast from 'react-native-toast-message'; // 상단 import 필요
+import api from '../../../api/config';
 
 interface IPermissions {
   room_management: boolean;
@@ -98,6 +100,101 @@ const StaffBottomSheet = ({
   const staffGrade = useInputBase();
   const staffName = useInputBase();
 
+  const [signupInfo, setSignupInfo] = useState({
+    phoneNumber: '',
+    isPhoneVerified: false,
+  });
+
+  // 인증 요청 함수
+const handleRequestCode = async () => {
+  const phone = phoneNumber.value.replace(/-/g, '').trim();
+
+  if (!phone || phone.length < 10) {
+    Toast.show({
+      type: 'error',
+      text1: '입력 오류',
+      text2: '유효한 전화번호를 입력해주세요.',
+      position: 'top',
+    });
+    return;
+  }
+
+  try {
+    const res = await api.post('/funeral/sms/send', {
+      funeralPhone: phone,
+    });
+    console.log('📨 인증번호 전송 성공:', res.data);
+
+    Toast.show({
+      type: 'success',
+      text1: '인증번호가 발송되었습니다.',
+      position: 'top',
+    });
+  } catch (error: any) {
+    console.log('❌ 인증번호 전송 실패:', error.response?.data || error.message);
+    Toast.show({
+      type: 'error',
+      text1: '인증번호 전송 실패',
+      text2: error.response?.data?.message || '오류가 발생했습니다.',
+      position: 'top',
+    });
+  }
+};
+
+// 인증 확인 함수
+const handleVerifyCode = async () => {
+  const phone = phoneNumber.value.replace(/-/g, '').trim();
+  const code = authCode.value.trim();
+
+  if (!phone || !code) {
+    Toast.show({
+      type: 'error',
+      text1: '입력 오류',
+      text2: '전화번호와 인증코드를 모두 입력해주세요.',
+      position: 'top',
+    });
+    return;
+  }
+
+  try {
+    const res = await api.post('/funeral/sms/verify', {
+      funeralPhone: phone,
+      code,
+    });
+    console.log("🚀 ~ handleVerifyCode ~ res:", res)
+
+    if (res.data.verified) {
+      Toast.show({
+        type: 'success',
+        text1: '인증 성공',
+        position: 'top',
+      });
+
+      // 인증 완료 처리 필요 시 여기에서 상태 반영
+      setSignupInfo(prev => ({
+        ...prev,
+        phoneNumber: phone,
+        isPhoneVerified: true,
+      }));
+    } else {
+      Toast.show({
+        type: 'error',
+        text1: '인증 실패',
+        text2: '인증코드가 틀렸거나 만료되었습니다.',
+        position: 'top',
+      });
+    }
+  } catch (error: any) {
+    console.log('❌ 인증 실패:', error.response?.data || error.message);
+    Toast.show({
+      type: 'error',
+      text1: '서버 오류',
+      text2: error.response?.data?.message || '잠시 후 다시 시도해주세요.',
+      position: 'top',
+    });
+  }
+};
+
   return (
     <Modal visible={visible} transparent animationType="none">
       <Pressable style={styles.backdrop} onPress={onClose}>
@@ -118,11 +215,10 @@ const StaffBottomSheet = ({
               <View style={styles.inputContainer}>
                 <Typo style={styles.inputTitle}>휴대전화번호</Typo>
                 <FuneralInput input={phoneNumber} placeholder="휴대전화번호" />
-                <CustomButton
-                  onPress={() => console.log('인증번호 발송')}
-                  style={styles.button}>
+                <CustomButton onPress={handleRequestCode} style={styles.button}>
                   <Typo style={styles.buttonText}>인증코드요청</Typo>
                 </CustomButton>
+
               </View>
               <View style={styles.inputContainer}>
                 <Typo style={styles.inputTitle}>인증코드</Typo>
@@ -130,9 +226,7 @@ const StaffBottomSheet = ({
                   input={authCode}
                   placeholder="인증코드를 입력하세요"
                 />
-                <CustomButton
-                  onPress={() => console.log('인증번호 확인')}
-                  style={styles.checkButton}>
+                <CustomButton onPress={handleVerifyCode} style={styles.checkButton}>
                   <Typo style={styles.checkButtonText}>인증번호확인</Typo>
                 </CustomButton>
               </View>
