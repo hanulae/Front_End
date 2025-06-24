@@ -29,6 +29,7 @@ import UserSelectSheet from '../../components/common/UserSelectSheet';
 import Toast from 'react-native-toast-message';
 import api from '../../api/config';
 import {storeTokens, storeUserInfo} from '../../utils/tokenStorage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface ILoginPageProps {
   navigation: NavigationProp<any>;
@@ -70,6 +71,7 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
   const goToSignup = () => {
     setShowSelectSheet(true);
   };
+
   const handleLogin = async (response: any) => {
     try {
       // 토큰 저장
@@ -150,7 +152,7 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
           data: employee,
         });
 
-        handleLogin();
+        handleLogin(response);
 
       } catch (error) {
         console.log('Employee login error', error);
@@ -194,7 +196,7 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
           data: manager,
         });
 
-        handleLogin();
+        handleLogin(response);
       } else if (userType === 'funeral') {
         response = await api.post('/funeral/auth/login', {
           funeralEmail: email.fullEmail,
@@ -212,7 +214,7 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
           data: funeral,
         });
 
-        handleLogin();
+        handleLogin(response);
       }
     } catch (error) {
       console.log('Login error', error);

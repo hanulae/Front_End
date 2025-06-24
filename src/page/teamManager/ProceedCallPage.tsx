@@ -1,36 +1,307 @@
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   NavigationProp,
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
-import {ScrollView, StyleSheet, TouchableOpacity, View} from 'react-native';
+import {ScrollView, StyleSheet, TouchableOpacity, View, ActivityIndicator} from 'react-native';
 import Typo from '../../components/common/Typo';
 import ManagerLayout from '../../layout/ManagerLayout';
 import SMSIcon from '../../assets/Attachment/Attach_SMSActive.svg';
 import PhoneIcon from '../../assets/Attachment/Attach_PhoneDisable.svg';
 import {isValidPhoneNumber} from '../../util/validation';
+import { useManagerDispatchRequest } from '../../hooks/useManagerDispatchRequest';
+import Toast from 'react-native-toast-message';
 
 const ProceedCallPage = () => {
   const navigation = useNavigation<NavigationProp<any>>();
   const route = useRoute();
-  // const {callId} = route.params as {callId: number};
-  // console.log('callId:', callId);
-  const {callId, status} = route.params as {callId: number; status: string};
-  const handleMessage = () => {
-    console.log('문자 보내기');
+  const { callId } = route.params as { callId: string };
+
+  // API 훅 사용
+  const { 
+    loading, 
+    error, 
+    getManagerDispatchRequestDetail,
+    cancelManagerDispatchRequest,
+    completeManagerDispatchRequest
+  } = useManagerDispatchRequest();
+
+  // 출동 신청 상세 데이터 상태
+  const [dispatchDetail, setDispatchDetail] = useState<any>(null);
+
+  // 데이터 로드
+  const loadDispatchDetail = useCallback(async () => {
+    try {
+      const result = await getManagerDispatchRequestDetail(callId);
+
+      if (result && result.data) {
+        setDispatchDetail(result.data);
+        console.log('✅ 출동 신청 상세 정보 로드 성공:', result.data);
+      } else {
+        console.log('❌ 출동 신청 상세 정보 로드 실패');
+      }
+    } catch (err) {
+      console.error('💥 출동 신청 상세 정보 로드 에러:', err);
+    }
+  }, [callId, getManagerDispatchRequestDetail]);
+
+  // 페이지 로드시 데이터 가져오기
+  useEffect(() => {
+    if (callId) {
+      loadDispatchDetail();
+    }
+  }, [callId, loadDispatchDetail]);
+
+  const handleMessage = (phoneNumber?: string) => {
+    if (!phoneNumber) {
+      Toast.show({
+        text1: '연락처 정보가 없습니다.',
+        type: 'error',
+        position: 'top',
+        topOffset: 0,
+      });
+      return;
+    }
+
+    // 실제 문자 보내기 로직 구현
+    console.log('문자 보내기:', phoneNumber);
+    // Linking.openURL(`sms:${phoneNumber}`);
   };
 
-  const handleCall = () => {
-    console.log('전화 걸기');
+  const handleCall = (phoneNumber?: string) => {
+    if (!phoneNumber) {
+      Toast.show({
+        text1: '연락처 정보가 없습니다.',
+        type: 'error',
+        position: 'top',
+        topOffset: 0,
+      });
+      return;
+    }
+
+    if (!isValidPhoneNumber(phoneNumber)) {
+      Toast.show({
+        text1: '올바르지 않은 전화번호입니다.',
+        type: 'error',
+        position: 'top',
+        topOffset: 0,
+      });
+      return;
+    }
+
+    // 실제 전화 걸기 로직 구현
+    console.log('전화 걸기:', phoneNumber);
+    // Linking.openURL(`tel:${phoneNumber}`);
   };
 
   const handleConfirm = () => {
     navigation.goBack();
   };
 
-  const handleCancel = () => {
-    console.log('취소');
+  const handleComplete = async (dispatchRequestId: string) => {
+    try {
+      const result = await completeManagerDispatchRequest(dispatchRequestId);
+      
+      if (result) {
+        // 성공 시 메시지 처리
+        const statusMessage = result.status === 'waiting_counterpart' 
+          ? '거래 확정을 완료했습니다. 장례식장의 확인을 기다리고 있습니다.'
+          : result.status === 'completed'
+          ? '거래가 성공적으로 완료되었습니다!'
+          : result.message;
+
+        Toast.show({
+          text1: statusMessage,
+          type: 'success',
+          position: 'top',
+          topOffset: 0,
+        });
+
+        // 데이터 새로고침
+        await loadDispatchDetail();
+        
+        // 거래가 완전히 완료된 경우에만 뒤로가기
+        if (result.status === 'completed') {
+          setTimeout(() => {
+            navigation.goBack();
+          }, 1500);
+        }
+      }
+    } catch (err: any) {
+      console.error('거래 확정 실패:', err);
+      Toast.show({
+        text1: err.message || '거래 확정에 실패했습니다.',
+        type: 'error',
+        position: 'top',
+        topOffset: 0,
+      });
+    }
   };
+
+  const handleCancel = async (dispatchRequestId: string) => {
+    try {
+      const result = await cancelManagerDispatchRequest(dispatchRequestId);
+      
+      if (result) {
+        Toast.show({
+          text1: '출동이 취소되었습니다.',
+          type: 'success',
+          position: 'top',
+          topOffset: 0,
+        });
+        
+        // 취소 후 뒤로가기
+        setTimeout(() => {
+          navigation.goBack();
+        }, 1000);
+      }
+    } catch (err: any) {
+      console.error('출동 취소 실패:', err);
+      Toast.show({
+        text1: err.message || '출동 취소에 실패했습니다.',
+        type: 'error',
+        position: 'top',
+        topOffset: 0,
+      });
+    }
+  };
+
+  // 상태별 안내 메시지
+  const getStatusMessage = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return {
+          text: '장례식장의 출동 승인을 기다리고 있습니다.',
+          style: styles.pendingMessage
+        };
+      case 'approved':
+        return {
+          text: '출동이 승인되었습니다! 잠시 후 도착예정이니 잠시만 기다려주세요.',
+          style: styles.approvedMessage
+        };
+      case 'completed':
+        return {
+          text: '거래가 성공적으로 완료되었습니다.',
+          style: styles.completedMessage
+        };
+      default:
+        return {
+          text: '상태를 확인할 수 없습니다.',
+          style: styles.defaultMessage
+        };
+    }
+  };
+
+  // 상태별 버튼 렌더링
+  const renderActionButtons = () => {
+    const status = dispatchDetail.isApproved;
+
+    switch (status) {
+      case 'pending':
+        // 출동 대기 상태 - 아직 액션할 수 없음
+        return (
+          <View style={styles.actionButtons}>
+            <TouchableOpacity
+              style={[styles.waitingButton, loading && styles.disabledButton]}
+              disabled={true} // 대기 상태에서는 비활성화
+            >
+              <Typo style={styles.waitingButtonText}>출동 대기 중</Typo>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.cancelButton, loading && styles.disabledButton]}
+              onPress={() => handleCancel(dispatchDetail.dispatchRequestId)}
+              disabled={loading}>
+              <Typo style={styles.cancelButtonText}>
+                {loading ? '처리 중...' : '출동 취소'}
+              </Typo>
+            </TouchableOpacity>
+          </View>
+        );
+
+      case 'approved':
+        // 출동 승인 상태 - 이제 거래 확정 가능
+        return (
+          <>
+            {/* 거래확정/취소 버튼 */}
+            <View style={styles.actionButtons}>
+              <TouchableOpacity
+                style={[
+                  styles.confirmButton,
+                  loading && styles.disabledButton
+                ]}
+                onPress={() => handleComplete(dispatchDetail.dispatchRequestId)}
+                disabled={loading}>
+                <Typo style={styles.confirmButtonText}>
+                  {loading ? '확정 처리 중...' : '거래 확정'}
+                </Typo>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.cancelButton, loading && styles.disabledButton]}
+                onPress={() => handleCancel(dispatchDetail.dispatchRequestId)}
+                disabled={loading}>
+                <Typo style={styles.cancelButtonText}>출동 취소</Typo>
+              </TouchableOpacity>
+            </View>
+          </>
+        );
+
+      case 'completed':
+        // 거래 완료 상태
+        return (
+          <View style={styles.actionButtons}>
+            <TouchableOpacity
+              style={styles.completedButton}
+              onPress={handleConfirm}>
+              <Typo style={styles.completedButtonText}>뒤로가기</Typo>
+            </TouchableOpacity>
+          </View>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  const renderStatusAndActions = () => {
+    if (!dispatchDetail) return null;
+
+    const status = dispatchDetail.isApproved;
+    const statusMessage = getStatusMessage(status);
+
+    return (
+      <View style={styles.statusActionSection}>
+        {/* 연락 버튼들 */}
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={[styles.messageButton, loading && styles.disabledButton]}
+            onPress={() => handleMessage(dispatchDetail.managerPhoneNumber)}
+            disabled={loading}>
+            <SMSIcon width={18} height={18} />
+            <Typo style={styles.messageIconButtonText}>문자</Typo>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.phoneButton, loading && styles.disabledButton]}
+            onPress={() => handleCall(dispatchDetail.managerPhoneNumber)}
+            disabled={loading}>
+            <PhoneIcon width={18} height={18} />
+            <Typo style={styles.phoneIconButtonText}>전화</Typo>
+          </TouchableOpacity>
+        </View>
+
+        {/* 상태별 안내 메시지 */}
+        <View style={styles.statusMessageContainer}>
+          <Typo style={statusMessage.style}>
+            {statusMessage.text}
+          </Typo>
+        </View>
+
+        {/* 상태별 액션 버튼 */}
+        {renderActionButtons()}
+      </View>
+    );
+  };
+
   return (
     <ManagerLayout
       headerShown={true}
@@ -40,71 +311,74 @@ const ProceedCallPage = () => {
       homeRouteName="ManagerMain"
       logoutButton={false}>
       <ScrollView contentContainerStyle={styles.wrapper}>
-        {/* 주소 */}
-        <View style={styles.section}>
-          <Typo style={styles.label}>주소</Typo>
-          <View style={styles.inputBox}>
-            <Typo style={styles.text}>하늘시 하늘구 하늘동</Typo>
+        {/* 로딩 상태 */}
+        {loading && (
+          <View style={styles.centerContainer}>
+            <ActivityIndicator size="large" color="#2D81F1" />
+            <Typo style={styles.loadingText}>출동 신청 정보를 불러오는 중...</Typo>
           </View>
+        )}
 
-          <Typo style={styles.label}>상세주소</Typo>
-          <View style={styles.inputBox}>
-            <Typo style={styles.text}>하늘 빌딩 하늘동</Typo>
-          </View>
-
-          <Typo style={styles.label}>가족 연락처</Typo>
-          <View style={styles.inputBox}>
-            <Typo style={styles.text}>01066668888</Typo>
-          </View>
-
-          <Typo style={styles.label}>팀장 연락처</Typo>
-          <View style={styles.inputBox}>
-            <Typo style={styles.text}>01066668888</Typo>
-          </View>
-
-          <Typo style={styles.label}>비상 연락처</Typo>
-          <View style={styles.inputBox}>
-            <Typo style={styles.text}>01029292999</Typo>
-          </View>
-        </View>
-
-        {/* 문자/전화 버튼 */}
-        {status !== '완료' && (
-          <View style={styles.buttonRow}>
-            <TouchableOpacity
-              style={styles.messageButton}
-              onPress={handleMessage}>
-              <SMSIcon width={18} height={18} />
-              <Typo style={styles.messageIconButtonText}>문자</Typo>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.phoneButton} onPress={handleCall}>
-              <PhoneIcon width={18} height={18} />
-              <Typo style={styles.phoneIconButtonText}>전화</Typo>
+        {/* 에러 상태 */}
+        {error && !loading && (
+          <View style={styles.centerContainer}>
+            <Typo style={styles.errorText}>{error}</Typo>
+            <TouchableOpacity style={styles.retryButton} onPress={loadDispatchDetail}>
+              <Typo style={styles.retryButtonText}>다시 시도</Typo>
             </TouchableOpacity>
           </View>
         )}
 
-        {/* 거래확정/취소 버튼 */}
-        {status === '완료' ? (
-          <View style={styles.bottomButtons}>
-            <TouchableOpacity
-              style={styles.confirmButton}
-              onPress={handleConfirm}>
-              <Typo style={styles.confirmButtonText}>확인</Typo>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <View style={styles.bottomButtons}>
-            <TouchableOpacity
-              style={styles.confirmButton}
-              onPress={handleConfirm}>
-              <Typo style={styles.confirmButtonText}>거래확정</Typo>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={handleCancel}>
-              <Typo style={styles.cancelButtonText}>취소</Typo>
-            </TouchableOpacity>
+        {/* 데이터 표시 */}
+        {!loading && !error && dispatchDetail && (
+          <>
+            {/* 주소 정보 */}
+            <View style={styles.section}>
+              <Typo style={styles.label}>주소</Typo>
+              <View style={styles.inputBox}>
+                <Typo style={[styles.text, dispatchDetail.address && styles.filledText]}>
+                  {dispatchDetail.address || '주소 정보 없음'}
+                </Typo>
+              </View>
+
+              <Typo style={styles.label}>상세주소</Typo>
+              <View style={styles.inputBox}>
+                <Typo style={[styles.text, dispatchDetail.addressDetail && styles.filledText]}>
+                  {dispatchDetail.addressDetail || '상세주소 정보 없음'}
+                </Typo>
+              </View>
+
+              <Typo style={styles.label}>가족 연락처</Typo>
+              <View style={styles.inputBox}>
+                <Typo style={[styles.text, dispatchDetail.famPhoneNumber && styles.filledText]}>
+                  {dispatchDetail.famPhoneNumber || '가족 연락처 정보 없음'}
+                </Typo>
+              </View>
+
+              <Typo style={styles.label}>팀장 연락처</Typo>
+              <View style={styles.inputBox}>
+                <Typo style={[styles.text, dispatchDetail.managerPhoneNumber && styles.filledText]}>
+                  {dispatchDetail.managerPhoneNumber || '팀장 연락처 정보 없음'}
+                </Typo>
+              </View>
+
+              <Typo style={styles.label}>비상 연락처</Typo>
+              <View style={styles.inputBox}>
+                <Typo style={[styles.text, dispatchDetail.emergencyPhoneNumber && styles.filledText]}>
+                  {dispatchDetail.emergencyPhoneNumber || '비상 연락처 정보 없음'}
+                </Typo>
+              </View>
+            </View>
+
+            {/* 상태 정보 */}
+            {renderStatusAndActions()}
+          </>
+        )}
+
+        {/* 데이터 없음 */}
+        {!loading && !error && !dispatchDetail && (
+          <View style={styles.centerContainer}>
+            <Typo style={styles.errorText}>출동 신청 정보를 찾을 수 없습니다.</Typo>
           </View>
         )}
       </ScrollView>
@@ -141,7 +415,7 @@ const styles = StyleSheet.create({
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: 24,
+    marginBottom: 16,
     gap: 10,
   },
   messageButton: {
@@ -178,7 +452,7 @@ const styles = StyleSheet.create({
   phoneIconButtonText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#8990A0',
+    color: '#666',
     fontFamily: 'Pretendard-Bold',
   },
   bottomButtons: {
@@ -186,10 +460,10 @@ const styles = StyleSheet.create({
   },
   confirmButton: {
     backgroundColor: '#2D81F1',
-    paddingVertical: 18,
+    paddingVertical: 16,
     borderRadius: 8,
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 8,
   },
   confirmButtonText: {
     color: '#fff',
@@ -200,7 +474,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#2D81F1',
-    paddingVertical: 18,
+    paddingVertical: 16,
     borderRadius: 8,
     alignItems: 'center',
   },
@@ -214,5 +488,158 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: 'rgba(175, 179, 187, 0.5)',
     fontFamily: 'Pretendard-Black',
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#666',
+    fontFamily: 'Pretendard-Regular',
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#F04452',
+    textAlign: 'center',
+    marginBottom: 16,
+    fontFamily: 'Pretendard-Regular',
+  },
+  retryButton: {
+    backgroundColor: '#2D81F1',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+    fontFamily: 'Pretendard-SemiBold',
+  },
+  filledText: {
+    color: '#333', // 데이터가 있을 때 진한 색상
+  },
+  statusSection: {
+    marginBottom: 24,
+  },
+  statusBox: {
+    backgroundColor: '#FFF3E0',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#FFB74D',
+  },
+  completedStatusBox: {
+    backgroundColor: '#E8F5E8',
+    borderColor: '#4CAF50',
+  },
+  statusText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FF8F00',
+    textAlign: 'center',
+    fontFamily: 'Pretendard-SemiBold',
+  },
+  completedStatusText: {
+    color: '#2E7D32',
+  },
+  actionButtons: {
+    marginTop: 'auto',
+  },
+  waitingButton: {
+    backgroundColor: '#FFF8E1',
+    borderWidth: 1,
+    borderColor: '#FFB74D',
+    paddingVertical: 18,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  waitingButtonText: {
+    color: '#F57C00',
+    fontWeight: '600',
+    fontSize: 16,
+    fontFamily: 'Pretendard-SemiBold',
+  },
+  disabledButton: {
+    backgroundColor: '#f2f2f2',
+  },
+  completedButton: {
+    backgroundColor: '#4CAF50',
+    paddingVertical: 18,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  completedButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+    fontFamily: 'Pretendard-Bold',
+  },
+  pendingMessage: {
+    fontSize: 14,
+    color: '#F57C00',
+    textAlign: 'center',
+    fontFamily: 'Pretendard-Regular',
+    lineHeight: 20,
+  },
+  approvedMessage: {
+    fontSize: 14,
+    color: '#1976D2',
+    textAlign: 'center',
+    fontFamily: 'Pretendard-SemiBold',
+    lineHeight: 20,
+  },
+  completedMessage: {
+    fontSize: 14,
+    color: '#2E7D32',
+    textAlign: 'center',
+    fontFamily: 'Pretendard-SemiBold',
+    lineHeight: 20,
+  },
+  defaultMessage: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    fontFamily: 'Pretendard-Regular',
+    lineHeight: 20,
+  },
+  statusActionSection: {
+    marginBottom: 12,
+  },
+  currentStatusContainer: {
+    marginBottom: 12,
+  },
+  statusLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'Pretendard-Light',
+    marginLeft: 10,
+  },
+  updatingStatusBox: {
+    backgroundColor: '#FFF8E1',
+    borderColor: '#FFB74D',
+  },
+  pendingStatusBox: {
+    backgroundColor: '#FFF8E1',
+    borderColor: '#FFB74D',
+  },
+  approvedStatusBox: {
+    backgroundColor: '#E3F2FD',
+    borderColor: '#42A5F5',
+  },
+  pendingStatusText: {
+    color: '#F57C00',
+  },
+  approvedStatusText: {
+    color: '#1976D2',
+  },
+  statusMessageContainer: {
+    marginBottom: 12,
   },
 });

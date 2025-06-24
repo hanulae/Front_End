@@ -1,4 +1,4 @@
-import {Platform, ScrollView, StatusBar, StyleSheet} from 'react-native';
+import {Platform, ScrollView, StatusBar, StyleSheet, View, ActivityIndicator} from 'react-native';
 import DefaultLayout from '../../layout/DefaultLayout';
 import {
   NavigationProp,
@@ -6,11 +6,18 @@ import {
   useNavigation,
 } from '@react-navigation/native';
 import EstimateCard from '../../components/manager/EstimateCard';
-import {useCallback} from 'react';
+import {useCallback, useState} from 'react';
+import {useManagerForm} from '../../hooks/useManagerForm';
+import {ManagerFormList} from '../../services/api/manager/managerFormService';
+import Typo from '../../components/common/Typo';
 
 const EstimateListPage = () => {
+  const {getManagerFormList, loading, error} = useManagerForm();
   const navigation = useNavigation<NavigationProp<any>>();
 
+  const [managerFormList, setManagerFormList] = useState<ManagerFormList[]>([]);
+
+  // ✅ 페이지 포커스 시 데이터 로드
   useFocusEffect(
     useCallback(() => {
       if (Platform.OS === 'android') {
@@ -20,16 +27,88 @@ const EstimateListPage = () => {
         StatusBar.setBarStyle('dark-content');
       }
 
+      // ✅ 견적 내역 데이터 로드
+      loadManagerFormList();
+
       return () => {
         // 화면 포커스 해제 시 필요하다면 초기화 작업
-        // 예: StatusBar.setStyle('default')
       };
     }, []),
   );
 
-  const goToClientEstimate = () => {
-    navigation.navigate('ClientEstimate', {clientId: 1});
+  // ✅ 견적 내역 로드 함수
+  const loadManagerFormList = async () => {
+    try {
+      const result = await getManagerFormList();
+      if (result) {
+        setManagerFormList(result);
+      }
+    } catch (error) {
+      console.error('견적 내역 로드 실패:', error);
+    }
   };
+
+  // ✅ 날짜 포맷팅 함수
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+  };
+
+  // ✅ 상태별 한글 변환
+  const getStatusText = (status: 'request' | 'bid_received' | 'bid_progress' | 'completed' | 'cancelled') => {
+    switch (status) {
+      case 'request':
+        return '견적 요청';
+      case 'bid_received':
+        return '입찰 완료';
+      case 'bid_progress':
+        return '거래 진행중';
+      case 'completed':
+        return '거래 완료';
+      case 'cancelled':
+        return '거래 취소';
+      default:
+        return status;
+    }
+  };
+
+  const goToClientEstimate = (managerFormId: string) => {
+    navigation.navigate('ClientEstimate', {managerFormId});
+  };
+
+  // ✅ 로딩 상태
+  if (loading) {
+    return (
+      <DefaultLayout
+        headerShown={true}
+        headerTitle="견적내역"
+        homeButton={true}
+        homeRouteName="ManagerMain"
+        logoutButton={false}>
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color="#3287F8" />
+          <Typo style={styles.loadingText}>견적 내역을 불러오는 중...</Typo>
+        </View>
+      </DefaultLayout>
+    );
+  }
+
+  // ✅ 에러 상태
+  if (error) {
+    return (
+      <DefaultLayout
+        headerShown={true}
+        headerTitle="견적내역"
+        homeButton={true}
+        homeRouteName="ManagerMain"
+        logoutButton={false}>
+        <View style={styles.centerContainer}>
+          <Typo style={styles.errorText}>❌ {error}</Typo>
+        </View>
+      </DefaultLayout>
+    );
+  }
+
   return (
     <DefaultLayout
       headerShown={true}
@@ -38,22 +117,25 @@ const EstimateListPage = () => {
       homeRouteName="ManagerMain"
       logoutButton={false}>
       <ScrollView contentContainerStyle={styles.wrapper}>
-        {[
-          {name: '김철수', date: '2025.04.01', count: 14},
-          {name: '김영희', date: '2025.04.01', count: 8},
-          {name: '홍길동', date: '2025.04.01', count: 7},
-          {name: '금잔디', date: '2025.04.01', count: 18},
-          {name: '김철수', date: '2025.04.01', count: 2},
-        ].map((item, index) => (
-          <EstimateCard
-            key={index}
-            name={item.name}
-            date={item.date}
-            count={item.count}
-            index={index}
-            onPress={goToClientEstimate}
-          />
-        ))}
+        {managerFormList.length === 0 ? (
+          // ✅ 빈 상태
+          <View style={styles.centerContainer}>
+            <Typo style={styles.emptyText}>견적 내역이 없습니다.</Typo>
+          </View>
+        ) : (
+          // ✅ 실제 데이터 렌더링
+          managerFormList.map((item, index) => (
+            <EstimateCard
+              key={item.managerFormId}
+              name={item.chiefMournerName}
+              date={formatDate(item.createdAt)}
+              count={item.bidCount}
+              status={getStatusText(item.formStatus)}
+              index={index}
+              onPress={() => goToClientEstimate(item.managerFormId)}
+            />
+          ))
+        )}
       </ScrollView>
     </DefaultLayout>
   );
@@ -65,6 +147,27 @@ const styles = StyleSheet.create({
   wrapper: {
     flexGrow: 1,
     padding: 16,
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#666',
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#ff4444',
+    textAlign: 'center',
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#999',
+    textAlign: 'center',
   },
   card: {
     backgroundColor: '#f9f9f9',

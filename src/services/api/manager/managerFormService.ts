@@ -1,4 +1,4 @@
-import api from '../../../api/config.ts';
+import api from '../../../api/config';
 
 interface CreateManagerFormParams {
   funeralList: string[]; // 견적서 발송 장례식 리스트
@@ -10,17 +10,74 @@ interface CreateManagerFormParams {
   roomSize?: number; // 평수 (선택)
 }
 
-interface ManagerFormResponse {
+interface CreateManagerFormResponse {
   success: boolean;
   message: string;
   data?: any;
+}
+
+interface ManagerFormList {
+  managerFormId: string;
+  chiefMournerName: string;
+  formStatus: 'request' | 'completed' | 'cancelled';
+  createdAt: string;
+  bidCount: number;
+}
+
+interface GetManagerFormListResponse {
+  success: boolean;
+  message?: string;
+  data: {
+    managerFormList: ManagerFormList[];
+  };
+}
+
+interface UserManagerFormList {
+  managerFormBidId: string;
+  bidStatus:
+    | 'pending'
+    | 'bid_submitted'
+    | 'bid_selected'
+    | 'bid_progress'
+    | 'transaction_completed'
+    | 'rejected'
+    | 'expired';
+  funeralName: string;
+  funeralAddress: string;
+}
+
+interface GetUserManagerFormResponse {
+  success: boolean;
+  message?: string;
+  data: {
+    managerFormDetail: UserManagerFormList[];
+  };
+}
+
+interface GetManagerFormBidDetailResponse {
+  success: boolean;
+  message?: string;
+  data: {
+    managerFormBidId: string;
+    managerFormId: string;
+    funeralId: string;
+    funeralHallName: string;
+    funeralHallSize: number;
+    funeralHallNumberOfMourners: number;
+    funeralHallPrice: number;
+    funeralHallDetailPrice: number;
+    funeralProponentMoney: number;
+    funeralDiscount: number;
+    bidStatus: string;
+    bidSubmittedAt: string;
+  };
 }
 
 export const managerFormService = {
   // 견적서 발송 (견적서 생성)
   createManagerForm: async (
     params: CreateManagerFormParams,
-  ): Promise<ManagerFormResponse> => {
+  ): Promise<CreateManagerFormResponse> => {
     try {
       const response = await api.post('/manager/form/create', params);
       return response.data;
@@ -42,11 +99,52 @@ export const managerFormService = {
     }
   },
 
-  // 모든 견적 리스트 조회
+  // 견적 내역 리스트 조회
+  getManagerFormList: async (): Promise<GetManagerFormListResponse> => {
+    try {
+      const response = await api.get('/manager/form/list');
+      return response.data;
+    } catch (error: any) {
+      console.error('견적 내역 리스트 조회 에러: ', error.message);
+      throw new Error(`견적 내역 리스트 조회  에러: ${error.message}`);
+    }
+  },
 
-  // 단일 상주 견적 조회
+  // 고객 견적서 조회
+  getUserManagerFormList: async (
+    managerFormId: string,
+  ): Promise<GetUserManagerFormResponse> => {
+    try {
+      const response = await api.get(`/manager/form/bid/list/${managerFormId}`);
+      return response.data;
+    } catch (error: any) {
+      console.log('고객 견적서 조회 에러: ', error.message);
+      throw new Error(`고객 견적서 조회 에러: ${error.message}`);
+    }
+  },
 
   // 견적 입찰 상세 조회
+  getManagerFormBidDetail: async (
+    managerFormBidId: string,
+  ): Promise<GetManagerFormBidDetailResponse> => {
+    try {
+      const response = await api.get(
+        `/manager/form/bid/detail/${managerFormBidId}`,
+      );
+      return response.data;
+    } catch (error: any) {
+      console.log('견적 입찰 상세 조회 에러: ', error.message);
+      throw new Error(`견적 입찰 상세 조회 에러: ${error.message}`);
+    }
+  },
 };
 
-export type {CreateManagerFormParams, ManagerFormResponse};
+export type {
+  CreateManagerFormParams,
+  CreateManagerFormResponse,
+  ManagerFormList,
+  GetManagerFormListResponse,
+  UserManagerFormList,
+  GetUserManagerFormResponse,
+  GetManagerFormBidDetailResponse,
+};

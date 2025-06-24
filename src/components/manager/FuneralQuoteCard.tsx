@@ -6,13 +6,14 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useNavigation} from '@react-navigation/native';
 
 interface IFuneralQuoteCardProps {
-  id: number;
-  handleSelect: (id: number) => void;
+  id: string;
+  handleSelect: (id: string) => void;
   selected: boolean;
   name: string;
   address: string;
   completed: boolean;
   status: string;
+  selectable: boolean;
 }
 
 const FuneralQuoteCard = ({
@@ -23,8 +24,52 @@ const FuneralQuoteCard = ({
   address,
   completed,
   status,
+  selectable,
 }: IFuneralQuoteCardProps) => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
+
+  const getStatusStyle = (status: string) => {
+    switch (status) {
+      case '입찰대기':
+        return {
+          borderColor: '#A7A9B0',
+          textColor: '#FFFFFF',
+          backgroundColor: '#A7A9B0',
+        };
+      case '입찰완료':
+        return {
+          borderColor: '#2D81F1',
+          textColor: '#1565C0',
+          backgroundColor: '#E2F2FF',
+        };
+      case '입찰실패':
+        return {
+          borderColor: '#FF6F00',
+          textColor: '#E65100',
+          backgroundColor: '#FFF3E0',
+        };
+      case '입찰만료':
+        return {
+          borderColor: '#FF6F00',
+          textColor: '#E65100',
+          backgroundColor: '#FFF3E0',
+        };
+      case '거래완료':
+        return {
+          borderColor: '#00C853',
+          textColor: '#00695C',
+          backgroundColor: '#E8F8F5',
+        };
+      default:
+        return {
+          borderColor: '#A7A9B0',
+          textColor: '#666666',
+          backgroundColor: '#F8F9FA',
+        };
+    }
+  }
+
+  const statusStyle = getStatusStyle(status);
 
   const goToClientDetail = () => {
     navigation.navigate('ClientDetail', {clientId: id});
@@ -39,7 +84,7 @@ const FuneralQuoteCard = ({
         selected ? styles.cardSelected : styles.cardUnselected,
       ]}
       onPress={() => handleSelect(id)}
-      disabled={status !== '입찰완료'}>
+      disabled={!selectable}>
       <View style={styles.row}>
         <View style={styles.firstRow}>
           <Typo style={[styles.nameText, selected && styles.selectedText]}>
@@ -54,12 +99,11 @@ const FuneralQuoteCard = ({
         </View>
         <View style={styles.secondRow}>
           <Typo style={styles.addressText}>{address}</Typo>
-          <View
-            style={[styles.statusButton, completed && styles.completedButton]}>
+          <View style={[styles.statusButton, {borderColor: statusStyle.borderColor, backgroundColor: statusStyle.backgroundColor}]}>
             <Typo
               style={[
                 styles.statusButtonText,
-                completed ? styles.statusComplete : styles.statusPending,
+                {color: statusStyle.textColor},
               ]}>
               {status}
             </Typo>

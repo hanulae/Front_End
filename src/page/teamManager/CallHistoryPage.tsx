@@ -6,29 +6,56 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
+  RefreshControl,
 } from 'react-native';
 import DefaultLayout from '../../layout/DefaultLayout';
-import {useCallback, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import Typo from '../../components/common/Typo';
 import ManagerLayout from '../../layout/ManagerLayout';
+import { useManagerDispatchRequest } from '../../hooks/useManagerDispatchRequest';
+import { ActivityIndicator } from 'react-native';
 
 interface ICallHistoryPageProps {
   navigation: NavigationProp<any>;
 }
 
-const dummyData = [
-  {id: 1, name: '김철수', status: '진행중'},
-  {id: 2, name: '김영희', status: '완료'},
-  {id: 3, name: '홍길동', status: '진행중'},
-  {id: 4, name: '금잔디', status: '완료'},
-  {id: 5, name: '김철수', status: '진행중'},
-];
-
 const CallHistoryPage = ({navigation}: ICallHistoryPageProps) => {
   const [selectedTab, setSelectedTab] = useState<'진행중' | '완료'>('진행중');
+  const { loading, error, getManagerDispatchRequestList } = useManagerDispatchRequest();
+  const [dispatchList, setDispatchList] = useState<any[]>([]);
+  const [filteredList, setFilteredList] = useState<any[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // 출동 신청 내역 조회
+  const loadDispatchList = useCallback(async () => {
+    try {
+      const result = await getManagerDispatchRequestList();
+      if (result && result.data) {
+        const formattedData = result.data.map((item: any) => {
+          // 완료 상태 정의: completed, rejected, cancelled
+          const isCompleted = ['completed', 'rejected', 'cancelled'].includes(item.isApproved);
+
+          return {
+            id: item.dispatchRequestId,
+            name: item.chiefMournerName,
+            status: isCompleted ? '완료' : '진행중', // 상태별 탭 분류
+            createdAt: item.createdAt,
+            isApproved: item.isApproved,
+          };
+        });
+
+        setDispatchList(formattedData);
+        console.log('출동 신청 내역 로드 성공:', formattedData);
+      }
+    } catch (err) {
+      console.error('출동 신청 내역 로드 실패:', err);
+    }
+  }, [getManagerDispatchRequestList]);
 
   useFocusEffect(
     useCallback(() => {
+      loadDispatchList();
+
       if (Platform.OS === 'android') {
         StatusBar.setBackgroundColor('#3287F8');
         StatusBar.setBarStyle('dark-content');
@@ -40,8 +67,14 @@ const CallHistoryPage = ({navigation}: ICallHistoryPageProps) => {
         // 화면 포커스 해제 시 필요하다면 초기화 작업
         // 예: StatusBar.setStyle('default')
       };
-    }, []),
+    }, [loadDispatchList]),
   );
+
+  // 필터링
+  useEffect(() => {
+    const filtered = dispatchList.filter(item => item.status === selectedTab);
+    setFilteredList(filtered);
+  }, [dispatchList, selectedTab]);
 
   // const goToClientDetail = (clientId: number) => {
 
@@ -58,6 +91,77 @@ const CallHistoryPage = ({navigation}: ICallHistoryPageProps) => {
       navigation.navigate('ProceedCall', {callId: item.id, status: '완료'});
     }
   };
+
+  // 날짜 포맷팅 함수
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+
+      return `${year}.${month}.${day} ${hours}:${minutes}`;
+    } catch (error) {
+      return '날짜 정보 없음';
+    }
+  };
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadDispatchList();
+    setRefreshing(false);
+  }, [loadDispatchList]);
+
+  // 상태별 태그 텍스트 반환 함수
+  const getStatusText = (isApproved: string) => {
+    switch (isApproved) {
+      case 'pending': return '출동 대기';
+      case 'approved': return '출동 승인';
+      case 'completed': return '거래 완료';
+      case 'rejected': return '출동 거부';
+      case 'cancelled': return '출동 취소';
+      default: return '출동 신청';
+    }
+  };
+
+  // 상태별 태그 스타일 반환 함수
+  const getStatusTagStyle = (isApproved: string) => {
+    switch (isApproved) {
+      case 'pending':
+        return {
+          container: [styles.tag, styles.pendingTag],
+          text: [styles.tagText, styles.pendingTagText]
+        };
+      case 'approved':
+        return {
+          container: [styles.tag, styles.approvedTag],
+          text: [styles.tagText, styles.approvedTagText]
+        };
+      case 'completed':
+        return {
+          container: [styles.tag, styles.completedTag],
+          text: [styles.tagText, styles.completedTagText]
+        };
+      case 'rejected':
+        return {
+          container: [styles.tag, styles.rejectedTag],
+          text: [styles.tagText, styles.rejectedTagText]
+        };
+      case 'cancelled':
+        return {
+          container: [styles.tag, styles.cancelledTag],
+          text: [styles.tagText, styles.cancelledTagText]
+        };
+      default:
+        return {
+          container: [styles.tag],
+          text: [styles.tagText]
+        };
+    }
+  };
+
   return (
     <ManagerLayout
       headerShown={true}
@@ -65,6 +169,7 @@ const CallHistoryPage = ({navigation}: ICallHistoryPageProps) => {
       headerTitle="출동 신청 내역"
       homeButton={true}
       homeRouteName="ManagerMain">
+
       {/* 탭 */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
@@ -95,48 +200,81 @@ const CallHistoryPage = ({navigation}: ICallHistoryPageProps) => {
       </View>
 
       {/* 리스트 */}
-      <ScrollView contentContainerStyle={styles.wrapper}>
-        {dummyData
-          .filter(item => item.status === selectedTab)
-          .map(item => (
+      <ScrollView 
+        contentContainerStyle={styles.wrapper}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#2D81F1']} // Android
+            tintColor="#2D81F1" // iOS
+          />
+        }
+      >
+        {/* 로딩 상태 */}
+        {loading && (
+          <View style={styles.centerContainer}>
+            <ActivityIndicator size="large" color="#2D81F1" />
+            <Typo style={styles.loadingText}>출동 신청 내역을 불러오는 중...</Typo>
+          </View>
+        )}
+
+        {/* 에러 상태 */}
+        {error && !loading && (
+          <View style={styles.centerContainer}>
+            <Typo style={styles.errorText}>
+              {error}
+            </Typo>
+            <TouchableOpacity style={styles.retryButton} onPress={loadDispatchList}>
+              <Typo style={styles.retryButtonText}>다시 시도</Typo>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* 데이터 없음 */}
+        {!loading && !error && filteredList.length === 0 && (
+          <View style={styles.centerContainer}>
+            <Typo style={styles.emptyText}>
+              {selectedTab === '진행중' ? '진행 중인' : '완료된'} 출동 신청이 없습니다.
+            </Typo>
+          </View>
+        )}
+
+        {/* 실제 데이터 리스트 */}
+        {!loading && !error && filteredList.length > 0 && 
+          filteredList.map(item => (
             <TouchableOpacity
               key={item.id}
               style={styles.card}
               onPress={() => handleCardPress(item)}>
-              {/* <Typo style={styles.customerName}>{item.name}</Typo>
-
-              <View style={styles.tag}>
-                <Typo style={styles.tagText}>출동신청</Typo>
-              </View> */}
               <View style={styles.topRow}>
                 <Typo style={styles.clientName}>{item.name}</Typo>
                 <Typo style={styles.clientDesc}>고객님</Typo>
               </View>
               <View style={styles.bottomRow}>
                 <View
-                  style={[
-                    styles.tag,
-                    item.status === '완료' && styles.completeTag,
-                  ]}>
+                  style={getStatusTagStyle(item.isApproved).container}>
                   <Typo
-                    style={[
-                      styles.tagText,
-                      item.status === '완료' && styles.completeTagTexts,
-                    ]}>
-                    {item.status === '완료' ? '출동완료' : '출동신청'}
+                    style={getStatusTagStyle(item.isApproved).text}>
+                    {getStatusText(item.isApproved)}
                   </Typo>
                 </View>
-                <TouchableOpacity
-                  style={styles.detailButton}
-                  onPress={() => {
-                    goToClientDetailDevMode();
-                    // navigation.navigate('DetailPage', { id }) 처럼 연결
-                  }}>
-                  <Typo style={styles.detailText}>상세보기</Typo>
-                </TouchableOpacity>
+                <View style={styles.dateContainer}>
+                  <Typo style={styles.dateText}>
+                    {formatDate(item.createdAt)}
+                  </Typo>
+                  <TouchableOpacity
+                    style={styles.detailButton}
+                    onPress={() => {
+                      goToClientDetailDevMode();
+                    }}>
+                    <Typo style={styles.detailText}>상세보기</Typo>
+                  </TouchableOpacity>
+                </View>
               </View>
             </TouchableOpacity>
-          ))}
+          ))
+        }
       </ScrollView>
     </ManagerLayout>
   );
@@ -194,7 +332,6 @@ const styles = StyleSheet.create({
   },
   tag: {
     backgroundColor: 'white',
-    borderColor: 'rgba(240, 68, 82, 0.25)',
     borderWidth: 1,
     paddingVertical: 6,
     paddingHorizontal: 10,
@@ -203,15 +340,7 @@ const styles = StyleSheet.create({
   tagText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#F04452',
     fontFamily: 'Pretendard-Bold',
-  },
-  completeTag: {
-    backgroundColor: 'white',
-    borderColor: '#2D81F1',
-  },
-  completeTagTexts: {
-    color: '#2D81F1',
   },
   topRow: {
     flexDirection: 'row',
@@ -257,4 +386,61 @@ const styles = StyleSheet.create({
     textDecorationColor: '#6F717D',
     fontFamily: 'Pretendard-Bold',
   },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#666',
+    fontFamily: 'Pretendard-Regular',
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#F04452',
+    textAlign: 'center',
+    marginBottom: 16,
+    fontFamily: 'Pretendard-Regular',
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    fontFamily: 'Pretendard-Regular',
+  },
+  retryButton: {
+    backgroundColor: '#2D81F1',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+    fontFamily: 'Pretendard-SemiBold',
+  },
+
+  dateContainer: {
+    alignItems: 'flex-end',
+  },
+  dateText: {
+    fontSize: 12,
+    color: '#999',
+    marginBottom: 4,
+    fontFamily: 'Pretendard-Regular',
+  },
+  pendingTag: { borderColor: '#FFB74D' },
+  pendingTagText: { color: '#F57C00' },
+  approvedTag: { borderColor: '#42A5F5' },
+  approvedTagText: { color: '#1976D2' },
+  completedTag: { borderColor: '#4CAF50' },
+  completedTagText: { color: '#2E7D32' },
+  rejectedTag: { borderColor: '#EF5350' },
+  rejectedTagText: { color: '#D32F2F' },
+  cancelledTag: { borderColor: '#9E9E9E' },
+  cancelledTagText: { color: '#616161' },
 });

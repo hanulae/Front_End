@@ -78,17 +78,17 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
     }
   };
 
-  // const handleSubmit = () => {
-  //   setSignupInfo(prev => ({
-  //     ...prev,
-  //     accountInfo: {bankName, accountNumber},
-  //     agreedTerms: agrees,
-  //   }));
-  //   onSubmit();
-  //   navigation.navigate('SignupComplete', {
-  //     userType: userType,
-  //   });
-  // };
+  const handleSubmit = () => {
+    setSignupInfo(prev => ({
+      ...prev,
+      accountInfo: {bankName, accountNumber},
+      agreedTerms: agrees,
+    }));
+    onSubmit();
+    navigation.navigate('SignupComplete', {
+      userType: userType,
+    });
+  };
 
   // const handleSubmit = () => {
   //   setSignupInfo(prev => ({

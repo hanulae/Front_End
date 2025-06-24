@@ -17,35 +17,17 @@ import Typo from '../../components/common/Typo';
 import {useCallback, useState} from 'react';
 import FuneralQuoteCard from '../../components/manager/FuneralQuoteCard';
 import CustomButton from '../../components/common/CustomButton';
-const estimates = [
-  {
-    id: 1,
-    name: '서울대학교병원 장례식장',
-    address: '서울시 종로구 대학로 101',
-    selected: true,
-    status: '입찰완료',
-  },
-  {
-    id: 2,
-    name: '서울대학교병원 장례식장',
-    address: '서울시 종로구 대학로 101',
-    selected: false,
-    status: '입찰완료',
-  },
-  {
-    id: 3,
-    name: '서울대학교병원 장례식장',
-    address: '서울시 종로구 대학로 101',
-    selected: false,
-    status: '입찰대기',
-  },
-];
+import {useManagerForm} from '../../hooks/useManagerForm';
+import { UserManagerFormList } from '../../services/api/manager/managerFormService';
+
 const ClientEstimatePage = () => {
   const navigation = useNavigation<NavigationProp<any>>();
   const route = useRoute();
-  const {clientId} = route.params as {clientId: number};
-  console.log('clientId', clientId);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const {managerFormId} = route.params as {managerFormId: string};
+  const [selectedId, setSelectedId] = useState<string>('');
+  const {getUserManagerFormList, loading, error} = useManagerForm();
+  const [userManagerFormList, setUserManagerFormList] = useState<UserManagerFormList[]>([]);
+  const [selectedFuneralName, setSelectedFuneralName] = useState<string>('');
 
   useFocusEffect(
     useCallback(() => {
@@ -56,6 +38,8 @@ const ClientEstimatePage = () => {
         StatusBar.setBarStyle('dark-content');
       }
 
+      loadUserManagerFormList();
+
       return () => {
         // 화면 포커스 해제 시 필요하다면 초기화 작업
         // 예: StatusBar.setStyle('default')
@@ -63,12 +47,52 @@ const ClientEstimatePage = () => {
     }, []),
   );
 
-  const handleSelect = (id: number) => {
-    setSelectedId(prev => (prev === id ? null : id));
+  const loadUserManagerFormList = async () => {
+    try {
+      const result = await getUserManagerFormList(managerFormId);
+      if (result) {
+        setUserManagerFormList(result);
+      }
+    } catch (error) {
+      console.error('고객 견적서 리스트 로드 실패: ', error);
+    }
   };
+
+  // 견적서 선택 (단일 선택)
+  const handleSelect = (id: string, funeralName: string) => {
+    setSelectedId(id);
+    setSelectedFuneralName(funeralName);
+  };
+
+  // 견적서 상세 보기
   const goToEstimateDetail = () => {
-    navigation.navigate('EstimateDetail');
+    navigation.navigate('EstimateDetail', {
+      managerFormBidId: selectedId,
+      funeralName: selectedFuneralName,
+    });
   };
+
+  const getStatusText = (status: 'pending' | 'bid_submitted' | 'bid_selected' | 'bid_progress' | 'rejected' | 'expired' | 'transaction_completed') => {
+    switch (status) {
+      case 'pending':
+      return '입찰대기';
+      case 'bid_submitted':
+        return '입찰완료';
+      case 'bid_selected':
+        return '입찰선택';
+      case 'bid_progress':
+        return '진행중';
+      case 'rejected':
+        return '입찰실패';
+      case 'expired':
+        return '입찰만료';
+      case 'transaction_completed':
+        return '거래완료';
+      default:
+        return status;
+    }
+  }
+
   return (
     <DefaultLayout
       headerShown={true}
@@ -77,20 +101,20 @@ const ClientEstimatePage = () => {
       homeRouteName="ManagerMain"
       logoutButton={false}>
       <ScrollView contentContainerStyle={styles.wrapper}>
-        {estimates.map(item => {
-          const isSelected = selectedId === item.id;
-          const isCompleted = item.status === '입찰완료';
+        {userManagerFormList.map(item => {
+          const canSelect = item.bidStatus === 'bid_submitted';
 
           return (
             <FuneralQuoteCard
-              key={item.id}
-              id={item.id}
-              handleSelect={handleSelect}
-              selected={isSelected}
-              name={item.name}
-              address={item.address}
-              completed={isCompleted}
-              status={item.status}
+              key={item.managerFormBidId}
+              id={item.managerFormBidId}
+              handleSelect={canSelect ? () => handleSelect(item.managerFormBidId, item.funeralName) : () => {}}
+              selected={item.managerFormBidId === selectedId}
+              name={item.funeralName}
+              address={item.funeralAddress}
+              completed={!canSelect}
+              selectable={canSelect}
+              status={getStatusText(item.bidStatus)}
             />
           );
         })}
@@ -104,7 +128,7 @@ const ClientEstimatePage = () => {
           selectedId ? styles.submitButtonEnabled : styles.submitButtonDisabled,
         ]}
         disabled={!selectedId}>
-        <Typo style={styles.submitButtonText}>출동신청</Typo>
+        <Typo style={styles.submitButtonText}>입찰 상세 보기</Typo>
       </CustomButton>
     </DefaultLayout>
   );
