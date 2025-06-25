@@ -122,7 +122,7 @@ const EstimateDetailPage = () => {
               <CommaIcon width={6} height={6} />
               <Typo style={styles.label}>제안가</Typo>
             </View>
-            <Typo style={styles.value}>{managerFormBidDetail?.funeralProponentMoney ? managerFormBidDetail.funeralProponentMoney / 10000 : 0}만원</Typo>
+            <Typo style={styles.value}>{managerFormBidDetail?.funeralProponentMoney}만원</Typo>
           </View>
           <View style={styles.listLastItem}>
             <View style={styles.labelContainer}>

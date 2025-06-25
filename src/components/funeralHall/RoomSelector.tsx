@@ -82,7 +82,7 @@ const RoomSelector = ({visible, onClose, onSelect, roomList}: Props) => {
               </Typo>
             </View>
             <Typo style={styles.roomPrice}>
-              {(room.roomServiceFee + room.roomPrice).toLocaleString()}만원
+              {(room.roomServiceFee + room.roomPrice).toLocaleString()} 만원
             </Typo>
           </TouchableOpacity>
         ))}

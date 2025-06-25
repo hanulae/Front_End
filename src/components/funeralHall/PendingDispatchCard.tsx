@@ -25,13 +25,13 @@ const PendingDispatchCard = ({
         <View
           style={[
             styles.statusTag,
-            status === '출동요청' && styles.requestDispatchTag,
+            status === 'pending' && styles.requestDispatchTag,
             status === '출동중' && styles.dispatchingTag,
           ]}>
           <Typo
             style={[
               styles.statusText,
-              status === '출동요청' && styles.requestDispatchText,
+              status === 'pending' && styles.requestDispatchText,
               status === '출동중' && styles.dispatchingText,
             ]}>
             {status}
