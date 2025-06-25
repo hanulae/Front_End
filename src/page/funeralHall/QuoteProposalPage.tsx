@@ -115,15 +115,15 @@ const QuoteProposalPage = () => {
       return;
     }
 
-    const total = selectedRoom.funeralHallDetailPrice + selectedRoom.funeralHallPrice;
-    const discount = total - Number(proposalPrice);
+    // const total = selectedRoom.funeralHallDetailPrice + selectedRoom.funeralHallPrice;
+    // const discount = total - Number(proposalPrice);
 
     try {
       const response = await submitBid({
         managerFormBidId: id,
         funeralHallId: selectedRoom.funeralHallId,
         proponentMoney: Number(proposalPrice),
-        discount: discount,
+        discount: Number(currentDiscountRate),
       });
 
       if (response.success) {

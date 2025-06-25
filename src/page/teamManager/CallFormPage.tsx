@@ -7,6 +7,7 @@ import ManagerLayout from '../../layout/ManagerLayout';
 import { useState } from 'react';
 import { useManagerDispatchRequest } from '../../hooks/useManagerDispatchRequest';
 import Toast from 'react-native-toast-message';
+import DaumPostcodeModal from '../../components/common/DaumPostcodeModal';
 
 // 라우터 파라미터 타입 정의
 type CallFormRouteParams = {
@@ -18,28 +19,69 @@ type CallFormRouteParams = {
 const CallFormPage = () => {
   const navigation = useNavigation<NavigationProp<any>>();
   const route = useRoute<RouteProp<{params: CallFormRouteParams}, 'params'>>();
-  
+
   // 전화번호 입력
   const familyPhone = usePhoneInput();
   const managerPhone = usePhoneInput();
   const emergencyPhone = usePhoneInput();
 
   // 주소 상태
-  const [address] = useState('테스트시 테스트구 테스트동');
+  const [address, setAddress] = useState('');
   const [addressDetail, setAddressDetail] = useState('');
+  const [showPostcodeModal, setShowPostcodeModal] = useState(false);
 
   // 출동 신청 훅
   const { loading, error, createManagerDispatchRequest } = useManagerDispatchRequest();
 
   // 이전 페이지에서 받아온 데이터
   const { managerFormBidId, managerFormId, funeralId } = route.params || {};
-  console.log('managerFormBidId', managerFormBidId);
-  console.log('managerFormId', managerFormId);
-  console.log('funeralId', funeralId);
 
   const handleAddressSearch = () => {
-    console.log('주소 검색 페이지로 이동');
-    // navigation.navigate('AddressSearchPage'); // 추후 연결
+    setShowPostcodeModal(true);
+  };
+
+  const handleAddressSelected = (postcodeData: any) => {
+    console.log('🏠🏠🏠 handleAddressSelected 호출됨!!!');
+    console.log('📦 받은 데이터 타입:', typeof postcodeData);
+    console.log('📦 받은 데이터 전체:', JSON.stringify(postcodeData, null, 2));
+    
+    // 데이터 구조 확인
+    console.log('🔑 데이터 키들:', Object.keys(postcodeData || {}));
+    
+    // 각 주소 필드 확인
+    console.log('🔍 roadAddress:', postcodeData?.roadAddress);
+    console.log('🔍 jibunAddress:', postcodeData?.jibunAddress);  
+    console.log('🔍 address:', postcodeData?.address);
+    console.log('🔍 autoRoadAddress:', postcodeData?.autoRoadAddress);
+    console.log('🔍 autoJibunAddress:', postcodeData?.autoJibunAddress);
+    
+    // 도로명주소가 있으면 도로명주소 사용, 없으면 지번주소 사용
+    const selectedAddress = postcodeData?.roadAddress || 
+                           postcodeData?.jibunAddress || 
+                           postcodeData?.address ||
+                           postcodeData?.autoRoadAddress ||
+                           postcodeData?.autoJibunAddress;
+    
+    console.log('✅ 최종 선택된 주소:', selectedAddress);
+    
+    if (selectedAddress) {
+      setAddress(selectedAddress);
+      console.log('💾 주소 상태 업데이트 완료:', selectedAddress);
+      
+      // 모달 닫기 (성공적으로 주소가 설정되었으므로)
+      setShowPostcodeModal(false);
+    } else {
+      console.log('❌ 선택된 주소가 없습니다 - 모든 주소 필드가 비어있음');
+      
+      // 에러 토스트 표시
+      Toast.show({
+        type: 'error',
+        text1: '주소 선택에 실패했습니다.',
+        text2: '다시 시도해주세요.',
+        position: 'top',
+        topOffset: 0,
+      });
+    }
   };
 
   const handleAddressDetailChange = (text: string) => {
@@ -103,13 +145,13 @@ const CallFormPage = () => {
         topOffset: 0,
       });
       // 출동 신청 완료 후 출동 진행 페이지로 이동 (dispatchRequestId를 callId로 전달)
-      navigation.navigate('ProceedCall', { 
-        callId: result.data.dispatchRequestId 
+      navigation.navigate('ProceedCall', {
+        callId: result.data.dispatchRequestId,
       });
     } else {
       Toast.show({
         type: 'error',
-        text1: (error|| '출동 신청에 실패했습니다. 다시 시도해주세요.'),
+        text1: (error || '출동 신청에 실패했습니다. 다시 시도해주세요.'),
         position: 'top',
         topOffset: 0,
       });
@@ -196,6 +238,14 @@ const CallFormPage = () => {
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* 주소검색 모달 */}
+      <DaumPostcodeModal
+        visible={showPostcodeModal}
+        onClose={() => setShowPostcodeModal(false)}
+        onSelected={handleAddressSelected}
+      />
+
       <Toast />
     </ManagerLayout>
   );
