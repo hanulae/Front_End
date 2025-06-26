@@ -31,6 +31,10 @@ import api from '../../api/config';
 import {storeTokens, storeUserInfo} from '../../utils/tokenStorage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+//BSK ADD IMPORTS
+import { useAtom } from 'jotai';
+import { loginAtom } from '../../state/local_state/loginAtom'; // 경로에 맞게 조정
+
 interface ILoginPageProps {
   navigation: NavigationProp<any>;
 }
@@ -39,6 +43,7 @@ interface ILoginPageProps {
 // }
 const {height} = Dimensions.get('window');
 const LoginPage = ({navigation}: ILoginPageProps) => {
+  console.log('LoginPage');
   const [showSelectSheet, setShowSelectSheet] = useState(false);
 
   useFocusEffect(
@@ -58,6 +63,9 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
   const password = usePasswordInput();
   const setLogin = useSetAtom(userInfoAtom);
 
+  //BSK ADD LOGIN ATOM
+  const [loginInfo, setLoginInfo] = useAtom(loginAtom);
+
   // 직원 로그인 여부 확인
   const isEmployeeLogin = userType === 'funeral' && email.isEmployee;
 
@@ -69,6 +77,7 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
     navigation.navigate('FindPW');
   };
   const goToSignup = () => {
+    console.log('goToSignup');
     setShowSelectSheet(true);
   };
 
@@ -185,6 +194,25 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
           managerPassword: password.value,
         });
 
+    
+        /*
+        //BSK 작업
+        console.log('manager login response', response);
+    
+        setLoginInfo({
+          userType: 'manager',
+          isLogin: true,
+          accessToken: response.data.accessToken,
+          refreshToken: response.data.refreshToken,
+          userId: response.data.userId,
+          userName: response.data.userName,
+          phoneNumber: response.data.phoneNumber,
+        });
+    
+        handleLogin(); // 필요 시 로그인 후 페이지 이동 등
+        */
+
+
         console.log('Manager login response:', response);
 
         // JWT 토큰과 사용자 정보 저장
@@ -197,11 +225,31 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
         });
 
         handleLogin(response);
+
       } else if (userType === 'funeral') {
         response = await api.post('/funeral/auth/login', {
           funeralEmail: email.fullEmail,
           funeralPassword: password.value,
         });
+
+    
+        /*
+        //BSK 작업
+        console.log('funeral login response', response);
+    
+        setLoginInfo({
+          userType: 'funeral',
+          isLogin: true,
+          accessToken: response.data.accessToken,
+          refreshToken: response.data.refreshToken,
+          userId: response.data.userId,
+          userName: response.data.userName,
+          phoneNumber: response.data.phoneNumber,
+        });
+    
+        handleLogin();
+        */
+
 
         console.log('Funeral login response:', response);
 
@@ -215,6 +263,7 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
         });
 
         handleLogin(response);
+
       }
     } catch (error) {
       console.log('Login error', error);

@@ -1,48 +1,32 @@
-import {useFocusEffect} from '@react-navigation/native';
-import {useCallback, useState} from 'react';
-import {Platform, ScrollView, StatusBar, StyleSheet, View} from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  View,
+} from 'react-native';
 import FuneralLayout from '../../layout/FuneralLayout';
 import CustomButton from '../../components/common/CustomButton';
 import Typo from '../../components/common/Typo';
 import StaffCard from '../../components/funeralHall/management/StaffCard';
 import StaffBottomSheet from '../../components/funeralHall/management/StaffBottomSheet';
-
-export interface IStaff {
-  staffId: string;
-  staffName: string;
-  staffGrade: string;
-  phone: string;
-}
-
-const DummyData: IStaff[] = [
-  {
-    staffId: '1',
-    staffName: '홍길동',
-    staffGrade: '사원',
-    phone: '010-1234-5678',
-  },
-  {
-    staffId: '2',
-    staffName: '김철수',
-    staffGrade: '대리',
-    phone: '010-2345-6789',
-  },
-  {
-    staffId: '3',
-    staffName: '이영희',
-    staffGrade: '과장',
-    phone: '010-3456-7890',
-  },
-  {
-    staffId: '4',
-    staffName: '박민수',
-    staffGrade: '부장',
-    phone: '010-4567-8901',
-  },
-];
+import { IStaff } from './StaffManagementPage.types';
+import Toast from 'react-native-toast-message';
+import api from '../../api/config';
+import { useAtomValue } from 'jotai';
+import { loginAtom } from '../../state/local_state/loginAtom';
 
 const StaffManagementPage = () => {
-  // StatusBar 설정
+  const loginInfo = useAtomValue(loginAtom);
+  const [isEdit, setIsEdit] = useState(false);
+  const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
+  const [bottomSheetMode, setBottomSheetMode] = useState<'add' | 'edit' | null>(null);
+  const [selectedStaff, setSelectedStaff] = useState<IStaff | null>(null);
+  const [staffList, setStaffList] = useState<IStaff[]>([]);
+
+  // 상태바 설정
   useFocusEffect(
     useCallback(() => {
       if (Platform.OS === 'android') {
@@ -51,22 +35,61 @@ const StaffManagementPage = () => {
       } else {
         StatusBar.setBarStyle('dark-content');
       }
-      return () => {
-        // 화면 포커스 해제 시 필요하다면 초기화 작업
-        // 예: StatusBar.setStyle('default')
-      };
-    }, []),
+    }, [])
   );
 
-  // 상태 관리
-  const [isEdit, setIsEdit] = useState(false);
-  const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
-  const [bottomSheetMode, setBottomSheetMode] = useState<'add' | 'edit' | null>(
-    null,
-  );
-  const [selectedStaff, setSelectedStaff] = useState<IStaff | null>(null);
+  const fetchStaffList = async () => {
+    try {
+      const res = await api.get('/funeral/staff/list', {
+        headers: {
+          Authorization: `Bearer ${loginInfo.accessToken}`,
+        },
+      });
 
-  // BottomSheet
+      const staffList = res.data.data.map((staff: any) => ({
+        staffId: staff.funeralStaffId,
+        staffName: staff.funeralStaffName,
+        staffGrade: staff.funeralStaffRole,
+        phone: staff.funeralStaffPhoneNumber,
+      }));
+      setStaffList(staffList);
+    } catch (error: any) {
+      console.error('직원 목록 조회 실패:', error.response?.data || error.message);
+      Toast.show({
+        type: 'error',
+        text1: '직원 목록 조회 실패',
+        text2: error.response?.data?.message || '오류가 발생했습니다.',
+      });
+    }
+  };
+
+  const handleDeleteStaff = async (staffId: string) => {
+    try {
+      await api.delete(`/funeral/staff/${staffId}`, {
+        headers: {
+          Authorization: `Bearer ${loginInfo.accessToken}`,
+        },
+      });
+      Toast.show({
+        type: 'success',
+        text1: '직원 삭제 완료',
+        position: 'top',
+      });
+      fetchStaffList(); // 삭제 후 목록 갱신
+    } catch (error: any) {
+      console.error('직원 삭제 실패:', error.response?.data || error.message);
+      Toast.show({
+        type: 'error',
+        text1: '직원 삭제 실패',
+        text2: error.response?.data?.message || '오류가 발생했습니다.',
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchStaffList();
+  }, []);
+
   const openAddSheet = () => {
     setBottomSheetMode('add');
     setBottomSheetVisible(true);
@@ -84,10 +107,10 @@ const StaffManagementPage = () => {
     setBottomSheetMode(null);
   };
 
-  // 수정 버튼 클릭 핸들러
   const toggleEdit = () => {
     setIsEdit(!isEdit);
   };
+
   return (
     <FuneralLayout
       headerShown={true}
@@ -100,15 +123,13 @@ const StaffManagementPage = () => {
       <View style={styles.wrapper}>
         <View style={styles.editButtonContainer}>
           <CustomButton onPress={toggleEdit} style={styles.editButton}>
-            <Typo style={styles.editButtonText}>
-              {isEdit ? '완료' : '편집'}
-            </Typo>
+            <Typo style={styles.editButtonText}>{isEdit ? '완료' : '편집'}</Typo>
           </CustomButton>
         </View>
         <ScrollView
-          contentContainerStyle={{gap: 10}}
+          contentContainerStyle={{ gap: 10 }}
           style={styles.cardContainer}>
-          {DummyData.map(staff => (
+          {staffList.map(staff => (
             <StaffCard
               key={staff.staffId}
               staffName={staff.staffName}
@@ -116,12 +137,11 @@ const StaffManagementPage = () => {
               staffId={staff.staffId}
               isButtonVisible={isEdit}
               toggleEdit={() => openEditSheet(staff)}
-              handleDelete={() => console.log('삭제')}
+              handleDelete={() => handleDeleteStaff(staff.staffId)}
               handleCancel={() => console.log('취소')}
             />
           ))}
         </ScrollView>
-        {/* BottomSheet */}
         <View style={styles.buttonContainer}>
           <CustomButton onPress={openAddSheet} style={styles.addStaffButton}>
             <Typo style={styles.addStaffButtonText}>등록</Typo>
@@ -131,11 +151,11 @@ const StaffManagementPage = () => {
       {isBottomSheetVisible && (
         <StaffBottomSheet
           visible={isBottomSheetVisible}
-          mode={bottomSheetMode} // <--- props로 모드 전달
-          staff={selectedStaff} // <--- 수정 모드일 경우 사용할 정보
+          mode={bottomSheetMode}
+          staff={selectedStaff}
           onClose={closeBottomSheet}
           onConfirm={() => {
-            console.log('직원 등록 또는 수정 완료');
+            fetchStaffList();
             closeBottomSheet();
           }}
         />
@@ -179,7 +199,6 @@ const styles = StyleSheet.create({
   },
   addStaffButton: {
     flexDirection: 'row',
-    // flex: 1,
     justifyContent: 'center',
     backgroundColor: '#2D81F1',
     borderRadius: 8,
