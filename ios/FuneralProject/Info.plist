@@ -55,6 +55,27 @@
 			<false/>
 			<key>NSAllowsLocalNetworking</key>
 			<true/>
+			<key>NSExceptionDomains</key>
+			<dict>
+				<key>t1.daumcdn.net</key>
+				<dict>
+					<key>NSExceptionAllowsInsecureHTTPLoads</key>
+					<true/>
+					<key>NSExceptionMinimumTLSVersion</key>
+					<string>TLSv1.0</string>
+					<key>NSIncludesSubdomains</key>
+					<true/>
+				</dict>
+				<key>postcode.map.daum.net</key>
+				<dict>
+					<key>NSExceptionAllowsInsecureHTTPLoads</key>
+					<true/>
+					<key>NSExceptionMinimumTLSVersion</key>
+					<string>TLSv1.0</string>
+					<key>NSIncludesSubdomains</key>
+					<true/>
+				</dict>
+			</dict>
 		</dict>
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string></string>

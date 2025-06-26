@@ -110,6 +110,7 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
     }
   };
 
+
   const handleSubmit = async () => {
     try {
       const formData = new FormData();
@@ -178,6 +179,21 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
       console.error('회원가입 에러 로그:', error);
       Alert.alert('회원가입 실패', alertMessage);
     }
+
+  /*
+  //회원가입 기존
+  const handleSubmit = () => {
+    setSignupInfo(prev => ({
+      ...prev,
+      accountInfo: {bankName, accountNumber},
+      agreedTerms: agrees,
+    }));
+    onSubmit();
+    navigation.navigate('SignupComplete', {
+      userType: userType,
+    });
+    */
+
   };
 
   // const handleSubmit = () => {

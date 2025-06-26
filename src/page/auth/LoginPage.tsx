@@ -28,6 +28,8 @@ import usePhoneAuthInput from '../../hooks/input/usePhoneAuthInput';
 import UserSelectSheet from '../../components/common/UserSelectSheet';
 import Toast from 'react-native-toast-message';
 import api from '../../api/config';
+import {storeTokens, storeUserInfo} from '../../utils/tokenStorage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 //BSK ADD IMPORTS
 import { useAtom } from 'jotai';
@@ -78,11 +80,24 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
     console.log('goToSignup');
     setShowSelectSheet(true);
   };
-  const handleLogin = () => {
-    setLogin({
-      userType: userType,
-      isLogin: true,
-    });
+
+  const handleLogin = async (response: any) => {
+    try {
+      // 토큰 저장
+      await AsyncStorage.setItem('accessToken', response.data.accessToken);
+      await AsyncStorage.setItem('refreshToken', response.data.refreshToken);
+
+      // 사용자 정보 저장 필요시 추가
+
+      setLogin({
+        userType: userType,
+        isLogin: true,
+      });
+
+      console.log('Login success', response.data.accessToken);
+    } catch (error) {
+      console.error('Login error:', error);
+    }
   };
 
   // 인증코드 발송 함수
@@ -136,7 +151,18 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
           verificationCode: phoneAuth.authCode,
         });
         console.log('Employee login response:', response);
-        handleLogin();
+
+        // JWT 토큰과 사용자 정보 저장
+        const {accessToken, refreshToken, employee} = response.data;
+        await storeTokens(accessToken, refreshToken);
+        await storeUserInfo({
+          userType: 'funeral',
+          userId: employee.employeeId,
+          data: employee,
+        });
+
+        handleLogin(response);
+
       } catch (error) {
         console.log('Employee login error', error);
         Toast.show({
@@ -161,12 +187,16 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
     }
 
     try {
+      let response;
       if (userType === 'manager') {
-        const response = await api.post('/manager/auth/login', {
+        response = await api.post('/manager/auth/login', {
           managerEmail: email.fullEmail,
           managerPassword: password.value,
         });
+
     
+        /*
+        //BSK 작업
         console.log('manager login response', response);
     
         setLoginInfo({
@@ -180,12 +210,31 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
         });
     
         handleLogin(); // 필요 시 로그인 후 페이지 이동 등
+        */
+
+
+        console.log('Manager login response:', response);
+
+        // JWT 토큰과 사용자 정보 저장
+        const {accessToken, refreshToken, manager} = response.data;
+        await storeTokens(accessToken, refreshToken);
+        await storeUserInfo({
+          userType: 'manager',
+          userId: manager.managerId,
+          data: manager,
+        });
+
+        handleLogin(response);
+
       } else if (userType === 'funeral') {
-        const response = await api.post('/funeral/auth/login', {
+        response = await api.post('/funeral/auth/login', {
           funeralEmail: email.fullEmail,
           funeralPassword: password.value,
         });
+
     
+        /*
+        //BSK 작업
         console.log('funeral login response', response);
     
         setLoginInfo({
@@ -199,9 +248,26 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
         });
     
         handleLogin();
+        */
+
+
+        console.log('Funeral login response:', response);
+
+        // JWT 토큰과 사용자 정보 저장
+        const {accessToken, refreshToken, funeral} = response.data;
+        await storeTokens(accessToken, refreshToken);
+        await storeUserInfo({
+          userType: 'funeral',
+          userId: funeral.funeralId,
+          data: funeral,
+        });
+
+        handleLogin(response);
+
       }
     } catch (error) {
-      console.log('error', error);
+      console.log('Login error', error);
+
       Toast.show({
         type: 'error',
         text1: '로그인에 실패했습니다.',

@@ -1,10 +1,12 @@
 import {StyleSheet, TouchableOpacity, View} from 'react-native';
 import Typo from '../common/Typo';
 import DateIcon from '../../assets/Contents/Content_Time.svg';
+
 interface IEstimateCardProps {
   name: string;
   date: string;
   count: number;
+  status: string;
   index: number;
   onPress: () => void;
 }
@@ -13,9 +15,47 @@ const EstimateCard = ({
   name,
   date,
   count,
+  status,
   index,
   onPress,
 }: IEstimateCardProps) => {
+  const getStatusStyle = (status: string) => {
+    switch (status) {
+      case '견적 요청':
+        return {
+          borderColor: '#A7A9B0',
+          textColor: '#666666',
+        };
+      case '입찰 완료':
+        return {
+          borderColor: '#2D81F1',
+          textColor: '#1565C0',
+        };
+      case '거래 진행중':
+        return {
+          borderColor: '#2D81F1',
+          textColor: '#1565C0',
+        };
+      case '거래 완료':
+        return {
+          borderColor: '#00C853',
+          textColor: '#00695C',
+        };
+      case '거래 취소':
+        return {
+          borderColor: '#FF6F00',
+          textColor: '#E65100',
+        };
+      default:
+        return {
+          borderColor: '#A7A9B0',
+          textColor: '#666666',
+        };
+    }
+  };
+
+  const statusStyle = getStatusStyle(status);
+
   return (
     <TouchableOpacity key={index} style={styles.card} onPress={onPress}>
       <View style={styles.topRow}>
@@ -25,8 +65,19 @@ const EstimateCard = ({
 
       <View style={styles.bottomRow}>
         <View style={styles.leftInfo}>
-          <View style={styles.tag}>
-            <Typo style={styles.tagText}>견적요청</Typo>
+          <View style={[
+            styles.tag,
+            {
+              backgroundColor: '#F8F9FA',
+              borderColor: statusStyle.borderColor,
+            }
+          ]}>
+            <Typo style={[
+              styles.tagText,
+              { color: statusStyle.textColor }
+            ]}>
+              {status}
+            </Typo>
           </View>
           <View style={styles.timeContainer}>
             <DateIcon width={14} height={14} />

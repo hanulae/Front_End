@@ -1,22 +1,59 @@
 import {StyleSheet, TouchableOpacity, View} from 'react-native';
 import DefaultLayout from '../../layout/DefaultLayout';
 import Typo from '../../components/common/Typo';
-import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {NavigationProp, useNavigation, useRoute} from '@react-navigation/native';
 import ManagerLayout from '../../layout/ManagerLayout';
 import CommaIcon from '../../assets/Contents/Content_Comma.svg';
 import CustomButton from '../../components/common/CustomButton';
 import DispatchIcon from '../../assets/Button/Button_Dispatch.svg';
 import MoveIcon from '../../assets/Button/Button_MoveTransparent.svg';
+import { useManagerForm } from '../../hooks/useManagerForm';
+import { useEffect, useState } from 'react';
+import { GetManagerFormBidDetailResponse } from '../../services/api/manager/managerFormService';
 
 const EstimateDetailPage = () => {
   const navigation = useNavigation<NavigationProp<any>>();
+  const route = useRoute();
+  const {managerFormBidId, funeralName} = route.params as {managerFormBidId: string, funeralName: string};
+  console.log('funeralName', funeralName);
+  const {getManagerFormBidDetail, loading, error} = useManagerForm();
+  const [managerFormBidDetail, setManagerFormBidDetail] = useState<{
+    managerFormBidId: string;
+    managerFormId: string;
+    funeralId: string;
+    funeralHallName: string;
+    funeralHallSize: number;
+    funeralHallNumberOfMourners: number;
+    funeralHallPrice: number;
+    funeralHallDetailPrice: number;
+    funeralProponentMoney: number;
+    funeralDiscount: number;
+    bidStatus: string;
+    bidSubmittedAt: string;
+  } | undefined>();
+
   const goToCallFormPage = () => {
-    navigation.navigate('CallForm');
+    navigation.navigate('CallForm', {
+      managerFormBidId: managerFormBidId,
+      managerFormId: managerFormBidDetail?.managerFormId,
+      funeralId: managerFormBidDetail?.funeralId,
+    });
   };
 
-  const fetchQuoteDetail = async () => {
-    console.log('Fetching quote detail...');
+  const loadManagerFormBidDetail = async () => {
+    try {
+      const result = await getManagerFormBidDetail(managerFormBidId);
+      if (result) {
+        setManagerFormBidDetail(result);
+      }
+    } catch (error) {
+      console.error('고객 견적 입찰 상세 조회 에러: ', error);
+    }
   };
+
+  useEffect(() => {
+    loadManagerFormBidDetail();
+  }, []);
 
   return (
     <ManagerLayout
@@ -27,58 +64,72 @@ const EstimateDetailPage = () => {
       logoutButton={false}>
       <View style={styles.wrapper}>
         <View style={styles.titleContainer}>
-          <Typo style={styles.title}>서울대학교병원 장례식장 입찰상세</Typo>
+          <Typo style={styles.title}>{`${funeralName} 입찰상세`}</Typo>
         </View>
 
         <View style={styles.listContainer}>
           <View style={styles.listItem}>
             <View style={styles.labelContainer}>
               <CommaIcon width={6} height={6} />
-              <Typo style={styles.label}>호실</Typo>
+              <Typo style={styles.label}>장례식장</Typo>
             </View>
-            <Typo style={styles.value}>1호실</Typo>
+            <Typo style={styles.value}>{managerFormBidDetail?.funeralHallName}</Typo>
           </View>
           <View style={styles.listItem}>
             <View style={styles.labelContainer}>
               <CommaIcon width={6} height={6} />
               <Typo style={styles.label}>평수</Typo>
             </View>
-            <Typo style={styles.value}>70평</Typo>
+            <Typo style={styles.value}>{managerFormBidDetail?.funeralHallSize}평</Typo>
           </View>
           <View style={styles.listItem}>
             <View style={styles.labelContainer}>
               <CommaIcon width={6} height={6} />
               <Typo style={styles.label}>수용인원</Typo>
             </View>
-            <Typo style={styles.value}>100명</Typo>
+            <Typo style={styles.value}>{managerFormBidDetail?.funeralHallNumberOfMourners}명</Typo>
           </View>
           <View style={styles.listItem}>
             <View style={styles.labelContainer}>
               <CommaIcon width={6} height={6} />
               <Typo style={styles.label}>식장지불금액</Typo>
             </View>
-            <Typo style={styles.value}>100만원</Typo>
+            <Typo style={styles.value}>{managerFormBidDetail?.funeralHallPrice}만원</Typo>
           </View>
           <View style={styles.listItem}>
             <View style={styles.labelContainer}>
               <CommaIcon width={6} height={6} />
               <Typo style={styles.label}>호실사용료</Typo>
             </View>
-            <Typo style={styles.value}>50만원</Typo>
+            <Typo style={styles.value}>{managerFormBidDetail?.funeralHallDetailPrice}만원</Typo>
+          </View>
+          <View style={styles.listItem}>
+            <View style={styles.labelContainer}>
+              <CommaIcon width={6} height={6} />
+              <Typo style={styles.label}>식장지불금액 + 호실사용료</Typo>
+            </View>
+            <Typo style={[
+              styles.value,
+              (managerFormBidDetail?.funeralHallPrice || 0) + (managerFormBidDetail?.funeralHallDetailPrice || 0) > 
+              (managerFormBidDetail?.funeralProponentMoney ? managerFormBidDetail.funeralProponentMoney / 10000 : 0) 
+              && { textDecorationLine: 'line-through', color: '#999' }
+            ]}>
+              {(managerFormBidDetail?.funeralHallPrice || 0) + (managerFormBidDetail?.funeralHallDetailPrice || 0)}만원
+            </Typo>
           </View>
           <View style={styles.listItem}>
             <View style={styles.labelContainer}>
               <CommaIcon width={6} height={6} />
               <Typo style={styles.label}>제안가</Typo>
             </View>
-            <Typo style={styles.value}>120만원</Typo>
+            <Typo style={styles.value}>{managerFormBidDetail?.funeralProponentMoney}만원</Typo>
           </View>
           <View style={styles.listLastItem}>
             <View style={styles.labelContainer}>
               <CommaIcon width={6} height={6} />
               <Typo style={styles.label}>할인율</Typo>
             </View>
-            <Typo style={styles.discountValue}>20%</Typo>
+            <Typo style={styles.discountValue}>{managerFormBidDetail?.funeralDiscount}%</Typo>
           </View>
         </View>
       </View>
@@ -88,7 +139,7 @@ const EstimateDetailPage = () => {
           <View style={styles.buttonIcon}>
             <DispatchIcon width={24} height={24} />
             <Typo fontSize={14} color="white">
-              출동신청
+              출동신청서 작성
             </Typo>
           </View>
           <MoveIcon width={24} height={24} />
@@ -166,7 +217,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard-Bold',
   },
   discountValue: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '600',
     color: '#2D81F1',
     fontFamily: 'Pretendard-Bold',
@@ -177,7 +228,7 @@ const styles = StyleSheet.create({
   },
   button: {
     flexDirection: 'row',
-    backgroundColor: '#C4C7CF',
+    backgroundColor: '#2D81F1',
     paddingVertical: 18,
     paddingHorizontal: 20,
     marginHorizontal: 16,

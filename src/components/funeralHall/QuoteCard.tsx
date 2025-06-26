@@ -1,15 +1,20 @@
-import {Pressable, StyleSheet, TouchableOpacity, View} from 'react-native';
-import {IEstimate} from '../../page/funeralHall/EstimateHistoryPage';
+import {StyleSheet, TouchableOpacity, View} from 'react-native';
 import Typo from '../common/Typo';
 import RequestIcon from '../../assets/Contents/Contents_Request.svg';
 import SendIcon from '../../assets/Contents/Contents_Send.svg';
 
-interface IQuoteCard extends IEstimate {
+interface IQuoteCard {
+  id: string;
+  name: string;
+  date: string;
+  status: string;
+  requestedAt: string;
+  sentAt: string;
   onPress: () => void;
 }
 
 const QuoteCard = ({
-  id,
+  id: _id,
   name,
   date,
   status,
