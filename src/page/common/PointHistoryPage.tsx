@@ -1,7 +1,7 @@
 import {ScrollView, StyleSheet, View} from 'react-native';
 import DefaultLayout from '../../layout/DefaultLayout';
 import {useFocusEffect, useRoute} from '@react-navigation/native';
-import {useCallback} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {Platform, StatusBar} from 'react-native';
 import Typo from '../../components/common/Typo';
 import PointIcon from '../../assets/Bullet/Bullet_PointBlue.svg';
@@ -10,6 +10,12 @@ import CashGrayIcon from '../../assets/Bullet/Bullet_CoinGray.svg';
 import CustomButton from '../../components/common/CustomButton';
 import SelectIcon from '../../assets/Icon/Icon_DropDown03.svg';
 import PointHistoryCard from '../../components/common/PointHistoryCard';
+
+// BSK ADD IMPORTS
+
+import { useAtomValue } from 'jotai';
+import { loginAtom } from '../../state/local_state/loginAtom';
+import api from '../../api/config';
 
 const DummyData = [
   {
@@ -39,6 +45,51 @@ const DummyData = [
 ];
 
 const PointHistoryPage = () => {
+
+  // BSK ADD LOGIN INFO
+  const loginInfo = useAtomValue(loginAtom);
+  const [currentPoint, setCurrentPoint] = useState<number>(0);
+  const [currentCash, setCurrentCash] = useState<number>(0);
+
+  // BSK ADD VARIANT
+  const route = useRoute();
+  const { variant } = route.params as { variant: 'manager' | 'funeral' };
+
+
+  useEffect(() => {
+    if (!variant) return;
+    const fetchPointAndCash = async () => {
+      try {
+        const isManager = variant === 'manager';
+        console.log('isManager', isManager);
+  
+        const pointRes = await api.get(
+          isManager ? '/manager/point/current' : '/funeral/point/current',
+          {
+            headers: {
+              Authorization: `Bearer ${loginInfo.accessToken}`,
+            },
+          },
+        );
+        setCurrentPoint(pointRes.data.currentPoint || 0);
+  
+        const cashRes = await api.get(
+          isManager ? '/manager/cash/current' : '/funeral/cash/current',
+          {
+            headers: {
+              Authorization: `Bearer ${loginInfo.accessToken}`,
+            },
+          },
+        );
+        setCurrentCash(cashRes.data.currentCash || 0);
+      } catch (error: any) {
+        console.error('잔액 조회 실패:', error.response?.data || error.message);
+      }
+    };
+  
+    fetchPointAndCash();
+  }, [variant]);
+
   useFocusEffect(
     useCallback(() => {
       if (Platform.OS === 'android') {
@@ -55,9 +106,6 @@ const PointHistoryPage = () => {
     }, []),
   );
 
-  const route = useRoute();
-  const {variant} = route.params as {variant: 'manager' | 'funeral'};
-
   return (
     <DefaultLayout
       headerShown={true}
@@ -73,14 +121,14 @@ const PointHistoryPage = () => {
             <View style={styles.pointContainer}>
               <Typo style={styles.titleText}>보유 포인트</Typo>
               <View style={styles.pointValueConainer}>
-                <Typo style={styles.pointValue}>100,000</Typo>
+              <Typo style={styles.pointValue}>{currentPoint.toLocaleString()}</Typo>
                 <PointIcon />
               </View>
             </View>
             <View style={styles.cashContainer}>
               <Typo style={styles.titleText}>캐시 포인트</Typo>
               <View style={styles.cashValueConainer}>
-                <Typo style={styles.cashValue}>100,000</Typo>
+              <Typo style={styles.cashValue}>{currentCash.toLocaleString()}</Typo>
                 <CashIcon />
               </View>
             </View>

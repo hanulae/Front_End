@@ -29,6 +29,10 @@ import UserSelectSheet from '../../components/common/UserSelectSheet';
 import Toast from 'react-native-toast-message';
 import api from '../../api/config';
 
+//BSK ADD IMPORTS
+import { useAtom } from 'jotai';
+import { loginAtom } from '../../state/local_state/loginAtom'; // 경로에 맞게 조정
+
 interface ILoginPageProps {
   navigation: NavigationProp<any>;
 }
@@ -56,6 +60,9 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
   const phoneAuth = usePhoneAuthInput();
   const password = usePasswordInput();
   const setLogin = useSetAtom(userInfoAtom);
+
+  //BSK ADD LOGIN ATOM
+  const [loginInfo, setLoginInfo] = useAtom(loginAtom);
 
   // 직원 로그인 여부 확인
   const isEmployeeLogin = userType === 'funeral' && email.isEmployee;
@@ -159,14 +166,38 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
           managerEmail: email.fullEmail,
           managerPassword: password.value,
         });
-        console.log('response', response);
-        handleLogin();
+    
+        console.log('manager login response', response);
+    
+        setLoginInfo({
+          userType: 'manager',
+          isLogin: true,
+          accessToken: response.data.accessToken,
+          refreshToken: response.data.refreshToken,
+          userId: response.data.userId,
+          userName: response.data.userName,
+          phoneNumber: response.data.phoneNumber,
+        });
+    
+        handleLogin(); // 필요 시 로그인 후 페이지 이동 등
       } else if (userType === 'funeral') {
         const response = await api.post('/funeral/auth/login', {
           funeralEmail: email.fullEmail,
           funeralPassword: password.value,
         });
-        console.log('response', response);
+    
+        console.log('funeral login response', response);
+    
+        setLoginInfo({
+          userType: 'funeral',
+          isLogin: true,
+          accessToken: response.data.accessToken,
+          refreshToken: response.data.refreshToken,
+          userId: response.data.userId,
+          userName: response.data.userName,
+          phoneNumber: response.data.phoneNumber,
+        });
+    
         handleLogin();
       }
     } catch (error) {

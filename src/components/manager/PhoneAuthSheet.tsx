@@ -9,6 +9,12 @@ import CustomButton from '../common/CustomButton';
 import CloseIcon from '../../assets/Icon/Icon_BtnClose01.svg';
 const screenHeight = Dimensions.get('window').height;
 
+// BSK ADD IMPORTS
+import api from '../../api/config';
+import Toast from 'react-native-toast-message';
+import { useAtomValue } from 'jotai';
+import { loginAtom } from '../../state/local_state/loginAtom'; // 경로는 프로젝트 구조에 따라 조정
+
 interface IPhoneAuthSheetProps {
   visible: boolean;
   onClose: () => void;
@@ -24,22 +30,99 @@ const PhoneAuthSheet = ({
   const phoneNumber = usePhoneInput();
   const authCode = useInputBase();
 
-  const confirmCode = () => {
-    // 인증 코드를 확인하는 로직.
-    // 인증 요청에 성공하면 개인정보수정페이지로 이동.
+  // BSK ADD LOGIN INFO
+  const loginInfo = useAtomValue(loginAtom); // 로그인된 유저 정보
+  const token = loginInfo.accessToken;
+
+  const confirmCode = async () => {
+    const phone = phoneNumber.value.replace(/[^0-9]/g, '').trim();
+    const code = authCode.value.trim();
+  
+    if (!phone || !code) {
+      Toast.show({
+        type: 'error',
+        text1: '입력 오류',
+        text2: '전화번호와 인증코드를 모두 입력해주세요.',
+        position: 'top',
+      });
+      return;
+    }
+  
     try {
-      // api 호출은 일단 생략
-      // 우선은 개인정보 페이지로 이동하는 로직만 작성
-      navigation.navigate('ModifyUserInfo');
-      onClose();
-    } catch (error) {
-      console.error('인증 코드 확인 실패:', error);
+      const res = await api.post('/manager/sms/verify', {
+        managerPhone: phone,
+        code: code,
+      });
+  
+      if (res.data.verified) {
+        Toast.show({
+          type: 'success',
+          text1: '인증 성공',
+          position: 'top',
+        });
+  
+        // 인증 성공 시 페이지 이동
+        navigation.navigate('ModifyUserInfo');
+        onClose();
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: '인증 실패',
+          text2: '인증코드가 틀렸거나 만료되었습니다.',
+          position: 'top',
+        });
+      }
+    } catch (error: any) {
+      console.error('인증 코드 확인 실패:', error.response?.data || error.message);
+      Toast.show({
+        type: 'error',
+        text1: '서버 오류',
+        text2: error.response?.data?.message || '잠시 후 다시 시도해주세요.',
+        position: 'top',
+      });
     }
   };
 
-  const handleRequestCode = () => {
-    // 인증 코드 요청 로직
-    console.log('인증 코드 요청:', phoneNumber.value);
+  const handleRequestCode = async () => {
+    const phone = phoneNumber.value.replace(/[^0-9]/g, '').trim();
+  
+    if (!phone || phone.length < 10) {
+      Toast.show({
+        type: 'error',
+        text1: '입력 오류',
+        text2: '유효한 휴대폰 번호를 입력해주세요.',
+        position: 'top',
+      });
+      return;
+    }
+  
+    try {
+      const res = await api.post(
+        '/manager/sms/update/send',
+        { managerPhone: phone },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // ✅ 토큰 추가
+          },
+        },
+      );
+  
+      console.log('📨 인증번호 전송 성공:', res.data);
+      Toast.show({
+        type: 'success',
+        text1: '인증번호 전송 완료',
+        text2: 'SMS를 확인해주세요.',
+        position: 'top',
+      });
+    } catch (error: any) {
+      console.error('❌ 인증번호 전송 실패:', error.response?.data || error.message);
+      Toast.show({
+        type: 'error',
+        text1: '전송 실패',
+        text2: error.response?.data?.message || '서버 오류가 발생했습니다.',
+        position: 'top',
+      });
+    }
   };
 
   useEffect(() => {

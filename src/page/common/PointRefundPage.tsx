@@ -1,12 +1,19 @@
 import {Platform, StatusBar, StyleSheet, TextInput, View} from 'react-native';
 import {useFocusEffect, useRoute} from '@react-navigation/native';
-import {useCallback, useState} from 'react';
+import {useCallback, useState, useEffect} from 'react';
 import DefaultLayout from '../../layout/DefaultLayout';
 import Typo from '../../components/common/Typo';
 import CashIcon from '../../assets/Bullet/Bullet_CoinYellow.svg';
 import CustomButton from '../../components/common/CustomButton';
 
-const REFUND_AMOUNTS = [100000, 75000, 50000, 25000, 50000, 5000];
+// BSK ADD IMPORTS
+import {useAtomValue} from 'jotai';
+import {loginAtom} from '../../state/local_state/loginAtom';
+import api from '../../api/config';
+import Toast from 'react-native-toast-message'; // 상단 import 필요
+
+
+const REFUND_AMOUNTS = [100000, 75000, 50000, 25000, 10000, 5000];
 
 const PointRefundPage = () => {
   useFocusEffect(
@@ -31,6 +38,10 @@ const PointRefundPage = () => {
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [inputAmount, setInputAmount] = useState('');
 
+  // BSK ADD LOGIN INFO
+  const loginInfo = useAtomValue(loginAtom);
+  const [currentPoint, setCurrentPoint] = useState<number>(0);
+
   const handleAmountSelect = (amount: number) => {
     setSelectedAmount(amount);
     setInputAmount(amount.toString());
@@ -41,15 +52,83 @@ const PointRefundPage = () => {
     setSelectedAmount(null); // 입력값이 변경되면 선택된 버튼 해제
   };
 
-  const handleRefundRequest = () => {
-    // TODO: 서버로 환급 신청 요청 보내기
+  const handleRefundRequest = async () => {
+    //TODO: 환급 요청 로직 추가
+    console.log('환급 요청 시도');
+    console.log('현재 포인트:', currentPoint);
+    console.log('입력 금액:', inputAmount);
+
     const amount = parseInt(inputAmount, 10);
+  
     if (isNaN(amount) || amount <= 0) {
-      // 에러 처리
+      Toast.show({
+        type: 'error',
+        text1: '입력 오류',
+        text2: '유효한 금액을 입력해주세요.',
+        position: 'top',
+      });
       return;
     }
-    console.log('Refund requested:', amount);
+  console.log('amount:', amount);
+    if (amount > currentPoint) {
+      Toast.show({
+        type: 'error',
+        text1: '포인트 초과',
+        text2: '환급 요청 금액이 현재 포인트를 초과했습니다.',
+        position: 'top',
+      });
+      return;
+    }
+  console.log('amount123:', amount);
+    try {
+      const res = await api.post(
+        '/manager/point/refund',
+        { amountPoint: amount },
+        {
+          headers: {
+            Authorization: `Bearer ${loginInfo.accessToken}`,
+          },
+        },
+      );
+  
+      Toast.show({
+        type: 'success',
+        text1: '환급 요청 완료',
+        text2: '환급 요청이 성공적으로 처리되었습니다.',
+        position: 'top',
+      });
+  
+      setInputAmount('');
+      setSelectedAmount(null);
+      setCurrentPoint(prev => prev - amount); // UI 반영용
+  
+    } catch (error: any) {
+      console.error('환급 요청 실패:', error.response?.data || error.message);
+      Toast.show({
+        type: 'error',
+        text1: '환급 요청 실패',
+        text2: error.response?.data?.message || '오류가 발생했습니다.',
+        position: 'top',
+      });
+    }
   };
+
+  useEffect(() => {
+    const fetchCurrentPoint = async () => {
+      try {
+        const res = await api.get('/manager/point/current', {
+          headers: {
+            Authorization: `Bearer ${loginInfo.accessToken}`,
+          },
+        });
+        setCurrentPoint(res.data.currentPoint || 0);
+      } catch (error: any) {
+        console.error('현재 포인트 조회 실패:', error.response?.data || error.message);
+      }
+    };
+  
+    fetchCurrentPoint();
+  }, []);
 
   return (
     <DefaultLayout
@@ -64,7 +143,7 @@ const PointRefundPage = () => {
         <View style={styles.balanceContainer}>
           <Typo style={styles.balanceTitle}>현재잔액</Typo>
           <View style={styles.balanceContainer1}>
-            <Typo style={styles.balanceValue}>100,000</Typo>
+          <Typo style={styles.balanceValue}>{currentPoint.toLocaleString()}</Typo>
             <CashIcon />
           </View>
         </View>

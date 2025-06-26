@@ -22,6 +22,11 @@ import CheckCircleOnIcon from '../../../assets/Check/Check01=Check01_Active.svg'
 import Toast from 'react-native-toast-message'; // 상단 import 필요
 import api from '../../../api/config';
 
+//Bsk add imports 
+import { useAtomValue } from 'jotai';
+import { loginAtom } from '.././../../state/local_state/loginAtom';
+
+
 interface IPermissions {
   room_management: boolean;
   info_edit: boolean;
@@ -104,6 +109,10 @@ const StaffBottomSheet = ({
     phoneNumber: '',
     isPhoneVerified: false,
   });
+
+  // BSK ADD USER INFO ATOM
+  const userInfo = useAtomValue(loginAtom); // 로그인 시 저장된 유저 정보
+  const accessToken = userInfo?.accessToken;
 
   // 인증 요청 함수
 const handleRequestCode = async () => {
@@ -195,6 +204,61 @@ const handleVerifyCode = async () => {
   }
 };
 
+const handleCreateStaff = async () => {
+  console.log('handleCreateStaff called');
+  if (!signupInfo.isPhoneVerified) {
+    Toast.show({
+      type: 'error',
+      text1: '휴대전화 인증을 완료해주세요.',
+      position: 'top',
+    });
+    return;
+  }
+
+  if (!staffName.value || !staffGrade.value) {
+    Toast.show({
+      type: 'error',
+      text1: '이름과 직급을 입력해주세요.',
+      position: 'top',
+    });
+    return;
+  }
+
+  try {
+    const response = await api.post(
+      '/funeral/staff/create',
+      {
+        funeralStaffPhoneNumber: signupInfo.phoneNumber,
+        funeralStaffName: staffName.value,
+        funeralStaffRole: staffGrade.value,
+        permissions,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`, // ✅ 토큰 포함
+        },
+      },
+    );
+
+    Toast.show({
+      type: 'success',
+      text1: '직원이 등록되었습니다.',
+      position: 'top',
+    });
+
+    onConfirm(); // 모달 닫기
+  } catch (error: any) {
+    console.log('직원 생성 실패:', error.response?.data || error.message);
+    Toast.show({
+      type: 'error',
+      text1: '직원 등록 실패',
+      text2: error.response?.data?.message || '오류가 발생했습니다.',
+      position: 'top',
+    });
+    // ❌ 모달 닫지 않음
+  }
+};
+
   return (
     <Modal visible={visible} transparent animationType="none">
       <Pressable style={styles.backdrop} onPress={onClose}>
@@ -282,7 +346,7 @@ const handleVerifyCode = async () => {
                 </View>
               </View>
               <View style={styles.buttonContainer}>
-                <Pressable onPress={onConfirm} style={styles.confirmButton}>
+                <Pressable onPress={handleCreateStaff} style={styles.confirmButton}>
                   <Typo style={styles.confirmText}>등록</Typo>
                 </Pressable>
               </View>
