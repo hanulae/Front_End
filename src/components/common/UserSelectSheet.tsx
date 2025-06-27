@@ -127,6 +127,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontFamily: 'Pretendard-Medium',
     textAlign: 'left',
+    color: '#000',
   },
   optionTextSelected: {
     color: '#397CFF',

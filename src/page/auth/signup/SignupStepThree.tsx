@@ -133,14 +133,14 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
         formData.append('agreements', JSON.stringify(agrees));
       }
   
-      // 🔹 파일 key 분기
+    // 🔹 중복된 managerAddFile 필드가 생기지 않도록 유일하게 append
     const fileKey = userType === 'funeral' ? 'funeralAddFile' : 'managerAddFile';
 
-    signupInfo.attachedFiles.forEach(file => {
+    signupInfo.attachedFiles?.forEach((file, index) => {
       formData.append(fileKey, {
         uri: file.uri,
         type: file.type,
-        name: file.name,
+        name: file.name || `upload_${index}.jpg`,
       });
     });
       
@@ -239,8 +239,6 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
     }
   };
 
-  console.log('signupInf123123o', signupInfo);
-
   return (
     <ScrollView contentContainerStyle={styles.wrapper}>
 
@@ -249,6 +247,7 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
   <TextInput
     style={styles.input}
     placeholder="이름을 입력하세요"
+    placeholderTextColor="black"
     value={name}
     onChangeText={setName}
   />
@@ -264,6 +263,7 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
     <TextInput
       style={[styles.input, { flex: 1, marginLeft: 8 }]}
       placeholder="000-0000-0000"
+      placeholderTextColor="black"
       value={accountNumber}
       onChangeText={setAccountNumber}
     />
@@ -402,7 +402,7 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
             ) : (
               <SmallCheckIconOff width={18} height={18} />
             )}
-            <Typo>(선택) 마케팅 정보 수신 동의</Typo>
+            <Typo style={styles.termsText}>(선택) 마케팅 정보 수신 동의</Typo>
           </View>
           <TouchableOpacity onPress={() => navigateMoreInfo('marketing')}>
             <Typo style={styles.moreInfoText}>보기</Typo>
@@ -565,6 +565,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     marginLeft: 4,
     fontFamily: 'Pretendard-Light',
+    color: '#000',
   },
   verifyButton: {
     backgroundColor: '#2D81F1',
