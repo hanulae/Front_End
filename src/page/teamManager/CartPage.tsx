@@ -62,33 +62,61 @@ const CartPage = ({navigation}: ICartPageProps) => {
     error: cartError,
   } = useManagerCart();
 
-  // ✅ 장바구니 데이터 불러오기 함수
+  // ✅ 장바구니 데이터 불러오기 함수 - AsyncStorage 기반으로 수정
   const fetchCartList = useCallback(async () => {
     try {
       const result = await getCartList();
       console.log('🛒 장바구니 조회 결과:', result);
       
-      if (result) {
-        // ✅ result.data.cartList에서 배열 추출
-        const cartData = result.data?.cartList || result.cartList || [];
-        console.log('🛒 장바구니 데이터:', cartData);
+      if (result && Array.isArray(result)) {
+        // ✅ 로컬 서비스는 직접 배열을 반환하므로 서버 구조로 변환
+        const cartData = result.map((item) => ({
+          managerCartId: item.funeralListId, // funeralListId를 ID로 사용
+          managerId: 'local', // 로컬 저장이므로 고정값
+          funeralListId: item.funeralListId,
+          createdAt: item.addedAt,
+          updatedAt: item.addedAt,
+          funeralList: {
+            funeralListId: item.funeralListId,
+            funeralId: item.funeralId,
+            funeralName: item.funeralName,
+            funeralAddress: item.funeralAddress,
+            funeralRegion: '',
+            funeralCity: '',
+            funeralScale: '',
+            funeralTotalRooms: 0,
+            funeralOperationType: '',
+            funeralStyle: '',
+            funeralParkingLot: false,
+            funeralStore: false,
+            funeralFamilyWaitingRoom: false,
+            funeralDisabledFacility: false,
+            funeralIsJoin: false,
+            funeralSearchKeywords: '',
+            createdAt: item.addedAt,
+            updatedAt: item.addedAt,
+            deletedAt: null,
+          }
+        }));
+        
+        console.log('🛒 변환된 장바구니 데이터:', cartData);
         setCartItems(cartData);
         
         // ✅ 새로운 아이템들에 대한 애니메이션 값 초기화
-        cartData.forEach((item: CartItem) => {
-          if (!animatedValues[item.managerCartId]) {
-            animatedValues[item.managerCartId] = new Animated.Value(0); // 슬라이드용 초기값 0
+        cartData.forEach((item) => {
+          if (!animatedValues[item.funeralListId]) {
+            animatedValues[item.funeralListId] = new Animated.Value(0);
           }
         });
       } else {
-        console.error('장바구니 불러오기 실패: result가 없습니다');
+        console.error('장바구니 불러오기 실패: 잘못된 데이터 형식');
         setCartItems([]);
       }
     } catch (error) {
       console.error('장바구니 불러오기 실패', error);
       setCartItems([]);
     }
-  }, [getCartList]);
+  }, [getCartList, animatedValues]);
 
   useEffect(() => {
     fetchCartList();
@@ -112,47 +140,47 @@ const CartPage = ({navigation}: ICartPageProps) => {
     }, [fetchCartList]),
   );
 
-  // ✅ 다중 선택 핸들러
-  const handleSelect = (id: string) => {
-    console.log('🔍 선택된 ID:', id);
+  // ✅ 다중 선택 핸들러 - funeralListId 기준으로 변경
+  const handleSelect = (funeralListId: string) => {
+    console.log('🔍 선택된 funeralListId:', funeralListId);
     setSelectedIds(prevSelected => {
-      const exists = prevSelected.includes(id);
+      const exists = prevSelected.includes(funeralListId);
       console.log('🔍 선택된 ID 존재 여부:', exists);
       if (exists) {
         // ✅ 이미 선택되어 있으면 제거
-        return prevSelected.filter(selectedId => selectedId !== id);
+        return prevSelected.filter(selectedId => selectedId !== funeralListId);
       } else {
         // ✅ 선택되어 있지 않으면 추가
-        return [...prevSelected, id];
+        return [...prevSelected, funeralListId];
       }
     });
   };
 
-  const handleDelete = async (managerCartId: string) => {
-    if (!animatedValues[managerCartId]) {
-      animatedValues[managerCartId] = new Animated.Value(0);
+  const handleDelete = async (funeralListId: string) => {
+    if (!animatedValues[funeralListId]) {
+      animatedValues[funeralListId] = new Animated.Value(0);
     }
 
-    Animated.timing(animatedValues[managerCartId], {
+    Animated.timing(animatedValues[funeralListId], {
       toValue: -400,
       duration: 350,
       easing: Easing.out(Easing.cubic),
       useNativeDriver: true,
     }).start(async () => {
       try {
-        const result = await deleteFromCart([managerCartId]);
+        const result = await deleteFromCart([funeralListId]);
         
         if (result) {
           setCartItems(prevItems => 
-            prevItems.filter(item => item.managerCartId !== managerCartId)
+            prevItems.filter(item => item.funeralListId !== funeralListId)
           );
           
           // ✅ 삭제된 아이템이 선택되어 있었다면 선택에서 제거
           setSelectedIds(prevSelected => 
-            prevSelected.filter(id => id !== managerCartId)
+            prevSelected.filter(id => id !== funeralListId)
           );
           
-          delete animatedValues[managerCartId];
+          delete animatedValues[funeralListId];
           
           Toast.show({
             type: 'success',
@@ -164,7 +192,7 @@ const CartPage = ({navigation}: ICartPageProps) => {
       } catch (error) {
         console.error('장바구니 삭제 실패', error);
         
-        Animated.timing(animatedValues[managerCartId], {
+        Animated.timing(animatedValues[funeralListId], {
           toValue: 0,
           duration: 200,
           useNativeDriver: true,
@@ -180,7 +208,7 @@ const CartPage = ({navigation}: ICartPageProps) => {
     });
   };
 
-  // ✅ 견적요청 함수 - 다중 선택된 항목들 전달
+  // ✅ 견적요청 함수 - funeralListId 기준으로 변경
   const requestEstimate = () => {
     if (selectedIds.length === 0) {
       Toast.show({
@@ -192,9 +220,9 @@ const CartPage = ({navigation}: ICartPageProps) => {
       return;
     }
 
-    // ✅ 선택된 장례식장들의 정보 수집
+    // ✅ 선택된 장례식장들의 정보 수집 - funeralListId 기준
     const selectedFunerals = cartItems.filter(item => 
-      selectedIds.includes(item.managerCartId)
+      selectedIds.includes(item.funeralListId)
     );
 
     console.log('selectedFunerals', selectedFunerals);
@@ -205,14 +233,14 @@ const CartPage = ({navigation}: ICartPageProps) => {
     });
   };
 
-  // ✅ 전체 선택/해제 함수 (추가 기능)
+  // ✅ 전체 선택/해제 함수 - funeralListId 기준으로 변경
   const handleSelectAll = () => {
     if (selectedIds.length === cartItems.length) {
       // 전체 선택되어 있으면 전체 해제
       setSelectedIds([]);
     } else {
-      // 전체 선택
-      setSelectedIds(cartItems.map(item => item.managerCartId));
+      // 전체 선택 - funeralListId 기준
+      setSelectedIds(cartItems.map(item => item.funeralListId));
     }
   };
 
@@ -248,9 +276,9 @@ const CartPage = ({navigation}: ICartPageProps) => {
           ) : (
             <FlatList
               data={cartItems}
-              keyExtractor={item => item.managerCartId}
+              keyExtractor={item => item.funeralListId}
               renderItem={({item}) => {
-                const slideValue = animatedValues[item.managerCartId] || new Animated.Value(0);
+                const slideValue = animatedValues[item.funeralListId] || new Animated.Value(0);
                 
                 return (
                   <Animated.View 
@@ -271,9 +299,9 @@ const CartPage = ({navigation}: ICartPageProps) => {
                         funeralAddress: item.funeralList.funeralAddress,
                         imageUrl: undefined,
                       }}
-                      // ✅ 다중 선택 확인
-                      selected={selectedIds.includes(item.managerCartId)}
-                      onPressCheck={() => handleSelect(item.managerCartId)}
+                      // ✅ funeralListId 기준으로 선택 확인
+                      selected={selectedIds.includes(item.funeralListId)}
+                      onPressCheck={() => handleSelect(item.funeralListId)}
                       onPressCard={() => {
                         console.log('상세 페이지 이동: ', item.funeralList.funeralName);
                         navigation.navigate('FuneralDetail', {
@@ -281,7 +309,7 @@ const CartPage = ({navigation}: ICartPageProps) => {
                           funeralId: item.funeralList.funeralId,
                         });
                       }}
-                      onPressDelete={() => handleDelete(item.managerCartId)}
+                      onPressDelete={() => handleDelete(item.funeralListId)}
                     />
                   </Animated.View>
                 );

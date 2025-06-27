@@ -41,38 +41,19 @@ const CallFormPage = () => {
   };
 
   const handleAddressSelected = (postcodeData: any) => {
-    console.log('🏠🏠🏠 handleAddressSelected 호출됨!!!');
-    console.log('📦 받은 데이터 타입:', typeof postcodeData);
-    console.log('📦 받은 데이터 전체:', JSON.stringify(postcodeData, null, 2));
-    
-    // 데이터 구조 확인
-    console.log('🔑 데이터 키들:', Object.keys(postcodeData || {}));
-    
-    // 각 주소 필드 확인
-    console.log('🔍 roadAddress:', postcodeData?.roadAddress);
-    console.log('🔍 jibunAddress:', postcodeData?.jibunAddress);  
-    console.log('🔍 address:', postcodeData?.address);
-    console.log('🔍 autoRoadAddress:', postcodeData?.autoRoadAddress);
-    console.log('🔍 autoJibunAddress:', postcodeData?.autoJibunAddress);
-    
     // 도로명주소가 있으면 도로명주소 사용, 없으면 지번주소 사용
-    const selectedAddress = postcodeData?.roadAddress || 
-                           postcodeData?.jibunAddress || 
-                           postcodeData?.address ||
-                           postcodeData?.autoRoadAddress ||
-                           postcodeData?.autoJibunAddress;
-    
-    console.log('✅ 최종 선택된 주소:', selectedAddress);
-    
+    const selectedAddress = postcodeData?.roadAddress ||
+                            postcodeData?.jibunAddress ||
+                            postcodeData?.address ||
+                            postcodeData?.autoRoadAddress ||
+                            postcodeData?.autoJibunAddress;
+
     if (selectedAddress) {
       setAddress(selectedAddress);
-      console.log('💾 주소 상태 업데이트 완료:', selectedAddress);
-      
+
       // 모달 닫기 (성공적으로 주소가 설정되었으므로)
       setShowPostcodeModal(false);
     } else {
-      console.log('❌ 선택된 주소가 없습니다 - 모든 주소 필드가 비어있음');
-      
       // 에러 토스트 표시
       Toast.show({
         type: 'error',
@@ -127,7 +108,7 @@ const CallFormPage = () => {
       managerFormId: managerFormId,
       funeralId: funeralId,
       address: address,
-      addressDetail: addressDetail,
+      addressDetail: addressDetail || undefined,
       famPhoneNumber: familyPhone.value || undefined, // 선택
       managerPhoneNumber: managerPhone.value,
       emergencyPhoneNumber: emergencyPhone.value || undefined, // 선택

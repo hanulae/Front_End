@@ -1,6 +1,8 @@
 import {StyleSheet, TouchableOpacity, View} from 'react-native';
 import Typo from '../common/Typo';
 import DateIcon from '../../assets/Contents/Content_Time.svg';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 interface IEstimateCardProps {
   name: string;
@@ -9,6 +11,7 @@ interface IEstimateCardProps {
   status: string;
   index: number;
   onPress: () => void;
+  data: any;
 }
 
 const EstimateCard = ({
@@ -18,33 +21,41 @@ const EstimateCard = ({
   status,
   index,
   onPress,
+  data,
 }: IEstimateCardProps) => {
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
+
   const getStatusStyle = (status: string) => {
     switch (status) {
-      case '견적 요청':
+      case '견적 발송':
         return {
-          borderColor: '#A7A9B0',
-          textColor: '#666666',
+          borderColor: '#9E9E9E',
+          textColor: '#616161',
         };
-      case '입찰 완료':
+      case '입찰 요청':
         return {
-          borderColor: '#2D81F1',
-          textColor: '#1565C0',
+          borderColor: '#2196F3',
+          textColor: '#2196F3',
         };
-      case '거래 진행중':
+      case '출동 신청':
         return {
-          borderColor: '#2D81F1',
-          textColor: '#1565C0',
+          borderColor: '#9C27B0',
+          textColor: '#7B1FA2',
+        };
+      case '출동 승인':
+        return {
+          borderColor: '#2196F3',
+          textColor: '#2196F3',
         };
       case '거래 완료':
         return {
-          borderColor: '#00C853',
-          textColor: '#00695C',
+          borderColor: '#4CAF50',
+          textColor: '#388E3C',
         };
       case '거래 취소':
         return {
-          borderColor: '#FF6F00',
-          textColor: '#E65100',
+          borderColor: '#F44336',
+          textColor: '#D32F2F',
         };
       default:
         return {
@@ -56,11 +67,19 @@ const EstimateCard = ({
 
   const statusStyle = getStatusStyle(status);
 
+  const goToClientDetail = () => {
+    navigation.navigate('ClientDetail', {data: data});
+  };
+
   return (
     <TouchableOpacity key={index} style={styles.card} onPress={onPress}>
       <View style={styles.topRow}>
-        <Typo style={styles.clientName}>{name}</Typo>
-        <Typo style={styles.clientDesc}>고객님</Typo>
+        <Typo style={styles.clientName}>{name} 고객님</Typo>
+          <TouchableOpacity
+            style={styles.detailButton}
+            onPress={goToClientDetail}>
+            <Typo style={styles.detailText}>견적 상세</Typo>
+          </TouchableOpacity>
       </View>
 
       <View style={styles.bottomRow}>
@@ -110,7 +129,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     paddingVertical: 10,
     paddingHorizontal: 30,
-    justifyContent: 'flex-start',
+    justifyContent: 'space-between',
     // alignContent: 'center',
     // alignItems: 'center',
     // borderWidth: 1,
@@ -182,5 +201,16 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#8890A0',
     fontFamily: 'Pretendard-Medium',
+  },
+  detailButton: {
+    paddingVertical: 4,
+  },
+  detailText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#3A83E3',
+    textDecorationLine: 'underline',
+    textDecorationColor: '#3A83E3',
+    fontFamily: 'Pretendard-Bold',
   },
 });

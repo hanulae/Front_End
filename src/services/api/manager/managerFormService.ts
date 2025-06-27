@@ -19,9 +19,14 @@ interface CreateManagerFormResponse {
 interface ManagerFormList {
   managerFormId: string;
   chiefMournerName: string;
+  deceasedName: string;
+  numberOfMourners: number;
+  checkInDate: string;
+  checkOutDate: string;
   formStatus: 'request' | 'completed' | 'cancelled';
   createdAt: string;
   bidCount: number;
+  roomSize: number;
 }
 
 interface GetManagerFormListResponse {

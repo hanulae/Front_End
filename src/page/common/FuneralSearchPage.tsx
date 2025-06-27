@@ -128,14 +128,18 @@ const FuneralSearchPage = () => {
     try {
       const result = await addToCart(selectedItems);
       if (result) {
-        // 성공 시 알림 및 선택 항목 초기화
+        let message = `${result.addedCount}개 항목이 장바구니에 추가되었습니다.`;
+        if (result.alreadyExistsCount && result.alreadyExistsCount > 0) {
+          message += ` (${result.alreadyExistsCount}개는 이미 존재)`;
+        }
+
         Toast.show({
           type: 'success',
-          text1: `장바구니에 추가되었습니다.`,
+          text1: message,
           position: 'top',
           topOffset: -150,
           visibilityTime: 2000,
-        })
+        });
       }
 
       // 선택 항목 초기화
@@ -149,7 +153,7 @@ const FuneralSearchPage = () => {
         position: 'top',
         topOffset: -150,
         visibilityTime: 2000,
-      })
+      });
     }
   }, [addToCart, selectedItems]);
 

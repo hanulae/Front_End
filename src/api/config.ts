@@ -11,7 +11,7 @@ import {
 
 const API_URL =
   Platform.OS === 'android'
-    ? 'http://10.0.2.2:3000/api'
+    ? 'http://15.164.166.8:3000/api'
     : 'http://localhost:3000/api';
 
 const api = axios.create({
