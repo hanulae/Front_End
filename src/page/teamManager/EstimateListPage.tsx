@@ -48,21 +48,30 @@ const EstimateListPage = () => {
     }
   };
 
-  // ✅ 날짜 포맷팅 함수
+
+  //날짜 포맷팅 함수
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    
+    return `${year}.${month}.${day} | ${hours}:${minutes}`;
   };
 
   // ✅ 상태별 한글 변환
-  const getStatusText = (status: 'request' | 'bid_received' | 'bid_progress' | 'completed' | 'cancelled') => {
+  const getStatusText = (status: 'request' | 'bid_received' | 'bid_selected' | 'bid_progress' | 'completed' | 'cancelled') => {
     switch (status) {
       case 'request':
-        return '견적 요청';
+        return '견적 발송';
       case 'bid_received':
-        return '입찰 완료';
+        return '입찰 요청';
+      case 'bid_selected':
+        return '출동 신청';
       case 'bid_progress':
-        return '거래 진행중';
+        return '출동 승인';
       case 'completed':
         return '거래 완료';
       case 'cancelled':
@@ -70,6 +79,7 @@ const EstimateListPage = () => {
       default:
         return status;
     }
+
   };
 
   const goToClientEstimate = (managerFormId: string) => {
@@ -133,6 +143,7 @@ const EstimateListPage = () => {
               status={getStatusText(item.formStatus)}
               index={index}
               onPress={() => goToClientEstimate(item.managerFormId)}
+              data={item}
             />
           ))
         )}

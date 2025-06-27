@@ -14,6 +14,7 @@ interface IFuneralQuoteCardProps {
   completed: boolean;
   status: string;
   selectable: boolean;
+  managerFormId: string;
 }
 
 const FuneralQuoteCard = ({
@@ -26,32 +27,38 @@ const FuneralQuoteCard = ({
   status,
   selectable,
 }: IFuneralQuoteCardProps) => {
-  const navigation = useNavigation<NativeStackNavigationProp<any>>();
+
 
   const getStatusStyle = (status: string) => {
     switch (status) {
       case '입찰대기':
         return {
-          borderColor: '#A7A9B0',
-          textColor: '#FFFFFF',
-          backgroundColor: '#A7A9B0',
+          borderColor: '#9E9E9E',
+          textColor: '#616161',
+          backgroundColor: '#e3e5ee',
         };
-      case '입찰완료':
+      case '출동신청':
         return {
-          borderColor: '#2D81F1',
-          textColor: '#1565C0',
+          borderColor: '#9C27B0',
+          textColor: '#7B1FA2',
+          backgroundColor: '#F3E0FF',
+        };
+      case '출동승인':
+        return {
+          borderColor: '#2196F3',
+          textColor: '#2196F3',
           backgroundColor: '#E2F2FF',
         };
       case '입찰실패':
         return {
-          borderColor: '#FF6F00',
-          textColor: '#E65100',
+          borderColor: '#F44336',
+          textColor: '#D32F2F',
           backgroundColor: '#FFF3E0',
         };
       case '입찰만료':
         return {
-          borderColor: '#FF6F00',
-          textColor: '#E65100',
+          borderColor: '#F44336',
+          textColor: '#D32F2F',
           backgroundColor: '#FFF3E0',
         };
       case '거래완료':
@@ -67,13 +74,12 @@ const FuneralQuoteCard = ({
           backgroundColor: '#F8F9FA',
         };
     }
-  }
+  };
 
   const statusStyle = getStatusStyle(status);
 
-  const goToClientDetail = () => {
-    navigation.navigate('ClientDetail', {clientId: id});
-  };
+  // ✅ 입찰만료나 입찰실패인지 확인
+  const isExpiredOrFailed = status === '입찰만료' || status === '입찰실패';
 
   return (
     <TouchableOpacity
@@ -82,12 +88,19 @@ const FuneralQuoteCard = ({
       style={[
         styles.card,
         selected ? styles.cardSelected : styles.cardUnselected,
+        // ✅ 입찰만료/실패시 흐리게 처리
+        isExpiredOrFailed && styles.cardDisabled,
       ]}
       onPress={() => handleSelect(id)}
-      disabled={!selectable}>
+      disabled={!selectable || isExpiredOrFailed}>
       <View style={styles.row}>
         <View style={styles.firstRow}>
-          <Typo style={[styles.nameText, selected && styles.selectedText]}>
+          <Typo style={[
+            styles.nameText, 
+            selected && styles.selectedText,
+            // ✅ 입찰만료/실패시 텍스트도 흐리게
+            isExpiredOrFailed && styles.disabledText,
+          ]}>
             {name}
           </Typo>
           {selected ? (
@@ -98,7 +111,13 @@ const FuneralQuoteCard = ({
           {/* <Typo style={styles.addressText}>{address}</Typo> */}
         </View>
         <View style={styles.secondRow}>
-          <Typo style={styles.addressText}>{address}</Typo>
+          <Typo style={[
+            styles.addressText,
+            // ✅ 입찰만료/실패시 주소 텍스트도 흐리게
+            isExpiredOrFailed && styles.disabledText,
+          ]}>
+            {address}
+          </Typo>
           <View style={[styles.statusButton, {borderColor: statusStyle.borderColor, backgroundColor: statusStyle.backgroundColor}]}>
             <Typo
               style={[
@@ -109,13 +128,13 @@ const FuneralQuoteCard = ({
             </Typo>
           </View>
         </View>
-        <View style={styles.thirdRow}>
+        {/* <View style={styles.thirdRow}>
           <TouchableOpacity
             style={styles.detailButton}
             onPress={goToClientDetail}>
             <Typo style={styles.detailText}>상세보기</Typo>
           </TouchableOpacity>
-        </View>
+        </View> */}
 
         {/* <View style={styles.checkWrapper}>
           <View
@@ -264,5 +283,11 @@ const styles = StyleSheet.create({
   },
   completedButton: {
     backgroundColor: '#E2F2FF',
+  },
+  cardDisabled: {
+    opacity: 0.5,
+  },
+  disabledText: {
+    color: '#999',
   },
 });

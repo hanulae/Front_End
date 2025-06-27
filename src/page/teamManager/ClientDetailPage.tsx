@@ -3,17 +3,30 @@ import ManagerLayout from '../../layout/ManagerLayout';
 import Typo from '../../components/common/Typo';
 import CommaIcon from '../../assets/Contents/Content_Comma.svg';
 import {useRoute} from '@react-navigation/native';
-import {useEffect, useState} from 'react';
 
 const ClientDetailPage = () => {
   const route = useRoute();
-  const {clientId} = route.params as {clientId: number};
+  const {data} = route.params as {data: any};
 
-  const [clientDetail, setClientDetail] = useState(null);
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
 
-  useEffect(() => {
-    const fetchClientDetail = async () => {};
-  }, []);
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}년 ${month}월 ${day}일`;
+  };
+
+  const isDataEmpty = (value: any) => {
+    return value === null || value === undefined || value === '' || value === '' || value === 0;
+  };
+
+  const getValueStyle = (value: any) => {
+    return isDataEmpty(value) ? styles.emptyValue : styles.value;
+  }
+
   return (
     <ManagerLayout
       headerShown={true}
@@ -32,28 +45,46 @@ const ClientDetailPage = () => {
               <CommaIcon width={6} height={6} />
               <Typo style={styles.label}>상주이름</Typo>
             </View>
-            <Typo style={styles.value}>김철수</Typo>
+            <Typo style={styles.value}>{data.chiefMournerName}</Typo>
+          </View>
+          <View style={styles.listItem}>
+            <View style={styles.labelContainer}>
+              <CommaIcon width={6} height={6} />
+              <Typo style={styles.label}>고인이름</Typo>
+            </View>
+            <Typo style={getValueStyle(data.deceasedName)}>
+              {isDataEmpty(data.deceasedName) ? '작성하지 않음' : data.deceasedName}
+            </Typo>
+          </View>
+          <View style={styles.listItem}>
+            <View style={styles.labelContainer}>
+              <CommaIcon width={6} height={6} />
+              <Typo style={styles.label}>평수</Typo>
+            </View>
+            <Typo style={getValueStyle(data.roomSize)}>
+              {isDataEmpty(data.roomSize) ? '작성하지 않음' : `${data.roomSize}평`}
+            </Typo>
           </View>
           <View style={styles.listItem}>
             <View style={styles.labelContainer}>
               <CommaIcon width={6} height={6} />
               <Typo style={styles.label}>조문객수</Typo>
             </View>
-            <Typo style={styles.value}>150명</Typo>
+            <Typo style={styles.value}>{data.numberOfMourners}명</Typo>
           </View>
           <View style={styles.listItem}>
             <View style={styles.labelContainer}>
               <CommaIcon width={6} height={6} />
               <Typo style={styles.label}>입실일자</Typo>
             </View>
-            <Typo style={styles.value}>2025.05.20</Typo>
+            <Typo style={styles.value}>{formatDate(data.checkInDate)}</Typo>
           </View>
           <View style={styles.listItem}>
             <View style={styles.labelContainer}>
               <CommaIcon width={6} height={6} />
               <Typo style={styles.label}>퇴실일자</Typo>
             </View>
-            <Typo style={styles.value}>2025.05.22</Typo>
+            <Typo style={styles.value}>{formatDate(data.checkOutDate)}</Typo>
           </View>
         </View>
       </View>
@@ -122,5 +153,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#283042',
     fontFamily: 'Pretendard-Bold',
+  },
+  emptyValue: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#A7A9B0',
+    fontFamily: 'Pretendard-Medium',
+    opacity: 0.8,
   },
 });

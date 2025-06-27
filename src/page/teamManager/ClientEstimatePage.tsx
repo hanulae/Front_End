@@ -56,6 +56,7 @@ const ClientEstimatePage = () => {
     } catch (error) {
       console.error('고객 견적서 리스트 로드 실패: ', error);
     }
+    
   };
 
   // 견적서 선택 (단일 선택)
@@ -75,13 +76,13 @@ const ClientEstimatePage = () => {
   const getStatusText = (status: 'pending' | 'bid_submitted' | 'bid_selected' | 'bid_progress' | 'rejected' | 'expired' | 'transaction_completed') => {
     switch (status) {
       case 'pending':
-      return '입찰대기';
+        return '입찰대기';
       case 'bid_submitted':
         return '입찰완료';
       case 'bid_selected':
-        return '입찰선택';
+        return '출동신청';
       case 'bid_progress':
-        return '진행중';
+        return '출동승인';
       case 'rejected':
         return '입찰실패';
       case 'expired':
@@ -103,6 +104,7 @@ const ClientEstimatePage = () => {
       <ScrollView contentContainerStyle={styles.wrapper}>
         {userManagerFormList.map(item => {
           const canSelect = item.bidStatus === 'bid_submitted';
+          console.log('item.bidStatus', item.bidStatus);
 
           return (
             <FuneralQuoteCard
@@ -115,6 +117,7 @@ const ClientEstimatePage = () => {
               completed={!canSelect}
               selectable={canSelect}
               status={getStatusText(item.bidStatus)}
+              managerFormId={managerFormId}
             />
           );
         })}

@@ -5,7 +5,7 @@ interface CreateManagerDispatchRequestParams {
   managerFormId: string;
   funeralId: string;
   address: string;
-  addressDetail: string;
+  addressDetail?: string;
   famPhoneNumber?: string;
   managerPhoneNumber: string;
   emergencyPhoneNumber?: string;
