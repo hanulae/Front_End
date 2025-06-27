@@ -24,7 +24,7 @@ import {getLocalFileCopies, LocalFile} from '../../../util/file';
 import {pick} from '@react-native-documents/picker';
 import FileList from '../../../components/common/FileList';
 import Toast from 'react-native-toast-message';
-// import api from '../../../api/config';
+import api from '../../../api/config';
 
 interface Props {
   onNext: () => void;
@@ -222,28 +222,77 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
   };
 
   const handleRequestCode = async () => {
-    // 인증 코드 요청 로직
-    // try {
-    //   await api.post('/manager/sms/send', {
-    //     managerPhone: phoneNumber.value,
-    //   });
-    // } catch (error) {
-    //   console.log('error', error);
-    // }
     console.log('인증 코드 요청:', phoneNumber.value);
+    try {
+      const res = await api.post('/manager/sms/send', {
+        managerPhone: phoneNumber.value,
+      });
+      console.log('📨 인증번호 전송 성공:', res.data);
+      Toast.show({
+        type: 'success',
+        text1: '인증번호가 발송되었습니다.',
+        position: 'top',
+      });
+    } catch (error: any) {
+      console.log('❌ 인증번호 전송 실패:', error.response?.data || error.message);
+      Toast.show({
+        type: 'error',
+        text1: '인증번호 전송 실패',
+        text2: error.response?.data?.message || '오류가 발생했습니다.',
+        position: 'top',
+      });
+    }
   };
 
   const handleVerifyCode = async () => {
-    // 인증 코드 확인 로직
-    // try {
-    //   await api.post('/manager/sms/verify', {
-    //     managerPhone: phoneNumber.value,
-    //     code: authCode.value,
-    //   });
-    // } catch (error) {
-    //   console.log('error', error);
-    // }
     console.log('인증 코드 확인:', authCode.value);
+  
+    if (!phoneNumber.value || !authCode.value) {
+      Toast.show({
+        type: 'error',
+        text1: '입력 오류',
+        text2: '전화번호와 인증코드를 모두 입력해주세요.',
+        position: 'top',
+      });
+      return;
+    }
+  
+    try {
+      const res = await api.post('/manager/sms/verify', {
+        managerPhone: phoneNumber.value,
+        code: authCode.value,
+      });
+  
+      if (res.data.verified) {
+        Toast.show({
+          type: 'success',
+          text1: '인증 성공',
+          position: 'top',
+        });
+  
+        // 인증 상태 저장
+        setSignupInfo(prev => ({
+          ...prev,
+          phoneNumber: phoneNumber.value,
+          isPhoneVerified: true,
+        }));
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: '인증 실패',
+          text2: '인증코드가 틀렸거나 만료되었습니다.',
+          position: 'top',
+        });
+      }
+    } catch (error: any) {
+      console.log('❌ 인증 실패:', error.response?.data || error.message);
+      Toast.show({
+        type: 'error',
+        text1: '서버 오류',
+        text2: error.response?.data?.message || '잠시 후 다시 시도해주세요.',
+        position: 'top',
+      });
+    }
   };
 
   const handlePickFiles = async () => {

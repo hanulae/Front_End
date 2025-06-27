@@ -290,7 +290,8 @@ const styles = StyleSheet.create({
   topButtonText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#FFFFFF',
+    //color: '#FFFFFF',
+    color: '#000',
     lineHeight: 20,
   },
   button: {
@@ -309,6 +310,7 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 18,
     fontWeight: '600',
+    color: '#000',
     lineHeight: 20,
   },
 });

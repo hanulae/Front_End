@@ -23,6 +23,7 @@ interface Props {
 }
 
 const SignupStepOne = ({onNext}: Props) => {
+  console.log('SignupStepOne');
   const route = useRoute();
   const {userType} = route.params as {userType: 'manager' | 'funeral'};
   const [signupInfo, setSignupInfo] = useAtom(signupAtom);
@@ -40,7 +41,25 @@ const SignupStepOne = ({onNext}: Props) => {
   const isPasswordMatchValid = confirmPassword.isValid;
   const isFormValid =
     isEmailVerified && isPasswordMatchValid && isPasswordValid;
+
+     // ✅ 여기에 추가하세요
+  console.log({
+    isEmailVerified,
+    isPasswordValid,
+    isPasswordMatchValid,
+    password: password.value,
+    confirmPassword: confirmPassword.value,
+    email: email.fullEmail,
+  });
   const handleNext = () => {
+    console.log({
+      isEmailVerified,
+      isPasswordValid,
+      isPasswordMatchValid,
+      password: password.value,
+      confirmPassword: confirmPassword.value,
+      email: email.fullEmail,
+    });
     setSignupInfo(prev => ({
       ...prev,
       email: email.fullEmail,
@@ -51,46 +70,65 @@ const SignupStepOne = ({onNext}: Props) => {
   };
 
   const handleRequestCode = async () => {
-    // 인증 코드 요청 로직
     console.log('인증 코드 요청:', email.fullEmail);
-    // try {
-    //   // userType이 manager인 경우
-    //   if (userType === 'manager') {
-    //     await api.post('/manager/email/send', {
-    //       email: email.fullEmail,
-    //     });
-    //   }
-    //   // userType이 funeral인 경우
-    //   if (userType === 'funeral') {
-    //     await api.post('/funeral/email/send', {
-    //       email: email.fullEmail,
-    //     });
-    //   }
-    // } catch (error) {
-    //   console.log('error', error);
-    // }
+    try {
+      console.log('userType:', userType);
+      // userType이 manager인 경우
+      if (userType === 'manager') {
+        const res = await api.post('/manager/email/send', {
+          email: email.fullEmail,
+        });
+        console.log('📨 manager 이메일 발송 성공:', res.data);
+      }
+  
+      // userType이 funeral인 경우
+      if (userType === 'funeral') {
+        const res = await api.post('/funeral/email/send', {
+          email: email.fullEmail,
+        });
+        console.log('📨 funeral 이메일 발송 성공:', res.data);
+      }
+    } catch (error: any) {
+      console.log('❌ 이메일 발송 실패:', error.response?.data || error.message);
+    }
   };
 
   const handleVerifyCode = async () => {
-    // 인증 코드 확인 로직
-    // try {
-    //   // userType이 manager인 경우
-    //   if (userType === 'manager') {
-    //     await api.post('/manager/email/verify', {
-    //       email: email.fullEmail,
-    //       code: authCode.value,
-    //     });
-    //   }
-    //   // userType이 funeral인 경우
-    //   if (userType === 'funeral') {
-    //     await api.post('/funeral/email/verify', {
-    //       email: email.fullEmail,
-    //       code: authCode.value,
-    //     });
-    //   }
-    // } catch (error) {
-    //   console.log('error', error);
-    // }
+    console.log('인증 코드 확인:', authCode.value);
+
+  // if (!email.fullEmail || !authCode.value) {
+  //   console.warn('⚠️ 이메일 또는 인증 코드가 비어 있습니다.');
+  //   return;
+  // }
+
+  // try {
+  //   let res;
+
+  //   // userType에 따라 API 경로 다르게 처리
+  //   if (userType === 'manager') {
+  //     res = await api.post('/manager/email/verify', {
+  //       email: email.fullEmail,
+  //       code: authCode.value,
+  //     });
+  //   } else if (userType === 'funeral') {
+  //     res = await api.post('/funeral/email/verify', {
+  //       email: email.fullEmail,
+  //       code: authCode.value,
+  //     });
+  //   }
+
+  //   // 인증 성공 시 상태 업데이트
+  //   if (res?.status === 200) {
+  //     console.log('✅ 인증 성공:', res.data);
+  //     setIsEmailVerified(true);
+  //     setSignupInfo(prev => ({
+  //       ...prev,
+  //       isEmailVerified: true,
+  //     }));
+  //   }
+  // } catch (error: any) {
+  //   console.log('❌ 인증 실패:', error.response?.data?.message || error.message);
+  // }
 
     // 테스트용: 값이 '1234'일 때 인증 성공 처리
     if (authCode.value === '1234') {
@@ -112,12 +150,14 @@ const SignupStepOne = ({onNext}: Props) => {
           <View style={styles.authSection}>
             <EmailInput input={email} userType={userType} />
             <CustomButton
-              onPress={handleRequestCode}
-              style={styles.requestButton}>
-              <Typo color="white" fontSize={14} style={styles.buttonText}>
-                인증코드받기
-              </Typo>
-            </CustomButton>
+            onPress={handleRequestCode}
+            style={styles.requestButton}
+            disabled={false} // ❗️버튼이 항상 활성화되도록 명시
+          >
+            <Typo color="white" fontSize={14} style={styles.buttonText}>
+              인증코드받기
+            </Typo>
+          </CustomButton>
           </View>
         </View>
         <View style={styles.authSection}>
