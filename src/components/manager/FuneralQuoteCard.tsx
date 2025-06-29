@@ -37,6 +37,12 @@ const FuneralQuoteCard = ({
           textColor: '#616161',
           backgroundColor: '#e3e5ee',
         };
+      case '입찰완료':
+        return {
+          borderColor: '#2196F3',
+          textColor: '#2196F3',
+          backgroundColor: '#E2F2FF',
+        };
       case '출동신청':
         return {
           borderColor: '#9C27B0',

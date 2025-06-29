@@ -13,11 +13,13 @@ import Toast from 'react-native-toast-message';
 import RequestIcon from '../../assets/Button/Button_RequestQuote.svg';
 import MoveIcon from '../../assets/Button/Button_MoveTransparent.svg';
 import {useManagerForm} from '../../hooks/useManagerForm';
+import {useManagerCart} from '../../hooks/useManagerCart';
 
 const EstimateFormPage = () => {
   const navigation = useNavigation();
   const clientName = useInputBase();
   const visitorCount = useInputBase();
+  const squareMeter = useInputBase();
   const deceasedName = useInputBase();
 
   const route = useRoute();
@@ -31,7 +33,7 @@ const EstimateFormPage = () => {
   const [departureDate, setDepartureDate] = useState<Date | null>(null);
   const [showAdmissionPicker, setShowAdmissionPicker] = useState(false);
   const [showDeparturePicker, setShowDeparturePicker] = useState(false);
-  
+  const {deleteFromCart} = useManagerCart();
   const { loading, error, createManagerForm, clearError } = useManagerForm();
 
   const formatSimpleDate = (date: Date) => {
@@ -174,6 +176,7 @@ const EstimateFormPage = () => {
         chiefMournerName: clientName.value.trim(),
         deceasedName: deceasedName.value.trim() || undefined,
         numberOfMourners: numberOfMourners,
+        roomSize: squareMeter.value.trim() ? parseInt(squareMeter.value.trim()) : undefined,
         checkInDate: formatServerDate(admissionDate),
         checkOutDate: formatServerDate(departureDate),
       };
@@ -183,6 +186,17 @@ const EstimateFormPage = () => {
       const result = await createManagerForm(formData);
 
       if (result) {
+        // 장바구니 삭제와 성공 메시지를 병렬로 처리
+        const [cartResult] = await Promise.allSettled([
+          deleteFromCart(funeralHallIds),
+        ]);
+
+        if (cartResult.status === 'rejected') {
+          console.error('⚠️ 장바구니 삭제 실패:', cartResult.reason);
+        } else {
+          console.log('✅ 장바구니 업데이트 완료');
+        }
+
         Toast.show({
           type: 'success',
           text1: '견적서 발송 완료!',
@@ -248,6 +262,16 @@ const EstimateFormPage = () => {
                   <Input
                     input={visitorCount}
                     placeholder="예상 조문객 수를 입력하세요."
+                    type="number"
+                  />
+                </View>
+                <View style={styles.field}>
+                  <Typo fontSize={16} style={styles.containerTitle}>
+                    평 수
+                  </Typo>
+                  <Input
+                    input={squareMeter}
+                    placeholder="원하시는 평 수를 입력하세요."
                     type="number"
                   />
                 </View>

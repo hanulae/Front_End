@@ -12,6 +12,7 @@ import PhoneIcon from '../../assets/Attachment/Attach_PhoneDisable.svg';
 import {isValidPhoneNumber} from '../../util/validation';
 import { useManagerDispatchRequest } from '../../hooks/useManagerDispatchRequest';
 import Toast from 'react-native-toast-message';
+import { Alert } from 'react-native';
 
 const ProceedCallPage = () => {
   const navigation = useNavigation<NavigationProp<any>>();
@@ -139,6 +140,34 @@ const ProceedCallPage = () => {
     }
   };
 
+  // 출동 취소 확인 대화상자 함수
+  const showCancelConfirmDialog = (dispatchRequestId: string) => {
+    Alert.alert(
+      '출동 취소',
+      '정말로 출동을 취소하시겠습니까?',
+      [
+        {
+          text: '네',
+          style: 'destructive',
+          onPress: () => handleCancel(dispatchRequestId),
+        },
+        {
+          text: '아니오',
+          style: 'cancel',
+          onPress: () => {
+            console.log('출동 취소 - 아니오 선택');
+          },
+        },
+      ],
+      {
+        cancelable: true,
+        onDismiss: () => {
+          console.log('출동 취소 대화상자 닫힘');
+        },
+      }
+    );
+  };
+
   const handleCancel = async (dispatchRequestId: string) => {
     try {
       const result = await cancelManagerDispatchRequest(dispatchRequestId);
@@ -210,7 +239,7 @@ const ProceedCallPage = () => {
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.cancelButton, loading && styles.disabledButton]}
-              onPress={() => handleCancel(dispatchDetail.dispatchRequestId)}
+              onPress={() => showCancelConfirmDialog(dispatchDetail.dispatchRequestId)}
               disabled={loading}>
               <Typo style={styles.cancelButtonText}>
                 {loading ? '처리 중...' : '출동 취소'}
@@ -238,7 +267,7 @@ const ProceedCallPage = () => {
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.cancelButton, loading && styles.disabledButton]}
-                onPress={() => handleCancel(dispatchDetail.dispatchRequestId)}
+                onPress={() => showCancelConfirmDialog(dispatchDetail.dispatchRequestId)}
                 disabled={loading}>
                 <Typo style={styles.cancelButtonText}>출동 취소</Typo>
               </TouchableOpacity>

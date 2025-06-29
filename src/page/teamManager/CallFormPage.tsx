@@ -1,5 +1,5 @@
 import {NavigationProp, useNavigation, RouteProp, useRoute} from '@react-navigation/native';
-import {StyleSheet, TouchableOpacity, View, TextInput} from 'react-native';
+import {StyleSheet, TouchableOpacity, View, TextInput, Alert} from 'react-native';
 import {usePhoneInput} from '../../hooks/input/usePhoneInput';
 import Typo from '../../components/common/Typo';
 import {Input} from '../../components/common/input/Input';
@@ -92,7 +92,25 @@ const CallFormPage = () => {
     }
 
     return true;
-  }
+  };
+
+  // 출동 신청 확인 alert
+  const showConfirmDialog = () => {
+    Alert.alert(
+      '출동신청',
+      '해당 내용으로 출동신청하시겠습니까?',
+      [
+        {
+          text: '출동신청',
+          onPress: () => handleDispatchRequest(),
+        },
+        {
+          text: '취소',
+          style: 'cancel',
+        },
+      ],
+    );
+  };
 
   // 출동 신청 처리 
   const handleDispatchRequest = async () => {
@@ -210,7 +228,7 @@ const CallFormPage = () => {
               styles.nextButton,
               loading && { opacity: 0.5 } // 로딩 중일 때 반투명
             ]} 
-            onPress={handleDispatchRequest}
+            onPress={showConfirmDialog}
             disabled={loading} // 로딩 중일 때 비활성화
           >
             <Typo style={styles.nextButtonText}>
