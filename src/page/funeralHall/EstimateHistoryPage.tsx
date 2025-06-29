@@ -70,21 +70,21 @@ const EstimateHistoryPage = () => {
   const getStatusText = (bidStatus: string) => {
     switch (bidStatus) {
       case 'pending':
-        return '입찰 대기';
+        return '입찰 요청';
       case 'bid_submitted':
-        return '입찰 완료';
+        return '입찰 제출';
       case 'bid_selected':
-        return '입찰 선택됨';
+        return '입찰 성공';
       case 'bid_progress':
-        return '진행중';
-      case 'deceased_arrived':
-        return '고인 안치';
+        return '거래 진행중';
+      // case 'deceased_arrived':
+      //   return '고인 안치';
       case 'transaction_completed':
         return '거래 완료';
       case 'rejected':
-        return '거절됨';
+        return '입찰 실패';
       case 'expired':
-        return '만료됨';
+        return '입찰 마감';
       default:
         return '상태 불명';
     }
@@ -101,17 +101,28 @@ const EstimateHistoryPage = () => {
     }).replace(/\./g, '.').replace(/\s/g, '');
   };
 
-  // 시간 포맷팅 함수
+  // 시간 포맷팅 함수 - 월일 시분 형태로 반환
   const formatDateTime = (dateString?: string) => {
     if (!dateString) return '-';
-    const date = new Date(dateString);
-    return date.toLocaleString('ko-KR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    
+    try {
+      const date = new Date(dateString);
+      
+      // 유효한 날짜인지 확인
+      if (isNaN(date.getTime())) {
+        return '-';
+      }
+      
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      
+      return `${month}월 ${day}일 ${hours}:${minutes}`;
+    } catch (error) {
+      console.warn('날짜 포맷팅 오류:', error);
+      return '-';
+    }
   };
 
   // handle Quote Card Press - 현재는 managerFormBidId를 받으므로 해당 ID로 이동

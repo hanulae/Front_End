@@ -12,10 +12,10 @@ import FuneralLayout from '../../layout/FuneralLayout';
 import Typo from '../../components/common/Typo';
 import CustomButton from '../../components/common/CustomButton';
 import ButtonIcon from '../../assets/Icon/Icon_DropDown01.svg';
-import {useState, useCallback} from 'react';
+import {useState, useCallback, useEffect} from 'react';
 import RoomSelector from '../../components/funeralHall/RoomSelector';
 import { useQuoteProposal } from '../../hooks/useFuneralEstimate';
-import { FuneralHallInfo } from '../../services/api/funeral/funeralEstimateService';
+import { FuneralHallInfo, ManagerFormBidDetail } from '../../services/api/funeral/funeralEstimateService';
 
 // 호실 정보 interface (RoomSelector 컴포넌트와 호환)
 interface RoomInfo {
@@ -31,6 +31,8 @@ const QuoteProposalPage = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const {id, status} = route.params as {id: string; status: string};
+  console.log('id', id);
+  console.log('status', status);
   
   const {
     hallList,
@@ -40,25 +42,38 @@ const QuoteProposalPage = () => {
     fetchHallList,
     fetchEstimateDetail,
     submitBid,
+    fetchManagerFormBidDetail,
   } = useQuoteProposal();
 
   const [isSelectRoomSheetVisible, setSelectRoomSheetVisible] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState<FuneralHallInfo | null>(null);
   const [proposalPrice, setProposalPrice] = useState('');
+  const [bidDetail, setBidDetail] = useState<ManagerFormBidDetail | null>(null); // 입찰 상세 내용
 
   const loadInitialData = useCallback(async () => {
     try {
       // 견적 상세 정보 로드
       await fetchEstimateDetail(id);
       
-      // 호실 목록 로드 (현재 장례식장의 호실 목록을 가져옴)
-      // JWT 토큰에서 funeralId를 자동으로 가져오므로 파라미터 없이 호출
-      await fetchHallList();
+      // status에 따라 다른 데이터 로드
+      if (status === 'pending') {
+        // pending 상태: 입찰 작성 모드 - 호실 목록 로드
+        await fetchHallList();
+      } else {
+        // pending이 아닌 상태: 입찰 조회 모드 - 입찰 상세 내용 로드
+        const bidDetailResult = await fetchManagerFormBidDetail(id);
+        if (bidDetailResult) {
+          setBidDetail(bidDetailResult);
+          
+          // 입찰에 사용된 호실 정보를 가져오기 위해 호실 목록도 로드
+          await fetchHallList();
+        }
+      }
     } catch (err) {
       console.error('초기 데이터 로드 실패:', err);
       Alert.alert('오류', '데이터를 불러오는데 실패했습니다.');
     }
-  }, [id, fetchEstimateDetail, fetchHallList]);
+  }, [id, status, fetchEstimateDetail, fetchHallList, fetchManagerFormBidDetail]);
 
   // 페이지가 포커스될 때 데이터 로드
   useFocusEffect(
@@ -66,6 +81,20 @@ const QuoteProposalPage = () => {
       loadInitialData();
     }, [loadInitialData])
   );
+
+  // 입찰 상세 내용이 로드되면 UI에 반영
+  useEffect(() => {
+    if (bidDetail && hallList.length > 0) {
+      // 입찰에 사용된 호실 찾기
+      const usedRoom = hallList.find(hall => hall.funeralHallId === bidDetail.funeralHallId);
+      if (usedRoom) {
+        setSelectedRoom(usedRoom);
+      }
+      
+      // 제안가 설정
+      setProposalPrice(bidDetail.proponentMoney.toString());
+    }
+  }, [bidDetail, hallList]);
 
   // 할인률 계산
   const calculateDiscountRate = (proposal: number, total: number): string => {
@@ -81,6 +110,28 @@ const QuoteProposalPage = () => {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}/${month}/${day}`;
+  };
+
+  // bidStatus를 한국어 상태로 변환
+  const getStatusText = (bidStatus: string) => {
+    switch (bidStatus) {
+      case 'pending':
+        return '입찰 요청';
+      case 'bid_submitted':
+        return '입찰 제출';
+      case 'bid_selected':
+        return '입찰 성공';
+      case 'bid_progress':
+        return '거래 진행중';
+      case 'transaction_completed':
+        return '거래 완료';
+      case 'rejected':
+        return '입찰 실패';
+      case 'expired':
+        return '입찰 마감';
+      default:
+        return '상태 불명';
+    }
   };
 
   // 제안가 입력 처리
@@ -148,9 +199,9 @@ const QuoteProposalPage = () => {
         )
       : '0';
 
-  // status가 '대기중' 일 때는 견적 제안서의 input을 활성화
-  // status가 '완료' 일 때는 견적 제안서의 input을 비활성화
-  const isDisabled = status === '완료';
+  // 입찰 작성 모드 vs 조회 모드 구분
+  const isWriteMode = status === 'pending'; // 입찰 요청 상태
+  const isDisabled = !isWriteMode; // 입찰 요청이 아니면 비활성화
 
   // 에러 표시
   if (error) {
@@ -160,7 +211,7 @@ const QuoteProposalPage = () => {
   return (
     <FuneralLayout
       headerShown={true}
-      headerTitle="견적 상세"
+      headerTitle={isWriteMode ? "견적 제안서 작성" : "입찰 상세 정보"}
       backButtonVisible={true}
       homeButton={true}
       homeRouteName="FuneralMain"
@@ -217,9 +268,44 @@ const QuoteProposalPage = () => {
             </View>
           )}
 
+          {/* 입찰 상세 정보 (조회 모드에서만 표시) */}
+          {!isWriteMode && bidDetail && (
+            <View style={styles.bidDetailContainer}>
+              <Typo style={styles.sectionTitle}>입찰 정보</Typo>
+              
+              <View style={styles.infoRow}>
+                <Typo style={styles.infoLabel}>입찰 상태:</Typo>
+                <Typo style={styles.infoValue}>{getStatusText(status)}</Typo>
+              </View>
+              
+              {bidDetail.bidSubmittedAt && (
+                <View style={styles.infoRow}>
+                  <Typo style={styles.infoLabel}>입찰 제출일:</Typo>
+                  <Typo style={styles.infoValue}>{formatDate(bidDetail.bidSubmittedAt)}</Typo>
+                </View>
+              )}
+              
+              {bidDetail.bidSelectedAt && (
+                <View style={styles.infoRow}>
+                  <Typo style={styles.infoLabel}>입찰 선택일:</Typo>
+                  <Typo style={styles.infoValue}>{formatDate(bidDetail.bidSelectedAt)}</Typo>
+                </View>
+              )}
+              
+              {bidDetail.transactionCompletedAt && (
+                <View style={styles.infoRow}>
+                  <Typo style={styles.infoLabel}>거래 완료일:</Typo>
+                  <Typo style={styles.infoValue}>{formatDate(bidDetail.transactionCompletedAt)}</Typo>
+                </View>
+              )}
+            </View>
+          )}
+
           {/* 제안 정보 입력 */}
           <View style={styles.proposalContainer}>
-            <Typo style={styles.sectionTitle}>입찰 제안서</Typo>
+            <Typo style={styles.sectionTitle}>
+              {isWriteMode ? "입찰 제안서" : "제출한 입찰 내용"}
+            </Typo>
             
             <View style={styles.inputContainer}>
               <Typo style={styles.titleText}>호실 선택</Typo>
@@ -325,25 +411,28 @@ const QuoteProposalPage = () => {
             </View>
           </View>
 
-          <View style={styles.buttonContainer}>
-            <CustomButton
-              onPress={handleSubmitBid}
-              style={[
-                styles.button,
-                (!selectedRoom || !proposalPrice || isDisabled || loading) &&
-                  styles.buttonDisabled,
-              ]}
-              disabled={!selectedRoom || !proposalPrice || isDisabled || loading}>
-              <Typo
+          {/* 입찰 작성 모드에서만 입찰 버튼 표시 */}
+          {isWriteMode && (
+            <View style={styles.buttonContainer}>
+              <CustomButton
+                onPress={handleSubmitBid}
                 style={[
-                  styles.buttonText,
-                  (!selectedRoom || !proposalPrice || isDisabled || loading) &&
-                    styles.buttonTextDisabled,
-                ]}>
-                {loading ? '처리중...' : '입찰'}
-              </Typo>
-            </CustomButton>
-          </View>
+                  styles.button,
+                  (!selectedRoom || !proposalPrice || loading) &&
+                    styles.buttonDisabled,
+                ]}
+                disabled={!selectedRoom || !proposalPrice || loading}>
+                <Typo
+                  style={[
+                    styles.buttonText,
+                    (!selectedRoom || !proposalPrice || loading) &&
+                      styles.buttonTextDisabled,
+                  ]}>
+                  {loading ? '처리중...' : '입찰'}
+                </Typo>
+              </CustomButton>
+            </View>
+          )}
         </ScrollView>
       </KeyboardAvoidingView>
 
@@ -391,6 +480,14 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#E5E8EB',
+  },
+  bidDetailContainer: {
+    margin: 20,
+    padding: 20,
+    backgroundColor: '#F0F8FF',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#B0D4F1',
   },
   sectionTitle: {
     fontSize: 20,
