@@ -25,14 +25,18 @@ const PendingDispatchCard = ({
         <View
           style={[
             styles.statusTag,
-            status === 'pending' && styles.requestDispatchTag,
-            status === '출동중' && styles.dispatchingTag,
+            status === '출동 요청' && styles.requestDispatchTag,
+            status === '출동 승인' && styles.approvedTag,
+            status === '출동 거절' && styles.rejectedTag,
+            status === '출동 취소' && styles.cancelledTag,
           ]}>
           <Typo
             style={[
               styles.statusText,
-              status === 'pending' && styles.requestDispatchText,
-              status === '출동중' && styles.dispatchingText,
+              status === '출동 요청' && styles.requestDispatchText,
+              status === '출동 승인' && styles.approvedText,
+              status === '출동 거절' && styles.rejectedText,
+              status === '출동 취소' && styles.cancelledText,
             ]}>
             {status}
           </Typo>
@@ -111,9 +115,21 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(45, 129, 241, 0.25)',
   },
-  dispatchingTag: {
+  approvedTag: {
     borderWidth: 1,
-    borderColor: 'rgba(25, 172, 65, 0.25)',
+    borderColor: 'rgba(16, 185, 129, 0.25)',
+  },
+  rejectedTag: {
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.25)',
+  },
+  cancelledTag: {
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.25)',
+  },
+  completedTag: {
+    borderWidth: 1,
+    borderColor: 'rgba(40, 48, 66, 0.25)',
   },
   statusText: {
     fontSize: 14,
@@ -121,9 +137,18 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard-Black',
   },
   requestDispatchText: {
-    color: '#2D81F1',
+    color: '#2D81F1', // 파란색 - 출동 요청
   },
-  dispatchingText: {
-    color: '#19AC41',
+  approvedText: {
+    color: '#10B981', // 민트색 - 출동 승인
+  },
+  completedText: {
+    color: '#283042', // 검정색 - 출동 완료
+  },
+  rejectedText: {
+    color: '#EF4444', // 빨간색 - 출동 거절
+  },
+  cancelledText: {
+    color: '#EF4444', // 회색 - 출동 취소
   },
 });

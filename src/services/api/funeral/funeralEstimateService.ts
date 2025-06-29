@@ -79,6 +79,28 @@ export interface SubmitBidResponse {
   message: string;
 }
 
+// 장례식장 입찰 상세 내용 타입
+export interface ManagerFormBidDetail {
+  managerFormBidId: string;
+  managerFormId: string;
+  funeralListId: string;
+  funeralId: string;
+  funeralHallId: string;
+  proponentMoney: number;
+  discount: number;
+  bidStatus: string;
+  bidSubmittedAt: string | null;
+  bidSelectedAt: string | null;
+  bidApprovedAt: string | null;
+  transactionCompletedAt: string | null;
+}
+
+// 장례식장 입찰 상세 내용 조회 응답 타입
+export interface GetManagerFormBidDetailResponse {
+  success: boolean;
+  data: ManagerFormBidDetail;
+}
+
 export const funeralEstimateService = {
   // 견적 내역 리스트 조회
   getEstimateList: async (): Promise<GetEstimateListResponse> => {
@@ -133,6 +155,21 @@ export const funeralEstimateService = {
     } catch (error: any) {
       console.error('입찰 제출 에러:', error.message);
       throw new Error(`입찰 제출 에러: ${error.message}`);
+    }
+  },
+
+  // 장례식장 입찰 상세 내용 조회
+  getManagerFormBidDetail: async (
+    managerFormBidId: string,
+  ): Promise<GetManagerFormBidDetailResponse> => {
+    try {
+      const response = await api.get(
+        `/funeral/form/bid/detail?managerFormBidId=${managerFormBidId}`,
+      );
+      return response.data;
+    } catch (error: any) {
+      console.error('장례식장 입찰 상세 내용 조회 에러:', error.message);
+      throw new Error(`장례식장 입찰 상세 내용 조회 에러: ${error.message}`);
     }
   },
 };

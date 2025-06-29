@@ -22,6 +22,28 @@ const QuoteCard = ({
   sentAt,
   onPress,
 }: IQuoteCard) => {
+  // 상태에 따른 스타일 반환 함수
+  const getStatusStyle = (status: string) => {
+    switch (status) {
+      case '입찰 요청':
+        return styles.statusPending;
+      case '입찰 제출':
+        return styles.statusSubmitted;
+      case '입찰 성공':
+        return styles.statusSelected;
+      case '거래 진행중':
+        return styles.statusProgress;
+      case '거래 완료': // 거래 완료
+        return styles.statusCompleted;
+      case '입찰 실패':
+        return styles.statusRejected;
+      case '입찰 마감':
+        return styles.statusExpired;
+      default:
+        return styles.statusDefault;
+    }
+  };
+
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
       <View style={styles.topRow}>
@@ -30,12 +52,7 @@ const QuoteCard = ({
           <Typo style={styles.divider}>|</Typo>
           <Typo style={styles.date}>{date}</Typo>
         </View>
-        <View
-          style={[
-            styles.topRowStatus,
-            status === '대기중' && styles.statusPending,
-            status === '완료' && styles.statusComplete,
-          ]}>
+        <View style={[styles.topRowStatus, getStatusStyle(status)]}>
           <Typo style={styles.status}>{status}</Typo>
         </View>
       </View>
@@ -111,48 +128,75 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard-Black',
   },
   statusPending: {
-    backgroundColor: '#CDD1D7',
+    backgroundColor: '#CDD1D7', // 회색 - 입찰 대기
   },
-  statusComplete: {
-    backgroundColor: '#283042',
+  statusSubmitted: {
+    backgroundColor: '#3287F8', // 파란색 - 입찰 완료
+  },
+  statusSelected: {
+    backgroundColor: '#10B981', // 초록색 - 입찰 선택됨
+  },
+  statusProgress: {
+    backgroundColor: '#F59E0B', // 주황색 - 진행중
+  },
+  statusCompleted: {
+    backgroundColor: '#283042', // 검정색 - 거래 완료
+  },
+  statusRejected: {
+    backgroundColor: '#EF4444', // 빨간색 - 거절됨
+  },
+  statusExpired: {
+    backgroundColor: '#EF4444', // 회색 - 만료됨
+  },
+  statusDefault: {
+    backgroundColor: '#6B7280', // 기본 회색 - 상태 불명
   },
   bottomRow: {
     flexDirection: 'row',
     paddingVertical: 16,
-    justifyContent: 'center',
+    paddingHorizontal: 20,
   },
   requestBox: {
+    flex: 1,
     paddingVertical: 10,
-    paddingHorizontal: 35,
+    paddingHorizontal: 16,
     backgroundColor: 'rgba(231, 232, 242, 0.2)',
     borderTopLeftRadius: 10,
     borderBottomLeftRadius: 10,
+    minHeight: 60,
+    justifyContent: 'center',
   },
   requestTitle: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 4,
   },
   requestDate: {
     fontSize: 12,
     fontWeight: '500',
-    lineHeight: 24,
+    lineHeight: 20,
     color: '#4B99FE',
     fontFamily: 'Pretendard-Bold',
+    textAlign: 'center',
   },
   sendBox: {
+    flex: 1,
     paddingVertical: 10,
-    paddingHorizontal: 35,
+    paddingHorizontal: 16,
     backgroundColor: 'rgba(231, 232, 242, 0.2)',
     borderTopRightRadius: 10,
     borderBottomRightRadius: 10,
     borderLeftWidth: 1,
     borderLeftColor: 'rgba(90, 90, 90, 0.2)',
+    minHeight: 60,
+    justifyContent: 'center',
   },
   sendTitle: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 4,
   },
   sendDate: {
     fontSize: 12,
@@ -160,6 +204,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     color: '#4B99FE',
     fontFamily: 'Pretendard-Bold',
+    textAlign: 'center',
   },
   bottomText: {
     fontSize: 12,

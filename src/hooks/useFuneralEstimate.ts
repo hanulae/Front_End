@@ -131,6 +131,27 @@ export const useQuoteProposal = () => {
     }
   }, []);
 
+  // 장례식장 입찰 상세 내용 조회
+  const fetchManagerFormBidDetail = useCallback(
+    async (managerFormBidId: string) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await funeralEstimateService.getManagerFormBidDetail(
+          managerFormBidId,
+        );
+        return response.data;
+      } catch (err: any) {
+        setError(err.message);
+        console.error('장례식장 입찰 상세 내용 조회 실패:', err);
+        return null;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
+
   return {
     hallList,
     estimateDetail,
@@ -139,5 +160,6 @@ export const useQuoteProposal = () => {
     fetchHallList,
     fetchEstimateDetail,
     submitBid,
+    fetchManagerFormBidDetail,
   };
 };

@@ -1,4 +1,4 @@
-import {Platform, ScrollView, StatusBar, StyleSheet, View} from 'react-native';
+import {Platform, ScrollView, StatusBar, StyleSheet} from 'react-native';
 import FuneralLayout from '../../layout/FuneralLayout';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -10,8 +10,9 @@ import Toast from 'react-native-toast-message';
 
 const PendingDispatchPage = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
-  const {loading, error, fetchDispatchList} = useFuneralDispatch();
+  const {error, fetchDispatchList} = useFuneralDispatch();
   const [dispatchList, setDispatchList] = useState<DispatchListItem[]>([]);
+  console.log('dispatchList', dispatchList);
 
   // StatusBar 설정
   useFocusEffect(
@@ -35,8 +36,10 @@ const PendingDispatchPage = () => {
       const result = await fetchDispatchList();
       console.log('pageResult', result);
       if (result && Array.isArray(result)) {
-        setDispatchList(result);
-        console.log('출동 대기 내역 로드 성공:', result);
+        // completed 상태 필터링 (출동 완료된 항목은 대기 목록에서 제외)
+        const filteredResult = result.filter(item => item.isApproved !== 'completed');
+        setDispatchList(filteredResult);
+        console.log('출동 대기 내역 로드 성공 (필터링 적용):', filteredResult);
       } else {
         console.log('❌ 출동 대기 내역 로드 실패 - 빈 데이터');
         setDispatchList([]);
@@ -66,14 +69,37 @@ const PendingDispatchPage = () => {
     }
   }, [error]);
 
+  // 상태값을 한국어로 변환하는 함수
+  const getStatusText = (isApproved: string) => {
+    switch (isApproved) {
+      case 'pending':
+        return '출동 요청';
+      case 'approved':
+        return '출동 승인';
+      case 'rejected':
+        return '출동 거절';
+      case 'cancelled':
+        return '출동 취소';
+      case 'completed':
+        return '거래 완료';
+      default:
+        return '상태 불명';
+    }
+  };
+
   // handle navigation to Dispatch Detail
   const goToDispatchDetail = (id: string, status: string) => {
     if (status === 'pending') {
       navigation.navigate('DispatchRequestDetail', {
         dispatchRequestId: id,
       });
-    } else if (status === 'completed' || status === 'approved') {
+    } else if (status === 'approved') {
       navigation.navigate('ConfirmTransaction', {
+        dispatchRequestId: id,
+      });
+    } else {
+      // 기타 상태 (rejected, cancelled 등)는 상세보기로
+      navigation.navigate('DispatchRequestDetail', {
         dispatchRequestId: id,
       });
     }
@@ -96,7 +122,7 @@ const PendingDispatchPage = () => {
             key={item.dispatchRequestId}
             name={item.chiefMournerName}
             index={index}
-            status={item.isApproved}
+            status={getStatusText(item.isApproved)}
             onPress={() => {
               goToDispatchDetail(item.dispatchRequestId, item.isApproved);
             }}
