@@ -339,7 +339,7 @@ const CartPage = ({navigation}: ICartPageProps) => {
                 selectedIds.length === 0 && styles.buttonTextDisabled
               ]}>
                 {/* ✅ 선택된 개수 표시 */}
-                견적요청 {selectedIds.length > 0 ? `(${selectedIds.length})` : ''}
+                견적서 작성 {selectedIds.length > 0 ? `(${selectedIds.length})` : ''}
               </Typo>
             </View>
             <MoveIcon width={24} height={24} />
