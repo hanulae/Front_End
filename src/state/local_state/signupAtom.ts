@@ -21,7 +21,7 @@ export interface AttachedFile {
 
 export interface ISignupInfo {
   userType: UserType;
-  email: string;
+  managerUsername: string;
   password: string;
   phoneNumber: string;
   attachedFiles: AttachedFile[]; // 배열로 변경
@@ -31,13 +31,13 @@ export interface ISignupInfo {
     accountNumber: string;
   };
   agreedTerms: IAgreement;
-  isEmailVerified?: boolean; // 이메일 인증 여부
+  isUsernameChecked?: boolean; // 이메일 인증 여부
   confirmPassword: string; // 비밀번호 확인
 }
 
 export const signupAtom = atom<ISignupInfo>({
   userType: 'manager',
-  email: '',
+  managerUsername: '',
   password: '',
   phoneNumber: '',
   attachedFiles: [], // 빈 배열로 초기화
@@ -54,6 +54,6 @@ export const signupAtom = atom<ISignupInfo>({
     age: false,
     marketing: false,
   },
-  isEmailVerified: false,
+  isUsernameChecked: false,
   confirmPassword: '',
 });
