@@ -2,7 +2,7 @@
 import {useState} from 'react';
 import api from '../../api/config';
 
-const useCheckUsername = () => {
+const useCheckUsername = (userType: 'manager' | 'funeral') => {
   const [checking, setChecking] = useState(false);
   const [available, setAvailable] = useState<boolean | null>(null);
   const [message, setMessage] = useState('');
@@ -13,8 +13,12 @@ const useCheckUsername = () => {
     setMessage('');
 
     try {
-      const res = await api.get('/manager/user/checkUsername', {
-        params: {managerUsername: username},
+      const endpoint = userType === 'manager' 
+        ? '/manager/user/checkUsername' 
+        : '/funeral/user/checkUsername';
+
+      const res = await api.get(endpoint, {
+        params: {username},
       });
       setAvailable(res.data.available);
       setMessage(res.data.message);

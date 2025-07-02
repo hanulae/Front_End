@@ -13,7 +13,7 @@ import {Input} from '../../../components/common/input/Input';
 import CustomButton from '../../../components/common/CustomButton';
 import Typo from '../../../components/common/Typo';
 import {useInputBase} from '../../../hooks/input/useInputBase';
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import EmailInput from '../../../components/common/input/EmailInput';
 import useEmailPartsInput from '../../../hooks/input/useEmailPartsInput';
 import {useRoute} from '@react-navigation/native';
@@ -21,6 +21,7 @@ import api from '../../../api/config';
 
 //BSKIM IMPORTS ADD
 import useCheckUsername from '../../../hooks/input/useCheckUsername';
+import Toast from 'react-native-toast-message';
 
 interface Props {
   onNext: () => void;
@@ -38,7 +39,7 @@ const SignupStepOne = ({onNext}: Props) => {
     return { valid: true, message: '' };
   };
   const username = useInputBase({ initialValue: '', validate: validateUsername });
-  const {checking, available, message, checkUsername} = useCheckUsername();
+  const {checking, available, message, checkUsername} = useCheckUsername(userType);
   const password = usePasswordInput(signupInfo.password);
   const authCode = useInputBase();
   const confirmPassword = useConfirmPasswordInput(
@@ -60,11 +61,16 @@ const SignupStepOne = ({onNext}: Props) => {
     isPasswordMatchValid,
     password: password.value,
     confirmPassword: confirmPassword.value,
-    managerUsername: username.value,
+    userName: username.value,
   });
   const handleNext = () => {
     if (!available) {
-      Alert.alert('아이디 중복 확인을 해주세요.');
+      Toast.show({
+        type: 'error',
+        text1: '아이디 확인',
+        text2: '아이디 중복 확인을 해주세요.',
+        position: 'top',
+      });
       return;
     }
 
@@ -75,7 +81,7 @@ const SignupStepOne = ({onNext}: Props) => {
 
     setSignupInfo(prev => ({
       ...prev,
-      managerUsername: username.value,
+      userName: username.value,
       password: password.value,
       confirmPassword: confirmPassword.value,
     }));
@@ -169,6 +175,10 @@ const SignupStepOne = ({onNext}: Props) => {
   //     }));
   //   }
   // };
+
+  useEffect(() => {
+    console.log('Signup Info:', signupInfo);
+  }, [signupInfo]);
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>

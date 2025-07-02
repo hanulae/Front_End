@@ -46,7 +46,7 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
   });
   const [name, setName] = useState('');
   const [bankCode, setBankCode] = useState('');
-
+  const [verified, setVerified] = useState(false);
 
   const BANK_LIST = [
     { name: 'KB국민은행', code: '004' },
@@ -110,6 +110,7 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
     }
   };
 
+  const allRequiredAgreements = agrees.service && agrees.privacy && agrees.location && agrees.age;
 
   const handleSubmit = async () => {
     try {
@@ -233,6 +234,8 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
           verified: true,
         },
       }));
+
+      setVerified(true);
     } catch (err: any) {
       console.log('계좌 인증 실패:', err.response?.data || err.message);
       Alert.alert('인증 실패', err.response?.data?.message || '계좌 인증에 실패했습니다.');
@@ -415,7 +418,11 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
         <TouchableOpacity style={styles.submitButton} onPress={onPrev}>
           <Typo style={styles.buttonText}>이전</Typo>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+        <TouchableOpacity
+          style={[styles.submitButton, (!verified || !allRequiredAgreements) && { backgroundColor: '#D3D3D3' }]}
+          onPress={handleSubmit}
+          disabled={!verified || !allRequiredAgreements}
+        >
           <Typo style={styles.buttonText}>회원가입</Typo>
         </TouchableOpacity>
       </View>

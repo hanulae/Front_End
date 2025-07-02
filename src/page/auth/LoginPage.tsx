@@ -30,6 +30,7 @@ import Toast from 'react-native-toast-message';
 import api from '../../api/config';
 import {storeTokens, storeUserInfo} from '../../utils/tokenStorage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useInputBase } from '../../hooks/input/useInputBase';
 
 //BSK ADD IMPORTS
 import { useAtom } from 'jotai';
@@ -131,55 +132,32 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
     }
   };
 
+  const username = useInputBase({ initialValue: '' });
+
+  const isPasswordValid = (password: string) => {
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return regex.test(password);
+  };
+
   // 로그인 핸들러
   const handleSignin = async () => {
-    // 직원 로그인의 경우
-    if (isEmployeeLogin) {
-      if (!phoneAuth.isVerified) {
-        Toast.show({
-          type: 'error',
-          text1: '휴대전화 인증을 완료해주세요.',
-          position: 'top',
-          topOffset: 100,
-        });
-        return;
-      }
-
-      try {
-        const response = await api.post('/funeral/auth/employee-login', {
-          phoneNumber: phoneAuth.phoneNumber.replace(/[^0-9]/g, ''),
-          verificationCode: phoneAuth.authCode,
-        });
-        console.log('Employee login response:', response);
-
-        // JWT 토큰과 사용자 정보 저장
-        const {accessToken, refreshToken, employee} = response.data;
-        await storeTokens(accessToken, refreshToken);
-        await storeUserInfo({
-          userType: 'funeral',
-          userId: employee.employeeId,
-          data: employee,
-        });
-
-        handleLogin(response);
-
-      } catch (error) {
-        console.log('Employee login error', error);
-        Toast.show({
-          type: 'error',
-          text1: '로그인에 실패했습니다.',
-          position: 'top',
-          topOffset: 100,
-        });
-      }
-      return;
-    }
-
-    // 기존 이메일/비밀번호 로그인
-    if (!email.fullEmail || !password.value) {
+    console.log('handleSignin');
+    if (!username.value || !password.value) {
       Toast.show({
         type: 'error',
-        text1: '이메일과 비밀번호를 입력해주세요.',
+        text1: '아이디와 비밀번호를 입력해주세요.',
+        position: 'top',
+        topOffset: 100,
+      });
+      return;
+    }
+    console.log('username', username.value);
+
+    if (!isPasswordValid(password.value)) {
+      console.log('Password is invalid'); // 디버깅용
+      Toast.show({
+        type: 'error',
+        text1: '비밀번호는 대문자, 소문자, 숫자, 특수기호를 포함해야 합니다.',
         position: 'top',
         topOffset: 100,
       });
@@ -190,84 +168,30 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
       let response;
       if (userType === 'manager') {
         response = await api.post('/manager/auth/login', {
-          managerEmail: email.fullEmail,
+          managerUsername: username.value,
           managerPassword: password.value,
         });
-
-    
-        /*
-        //BSK 작업
-        console.log('manager login response', response);
-    
-        setLoginInfo({
-          userType: 'manager',
-          isLogin: true,
-          accessToken: response.data.accessToken,
-          refreshToken: response.data.refreshToken,
-          userId: response.data.userId,
-          userName: response.data.userName,
-          phoneNumber: response.data.phoneNumber,
-        });
-    
-        handleLogin(); // 필요 시 로그인 후 페이지 이동 등
-        */
-
-
-        console.log('Manager login response:', response);
-
-        // JWT 토큰과 사용자 정보 저장
-        const {accessToken, refreshToken, manager} = response.data;
-        await storeTokens(accessToken, refreshToken);
-        await storeUserInfo({
-          userType: 'manager',
-          userId: manager.managerId,
-          data: manager,
-        });
-
-        handleLogin(response);
-
       } else if (userType === 'funeral') {
         response = await api.post('/funeral/auth/login', {
-          funeralEmail: email.fullEmail,
+          funeralUsername: username.value,
           funeralPassword: password.value,
         });
-
-    
-        /*
-        //BSK 작업
-        console.log('funeral login response', response);
-    
-        setLoginInfo({
-          userType: 'funeral',
-          isLogin: true,
-          accessToken: response.data.accessToken,
-          refreshToken: response.data.refreshToken,
-          userId: response.data.userId,
-          userName: response.data.userName,
-          phoneNumber: response.data.phoneNumber,
-        });
-    
-        handleLogin();
-        */
-
-
-        console.log('Funeral login response:', response);
-
-        // JWT 토큰과 사용자 정보 저장
-        const {accessToken, refreshToken, funeral} = response.data;
-        await storeTokens(accessToken, refreshToken);
-        await storeUserInfo({
-          userType: 'funeral',
-          userId: funeral.funeralId,
-          data: funeral,
-        });
-
-        handleLogin(response);
-
       }
+
+      // Handle login success
+      console.log('Login response:', response);
+      const { accessToken, refreshToken, user } = response.data;
+      await storeTokens(accessToken, refreshToken);
+      await storeUserInfo({
+        userType,
+        userId: user.id,
+        data: user,
+      });
+
+      handleLogin(response);
+
     } catch (error) {
       console.log('Login error', error);
-
       Toast.show({
         type: 'error',
         text1: '로그인에 실패했습니다.',
@@ -302,7 +226,10 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
             />
           ) : (
             <>
-              <EmailInput input={email} userType={userType} />
+              <Input
+                input={username}
+                placeholder="아이디를 입력하세요"
+              />
               <Input
                 input={password}
                 type="password"
@@ -312,7 +239,13 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
           )}
         </View>
         <View style={styles.buttonSection}>
-          <CustomButton onPress={handleSignin} style={styles.button}>
+          <CustomButton
+            onPress={handleSignin}
+            style={[
+              styles.button,
+              isPasswordValid(password.value) ? { backgroundColor: '#2D81F1' } : { backgroundColor: '#D3D3D3' }
+            ]}
+          >
             <Typo>로그인</Typo>
           </CustomButton>
         </View>

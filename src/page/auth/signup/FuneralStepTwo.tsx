@@ -46,6 +46,7 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
   const [showAlbum, setShowAlbum] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<LocalFile[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isPhoneVerified, setIsPhoneVerified] = useState(false);
 
   // 총 첨부파일 개수 계산
   const totalAttachedCount = useMemo(() => {
@@ -248,9 +249,8 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
   };
 
   const handleVerifyCode = async () => {
-    // 인증 코드 확인 로직
     console.log('인증 코드 확인:', authCode.value);
-  
+
     if (!phoneNumber.value || !authCode.value) {
       Toast.show({
         type: 'error',
@@ -260,26 +260,28 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
       });
       return;
     }
-  
+
     try {
       const res = await api.post('/funeral/sms/verify', {
         funeralPhone: phoneNumber.value,
         code: authCode.value,
       });
-  
+
       if (res.data.verified) {
         Toast.show({
           type: 'success',
           text1: '인증 성공',
           position: 'top',
         });
-  
+
         // 인증 상태 저장
         setSignupInfo(prev => ({
           ...prev,
           phoneNumber: phoneNumber.value,
           isPhoneVerified: true,
         }));
+
+        setIsPhoneVerified(true);
       } else {
         Toast.show({
           type: 'error',
@@ -449,7 +451,11 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
             </Typo>
           </CustomButton>
 
-          <CustomButton onPress={handleNext} style={styles.button}>
+          <CustomButton
+            onPress={handleNext}
+            style={[styles.button, (!isPhoneVerified || totalAttachedCount === 0) && {backgroundColor: '#D3D3D3'}]}
+            disabled={!isPhoneVerified || totalAttachedCount === 0}
+          >
             <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
               다음
             </Typo>
