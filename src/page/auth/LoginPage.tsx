@@ -177,16 +177,31 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
           funeralPassword: password.value,
         });
       }
-
+      if (!response || !response.data) {
+        throw new Error('Login response is invalid');
+      }
+      
       // Handle login success
       console.log('Login response:', response);
-      const { accessToken, refreshToken, user } = response.data;
+      const { accessToken, refreshToken } = response.data;
+
+      if (userType === 'manager') {
+        const { manager } = response.data;
+        await storeUserInfo({
+          userType,
+          userId: manager.managerId,
+          data: manager,
+        });
+      } else if (userType === 'funeral') {
+        const { funeral } = response.data;
+        await storeUserInfo({
+          userType,
+          userId: funeral.funeralId,
+          data: funeral,
+        });
+      }
+
       await storeTokens(accessToken, refreshToken);
-      await storeUserInfo({
-        userType,
-        userId: user.id,
-        data: user,
-      });
 
       handleLogin(response);
 

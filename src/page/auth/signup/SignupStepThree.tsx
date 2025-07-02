@@ -116,7 +116,7 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
     try {
       const formData = new FormData();
       if (userType === 'manager') {
-        formData.append('managerEmail', signupInfo.email);
+        formData.append('managerUsername', signupInfo.userName);
         formData.append('managerPassword', signupInfo.password);
         formData.append('managerName', name);
         formData.append('managerPhone', signupInfo.phoneNumber.replace(/-/g, ''));
@@ -124,7 +124,7 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
         formData.append('managerBankNumber', accountNumber);
         formData.append('agreements', JSON.stringify(agrees));
       } else if (userType === 'funeral') {
-        formData.append('funeralEmail', signupInfo.email);
+        formData.append('funeralUsername', signupInfo.userName);
         formData.append('funeralPassword', signupInfo.password);
         formData.append('funeralName', name);
         formData.append('funeralPhoneNumber', signupInfo.phoneNumber.replace(/-/g, ''));
