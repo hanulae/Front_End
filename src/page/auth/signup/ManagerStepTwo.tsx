@@ -47,6 +47,14 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
     return selectedImages.length + selectedFiles.length;
   }, [selectedImages.length, selectedFiles.length]);
 
+  // 다음 버튼 활성화 여부
+  const isNextEnabled = useMemo(() => {
+    return (
+      signupInfo.isPhoneVerified === true &&
+      signupInfo.attachedFiles.length > 0
+    );
+  }, [signupInfo.isPhoneVerified, signupInfo.attachedFiles]);
+
   // signupInfo에서 첨부파일 복원
   useEffect(() => {
     if (!isInitialized && signupInfo.attachedFiles.length > 0) {
@@ -88,7 +96,21 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
   console.log('selectedImages', selectedImages);
 
   const handleNext = () => {
-    setSignupInfo(prev => ({...prev, phoneNumber: phoneNumber.value}));
+    console.log('handleNext');
+    if (!signupInfo.isPhoneVerified) {
+      Toast.show({
+        type: 'error',
+        text1: '인증 오류',
+        text2: '전화번호 인증을 완료해주세요.',
+        position: 'top',
+      });
+      return;
+    }
+  
+    setSignupInfo(prev => ({
+      ...prev,
+      phoneNumber: phoneNumber.value,
+    }));
     onNext();
   };
 
@@ -415,7 +437,13 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
             <Typo style={styles.buttonText}>이전</Typo>
           </CustomButton>
 
-          <CustomButton onPress={handleNext} style={styles.button}>
+          <CustomButton
+            onPress={handleNext}
+            style={[
+              styles.button,
+              {backgroundColor: isNextEnabled ? '#2D81F1' : '#C0C0C0'}, // 비활성 시 회색
+            ]}
+            disabled={!isNextEnabled}>
             <Typo style={styles.buttonText}>다음</Typo>
           </CustomButton>
         </View>
