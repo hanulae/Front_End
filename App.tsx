@@ -9,7 +9,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import React, {useEffect} from 'react';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
-import {StatusBar} from 'react-native';
+import {StatusBar, Appearance} from 'react-native';
 import {useAtomValue} from 'jotai';
 import {userInfoAtom} from './src/state/local_state/userinfoAtom';
 import RootStack from './src/router/RootStack';
@@ -22,6 +22,12 @@ function App(): React.JSX.Element {
   console.log('----userInfo----', userInfo);
   const isLogin = userInfo?.isLogin;
   const userType = userInfo?.userType;
+
+  // ✅ 다크모드 비활성화
+  useEffect(() => {
+    // 항상 라이트 모드로 고정
+    Appearance.setColorScheme('light');
+  }, []);
 
   // ✅ 부트스플래시 숨기기
   useEffect(() => {
@@ -36,7 +42,7 @@ function App(): React.JSX.Element {
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
-        <StatusBar barStyle="dark-content" />
+        <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
         <NavigationContainer>
           <RootStack isLogin={isLogin} userType={userType} />
         </NavigationContainer>
