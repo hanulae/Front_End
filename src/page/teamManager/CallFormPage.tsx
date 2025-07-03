@@ -144,8 +144,18 @@ const CallFormPage = () => {
         topOffset: 0,
       });
       // 출동 신청 완료 후 출동 진행 페이지로 이동 (dispatchRequestId를 callId로 전달)
-      navigation.navigate('ProceedCall', {
-        callId: result.data.dispatchRequestId,
+      navigation.reset({
+        index: 2,
+        routes: [
+          {name: 'ManagerMain'}, // 메인 화면
+          {name: 'CallHistory'}, // 출동 신청 내역 화면
+          {
+            name: 'ProceedCall',
+            params: {
+              callId: result.data.dispatchRequestId,
+            }, // 출동 진행 내역 상세 페이지 (거래 확정 페이지)
+          },
+        ],
       });
     } else {
       Toast.show({

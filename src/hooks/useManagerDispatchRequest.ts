@@ -74,12 +74,29 @@ export const useManagerDispatchRequest = () => {
       setLoading(true);
       setError(null);
       try {
+        // 1. 출동 신청 내역 상세 조회
         const result =
           await managerDispatchRequestService.getManagerDispatchRequestDetail(
             dispatchRequestId,
           );
-        if (result.success) {
-          return result;
+
+        console.log('result: ', result);
+        // 2. 거래 흐름 상태 조회
+        const transactionStatus =
+          await managerDispatchRequestService.getManagerDispatchRequestTransactionStatus(
+            dispatchRequestId,
+          );
+
+        if (result.success && transactionStatus !== null) {
+          return {
+            dispatchRequest: result.data,
+            transactionStatus: transactionStatus,
+          };
+        } else if (transactionStatus === null) {
+          return {
+            dispatchRequest: result,
+            transactionStatus: null,
+          };
         } else {
           setError(
             result.message || '출동 신청 내역 상세 조회에 실패했습니다.',

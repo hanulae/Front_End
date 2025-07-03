@@ -68,6 +68,23 @@ interface CompleteManagerDispatchResponse {
   status: 'waiting_counterpart' | 'already_completed' | 'completed';
 }
 
+interface TransactionStatus {
+  transactionId: string;
+  dispatchRequestId: string;
+  funeralId: string;
+  managerId: string;
+  status: string;
+  managerTransactionCompletedAt: string;
+  funeralTransactionCompletedAt: string;
+  transactionCompletedAt: string;
+}
+
+interface GetManagerDispatchRequestTransactionStatus {
+  success: boolean;
+  message?: string;
+  data: TransactionStatus | null;
+}
+
 export const managerDispatchRequestService = {
   // 출동 신청
   createManagerDispatchRequest: async (
@@ -75,7 +92,6 @@ export const managerDispatchRequestService = {
   ): Promise<CreateManagerDispatchRequestResponse> => {
     try {
       const response = await api.post('/manager/request/create', params);
-      console.log('출동신청 성공: ', response.data);
       return response.data;
     } catch (error: any) {
       console.error('출동신청 에러 발생: ', error.message);
@@ -118,7 +134,6 @@ export const managerDispatchRequestService = {
       const response = await api.delete(
         `/manager/request/cancel/${dispatchRequestId}`,
       );
-      console.log('출동 취소 성공: ', response.data);
       return response.data;
     } catch (error: any) {
       console.error('출동 신청 취소 에러: ', error.message);
@@ -134,11 +149,25 @@ export const managerDispatchRequestService = {
       const response = await api.post(
         `/manager/request/complete/${dispatchRequestId}`,
       );
-      console.log('거래 확정 성공: ', response.data);
       return response.data;
     } catch (error: any) {
       console.error('거래 확정 에러: ', error.message);
       throw new Error(`거래 확정 에러: ${error.message}`);
+    }
+  },
+
+  // 거래 흐름 상태 조회
+  getManagerDispatchRequestTransactionStatus: async (
+    dispatchRequestId: string,
+  ): Promise<GetManagerDispatchRequestTransactionStatus> => {
+    try {
+      const response = await api.get(
+        `/manager/request/transaction-detail/${dispatchRequestId}`,
+      );
+      return response.data;
+    } catch (error: any) {
+      console.error('거래 흐름 상태 조회 에러: ', error.message);
+      throw new Error(`거래 흐름 상태 조회 에러: ${error.message}`);
     }
   },
 };
@@ -152,4 +181,6 @@ export type {
   GetManagerDispatchRequestList,
   DispatchRequest,
   GetManagerDispatchRequestDetail,
+  TransactionStatus,
+  GetManagerDispatchRequestTransactionStatus,
 };

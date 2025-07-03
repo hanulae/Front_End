@@ -13,6 +13,7 @@ import {isValidPhoneNumber} from '../../util/validation';
 import { useManagerDispatchRequest } from '../../hooks/useManagerDispatchRequest';
 import Toast from 'react-native-toast-message';
 import { Alert } from 'react-native';
+import { GetManagerDispatchRequestTransactionStatus } from '../../services/api/manager/managerDispatchRequestService';
 
 const ProceedCallPage = () => {
   const navigation = useNavigation<NavigationProp<any>>();
@@ -30,15 +31,43 @@ const ProceedCallPage = () => {
 
   // 출동 신청 상세 데이터 상태
   const [dispatchDetail, setDispatchDetail] = useState<any>(null);
+  const [transactionStatus, setTransactionStatus] = useState<GetManagerDispatchRequestTransactionStatus | null>(null);
+
+  // 현재 상태 계산 (dispatchDetail과 transactionStatus를 종합)
+  const getCurrentStatus = () => {
+    if (!dispatchDetail) return null;
+    
+    // transactionStatus가 있으면 거래 관련 상태 확인
+    if (transactionStatus?.data) {
+      const { managerTransactionCompletedAt, funeralTransactionCompletedAt } = transactionStatus.data;
+      
+      // 매니저는 완료했지만 장례식장이 아직 완료하지 않음
+      if (managerTransactionCompletedAt && !funeralTransactionCompletedAt) {
+        return 'waiting_funeral_completion';
+      }
+      
+      // 둘 다 완료
+      if (managerTransactionCompletedAt && funeralTransactionCompletedAt) {
+        return 'transaction_completed';
+      }
+    }
+    
+    // 기본 출동 상태 (pending, approved, completed 등)
+    return dispatchDetail.isApproved;
+  };
 
   // 데이터 로드
   const loadDispatchDetail = useCallback(async () => {
     try {
       const result = await getManagerDispatchRequestDetail(callId);
 
-      if (result && result.data) {
-        setDispatchDetail(result.data);
-        console.log('✅ 출동 신청 상세 정보 로드 성공:', result.data);
+      console.log('result: ', result);
+
+      if (result && result.transactionStatus !== null && result.dispatchRequest) {
+        setDispatchDetail(result.dispatchRequest);
+        setTransactionStatus(result.transactionStatus);
+      } else if (result && result.dispatchRequest) {
+        setDispatchDetail(result.dispatchRequest);
       } else {
         console.log('❌ 출동 신청 상세 정보 로드 실패');
       }
@@ -202,29 +231,39 @@ const ProceedCallPage = () => {
       case 'pending':
         return {
           text: '장례식장의 출동 승인을 기다리고 있습니다.',
-          style: styles.pendingMessage
+          style: styles.pendingMessage,
         };
       case 'approved':
         return {
-          text: '출동이 승인되었습니다! 잠시 후 도착예정이니 잠시만 기다려주세요.',
-          style: styles.approvedMessage
+          text: '출동이 승인되었습니다! 도착예정이니 잠시만 기다려주세요.',
+          style: styles.approvedMessage,
+        };
+      case 'waiting_funeral_completion':
+        return {
+          text: '거래완료 대기중 입니다. 장례식장의 거래완료를 기다리고 있습니다.',
+          style: styles.waitingMessage,
+        };
+      case 'transaction_completed':
+        return {
+          text: '거래가 성공적으로 완료되었습니다.',
+          style: styles.completedMessage,
         };
       case 'completed':
         return {
           text: '거래가 성공적으로 완료되었습니다.',
-          style: styles.completedMessage
+          style: styles.completedMessage,
         };
       default:
         return {
           text: '상태를 확인할 수 없습니다.',
-          style: styles.defaultMessage
+          style: styles.defaultMessage,
         };
     }
   };
 
   // 상태별 버튼 렌더링
   const renderActionButtons = () => {
-    const status = dispatchDetail.isApproved;
+    const status = getCurrentStatus();
 
     switch (status) {
       case 'pending':
@@ -275,6 +314,20 @@ const ProceedCallPage = () => {
           </>
         );
 
+      case 'waiting_funeral_completion':
+        // 매니저는 거래 완료했지만 장례식장이 아직 완료하지 않음
+        return (
+          <View style={styles.actionButtons}>
+            <TouchableOpacity
+              style={[styles.waitingCompletionButton, loading && styles.disabledButton]}
+              disabled={true}
+            >
+              <Typo style={styles.waitingCompletionButtonText}>거래 완료 대기중</Typo>
+            </TouchableOpacity>
+          </View>
+        );
+
+      case 'transaction_completed':
       case 'completed':
         // 거래 완료 상태
         return (
@@ -295,7 +348,7 @@ const ProceedCallPage = () => {
   const renderStatusAndActions = () => {
     if (!dispatchDetail) return null;
 
-    const status = dispatchDetail.isApproved;
+    const status = getCurrentStatus();
     const statusMessage = getStatusMessage(status);
 
     return (
@@ -339,7 +392,10 @@ const ProceedCallPage = () => {
       homeButton={true}
       homeRouteName="ManagerMain"
       logoutButton={false}>
-      <ScrollView contentContainerStyle={styles.wrapper}>
+      <ScrollView 
+        contentContainerStyle={styles.wrapper}
+        showsVerticalScrollIndicator={false}
+        bounces={false}>
         {/* 로딩 상태 */}
         {loading && (
           <View style={styles.centerContainer}>
@@ -419,9 +475,10 @@ export default ProceedCallPage;
 
 const styles = StyleSheet.create({
   wrapper: {
-    flex: 1,
+    flexGrow: 1,
     paddingHorizontal: 16,
-    paddingBottom: 32,
+    paddingTop: 16,
+    paddingBottom: 40,
   },
   section: {
     marginBottom: 24,
@@ -578,7 +635,8 @@ const styles = StyleSheet.create({
     color: '#2E7D32',
   },
   actionButtons: {
-    marginTop: 'auto',
+    marginTop: 24,
+    marginBottom: 32,
   },
   waitingButton: {
     backgroundColor: '#FFF8E1',
@@ -631,6 +689,13 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard-SemiBold',
     lineHeight: 20,
   },
+  waitingMessage: {
+    fontSize: 14,
+    color: '#F57C00',
+    textAlign: 'center',
+    fontFamily: 'Pretendard-SemiBold',
+    lineHeight: 20,
+  },
   defaultMessage: {
     fontSize: 14,
     color: '#666',
@@ -639,7 +704,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   statusActionSection: {
-    marginBottom: 12,
+    marginBottom: 24,
   },
   currentStatusContainer: {
     marginBottom: 12,
@@ -670,5 +735,19 @@ const styles = StyleSheet.create({
   },
   statusMessageContainer: {
     marginBottom: 12,
+  },
+  waitingCompletionButton: {
+    backgroundColor: '#FFF8E1',
+    borderWidth: 1,
+    borderColor: '#FFB74D',
+    paddingVertical: 18,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  waitingCompletionButtonText: {
+    color: '#F57C00',
+    fontWeight: '600',
+    fontSize: 16,
+    fontFamily: 'Pretendard-SemiBold',
   },
 });

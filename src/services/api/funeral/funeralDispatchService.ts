@@ -130,8 +130,20 @@ export const funeralDispatchService = {
 
       return response.data;
     } catch (error: any) {
-      console.error('장례식장 거래 확정 에러: ', error.message);
-      throw new Error(`장례식장 거래 확정 에러: ${error.message}`);
+      console.error('장례식장 거래 확정 에러: ', error);
+
+      // 서버 에러 메시지 추출
+      let errorMessage = '장례식장 거래 확정 에러가 발생했습니다.';
+
+      if (error.response?.data?.message) {
+        // 서버에서 JSON 형태 에러 메시지
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        // 네트워크 에러 등
+        errorMessage = error.message;
+      }
+
+      throw new Error(errorMessage);
     }
   },
 };

@@ -274,7 +274,7 @@ const QuoteProposalPage = () => {
               <Typo style={styles.sectionTitle}>입찰 정보</Typo>
               
               <View style={styles.infoRow}>
-                <Typo style={styles.infoLabel}>입찰 상태:</Typo>
+                <Typo style={styles.infoLabel}>현재 입찰 상태:</Typo>
                 <Typo style={styles.infoValue}>{getStatusText(status)}</Typo>
               </View>
               
@@ -287,7 +287,7 @@ const QuoteProposalPage = () => {
               
               {bidDetail.bidSelectedAt && (
                 <View style={styles.infoRow}>
-                  <Typo style={styles.infoLabel}>입찰 선택일:</Typo>
+                  <Typo style={styles.infoLabel}>입찰 성공일:</Typo>
                   <Typo style={styles.infoValue}>{formatDate(bidDetail.bidSelectedAt)}</Typo>
                 </View>
               )}
