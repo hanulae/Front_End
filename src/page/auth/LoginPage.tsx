@@ -205,11 +205,13 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
 
       handleLogin(response);
 
-    } catch (error) {
+    } catch (error: any) {
       console.log('Login error', error);
+      // 백엔드에서 받은 오류 메시지 확인
+  const errorMessage = error.response?.data?.message || '로그인에 실패했습니다.';
       Toast.show({
         type: 'error',
-        text1: '로그인에 실패했습니다.',
+        text1: errorMessage,
         position: 'top',
         topOffset: 100,
       });
@@ -285,6 +287,7 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
           targetScreen="Signup"
         />
       )}
+      <Toast />
     </DefaultLayout>
   );
 };

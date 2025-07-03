@@ -1,7 +1,7 @@
 import {useAtom, useSetAtom} from 'jotai';
 import axios from 'axios';
 import {useState} from 'react';
-import {signupAtom} from '../../../state/local_state/signupAtom';
+import {signupAtom, initialSignupState} from '../../../state/local_state/signupAtom';
 import {
   StyleSheet,
   View,
@@ -130,8 +130,11 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
         formData.append('funeralPhoneNumber', signupInfo.phoneNumber.replace(/-/g, ''));
         formData.append('funeralBankName', bankName);
         formData.append('funeralBankNumber', accountNumber);
-        formData.append('funeralBankHolder', name); // 필요 시 계좌주명 따로 입력받아 사용
+        formData.append('funeralBankHolder', name);
         formData.append('agreements', JSON.stringify(agrees));
+        
+        // Add funeral home information
+        formData.append('funeralHome', signupInfo.selectedFuneral?.funeralId); // Assuming funeralHome is a field in signupInfo
       }
   
     // 🔹 중복된 managerAddFile 필드가 생기지 않도록 유일하게 append
@@ -161,6 +164,10 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
       });
   
       Alert.alert('가입 완료', res.data.message);
+
+      // Reset signupInfo to initial state
+      setSignupInfo(initialSignupState);
+
       navigation.navigate('SignupComplete', {
         userType,
       });
@@ -250,7 +257,7 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
   <TextInput
     style={styles.input}
     placeholder="이름을 입력하세요"
-    placeholderTextColor="black"
+    placeholderTextColor="#000"
     value={name}
     onChangeText={setName}
   />
@@ -266,7 +273,7 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
     <TextInput
       style={[styles.input, { flex: 1, marginLeft: 8 }]}
       placeholder="000-0000-0000"
-      placeholderTextColor="black"
+      placeholderTextColor="#000"
       value={accountNumber}
       onChangeText={setAccountNumber}
     />
@@ -475,6 +482,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 12,
     paddingHorizontal: 20,
+    color: '#000',
   },
   buttonGray: {
     backgroundColor: '#888',
