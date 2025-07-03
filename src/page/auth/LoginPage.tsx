@@ -21,7 +21,6 @@ import {usePasswordInput} from '../../hooks/input/usePasswordInput';
 import {useSetAtom} from 'jotai';
 import {userInfoAtom} from '../../state/local_state/userinfoAtom';
 import {useCallback, useState} from 'react';
-import EmailInput from '../../components/common/input/EmailInput';
 import useEmailPartsInput from '../../hooks/input/useEmailPartsInput';
 import PhoneAuthInput from '../../components/common/input/PhoneAuthInput';
 import usePhoneAuthInput from '../../hooks/input/usePhoneAuthInput';
@@ -30,11 +29,11 @@ import Toast from 'react-native-toast-message';
 import api from '../../api/config';
 import {storeTokens, storeUserInfo} from '../../utils/tokenStorage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useInputBase } from '../../hooks/input/useInputBase';
+import {useInputBase} from '../../hooks/input/useInputBase';
 
 //BSK ADD IMPORTS
-import { useAtom } from 'jotai';
-import { loginAtom } from '../../state/local_state/loginAtom'; // 경로에 맞게 조정
+import {useAtom} from 'jotai';
+import {loginAtom} from '../../state/local_state/loginAtom'; // 경로에 맞게 조정
 
 interface ILoginPageProps {
   navigation: NavigationProp<any>;
@@ -65,7 +64,7 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
   const setLogin = useSetAtom(userInfoAtom);
 
   //BSK ADD LOGIN ATOM
-  const [loginInfo, setLoginInfo] = useAtom(loginAtom);
+  const [_loginInfo, _setLoginInfo] = useAtom(loginAtom);
 
   // 직원 로그인 여부 확인
   const isEmployeeLogin = userType === 'funeral' && email.isEmployee;
@@ -132,10 +131,11 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
     }
   };
 
-  const username = useInputBase({ initialValue: '' });
+  const username = useInputBase({initialValue: ''});
 
   const isPasswordValid = (password: string) => {
-    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    const regex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     return regex.test(password);
   };
 
@@ -180,18 +180,26 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
 
       // Handle login success
       console.log('Login response:', response);
-      const { accessToken, refreshToken, user } = response.data;
-      await storeTokens(accessToken, refreshToken);
-      await storeUserInfo({
-        userType,
-        userId: user.id,
-        data: user,
-      });
+      if (response && response.data) {
+        const {accessToken, refreshToken, manager} = response.data;
+        await storeTokens(accessToken, refreshToken);
+        await storeUserInfo({
+          userType,
+          userId: manager.managerId,
+          data: manager,
+        });
 
-      handleLogin(response);
-
+        handleLogin(response);
+        console.log('userType', userType);
+        // 로그인 성공 후 네비게이션
+        if (userType === 'manager') {
+          navigation.navigate('ManagerMain'); // 매니저 메인 화면으로 이동
+        } else if (userType === 'funeral') {
+          navigation.navigate('FuneralMain'); // 장례식장 메인 화면으로 이동
+        }
+      }
     } catch (error) {
-      console.log('Login error', error);
+      // console.log('Login error', error);
       Toast.show({
         type: 'error',
         text1: '로그인에 실패했습니다.',
@@ -226,10 +234,7 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
             />
           ) : (
             <>
-              <Input
-                input={username}
-                placeholder="아이디를 입력하세요"
-              />
+              <Input input={username} placeholder="아이디를 입력하세요" />
               <Input
                 input={password}
                 type="password"
@@ -243,9 +248,10 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
             onPress={handleSignin}
             style={[
               styles.button,
-              isPasswordValid(password.value) ? { backgroundColor: '#2D81F1' } : { backgroundColor: '#D3D3D3' }
-            ]}
-          >
+              isPasswordValid(password.value)
+                ? {backgroundColor: '#2D81F1'}
+                : {backgroundColor: '#D3D3D3'},
+            ]}>
             <Typo>로그인</Typo>
           </CustomButton>
         </View>
@@ -270,6 +276,7 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
           targetScreen="Signup"
         />
       )}
+      <Toast />
     </DefaultLayout>
   );
 };
