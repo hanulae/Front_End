@@ -1,6 +1,13 @@
-import {Platform, StatusBar, StyleSheet, View, ScrollView} from 'react-native';
+import {
+  Platform,
+  StatusBar,
+  StyleSheet,
+  View,
+  ScrollView,
+  Pressable,
+} from 'react-native';
 import ProfileStat from '../../components/funeralHall/ProfileStat';
-import {useCallback, useEffect} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import FuneralLayout from '../../layout/FuneralLayout';
 import CustomButton from '../../components/common/CustomButton';
 import MoveWhiteIcon from '../../assets/Button/Button_MoveTransparent.svg';
@@ -19,6 +26,7 @@ import {userInfoAtom} from '../../state/local_state/userinfoAtom';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import Toast from 'react-native-toast-message';
+import PhoneAuthSheet from '../../components/funeralHall/PhoneAuthSheet';
 
 // ===== 접근 권한 관련 타입 및 로직 (주석 처리) =====
 /*
@@ -73,6 +81,8 @@ const FuneralProfilePage = () => {
       };
     }, []),
   );
+
+  const [showPhoneAuthSheet, setShowPhoneAuthSheet] = useState(false);
 
   const setLogin = useSetAtom(userInfoAtom);
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
@@ -140,6 +150,10 @@ const FuneralProfilePage = () => {
     navigation.navigate('AppSetting', {userType: 'funeral'});
   };
 
+  const goToPointHistory = () => {
+    navigation.navigate('PointHistory', {variant: 'funeral'});
+  };
+
   const logout = () => {
     // 로그아웃 로직
     setLogin({
@@ -162,16 +176,18 @@ const FuneralProfilePage = () => {
           onLogoutPress={logout}
         />
         <View style={styles.container}>
-          <ProfileStat point={100000} cash={50000} hallName="김상조" />
+          <Pressable onPress={goToPointHistory}>
+            <ProfileStat point={100000} cash={50000} hallName="김상조" />
+          </Pressable>
         </View>
       </View>
 
       <CustomButton
-        onPress={goToModifyFuneralInfo}
+        onPress={() => setShowPhoneAuthSheet(true)}
         style={styles.floatingButton}>
         <View style={styles.buttonNameContainer}>
           <ModifyInfoIcon width={24} height={24} />
-          <Typo style={styles.topButtonText}>정보 수정</Typo>
+          <Typo style={styles.topButtonText}>회원정보 수정</Typo>
         </View>
         <MoveWhiteIcon width={24} height={24} />
       </CustomButton>
@@ -223,6 +239,11 @@ const FuneralProfilePage = () => {
           <MoveGrayIcon width={24} height={24} />
         </CustomButton>
       </ScrollView>
+      <PhoneAuthSheet
+        visible={showPhoneAuthSheet}
+        onClose={() => setShowPhoneAuthSheet(false)}
+        navigation={navigation}
+      />
       <Toast />
     </FuneralLayout>
   );
@@ -293,8 +314,8 @@ const styles = StyleSheet.create({
   topButtonText: {
     fontSize: 18,
     fontWeight: '600',
-    //color: '#FFFFFF',
-    color: '#000',
+    color: '#FFFFFF',
+    // color: '#000',
     lineHeight: 20,
   },
   button: {

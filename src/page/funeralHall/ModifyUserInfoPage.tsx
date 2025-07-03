@@ -115,8 +115,9 @@ const ModifyUserInfoPage = () => {
     }
     console.log('비밀번호 변경 요청:', newPassword.value);
     try {
+      // TODO: funeral용 API 엔드포인트로 변경 필요
       const res = await api.patch(
-        '/manager/auth/update/password',
+        '/funeral/auth/update/password',
         {
           newPassword: newPassword.value,
         },
@@ -160,9 +161,10 @@ const ModifyUserInfoPage = () => {
     }
 
     try {
+      // TODO: funeral용 API 엔드포인트로 변경 필요
       const res = await api.post(
-        '/manager/sms/send',
-        {managerPhone: phone},
+        '/funeral/sms/send',
+        {funeralPhone: phone},
         {
           headers: {
             Authorization: `Bearer ${loginInfo.accessToken}`,
@@ -205,10 +207,11 @@ const ModifyUserInfoPage = () => {
     }
 
     try {
+      // TODO: funeral용 API 엔드포인트로 변경 필요
       const res = await api.post(
-        '/manager/sms/verify',
+        '/funeral/sms/verify',
         {
-          managerPhone: phone,
+          funeralPhone: phone,
           code: code,
         },
         {
@@ -260,8 +263,9 @@ const ModifyUserInfoPage = () => {
     }
 
     try {
+      // TODO: funeral용 API 엔드포인트로 변경 필요
       const res = await api.patch(
-        '/manager/auth/update/phone',
+        '/funeral/auth/update/phone',
         {
           currentPhone,
           newPhone,
@@ -307,6 +311,7 @@ const ModifyUserInfoPage = () => {
     }
 
     try {
+      // TODO: funeral용 API 엔드포인트로 변경 필요
       const res = await api.post('/manager/bank/verify', {
         bankCode,
         bankNumber: accountNumber,
@@ -338,12 +343,16 @@ const ModifyUserInfoPage = () => {
     }
 
     try {
+      // TODO: funeral용 API 엔드포인트로 변경 필요
+      console.log('bankName', bankName);
+      console.log('bankCode', bankCode);
+      console.log('accountNumber', accountNumber);
       const res = await api.patch(
-        '/manager/auth/update/bank-number',
+        '/funeral/auth/update/bank-number',
         {
-          managerBankName: bankName.trim(),
-          managerBankNumber: accountNumber.trim(),
-          managerBankHolder: bankName.trim(), // 예금주 이름도 bankName에 들어 있다고 가정
+          funeralBankName: bankName.trim(),
+          funeralBankNumber: accountNumber.trim(),
+          funeralBankHolder: bankName.trim(), // 예금주 이름도 bankName에 들어 있다고 가정
         },
         {
           headers: {
@@ -380,7 +389,7 @@ const ModifyUserInfoPage = () => {
       homeButton={true}
       color="white"
       logoutButton={false}
-      homeRouteName="ManagerMain">
+      homeRouteName="FuneralMain">
       <ScrollView contentContainerStyle={styles.wrapper}>
         {/* 비밀번호 변경 */}
         <Typo style={styles.sectionTitle}>비밀번호 변경</Typo>
@@ -489,11 +498,6 @@ const ModifyUserInfoPage = () => {
           </View>
 
           <View style={styles.fieldRow1}>
-            {/* <Input input={accountBank} placeholder="은행선택" />
-            <TouchableOpacity style={styles.subButton}>
-              <Typo style={styles.subButtonText}>인증코드받기</Typo>
-            </TouchableOpacity> */}
-
             <CustomButton
               onPress={openBankSelectSheet}
               style={styles.selectBankButton}>
@@ -507,21 +511,6 @@ const ModifyUserInfoPage = () => {
               onChangeText={setAccountNumber}
             />
           </View>
-
-          {/* <View style={styles.field1}>
-            <TextInput
-              style={styles.input}
-              placeholder="인증코드"
-              value={authCode}
-              onChangeText={setAuthCode}
-            />
-          </View> */}
-          {/* <Typo style={styles.label}>인증코드</Typo> */}
-          {/* <View style={styles.fieldRow}>
-            <Input input={authCodeAccount} placeholder="인증번호" />
-            <Typo style={styles.timerText}>02:56</Typo>
-          </View> */}
-
           <TouchableOpacity
             style={styles.subConfirmButton}
             onPress={handleAccountVerify}>

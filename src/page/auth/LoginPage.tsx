@@ -71,10 +71,10 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
 
   const goToFindEmail = () => {
     console.log('goToFindEmail');
-    navigation.navigate('FindEmail');
+    navigation.navigate('FindEmail', {userType});
   };
   const goToFindPassword = () => {
-    navigation.navigate('FindPW');
+    navigation.navigate('FindPW', {userType});
   };
   const goToSignup = () => {
     console.log('goToSignup');

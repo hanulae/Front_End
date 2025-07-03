@@ -12,7 +12,6 @@ import {loginAtom} from '../../state/local_state/loginAtom';
 import api from '../../api/config';
 import Toast from 'react-native-toast-message'; // 상단 import 필요
 
-
 const REFUND_AMOUNTS = [100000, 75000, 50000, 25000, 10000, 5000];
 
 const PointRefundPage = () => {
@@ -59,7 +58,7 @@ const PointRefundPage = () => {
     console.log('입력 금액:', inputAmount);
 
     const amount = parseInt(inputAmount, 10);
-  
+
     if (isNaN(amount) || amount <= 0) {
       Toast.show({
         type: 'error',
@@ -69,7 +68,7 @@ const PointRefundPage = () => {
       });
       return;
     }
-  console.log('amount:', amount);
+    console.log('amount:', amount);
     if (amount > currentPoint) {
       Toast.show({
         type: 'error',
@@ -79,29 +78,28 @@ const PointRefundPage = () => {
       });
       return;
     }
-  console.log('amount123:', amount);
+    console.log('amount123:', amount);
     try {
       const res = await api.post(
         '/manager/point/refund',
-        { amountPoint: amount },
+        {amountPoint: amount},
         {
           headers: {
             Authorization: `Bearer ${loginInfo.accessToken}`,
           },
         },
       );
-  
+
       Toast.show({
         type: 'success',
         text1: '환급 요청 완료',
         text2: '환급 요청이 성공적으로 처리되었습니다.',
         position: 'top',
       });
-  
+
       setInputAmount('');
       setSelectedAmount(null);
       setCurrentPoint(prev => prev - amount); // UI 반영용
-  
     } catch (error: any) {
       console.error('환급 요청 실패:', error.response?.data || error.message);
       Toast.show({
@@ -116,17 +114,24 @@ const PointRefundPage = () => {
   useEffect(() => {
     const fetchCurrentPoint = async () => {
       try {
-        const res = await api.get('/manager/point/current', {
+        const isManager = variant === 'manager';
+        const pointUrl = isManager
+          ? '/manager/point/current'
+          : '/funeral/point/current';
+        const res = await api.get(pointUrl, {
           headers: {
             Authorization: `Bearer ${loginInfo.accessToken}`,
           },
         });
         setCurrentPoint(res.data.currentPoint || 0);
       } catch (error: any) {
-        console.error('현재 포인트 조회 실패:', error.response?.data || error.message);
+        console.error(
+          '현재 포인트 조회 실패:',
+          error.response?.data || error.message,
+        );
       }
     };
-  
+
     fetchCurrentPoint();
   }, []);
 
@@ -143,7 +148,9 @@ const PointRefundPage = () => {
         <View style={styles.balanceContainer}>
           <Typo style={styles.balanceTitle}>현재잔액</Typo>
           <View style={styles.balanceContainer1}>
-          <Typo style={styles.balanceValue}>{currentPoint.toLocaleString()}</Typo>
+            <Typo style={styles.balanceValue}>
+              {currentPoint.toLocaleString()}
+            </Typo>
             <CashIcon />
           </View>
         </View>
