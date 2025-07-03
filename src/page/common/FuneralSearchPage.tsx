@@ -8,7 +8,6 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   TextInput,
-  Dimensions,
 } from 'react-native';
 import {useInputBase} from '../../hooks/input/useInputBase';
 import {Input} from '../../components/common/input/Input';
@@ -28,16 +27,20 @@ import { useManagerCart } from '../../hooks/useManagerCart';
 import FindCityBottomSheet from '../../components/funeralHall/FindLocation/FindCityBottomSheet';
 import FindGuBottomSheet from '../../components/funeralHall/FindLocation/FindGuBottomSheet';
 import Toast from 'react-native-toast-message';
-
-const {height} = Dimensions.get('window');
+import { useAtom } from 'jotai';
+import { loginAtom } from '../../state/local_state/loginAtom';
 
 const FuneralSearchPage = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   
-  const [showLocationModal, setShowLocationModal] = useState(false);
-  const [location, setLocation] = useState<string>('');
-  const [selectedSido, setSelectedSido] = useState<string>('');
-  const [selectedSigungu, setSelectedSigungu] = useState<string>('');
+  // 로그인 상태 체크
+  const [loginInfo] = useAtom(loginAtom);
+  const isLoggedIn = loginInfo.isLogin;
+
+  const [_showLocationModal, _setShowLocationModal] = useState(false);
+  const [_location, _setLocation] = useState<string>('');
+  const [_selectedSido, _setSelectedSido] = useState<string>('');
+  const [_selectedSigungu, _setSelectedSigungu] = useState<string>('');
   const [showFindCityBottomSheet, setShowFindCityBottomSheet] = useState(false);
   const [showGuBottomSheet, setShowGuBottomSheet] = useState(false);
   const [selectedCity, setSelectedCity] = useState<string>('시 / 도');
@@ -80,12 +83,7 @@ const FuneralSearchPage = () => {
     resetSearch,
   } = useFuneralSearch();
 
-  const {
-    loading: cartLoading,
-    error: cartError,
-    addToCart,
-    clearError,
-  } = useManagerCart();
+  const { addToCart } = useManagerCart();
 
   const [selectedItems, setSelectedItems] = useState<FuneralData[]>([]);
 
@@ -120,10 +118,26 @@ const FuneralSearchPage = () => {
 
   // ✅ 장바구니 추가 함수
   const handleAddToCart = useCallback(async () => {
-      if (selectedItems.length === 0) {
+    // 로그인 체크
+    if (!isLoggedIn) {
+      Alert.alert(
+        '로그인 필요',
+        '장바구니 기능을 사용하려면 로그인이 필요합니다.',
+        [
+          { text: '취소', style: 'cancel' },
+          { 
+            text: '로그인', 
+            onPress: () => navigation.navigate('Login', { userType: 'manager' })
+          }
+        ]
+      );
+      return;
+    }
+
+    if (selectedItems.length === 0) {
       Alert.alert('알림', '선택된 장례식장이 없습니다.');
-        return;
-      }
+      return;
+    }
 
     try {
       const result = await addToCart(selectedItems);
@@ -155,7 +169,7 @@ const FuneralSearchPage = () => {
         visibilityTime: 2000,
       });
     }
-  }, [addToCart, selectedItems]);
+  }, [addToCart, selectedItems, isLoggedIn, navigation]);
 
   const selectFuneral = async () => {
     try {
@@ -193,121 +207,124 @@ const FuneralSearchPage = () => {
       color="white"
       homeButton={true}
       logoutButton={false}>
-      <View style={styles.wrapper}>
-        {/* ❌ 에러 메시지 표시 */}
-        {error && (
-          <View style={styles.errorContainer}>
-            <Typo style={styles.errorText}>❌ {error}</Typo>
-          </View>
-        )}
-
-            <View style={styles.searchContainer}>
-          {/* 🔍 검색 입력 영역 - 돋보기 아이콘 내장 */}
-          <View style={styles.searchInputContainer}>
-            <TextInput
-              style={styles.searchInput}
-              placeholder="장례식장명을 입력하세요"
-              value={hallName.value}
-              onChangeText={hallName.onChangeText}
-              onSubmitEditing={handleSearch}
-              returnKeyType="search"
-            />
-            <TouchableOpacity
-              style={styles.searchIconContainer}
-              onPress={handleSearch}
-              activeOpacity={0.7}>
-              <Typo style={styles.searchIcon}>🔍</Typo>
-            </TouchableOpacity>
-          </View>
-
-          {/* 📍 위치 선택 영역 - 아이콘 내장 */}
-          <View style={styles.locationContainer}>
-            <CustomButton
-              onPress={() => setShowFindCityBottomSheet(true)}
-              style={styles.locationButton}>
-              <Typo style={styles.locationButtonText}>{selectedCity}</Typo>
-            </CustomButton>
-            <CustomButton
-              onPress={() => setShowGuBottomSheet(true)}
-              style={styles.locationButton}>
-              <Typo style={styles.locationButtonText}>{selectedGu}</Typo>
-            </CustomButton>
-          </View>
-
-          {/* 🆕 검색 결과 헤더 - pageInfo가 있을 때만 표시 */}
-          {pageInfo && (
-            <View style={styles.resultHeader}>
-              <Typo style={styles.resultText}>
-                📊 총 {pageInfo.totalItems}개의 장례식장을 찾았습니다.
-                (페이지 {pageInfo.currentPage}/{pageInfo.totalPages})
-              </Typo>
-              {/* 🆕 현재 표시 중인 데이터 수 */}
-              <Typo style={styles.currentResultText}>
-                현재 {funerals.length}개 표시 중
-              </Typo>
+      <View style={styles.container}>
+        <View style={styles.wrapper}>
+          {/* ❌ 에러 메시지 표시 */}
+          {error && (
+            <View style={styles.errorContainer}>
+              <Typo style={styles.errorText}>❌ {error}</Typo>
             </View>
           )}
-        </View>
 
-        <View style={styles.listContainer}>
-          {loading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#2D81F1" />
-              <Typo style={styles.loadingText}>검색 중...</Typo>
+              <View style={styles.searchContainer}>
+            {/* 🔍 검색 입력 영역 - 돋보기 아이콘 내장 */}
+            <View style={styles.searchInputContainer}>
+              <TextInput
+                style={styles.searchInput}
+                placeholder="장례식장명을 입력하세요"
+                value={hallName.value}
+                onChangeText={hallName.onChangeText}
+                onSubmitEditing={handleSearch}
+                returnKeyType="search"
+              />
+              <TouchableOpacity
+                style={styles.searchIconContainer}
+                onPress={handleSearch}
+                activeOpacity={0.7}>
+                <Typo style={styles.searchIcon}>🔍</Typo>
+              </TouchableOpacity>
             </View>
-          ) : (
-            <FlatList
-              data={funerals}
-              keyExtractor={item => item.funeralListId}
-              renderItem={({ item }) => (
-            <FuneralCard
-              item={item}
-                  selected={!!selectedItems.find(selected => selected.funeralListId === item.funeralListId)}
-              onPressCheck={() => handleSelect(item)}
-              onPressCard={() => {
-                    navigation.navigate('FuneralDetail', {
-                      funeralListId: item.funeralListId,
-                      funeralId: item.funeralId,
-                    });
-              }}
-            />
-          )}
 
-              // 🆕 페이지네이션 관련 props
-              onEndReached={handleEndReached}           // 끝에 도달했을 때
-              onEndReachedThreshold={0.1}               // 90% 스크롤 시 트리거
-              ListFooterComponent={renderFooter}        // 하단 로딩 표시
+            {/* 📍 위치 선택 영역 - 아이콘 내장 */}
+            <View style={styles.locationContainer}>
+              <CustomButton
+                onPress={() => setShowFindCityBottomSheet(true)}
+                style={styles.locationButton}>
+                <Typo style={styles.locationButtonText}>{selectedCity}</Typo>
+              </CustomButton>
+              <CustomButton
+                onPress={() => setShowGuBottomSheet(true)}
+                style={styles.locationButton}>
+                <Typo style={styles.locationButtonText}>{selectedGu}</Typo>
+              </CustomButton>
+            </View>
 
-          ListEmptyComponent={
-                !loading ? (
-                  <View style={styles.emptyContainer}>
-                    <Typo style={styles.emptyText}>📭 검색 결과가 없습니다.</Typo>
+            {/* 🆕 검색 결과 헤더 - pageInfo가 있을 때만 표시 */}
+            {pageInfo && (
+              <View style={styles.resultHeader}>
+                <Typo style={styles.resultText}>
+                  📊 총 {pageInfo.totalItems}개의 장례식장을 찾았습니다.
+                  (페이지 {pageInfo.currentPage}/{pageInfo.totalPages})
+                </Typo>
+                {/* 🆕 현재 표시 중인 데이터 수 */}
+                <Typo style={styles.currentResultText}>
+                  현재 {funerals.length}개 표시 중
+                </Typo>
               </View>
-                ) : null
-              }
-              refreshing={loading}
-              onRefresh={() => {
-                console.log('🔄 새로고침 시작');
-                setSelectedCity('시 / 도');
-                setSelectedGu('시 / 군 / 구');
-                hallName.onChangeText('');
-                resetSearch();
-                searchFunerals({ page: 1, limit: 20 });
-              }}
+            )}
+          </View>
 
-              // 🆕 성능 최적화
-              removeClippedSubviews={true}
-              maxToRenderPerBatch={10}
-              updateCellsBatchingPeriod={50}
-              initialNumToRender={10}
-              windowSize={10}
-            />
-          )}
+          <View style={styles.listContainer}>
+            {loading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#2D81F1" />
+                <Typo style={styles.loadingText}>검색 중...</Typo>
+              </View>
+            ) : (
+            <FlatList
+                data={funerals}
+                keyExtractor={item => item.funeralListId}
+                renderItem={({ item }) => (
+              <FuneralCard
+                item={item}
+                    selected={!!selectedItems.find(selected => selected.funeralListId === item.funeralListId)}
+                onPressCheck={() => handleSelect(item)}
+                onPressCard={() => {
+                      navigation.navigate('FuneralDetail', {
+                        funeralListId: item.funeralListId,
+                        funeralId: item.funeralId,
+                      });
+                }}
+                showCheckbox={isLoggedIn} // 로그인된 사용자만 체크박스 표시
+              />
+            )}
+            // 🆕 페이지네이션 관련 props
+            onEndReached={handleEndReached}           // 끝에 도달했을 때
+            onEndReachedThreshold={0.1}               // 90% 스크롤 시 트리거
+            ListFooterComponent={renderFooter}        // 하단 로딩 표시
+
+            ListEmptyComponent={
+                  !loading ? (
+                    <View style={styles.emptyContainer}>
+                      <Typo style={styles.emptyText}>📭 검색 결과가 없습니다.</Typo>
+                </View>
+                  ) : null
+                }
+                refreshing={loading}
+                onRefresh={() => {
+                  console.log('🔄 새로고침 시작');
+                  setSelectedCity('시 / 도');
+                  setSelectedGu('시 / 군 / 구');
+                  hallName.onChangeText('');
+                  resetSearch();
+                  searchFunerals({ page: 1, limit: 20 });
+                }}
+
+                // 🆕 성능 최적화
+                removeClippedSubviews={true}
+                maxToRenderPerBatch={10}
+                updateCellsBatchingPeriod={50}
+                initialNumToRender={10}
+                windowSize={10}
+                contentContainerStyle={styles.flatListContent}
+              />
+            )}
+          </View>
         </View>
 
-        {/* 버튼 영역 */}
-        {variant === 'main' && (
-          <View style={styles.buttonContainer}>
+        {/* 고정 버튼 영역 - 로그인된 사용자만 표시 */}
+        {variant === 'main' && isLoggedIn && (
+          <View style={styles.fixedButtonContainer}>
             <CustomButton 
             onPress={handleAddToCart} 
             style={[
@@ -332,10 +349,10 @@ const FuneralSearchPage = () => {
               <MoveIcon width={24} height={24}/>
             </CustomButton>
           </View>
-          )}
+        )}
 
           {variant === 'signup' && (
-          <View style={styles.buttonContainer}>
+          <View style={styles.fixedButtonContainer}>
             <CustomButton onPress={selectFuneral} style={styles.button}>
               <View style={styles.buttonIcon}>
                 <CartIcon width={24} height={24} />
@@ -347,23 +364,24 @@ const FuneralSearchPage = () => {
             </CustomButton>
           </View>
           )}
-          {showFindCityBottomSheet && (
-            <FindCityBottomSheet
-              visible={showFindCityBottomSheet}
-              onClose={() => setShowFindCityBottomSheet(false)}
-              onSelect={handleSelectCity}
-              selectedRegion={selectedCity}
-            />
-          )}
-          {showGuBottomSheet && (
-            <FindGuBottomSheet
-              visible={showGuBottomSheet}
-              onClose={() => setShowGuBottomSheet(false)}
-              onSelect={handleSelectGu}
-              selectedDistrict={selectedGu}
-              selectedRegion={selectedCity}
-            />
-          )}
+
+        {showFindCityBottomSheet && (
+          <FindCityBottomSheet
+            visible={showFindCityBottomSheet}
+            onClose={() => setShowFindCityBottomSheet(false)}
+            onSelect={handleSelectCity}
+            selectedRegion={selectedCity}
+          />
+        )}
+        {showGuBottomSheet && (
+          <FindGuBottomSheet
+            visible={showGuBottomSheet}
+            onClose={() => setShowGuBottomSheet(false)}
+            onSelect={handleSelectGu}
+            selectedDistrict={selectedGu}
+            selectedRegion={selectedCity}
+          />
+        )}
       </View>
       <Toast />
     </ManagerLayout>
@@ -373,13 +391,16 @@ const FuneralSearchPage = () => {
 export default FuneralSearchPage;
 
 const styles = StyleSheet.create({
+  // ✅ 전체 컨테이너
+  container: {
+    flex: 1,
+  },
   wrapper: {
     padding: 16,
+    flex: 1,
   },
   searchContainer: {
     flexDirection: 'column',
-    // paddingBottom: 10,
-    // marginBottom: 8,
     gap: 10,
   },
   // ✅ 검색 입력창 - 돋보기 아이콘 내장
@@ -448,10 +469,38 @@ const styles = StyleSheet.create({
     color: '#2D81F1',
   },
   listContainer: {
-    maxHeight: height * 0.52,
-    // paddingBottom: 8,
+    flex: 1,
     borderBottomWidth: 1,
     borderBottomColor: '#dedede',
+  },
+  // ✅ FlatList 컨텐츠 스타일
+  flatListContent: {
+    paddingBottom: 20,
+  },
+  // ✅ 고정된 버튼 컨테이너
+  fixedButtonContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    paddingBottom: Platform.OS === 'ios' ? 34 : 16, // iOS Safe Area 고려
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#E0E0E0',
+    // 그림자 효과
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: -2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5, // Android 그림자
   },
   buttonContainer: {
     flexDirection: 'row',

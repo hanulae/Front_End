@@ -28,6 +28,8 @@ import DisabledFacilityIcon from '../../assets/Icon/Icon_DisabledFacility.svg';
 import {funeralService, FuneralDetail} from '../../services/api/funeralService';
 import { useManagerCart } from '../../hooks/useManagerCart';
 import Toast from 'react-native-toast-message';
+import { useAtom } from 'jotai';
+import { loginAtom } from '../../state/local_state/loginAtom';
 
 const {width} = Dimensions.get('window');
 
@@ -51,6 +53,10 @@ const FuneralDetailPage = ({navigation}: IFuneralDetailPageProps) => {
   const route = useRoute<RouteProp<{params: FuneralDetailParams}, 'params'>>();
   const {funeralListId, funeralId} = route.params;
 
+  // 로그인 상태 체크
+  const [loginInfo] = useAtom(loginAtom);
+  const isLoggedIn = loginInfo.isLogin;
+
   // 🆕 상태 관리
   const [funeralInfo, setFuneralInfo] = useState<FuneralDetail | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -58,8 +64,8 @@ const FuneralDetailPage = ({navigation}: IFuneralDetailPageProps) => {
 
   const {
     addToCart,
-    loading: cartLoading,
-    error: cartError,
+    loading: _cartLoading,
+    error: _cartError,
   } = useManagerCart();
 
   useEffect(() => {
@@ -345,15 +351,30 @@ const FuneralDetailPage = ({navigation}: IFuneralDetailPageProps) => {
         </View>
       </ScrollView>
 
-      {/* 🛒 하단 고정 버튼 */}
+      {/* 🛒 하단 고정 버튼 - 로그인 상태에 따라 다른 버튼 표시 */}
       <View style={styles.buttonContainer}>
-        <CustomButton onPress={handleAddToCart} style={styles.button}>
-          <View style={styles.buttonIcon}>
-            <CartIcon width={ICON_SIZES.button} height={ICON_SIZES.button} />
-            <Typo style={styles.buttonText}>장바구니 담기</Typo>
-          </View>
-          <MoveIcon width={ICON_SIZES.button} height={ICON_SIZES.button} />
-        </CustomButton>
+        {isLoggedIn ? (
+          // 로그인된 사용자: 장바구니 담기 버튼
+          <CustomButton onPress={handleAddToCart} style={styles.button}>
+            <View style={styles.buttonIcon}>
+              <CartIcon width={ICON_SIZES.button} height={ICON_SIZES.button} />
+              <Typo style={styles.buttonText}>장바구니 담기</Typo>
+            </View>
+            <MoveIcon width={ICON_SIZES.button} height={ICON_SIZES.button} />
+          </CustomButton>
+        ) : (
+          // 로그인하지 않은 사용자: 로그인 안내 버튼
+          <CustomButton 
+            onPress={() => navigation.navigate('Login', { userType: 'manager' })} 
+            style={styles.loginPromptButton}
+          >
+            <View style={styles.buttonIcon}>
+              <CartIcon width={ICON_SIZES.button} height={ICON_SIZES.button} />
+              <Typo style={styles.loginPromptButtonText}>더 많은 기능 사용을 위해 로그인하기</Typo>
+            </View>
+            <MoveIcon width={ICON_SIZES.button} height={ICON_SIZES.button} />
+          </CustomButton>
+        )}
       </View>
       <Toast />
     </ManagerLayout>
@@ -530,6 +551,21 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   buttonText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    fontFamily: 'Pretendard-Black',
+  },
+  // 로그인 안내 버튼 스타일
+  loginPromptButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FF6B6B',
+    borderRadius: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+  },
+  loginPromptButtonText: {
     fontSize: 15,
     fontWeight: '700',
     color: '#FFFFFF',
