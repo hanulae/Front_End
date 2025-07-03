@@ -26,15 +26,13 @@ import {useManagerCart} from '../../hooks/useManagerCart';
 import FindCityBottomSheet from '../../components/funeralHall/FindLocation/FindCityBottomSheet';
 import FindGuBottomSheet from '../../components/funeralHall/FindLocation/FindGuBottomSheet';
 import Toast from 'react-native-toast-message';
-import { useAtom } from 'jotai';
-import { signupAtom } from '../../state/local_state/signupAtom';
+import {useAtom} from 'jotai';
+import {signupAtom} from '../../state/local_state/signupAtom';
 
 const {height} = Dimensions.get('window');
 
 const FuneralSearchPage = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
-  const setMyFuneral = useSetAtom(myFuneralAtom);
-
   const [_showLocationModal, _setShowLocationModal] = useState(false);
   const [_location, _setLocation] = useState<string>('');
   const [_selectedSido, _setSelectedSido] = useState<string>('');
@@ -164,7 +162,7 @@ const FuneralSearchPage = () => {
       Alert.alert('알림', '선택된 장례식장이 없습니다.');
       return;
     }
-    console.log('🚀 ~ selectFuneral ~ selectedItems:', selectedItems)
+    console.log('🚀 ~ selectFuneral ~ selectedItems:', selectedItems);
 
     // 선택된 장례식장 ID를 signupAtom에 저장
     setSignupInfo(prev => ({
@@ -183,7 +181,7 @@ const FuneralSearchPage = () => {
       position: 'top',
     });
 
-  // 이전 화면으로 돌아가기
+    // 이전 화면으로 돌아가기
     navigation.goBack();
   };
 
