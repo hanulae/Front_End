@@ -135,7 +135,7 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
 
   const isPasswordValid = (password: string) => {
     const regex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     return regex.test(password);
   };
 
@@ -180,20 +180,20 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
       if (!response || !response.data) {
         throw new Error('Login response is invalid');
       }
-      
+
       // Handle login success
       console.log('Login response:', response);
-      const { accessToken, refreshToken } = response.data;
+      const {accessToken, refreshToken} = response.data;
 
       if (userType === 'manager') {
-        const { manager } = response.data;
+        const {manager} = response.data;
         await storeUserInfo({
           userType,
           userId: manager.managerId,
           data: manager,
         });
       } else if (userType === 'funeral') {
-        const { funeral } = response.data;
+        const {funeral} = response.data;
         await storeUserInfo({
           userType,
           userId: funeral.funeralId,
@@ -204,11 +204,11 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
       await storeTokens(accessToken, refreshToken);
 
       handleLogin(response);
-
     } catch (error: any) {
       console.log('Login error', error);
       // 백엔드에서 받은 오류 메시지 확인
-  const errorMessage = error.response?.data?.message || '로그인에 실패했습니다.';
+      const errorMessage =
+        error.response?.data?.message || '로그인에 실패했습니다.';
       Toast.show({
         type: 'error',
         text1: errorMessage,
