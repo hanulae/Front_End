@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
+  ScrollView,
 } from 'react-native';
 import Typo from '../common/Typo';
 
@@ -67,25 +68,37 @@ const RoomSelector = ({visible, onClose, onSelect, roomList}: Props) => {
         <View style={styles.header}>
           <Typo style={styles.headerTitle}>호실 선택</Typo>
         </View>
-        {roomList.map(room => (
-          <TouchableOpacity
-            style={styles.room}
-            key={room.id}
-            onPress={() => {
-              onSelect(room);
-              onClose();
-            }}>
-            <View style={styles.roomInfo}>
-              <Typo style={styles.roomName}>{room.roomName}</Typo>
-              <Typo style={styles.roomDetails}>
-                {room.roomSpace}평 | {room.roomCapacity}명 수용
+        
+        <ScrollView style={styles.content}>
+          {roomList.length > 0 ? (
+            roomList.map(room => (
+              <TouchableOpacity
+                style={styles.room}
+                key={room.id}
+                onPress={() => {
+                  onSelect(room);
+                  onClose();
+                }}>
+                <View style={styles.roomInfo}>
+                  <Typo style={styles.roomName}>{room.roomName}</Typo>
+                  <Typo style={styles.roomDetails}>
+                    {room.roomSpace}평 | {room.roomCapacity}명 수용
+                  </Typo>
+                </View>
+                <Typo style={styles.roomPrice}>
+                  {(room.roomServiceFee + room.roomPrice).toLocaleString()} 만원
+                </Typo>
+              </TouchableOpacity>
+            ))
+          ) : (
+            <View style={styles.emptyContainer}>
+              <Typo style={styles.emptyText}>등록된 호실이 없습니다</Typo>
+              <Typo style={styles.emptySubText}>
+                호실 등록 후 다시 시도해주세요
               </Typo>
             </View>
-            <Typo style={styles.roomPrice}>
-              {(room.roomServiceFee + room.roomPrice).toLocaleString()} 만원
-            </Typo>
-          </TouchableOpacity>
-        ))}
+          )}
+        </ScrollView>
       </Animated.View>
     </Modal>
   );
@@ -122,6 +135,9 @@ const styles = StyleSheet.create({
     color: '#283042',
     textAlign: 'center',
   },
+  content: {
+    maxHeight: 400, // 스크롤 가능한 최대 높이 설정
+  },
   room: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -152,5 +168,26 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontFamily: 'Pretendard-Black',
     color: '#2D81F1',
+  },
+  emptyContainer: {
+    paddingVertical: 60,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: '600',
+    fontFamily: 'Pretendard-Black',
+    color: '#AFB3BB',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  emptySubText: {
+    fontSize: 14,
+    fontWeight: '400',
+    fontFamily: 'Pretendard-Black',
+    color: '#D1D5DB',
+    textAlign: 'center',
   },
 });

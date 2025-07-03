@@ -22,6 +22,7 @@ interface FuneralCardProps {
   onPressCard: () => void;
   onPressCheck: () => void;
   onPressDelete?: () => void;
+  showCheckbox?: boolean; // 체크박스 표시 여부
 }
 
 const FuneralCard = ({
@@ -30,6 +31,7 @@ const FuneralCard = ({
   onPressCard,
   onPressCheck,
   onPressDelete,
+  showCheckbox = true, // 기본값은 true (기존 동작 유지)
 }: FuneralCardProps) => {
   const itemName = item.funeralName || item.name || '장례식장 이름';
   const itemAddress = item.funeralAddress || item.address || '주소 정보 없음';
@@ -37,10 +39,13 @@ const FuneralCard = ({
 
   return (
     <View style={styles.card}>
-      <Pressable style={styles.checkContainer} onPress={onPressCheck}>
-        {selected ? <CheckOnIcon /> : <CheckOffIcon />}
-      </Pressable>
-      <Pressable style={styles.contentArea} onPress={onPressCard}>
+      {/* 체크박스는 showCheckbox가 true일 때만 표시 */}
+      {showCheckbox && (
+        <Pressable style={styles.checkContainer} onPress={onPressCheck}>
+          {selected ? <CheckOnIcon /> : <CheckOffIcon />}
+        </Pressable>
+      )}
+      <Pressable style={[styles.contentArea, !showCheckbox && styles.contentAreaFullWidth]} onPress={onPressCard}>
         <Image 
           source={itemImage}
           style={styles.image}
@@ -82,6 +87,9 @@ const styles = StyleSheet.create({
     gap: 20,
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  contentAreaFullWidth: {
+    paddingLeft: 8, // 체크박스가 없을 때 적절한 여백 추가
   },
   image: {
     width: 100,

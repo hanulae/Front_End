@@ -6,7 +6,7 @@ import CustomButton from '../../components/common/CustomButton';
 import Typo from '../../components/common/Typo';
 import {useInputBase} from '../../hooks/input/useInputBase';
 import BaseInput from '../../components/common/input/BaseInput';
-import {NavigationProp} from '@react-navigation/native';
+import {NavigationProp, useRoute} from '@react-navigation/native';
 import {request} from 'react-native-permissions';
 import api from '../../api/config';
 import { useState } from 'react';
@@ -17,7 +17,10 @@ interface IFindEmailPageProps {
 
 const FindEmailPage = ({navigation}: IFindEmailPageProps) => {
   const phoneNumber = usePhoneInput();
+  const route = useRoute();
+  const {userType} = route.params as {userType: 'manager' | 'funeral'};
   const authCode = useInputBase();
+
   const [username, setUsername] = useState<string | null>(null);
 
   const handleRequestCode = async () => {
@@ -33,6 +36,8 @@ const FindEmailPage = ({navigation}: IFindEmailPageProps) => {
       Alert.alert('오류', error.response?.data?.message || '인증 코드 전송에 실패했습니다.');
     }
   };
+  const pageName =
+    userType === 'manager' ? '상조팀장 이메일 찾기' : '장례식장 이메일 찾기';
 
   const handleVerifyCode = async () => {
     try {
@@ -59,7 +64,7 @@ const FindEmailPage = ({navigation}: IFindEmailPageProps) => {
   return (
     <DefaultLayout
       headerShown={true}
-      headerTitle="아이디 찾기"
+      headerTitle="아이디 찾기
       color="white"
       homeButton={true}
       logoutButton={false}

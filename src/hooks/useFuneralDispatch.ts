@@ -116,7 +116,9 @@ export const useFuneralDispatch = () => {
     } catch (err: any) {
       setError(err.message);
       console.error('장례식장 거래 확정 에러 In hook: ', err.message);
-      return null;
+      throw err;
+    } finally {
+      setLoading(false);
     }
   }, []);
 

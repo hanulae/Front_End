@@ -16,7 +16,7 @@ import PointRefundIcon from '../../assets/Button/Button_Refund.svg';
 import AppSettingIcon from '../../assets/Button/Button_AppSettingoff.svg';
 import Toast from 'react-native-toast-message';
 import {userInfoAtom} from '../../state/local_state/userinfoAtom';
-import {useSetAtom} from 'jotai';
+import {useAtomValue, useSetAtom} from 'jotai';
 import ManagerHeader from '../../components/common/ManagerHeader';
 // import Toast from 'react-native-toast-message';
 
@@ -41,6 +41,7 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
     }, []),
   );
   const setLogin = useSetAtom(userInfoAtom);
+  const userInfo = useAtomValue(userInfoAtom);
   console.log('StatusBar.currentHeight', StatusBar.currentHeight);
   const [showPhoneAuthSheet, setShowPhoneAuthSheet] = useState(false);
   const goToModifyUserInfo = () => {
@@ -76,6 +77,9 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
     setLogin({
       userType: 'manager',
       isLogin: false,
+      userName: '',
+      accessToken: '',
+      refreshToken: '',
     });
     navigation.navigate('ManagerMain');
   };
@@ -99,7 +103,7 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
             <ManagerProfileStat
               point={100000}
               cash={100000}
-              managerName="김상조"
+              managerName={userInfo.userName}
             />
           </View>
         </View>

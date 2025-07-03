@@ -1,6 +1,6 @@
-import { atom } from 'jotai';
+import {atom} from 'jotai';
 
-export type UserType = 'manager' | 'funeral' | 'admin' | null;
+export type UserType = 'manager' | 'funeral' | null;
 
 export interface ILoginUser {
   userType: UserType;

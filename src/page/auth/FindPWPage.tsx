@@ -1,4 +1,4 @@
-import {NavigationProp} from '@react-navigation/native';
+import {NavigationProp, useRoute} from '@react-navigation/native';
 import {StyleSheet, View} from 'react-native';
 import {usePasswordInput} from '../../hooks/input/usePasswordInput';
 import {useConfirmPasswordInput} from '../../hooks/input/useConfirmPasswordInput';
@@ -21,7 +21,12 @@ const FindPWpage = ({navigation}: IFindPWPageProps) => {
   const phoneNumber = usePhoneInput();
   const password = usePasswordInput();
   const authCode = useInputBase();
-
+  const route = useRoute();
+  const {userType} = route.params as {userType: 'manager' | 'funeral'};
+  const pageName =
+    userType === 'manager'
+      ? '상조팀장 비밀번호 변경'
+      : '장례식장 비밀번호 변경';
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
   const confirmPassword = useConfirmPasswordInput(
     () => password.value,
@@ -67,7 +72,7 @@ const handleVerifyCode = async (phoneNumber: string, authCode: string): Promise<
   return (
     <DefaultLayout
       headerShown={true}
-      headerTitle="비밀번호 변경"
+      headerTitle={pageName}
       color="white"
       homeButton={true}
       logoutButton={false}

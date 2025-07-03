@@ -28,12 +28,15 @@ import DisabledFacilityIcon from '../../assets/Icon/Icon_DisabledFacility.svg';
 import {funeralService, FuneralDetail} from '../../services/api/funeralService';
 import { useManagerCart } from '../../hooks/useManagerCart';
 import Toast from 'react-native-toast-message';
+import { useAtom } from 'jotai';
+import { userInfoAtom } from '../../state/local_state/userinfoAtom';
 
 const {width} = Dimensions.get('window');
 
 type FuneralDetailParams = {
   funeralListId: string;
   funeralId: string;
+  variant?: string; // variant 파라미터 추가
 };
 
 interface IFuneralDetailPageProps {
@@ -49,7 +52,14 @@ const ICON_SIZES = {
 
 const FuneralDetailPage = ({navigation}: IFuneralDetailPageProps) => {
   const route = useRoute<RouteProp<{params: FuneralDetailParams}, 'params'>>();
-  const {funeralListId, funeralId} = route.params;
+  const {funeralListId, funeralId, variant} = route.params;
+
+  // 로그인 상태 체크
+  const [userInfo] = useAtom(userInfoAtom);
+  const isLoggedIn = userInfo.isLogin;
+
+  // 회원가입 중인지 확인
+  const isSignupMode = variant === 'signup';
 
   // 🆕 상태 관리
   const [funeralInfo, setFuneralInfo] = useState<FuneralDetail | null>(null);
@@ -58,8 +68,8 @@ const FuneralDetailPage = ({navigation}: IFuneralDetailPageProps) => {
 
   const {
     addToCart,
-    loading: cartLoading,
-    error: cartError,
+    loading: _cartLoading,
+    error: _cartError,
   } = useManagerCart();
 
   useEffect(() => {
@@ -207,8 +217,7 @@ const FuneralDetailPage = ({navigation}: IFuneralDetailPageProps) => {
           <Typo style={styles.hallName}>{funeralInfo.funeralName}</Typo>
           <Typo style={styles.hallAddress}>{funeralInfo.funeralAddress}</Typo>
 
-          {/* 📞 연락처 버튼들 */}
-          <View style={styles.contactButtons}>
+            <View style={styles.contactButtons}>
               <TouchableOpacity
                 style={styles.contactButton}
                 onPress={handlePhoneCall}>
@@ -229,11 +238,11 @@ const FuneralDetailPage = ({navigation}: IFuneralDetailPageProps) => {
                 <Typo style={styles.contactText}>홈페이지</Typo>
               </TouchableOpacity>
 
-            <TouchableOpacity style={styles.contactButton} onPress={handleMap}>
-              <MapIcon width={ICON_SIZES.contact} height={ICON_SIZES.contact} />
-              <Typo style={styles.contactText}>지도</Typo>
-            </TouchableOpacity>
-          </View>
+              <TouchableOpacity style={styles.contactButton} onPress={handleMap}>
+                <MapIcon width={ICON_SIZES.contact} height={ICON_SIZES.contact} />
+                <Typo style={styles.contactText}>지도</Typo>
+              </TouchableOpacity>
+            </View>
         </View>
 
         {/* 🏢 시설정보 */}
@@ -345,16 +354,33 @@ const FuneralDetailPage = ({navigation}: IFuneralDetailPageProps) => {
         </View>
       </ScrollView>
 
-      {/* 🛒 하단 고정 버튼 */}
-      <View style={styles.buttonContainer}>
-        <CustomButton onPress={handleAddToCart} style={styles.button}>
-          <View style={styles.buttonIcon}>
-            <CartIcon width={ICON_SIZES.button} height={ICON_SIZES.button} />
-            <Typo style={styles.buttonText}>장바구니 담기</Typo>
-          </View>
-          <MoveIcon width={ICON_SIZES.button} height={ICON_SIZES.button} />
-        </CustomButton>
-      </View>
+      {/* 🛒 하단 고정 버튼 - 회원가입 중이 아닐 때만 표시 */}
+      {!isSignupMode && (
+        <View style={styles.buttonContainer}>
+          {isLoggedIn ? (
+            // 로그인된 사용자: 장바구니 담기 버튼
+            <CustomButton onPress={handleAddToCart} style={styles.button}>
+              <View style={styles.buttonIcon}>
+                <CartIcon width={ICON_SIZES.button} height={ICON_SIZES.button} />
+                <Typo style={styles.buttonText}>장바구니 담기</Typo>
+              </View>
+              <MoveIcon width={ICON_SIZES.button} height={ICON_SIZES.button} />
+            </CustomButton>
+          ) : (
+            // 로그인하지 않은 사용자: 로그인 안내 버튼
+            <CustomButton 
+              onPress={() => navigation.navigate('Login', { userType: 'manager' })} 
+              style={styles.loginPromptButton}
+            >
+              <View style={styles.buttonIcon}>
+                <CartIcon width={ICON_SIZES.button} height={ICON_SIZES.button} />
+                <Typo style={styles.loginPromptButtonText}>더 많은 기능 사용을 위해 로그인하기</Typo>
+              </View>
+              <MoveIcon width={ICON_SIZES.button} height={ICON_SIZES.button} />
+            </CustomButton>
+          )}
+        </View>
+      )}
       <Toast />
     </ManagerLayout>
   );
@@ -530,6 +556,21 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   buttonText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    fontFamily: 'Pretendard-Black',
+  },
+  // 로그인 안내 버튼 스타일
+  loginPromptButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FF6B6B',
+    borderRadius: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+  },
+  loginPromptButtonText: {
     fontSize: 15,
     fontWeight: '700',
     color: '#FFFFFF',

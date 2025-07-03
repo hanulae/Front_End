@@ -91,7 +91,7 @@ const ConfirmTransactionPage = () => {
         console.log('거래 확정 요청 성공:', result);
         Toast.show({
           type: 'success',
-          text1: '거래 확정이 완료되었습니다.',
+          text1: result.message || '거래 확정이 완료되었습니다.',
           position: 'top',
           topOffset: 0,
         });
@@ -100,18 +100,35 @@ const ConfirmTransactionPage = () => {
         // navigation.navigate('FuneralMain');
       } else {
         console.log('거래 확정 요청 실패:', result);
+        const errorMessage = result?.message || '거래 확정에 실패했습니다.';
         Toast.show({
           type: 'error',
-          text1: '거래 확정에 실패했습니다.',
+          text1: errorMessage,
           position: 'top',
           topOffset: 0,
         });
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('거래 확정 에러:', err);
+      console.log('🔍 에러 전체 객체:', JSON.stringify(err, null, 2));
+      
+      // 서버에서 온 구체적인 에러 메시지 추출
+      let errorMessage = '거래 확정 중 오류가 발생했습니다.';
+      
+      if (err.response?.data?.message) {
+        // 서버에서 JSON 형태로 에러 메시지를 보낸 경우
+        errorMessage = err.response.data.message;
+        console.log('🔍 서버 에러 메시지:', errorMessage);
+      } else if (err.message) {
+        // Error 객체의 message 속성
+        errorMessage = err.message;
+        console.log('🔍 Error 객체 메시지:', errorMessage);
+      }
+      
+      console.log('🔍 최종 에러 메시지:', errorMessage);
       Toast.show({
         type: 'error',
-        text1: '거래 확정 중 오류가 발생했습니다.',
+        text1: errorMessage,
         position: 'top',
         topOffset: 0,
       });
@@ -216,6 +233,7 @@ const ConfirmTransactionPage = () => {
           </CustomButton>
         </View>
       </View>
+      <Toast />
     </FuneralLayout>
   );
 };

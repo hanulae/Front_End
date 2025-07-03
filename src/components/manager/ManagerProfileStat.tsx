@@ -4,16 +4,13 @@ import {StyleSheet, View} from 'react-native';
 import Typo from '../common/Typo';
 import PointIcon from '../../assets/Bullet/Bullet_PointCircle.svg';
 import CashIcon from '../../assets/Bullet/Bullet_CoinYellow.svg';
-import LogIcon from '../../assets/Button/Button_Log.svg';
-
-import CustomButton from '../common/CustomButton';
-import Hello from './Hello';
 
 // BSK ADD IMPORTS
 import { useEffect, useState } from 'react';
 import api from '../../api/config';
 import { useAtomValue } from 'jotai';
 import { loginAtom } from '../../state/local_state/loginAtom';
+import Hello from './Hello';
 
 interface IManagerProfileStatProps {
   point: number;

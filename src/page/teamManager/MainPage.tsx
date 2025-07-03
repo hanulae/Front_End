@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import Typo from '../../components/common/Typo';
 import CustomButton from '../../components/common/CustomButton';
-import {useSetAtom} from 'jotai';
+import {useAtomValue, useSetAtom} from 'jotai';
 import {userInfoAtom} from '../../state/local_state/userinfoAtom';
 import ManagerLayout from '../../layout/ManagerLayout';
 import {useCallback} from 'react';
@@ -25,7 +25,7 @@ interface IManagerMainPageProps {
 
 const ManagerMainPage = ({navigation}: IManagerMainPageProps) => {
   const setLogin = useSetAtom(userInfoAtom);
-
+  const userInfo = useAtomValue(userInfoAtom);
   useFocusEffect(
     useCallback(() => {
       if (Platform.OS === 'android') {
@@ -42,6 +42,9 @@ const ManagerMainPage = ({navigation}: IManagerMainPageProps) => {
     setLogin({
       userType: 'manager',
       isLogin: false,
+      userName: '',
+      accessToken: '',
+      refreshToken: '',
     });
     navigation.navigate('ManagerMain');
   };
@@ -78,7 +81,7 @@ const ManagerMainPage = ({navigation}: IManagerMainPageProps) => {
         </View>
       </View>
       <View style={styles.mainContainer}>
-        <ManagerProfileStat point={100000} cash={100000} managerName="김상조" />
+        <ManagerProfileStat point={100000} cash={100000} managerName={userInfo.userName} />
         <ImageBackground
           style={styles.buttonContainer}
           source={require('../../assets/mainImage.png')}
