@@ -141,6 +141,16 @@ export const fetchFuneralHomeInfo = async () => {
   }
 };
 
+export const updateFuneralHomeInfo = async (data: any) => {
+  try {
+    const response = await api.put(`/funeral/funeralList/update/funeralList`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating funeral home info:', error);
+    throw error;
+  }
+};
+
 export type {
   SearchFuneralParams,
   FuneralData,

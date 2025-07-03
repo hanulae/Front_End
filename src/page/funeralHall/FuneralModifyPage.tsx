@@ -23,7 +23,7 @@ import {useInputBase} from '../../hooks/input/useInputBase';
 import {FuneralInput} from '../../components/common/input/FuneralInput';
 import {usePhoneInput} from '../../hooks/input/usePhoneInput';
 import CustomButton from '../../components/common/CustomButton';
-import { fetchFuneralHomeInfo } from '../../services/api/funeralService';
+import { fetchFuneralHomeInfo, updateFuneralHomeInfo } from '../../services/api/funeralService';
 
 const FuneralModiftyPage = () => {
   // StatusBar 설정
@@ -174,6 +174,33 @@ const FuneralModiftyPage = () => {
     // navigation.navigate('AddressSearchPage'); // 추후 연결
   };
 
+  const handleSave = async () => {
+    if (!funeralHomeInfo) return; // funeralHomeInfo가 없으면 실행하지 않음
+
+    const dataToUpdate = {
+      funeralScale: infoData.funeral_scale,
+      funeralTotalRooms: parseInt(infoData.funeral_total_rooms, 10),
+      funeralOperationType: infoData.funeral_operation_type,
+      funeralStyle: infoData.funeral_style,
+      funeralAddress: funeralAddress.value,
+      funeralHomepage: funeralWebsite.value,
+      funeralPhone: funeralPhone.value,
+      funeralParkingLot: convenienceData.funeral_parking_lot,
+      funeralStore: convenienceData.funeral_store,
+      funeralFamilyWaitingRoom: convenienceData.funeral_family_waiting_room,
+      funeralDisabledFacility: convenienceData.funeral_disabled_facility,
+    };
+
+    try {
+      const response = await updateFuneralHomeInfo(dataToUpdate);
+      console.log('Update successful:', response);
+      // 성공 메시지 표시 또는 다른 작업 수행
+    } catch (error) {
+      console.error('Failed to update funeral home info:', error);
+      // 오류 메시지 표시
+    }
+  };
+
   return (
     <FuneralLayout
       headerShown={true}
@@ -205,9 +232,13 @@ const FuneralModiftyPage = () => {
           </View>
           <View style={styles.facilityContainer}>
             <Typo style={styles.titleText}>시설정보</Typo>
+
+                {console.log('🏁 funeralHomeInfo:', funeralHomeInfo)}
+                {console.log('🏁 labelData:', labelData)}
+
             <InfoTable
               editable={true}
-              data={funeralHomeInfo ? funeralHomeInfo : labelData} // 데이터가 있으면 사용
+              data={labelData}
               onChange={handleChange}
             />
           </View>
@@ -263,7 +294,7 @@ const FuneralModiftyPage = () => {
             </View>
           </View>
           <View style={styles.buttonContainer}>
-            <CustomButton onPress={() => {}} style={styles.saveButton}>
+            <CustomButton onPress={handleSave} style={styles.saveButton}>
               <Typo style={styles.saveButtonText}>저장</Typo>
             </CustomButton>
           </View>

@@ -19,6 +19,7 @@ interface IInfoTableProps {
 const LABELS = ['규모', '빈소', '운영', '형태'];
 
 const InfoTable = ({editable, data, onChange}: IInfoTableProps) => {
+  console.log('🏁 data:', data);
   return (
     <View style={styles.container}>
       {/* 헤더 */}
@@ -106,5 +107,6 @@ const styles = StyleSheet.create({
   valueText: {
     fontSize: 14,
     textAlign: 'center',
+    color: '#000',
   },
 });
