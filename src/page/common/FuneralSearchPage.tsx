@@ -26,8 +26,8 @@ import {useManagerCart} from '../../hooks/useManagerCart';
 import FindCityBottomSheet from '../../components/funeralHall/FindLocation/FindCityBottomSheet';
 import FindGuBottomSheet from '../../components/funeralHall/FindLocation/FindGuBottomSheet';
 import Toast from 'react-native-toast-message';
-import {useSetAtom} from 'jotai';
-import {myFuneralAtom} from '../../state/local_state/myFuneralAtom';
+import { useAtom } from 'jotai';
+import { signupAtom } from '../../state/local_state/signupAtom';
 
 const {height} = Dimensions.get('window');
 
@@ -84,6 +84,8 @@ const FuneralSearchPage = () => {
   const {addToCart} = useManagerCart();
 
   const [selectedItems, setSelectedItems] = useState<FuneralData[]>([]);
+
+  const [signupInfo, setSignupInfo] = useAtom(signupAtom);
 
   // ✅ 초기 데이터 로드 (전체 목록)
   useEffect(() => {
@@ -158,39 +160,31 @@ const FuneralSearchPage = () => {
   }, [addToCart, selectedItems]);
 
   const selectFuneral = async () => {
-    try {
-      if (selectedItems.length === 0) {
-        Toast.show({
-          type: 'error',
-          text1: '선택된 장례식장이 없습니다.',
-          position: 'top',
-        });
-        return;
-      }
-
-      // 첫 번째 선택된 장례식장을 myFuneralAtom에 저장
-      const selectedFuneral = selectedItems[0];
-      setMyFuneral({
-        funeralName: selectedFuneral.funeralName,
-        funeralAddress: selectedFuneral.funeralAddress || '',
-      });
-
-      Toast.show({
-        type: 'success',
-        text1: `${selectedFuneral.funeralName}이(가) 선택되었습니다.`,
-        position: 'top',
-      });
-
-      // 이전 화면으로 돌아가기
-      navigation.goBack();
-    } catch (err) {
-      console.error('장례식장 선택 실패', err);
-      Toast.show({
-        type: 'error',
-        text1: '장례식장 선택에 실패했습니다.',
-        position: 'top',
-      });
+    if (selectedItems.length === 0) {
+      Alert.alert('알림', '선택된 장례식장이 없습니다.');
+      return;
     }
+    console.log('🚀 ~ selectFuneral ~ selectedItems:', selectedItems)
+
+    // 선택된 장례식장 ID를 signupAtom에 저장
+    setSignupInfo(prev => ({
+      ...prev,
+      selectedFuneral: {
+        funeralId: selectedItems[0].funeralId,
+        funeralListId: selectedItems[0].funeralListId,
+        funeralName: selectedItems[0].funeralName,
+        funeralAddress: selectedItems[0].funeralAddress,
+      },
+    }));
+
+    Toast.show({
+      type: 'success',
+      text1: '장례식장이 선택되었습니다.',
+      position: 'top',
+    });
+
+  // 이전 화면으로 돌아가기
+    navigation.goBack();
   };
 
   //FlatList 끝에 도달했을 때 호출

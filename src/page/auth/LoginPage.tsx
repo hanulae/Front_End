@@ -177,32 +177,41 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
           funeralPassword: password.value,
         });
       }
-
+      if (!response || !response.data) {
+        throw new Error('Login response is invalid');
+      }
+      
       // Handle login success
       console.log('Login response:', response);
-      if (response && response.data) {
-        const {accessToken, refreshToken, manager} = response.data;
-        await storeTokens(accessToken, refreshToken);
+      const { accessToken, refreshToken } = response.data;
+
+      if (userType === 'manager') {
+        const { manager } = response.data;
         await storeUserInfo({
           userType,
           userId: manager.managerId,
           data: manager,
         });
-
-        handleLogin(response);
-        console.log('userType', userType);
-        // 로그인 성공 후 네비게이션
-        if (userType === 'manager') {
-          navigation.navigate('ManagerMain'); // 매니저 메인 화면으로 이동
-        } else if (userType === 'funeral') {
-          navigation.navigate('FuneralMain'); // 장례식장 메인 화면으로 이동
-        }
+      } else if (userType === 'funeral') {
+        const { funeral } = response.data;
+        await storeUserInfo({
+          userType,
+          userId: funeral.funeralId,
+          data: funeral,
+        });
       }
-    } catch (error) {
-      // console.log('Login error', error);
+
+      await storeTokens(accessToken, refreshToken);
+
+      handleLogin(response);
+
+    } catch (error: any) {
+      console.log('Login error', error);
+      // 백엔드에서 받은 오류 메시지 확인
+  const errorMessage = error.response?.data?.message || '로그인에 실패했습니다.';
       Toast.show({
         type: 'error',
-        text1: '로그인에 실패했습니다.',
+        text1: errorMessage,
         position: 'top',
         topOffset: 100,
       });
