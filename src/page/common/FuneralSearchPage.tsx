@@ -11,20 +11,18 @@ import {
   Dimensions,
 } from 'react-native';
 import {useInputBase} from '../../hooks/input/useInputBase';
-import {Input} from '../../components/common/input/Input';
 import Typo from '../../components/common/Typo';
 import {useEffect, useState, useCallback} from 'react';
 import FuneralCard from '../../components/common/FuneralCard';
 import CustomButton from '../../components/common/CustomButton';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useRoute, useNavigation} from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import ManagerLayout from '../../layout/ManagerLayout';
 import MoveIcon from '../../assets/Button/Button_MoveTransparent.svg';
 import CartIcon from '../../assets/Button/Button_Cart.svg';
-import { useFuneralSearch } from '../../hooks/useFuneralSearch';
-import { FuneralData } from '../../services/api/funeralService';
-import { useManagerCart } from '../../hooks/useManagerCart';
+import {useFuneralSearch} from '../../hooks/useFuneralSearch';
+import {FuneralData} from '../../services/api/funeralService';
+import {useManagerCart} from '../../hooks/useManagerCart';
 import FindCityBottomSheet from '../../components/funeralHall/FindLocation/FindCityBottomSheet';
 import FindGuBottomSheet from '../../components/funeralHall/FindLocation/FindGuBottomSheet';
 import Toast from 'react-native-toast-message';
@@ -35,11 +33,12 @@ const {height} = Dimensions.get('window');
 
 const FuneralSearchPage = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
-  
-  const [showLocationModal, setShowLocationModal] = useState(false);
-  const [location, setLocation] = useState<string>('');
-  const [selectedSido, setSelectedSido] = useState<string>('');
-  const [selectedSigungu, setSelectedSigungu] = useState<string>('');
+  const setMyFuneral = useSetAtom(myFuneralAtom);
+
+  const [_showLocationModal, _setShowLocationModal] = useState(false);
+  const [_location, _setLocation] = useState<string>('');
+  const [_selectedSido, _setSelectedSido] = useState<string>('');
+  const [_selectedSigungu, _setSelectedSigungu] = useState<string>('');
   const [showFindCityBottomSheet, setShowFindCityBottomSheet] = useState(false);
   const [showGuBottomSheet, setShowGuBottomSheet] = useState(false);
   const [selectedCity, setSelectedCity] = useState<string>('시 / 도');
@@ -82,12 +81,7 @@ const FuneralSearchPage = () => {
     resetSearch,
   } = useFuneralSearch();
 
-  const {
-    loading: cartLoading,
-    error: cartError,
-    addToCart,
-    clearError,
-  } = useManagerCart();
+  const {addToCart} = useManagerCart();
 
   const [selectedItems, setSelectedItems] = useState<FuneralData[]>([]);
 
@@ -96,7 +90,7 @@ const FuneralSearchPage = () => {
   // ✅ 초기 데이터 로드 (전체 목록)
   useEffect(() => {
     if (searchFunerals) {
-      searchFunerals({ page: 1, limit: 20 });
+      searchFunerals({page: 1, limit: 20});
     }
   }, [searchFunerals]);
 
@@ -113,9 +107,13 @@ const FuneralSearchPage = () => {
 
   const handleSelect = (item: FuneralData) => {
     setSelectedItems(prevSelected => {
-      const exists = prevSelected.find(selected => selected.funeralListId === item.funeralListId);
+      const exists = prevSelected.find(
+        selected => selected.funeralListId === item.funeralListId,
+      );
       if (exists) {
-        return prevSelected.filter(selected => selected.funeralListId !== item.funeralListId);
+        return prevSelected.filter(
+          selected => selected.funeralListId !== item.funeralListId,
+        );
       } else {
         return [...prevSelected, item];
       }
@@ -124,10 +122,10 @@ const FuneralSearchPage = () => {
 
   // ✅ 장바구니 추가 함수
   const handleAddToCart = useCallback(async () => {
-      if (selectedItems.length === 0) {
+    if (selectedItems.length === 0) {
       Alert.alert('알림', '선택된 장례식장이 없습니다.');
-        return;
-      }
+      return;
+    }
 
     try {
       const result = await addToCart(selectedItems);
@@ -223,7 +221,7 @@ const FuneralSearchPage = () => {
           </View>
         )}
 
-            <View style={styles.searchContainer}>
+        <View style={styles.searchContainer}>
           {/* 🔍 검색 입력 영역 - 돋보기 아이콘 내장 */}
           <View style={styles.searchInputContainer}>
             <TextInput
@@ -260,8 +258,8 @@ const FuneralSearchPage = () => {
           {pageInfo && (
             <View style={styles.resultHeader}>
               <Typo style={styles.resultText}>
-                📊 총 {pageInfo.totalItems}개의 장례식장을 찾았습니다.
-                (페이지 {pageInfo.currentPage}/{pageInfo.totalPages})
+                📊 총 {pageInfo.totalItems}개의 장례식장을 찾았습니다. (페이지{' '}
+                {pageInfo.currentPage}/{pageInfo.totalPages})
               </Typo>
               {/* 🆕 현재 표시 중인 데이터 수 */}
               <Typo style={styles.currentResultText}>
@@ -281,30 +279,34 @@ const FuneralSearchPage = () => {
             <FlatList
               data={funerals}
               keyExtractor={item => item.funeralListId}
-              renderItem={({ item }) => (
-            <FuneralCard
-              item={item}
-                  selected={!!selectedItems.find(selected => selected.funeralListId === item.funeralListId)}
-              onPressCheck={() => handleSelect(item)}
-              onPressCard={() => {
+              renderItem={({item}) => (
+                <FuneralCard
+                  item={item}
+                  selected={
+                    !!selectedItems.find(
+                      selected => selected.funeralListId === item.funeralListId,
+                    )
+                  }
+                  onPressCheck={() => handleSelect(item)}
+                  onPressCard={() => {
                     navigation.navigate('FuneralDetail', {
                       funeralListId: item.funeralListId,
                       funeralId: item.funeralId,
                     });
-              }}
-            />
-          )}
-
+                  }}
+                />
+              )}
               // 🆕 페이지네이션 관련 props
-              onEndReached={handleEndReached}           // 끝에 도달했을 때
-              onEndReachedThreshold={0.1}               // 90% 스크롤 시 트리거
-              ListFooterComponent={renderFooter}        // 하단 로딩 표시
-
-          ListEmptyComponent={
+              onEndReached={handleEndReached} // 끝에 도달했을 때
+              onEndReachedThreshold={0.1} // 90% 스크롤 시 트리거
+              ListFooterComponent={renderFooter} // 하단 로딩 표시
+              ListEmptyComponent={
                 !loading ? (
                   <View style={styles.emptyContainer}>
-                    <Typo style={styles.emptyText}>📭 검색 결과가 없습니다.</Typo>
-              </View>
+                    <Typo style={styles.emptyText}>
+                      📭 검색 결과가 없습니다.
+                    </Typo>
+                  </View>
                 ) : null
               }
               refreshing={loading}
@@ -314,9 +316,8 @@ const FuneralSearchPage = () => {
                 setSelectedGu('시 / 군 / 구');
                 hallName.onChangeText('');
                 resetSearch();
-                searchFunerals({ page: 1, limit: 20 });
+                searchFunerals({page: 1, limit: 20});
               }}
-
               // 🆕 성능 최적화
               removeClippedSubviews={true}
               maxToRenderPerBatch={10}
@@ -330,33 +331,33 @@ const FuneralSearchPage = () => {
         {/* 버튼 영역 */}
         {variant === 'main' && (
           <View style={styles.buttonContainer}>
-            <CustomButton 
-            onPress={handleAddToCart} 
-            style={[
-              styles.button, 
-              selectedItems.length === 0 && styles.buttonDisabled
+            <CustomButton
+              onPress={handleAddToCart}
+              style={[
+                styles.button,
+                selectedItems.length === 0 && styles.buttonDisabled,
               ]}
-              disabled={selectedItems.length === 0}
-            >
+              disabled={selectedItems.length === 0}>
               <View style={styles.buttonIcon}>
-                <CartIcon 
-                width={24} 
-                height={24} 
-                fill={selectedItems.length === 0 ? '#ffffff' : '#ffffff'}
+                <CartIcon
+                  width={24}
+                  height={24}
+                  fill={selectedItems.length === 0 ? '#ffffff' : '#ffffff'}
                 />
-                <Typo style={[
-                  styles.buttonText, 
-                  selectedItems.length === 0 && styles.buttonTextDisabled
-                ]}>
+                <Typo
+                  style={[
+                    styles.buttonText,
+                    selectedItems.length === 0 && styles.buttonTextDisabled,
+                  ]}>
                   장바구니 담기 ({selectedItems.length})
                 </Typo>
               </View>
-              <MoveIcon width={24} height={24}/>
+              <MoveIcon width={24} height={24} />
             </CustomButton>
           </View>
-          )}
+        )}
 
-          {variant === 'signup' && (
+        {variant === 'signup' && (
           <View style={styles.buttonContainer}>
             <CustomButton onPress={selectFuneral} style={styles.button}>
               <View style={styles.buttonIcon}>
@@ -368,24 +369,24 @@ const FuneralSearchPage = () => {
               <MoveIcon width={24} height={24} />
             </CustomButton>
           </View>
-          )}
-          {showFindCityBottomSheet && (
-            <FindCityBottomSheet
-              visible={showFindCityBottomSheet}
-              onClose={() => setShowFindCityBottomSheet(false)}
-              onSelect={handleSelectCity}
-              selectedRegion={selectedCity}
-            />
-          )}
-          {showGuBottomSheet && (
-            <FindGuBottomSheet
-              visible={showGuBottomSheet}
-              onClose={() => setShowGuBottomSheet(false)}
-              onSelect={handleSelectGu}
-              selectedDistrict={selectedGu}
-              selectedRegion={selectedCity}
-            />
-          )}
+        )}
+        {showFindCityBottomSheet && (
+          <FindCityBottomSheet
+            visible={showFindCityBottomSheet}
+            onClose={() => setShowFindCityBottomSheet(false)}
+            onSelect={handleSelectCity}
+            selectedRegion={selectedCity}
+          />
+        )}
+        {showGuBottomSheet && (
+          <FindGuBottomSheet
+            visible={showGuBottomSheet}
+            onClose={() => setShowGuBottomSheet(false)}
+            onSelect={handleSelectGu}
+            selectedDistrict={selectedGu}
+            selectedRegion={selectedCity}
+          />
+        )}
       </View>
       <Toast />
     </ManagerLayout>
