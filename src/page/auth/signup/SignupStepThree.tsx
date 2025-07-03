@@ -1,7 +1,10 @@
 import {useAtom, useSetAtom} from 'jotai';
 import axios from 'axios';
 import {useState} from 'react';
-import {signupAtom, initialSignupState} from '../../../state/local_state/signupAtom';
+import {
+  signupAtom,
+  initialSignupState,
+} from '../../../state/local_state/signupAtom';
 import {
   StyleSheet,
   View,
@@ -139,7 +142,7 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
         formData.append('funeralBankNumber', accountNumber);
         formData.append('funeralBankHolder', name);
         formData.append('agreements', JSON.stringify(agrees));
-        
+
         // Add funeral home information
         formData.append('funeralHome', signupInfo.selectedFuneral?.funeralId); // Assuming funeralHome is a field in signupInfo
       }
@@ -262,30 +265,30 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
   return (
     <ScrollView contentContainerStyle={styles.wrapper}>
       {/* 이름 입력 */}
-  <Typo style={styles.label}>예금주 이름</Typo>
-  <TextInput
-    style={styles.input}
-    placeholder="이름을 입력하세요"
-    placeholderTextColor="#000"
-    value={name}
-    onChangeText={setName}
-  />
-      
+      <Typo style={styles.label}>예금주 이름</Typo>
+      <TextInput
+        style={styles.input}
+        placeholder="이름을 입력하세요"
+        placeholderTextColor="#000"
+        value={name}
+        onChangeText={setName}
+      />
+
       {/* 계좌 인증 */}
       <View style={styles.accountSection}>
         <View style={styles.row}>
-        <CustomButton
-      onPress={() => setShowBankSelectSheet(true)}
-      style={styles.selectBankButton}>
-      <Typo style={styles.bankText}>{bankName || '은행 선택'}</Typo>
-    </CustomButton>
-    <TextInput
-      style={[styles.input, { flex: 1, marginLeft: 8 }]}
-      placeholder="000-0000-0000"
-      placeholderTextColor="#000"
-      value={accountNumber}
-      onChangeText={setAccountNumber}
-    />
+          <CustomButton
+            onPress={() => setShowBankSelectSheet(true)}
+            style={styles.selectBankButton}>
+            <Typo style={styles.bankText}>{bankName || '은행 선택'}</Typo>
+          </CustomButton>
+          <TextInput
+            style={[styles.input, {flex: 1, marginLeft: 8}]}
+            placeholder="000-0000-0000"
+            placeholderTextColor="#000"
+            value={accountNumber}
+            onChangeText={setAccountNumber}
+          />
         </View>
 
         {/* 인증 버튼 */}
@@ -328,12 +331,12 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
           }}
         />
 
-        <TextInput
+        {/* <TextInput
           style={styles.input}
           placeholder="인증코드"
           value={authCode}
           onChangeText={setAuthCode}
-        />
+        /> */}
         {/* 
         <TouchableOpacity style={styles.buttonOutline}>
           <Typo fontSize={14}>인증 코드 확인</Typo>
