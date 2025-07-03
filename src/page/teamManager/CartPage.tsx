@@ -124,6 +124,7 @@ const CartPage = ({navigation}: ICartPageProps) => {
 
   useFocusEffect(
     useCallback(() => {
+      
       if (Platform.OS === 'android') {
         StatusBar.setBackgroundColor('#3287F8');
         StatusBar.setBarStyle('dark-content');
@@ -131,21 +132,21 @@ const CartPage = ({navigation}: ICartPageProps) => {
         StatusBar.setBarStyle('dark-content');
       }
 
-      // ✅ 페이지 포커스 시 장바구니 새로고침
+      // ✅ 페이지 포커스 시 선택 상태 초기화 및 장바구니 새로고침
+      setSelectedIds([]); // 선택 상태 초기화
       fetchCartList();
 
       return () => {
-        // 화면 포커스 해제 시 필요하다면 초기화 작업
+        // ✅ 페이지를 벗어날 때 선택 상태 초기화 (선택사항)
+        setSelectedIds([]);
       };
     }, [fetchCartList]),
   );
 
   // ✅ 다중 선택 핸들러 - funeralListId 기준으로 변경
   const handleSelect = (funeralListId: string) => {
-    console.log('🔍 선택된 funeralListId:', funeralListId);
     setSelectedIds(prevSelected => {
       const exists = prevSelected.includes(funeralListId);
-      console.log('🔍 선택된 ID 존재 여부:', exists);
       if (exists) {
         // ✅ 이미 선택되어 있으면 제거
         return prevSelected.filter(selectedId => selectedId !== funeralListId);
@@ -169,19 +170,19 @@ const CartPage = ({navigation}: ICartPageProps) => {
     }).start(async () => {
       try {
         const result = await deleteFromCart([funeralListId]);
-        
+
         if (result) {
           setCartItems(prevItems => 
             prevItems.filter(item => item.funeralListId !== funeralListId)
           );
-          
+
           // ✅ 삭제된 아이템이 선택되어 있었다면 선택에서 제거
           setSelectedIds(prevSelected => 
             prevSelected.filter(id => id !== funeralListId)
           );
-          
+
           delete animatedValues[funeralListId];
-          
+
           Toast.show({
             type: 'success',
             text1: '장바구니에서 삭제되었습니다.',
@@ -191,13 +192,13 @@ const CartPage = ({navigation}: ICartPageProps) => {
         }
       } catch (error) {
         console.error('장바구니 삭제 실패', error);
-        
+
         Animated.timing(animatedValues[funeralListId], {
           toValue: 0,
           duration: 200,
           useNativeDriver: true,
         }).start();
-        
+
         Toast.show({
           type: 'error',
           text1: '삭제에 실패했습니다.',

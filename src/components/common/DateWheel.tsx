@@ -41,10 +41,10 @@ const Wheel = ({data, value, onChange}: any) => {
     const index = data.indexOf(value);
     if (index >= 0) {
       setTimeout(() => {
-        ref.current?.scrollToIndex({index, animated: false});
+        ref.current?.scrollToIndex({index, animated: true});
       }, 50);
     }
-  }, []);
+  }, [value]);
 
   return (
     <FlatList
@@ -93,17 +93,22 @@ const DateWheelBottomSheet = ({
 }) => {
   const translateY = useRef(new Animated.Value(screenHeight)).current;
 
-  const [year, setYear] = useState(initialDate!.getFullYear());
-  const [month, setMonth] = useState(initialDate!.getMonth() + 1);
-  const [day, setDay] = useState(initialDate!.getDate());
+  // 기본값을 현재 날짜로 설정
+  const defaultDate = initialDate || new Date();
+  
+  const [year, setYear] = useState(defaultDate.getFullYear());
+  const [month, setMonth] = useState(defaultDate.getMonth() + 1);
+  const [day, setDay] = useState(defaultDate.getDate());
 
+  // visible이 true가 되거나 initialDate가 변경될 때마다 상태 업데이트
   useEffect(() => {
     if (visible) {
-      setYear(initialDate!.getFullYear());
-      setMonth(initialDate!.getMonth() + 1);
-      setDay(initialDate!.getDate());
+      const dateToUse = initialDate || new Date();
+      setYear(dateToUse.getFullYear());
+      setMonth(dateToUse.getMonth() + 1);
+      setDay(dateToUse.getDate());
     }
-  }, [visible, initialDate]);
+  }, [visible]); // initialDate는 key로 처리되므로 의존성에서 제거
 
   // day 보정 로직
   useEffect(() => {
@@ -113,17 +118,62 @@ const DateWheelBottomSheet = ({
     }
   }, [year, month]);
 
+  // 년도 변경 함수
+  const handleYearChange = (direction: 'up' | 'down') => {
+    if (direction === 'up' && year < 2055) {
+      setYear(year + 1);
+    } else if (direction === 'down' && year > 2025) {
+      setYear(year - 1);
+    }
+  };
+
+  // 월 변경 함수
+  const handleMonthChange = (direction: 'up' | 'down') => {
+    if (direction === 'up') {
+      if (month < 12) {
+        setMonth(month + 1);
+      } else {
+        setMonth(1);
+        if (year < 2055) setYear(year + 1);
+      }
+    } else if (direction === 'down') {
+      if (month > 1) {
+        setMonth(month - 1);
+      } else {
+        setMonth(12);
+        if (year > 2025) setYear(year - 1);
+      }
+    }
+  };
+
+  // 일 변경 함수
+  const handleDayChange = (direction: 'up' | 'down') => {
+    const lastDay = getLastDayOfMonth(year, month);
+    
+    if (direction === 'up') {
+      if (day < lastDay) {
+        setDay(day + 1);
+      } else {
+        setDay(1);
+        handleMonthChange('up');
+      }
+    } else if (direction === 'down') {
+      if (day > 1) {
+        setDay(day - 1);
+      } else {
+        const prevMonth = month === 1 ? 12 : month - 1;
+        const prevYear = month === 1 ? year - 1 : year;
+        const prevLastDay = getLastDayOfMonth(prevYear, prevMonth);
+        setDay(prevLastDay);
+        handleMonthChange('down');
+      }
+    }
+  };
+
   const confirmAndClose = () => {
     onConfirm(new Date(year, month - 1, day));
     onClose();
   };
-
-  // const formatSimpleDate = (date: Date) => {
-  //   return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(
-  //     2,
-  //     '0',
-  //   )}.${String(date.getDate()).padStart(2, '0')}`;
-  // };
 
   useEffect(() => {
     Animated.timing(translateY, {
@@ -150,35 +200,65 @@ const DateWheelBottomSheet = ({
         <View style={styles.wheelWrapper}>
           {/* year */}
           <View style={styles.wheelColumn}>
-            <Text style={styles.arrow}>▲</Text>
+            <TouchableOpacity 
+              style={styles.arrowButton}
+              onPress={() => handleYearChange('up')}
+              activeOpacity={0.7}>
+              <Text style={styles.arrow}>▲</Text>
+            </TouchableOpacity>
             <Wheel
               data={generateRange(2025, 2055)}
               value={year}
               onChange={setYear}
             />
-            <Text style={styles.arrow}>▼</Text>
+            <TouchableOpacity 
+              style={styles.arrowButton}
+              onPress={() => handleYearChange('down')}
+              activeOpacity={0.7}>
+              <Text style={styles.arrow}>▼</Text>
+            </TouchableOpacity>
           </View>
 
           {/* month */}
           <View style={styles.wheelColumn}>
-            <Text style={styles.arrow}>▲</Text>
+            <TouchableOpacity 
+              style={styles.arrowButton}
+              onPress={() => handleMonthChange('up')}
+              activeOpacity={0.7}>
+              <Text style={styles.arrow}>▲</Text>
+            </TouchableOpacity>
             <Wheel
               data={generateRange(1, 12)}
               value={month}
               onChange={setMonth}
             />
-            <Text style={styles.arrow}>▼</Text>
+            <TouchableOpacity 
+              style={styles.arrowButton}
+              onPress={() => handleMonthChange('down')}
+              activeOpacity={0.7}>
+              <Text style={styles.arrow}>▼</Text>
+            </TouchableOpacity>
           </View>
 
           {/* day */}
           <View style={styles.wheelColumn}>
-            <Text style={styles.arrow}>▲</Text>
+            <TouchableOpacity 
+              style={styles.arrowButton}
+              onPress={() => handleDayChange('up')}
+              activeOpacity={0.7}>
+              <Text style={styles.arrow}>▲</Text>
+            </TouchableOpacity>
             <Wheel
               data={generateRange(1, getLastDayOfMonth(year, month))}
               value={day}
               onChange={setDay}
             />
-            <Text style={styles.arrow}>▼</Text>
+            <TouchableOpacity 
+              style={styles.arrowButton}
+              onPress={() => handleDayChange('down')}
+              activeOpacity={0.7}>
+              <Text style={styles.arrow}>▼</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -214,10 +294,17 @@ const styles = StyleSheet.create({
     alignItems: 'center', // ✅ 가로 중앙 정렬
     justifyContent: 'center',
   },
+  arrowButton: {
+    padding: 8,
+    minHeight: 32,
+    minWidth: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   arrow: {
-    color: '#aaa',
+    color: '#2D81F1',
     fontSize: 18,
-    marginVertical: 4,
+    fontWeight: 'bold',
   },
   sheetContainer: {
     position: 'absolute',
@@ -242,9 +329,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     width: '100%',
     marginBottom: 4,
-  },
-  arrow: {
-    color: '#aaa',
   },
   wheelRow: {
     flexDirection: 'row',

@@ -70,6 +70,7 @@ const EstimateFormPage = () => {
     console.log('입실일자 선택됨:', formatSimpleDate(date));
     setAdmissionDate(date);
 
+    // 3일장 기준으로 퇴실일자 자동 설정 (입실일자 + 2일)
     const newDeparture = new Date(date);
     newDeparture.setDate(newDeparture.getDate() + 2);
     setDepartureDate(newDeparture);
@@ -109,76 +110,99 @@ const EstimateFormPage = () => {
   };
 
   const handleDispatchEstimate = async () => {
+    // 입력 유효성 검증
+    if (!clientName.value.trim()) {
+      Toast.show({
+        type: 'error',
+        text1: '상주 이름을 입력해주세요.',
+        position: 'top',
+        topOffset: -150,
+      });
+      return;
+    }
+
+    if (!visitorCount.value.trim()) {
+      Toast.show({
+        type: 'error',
+        text1: '예상 조문객 수를 입력해주세요.',
+        position: 'top',
+        topOffset: -150,
+      });
+      return;
+    }
+
+    if (!admissionDate) {
+      Toast.show({
+        type: 'error',
+        text1: '입실일자를 선택해주세요.',
+        position: 'top',
+        topOffset: -150,
+      });
+      return;
+    }
+
+    if (!departureDate) {
+      Toast.show({
+        type: 'error',
+        text1: '퇴실일자를 선택해주세요.',
+        position: 'top',
+        topOffset: -150,
+      });
+      return;
+    }
+
+    if (!funeralHallIds || funeralHallIds.length === 0) {
+      Toast.show({
+        type: 'error',
+        text1: '선택된 장례식장이 없습니다.',
+        position: 'top',
+        topOffset: -150,
+      });
+      return;
+    }
+
+    const numberOfMourners = parseInt(visitorCount.value);
+    if (isNaN(numberOfMourners) || numberOfMourners <= 0) {
+      Toast.show({
+        type: 'error',
+        text1: '유효한 조문객 수를 입력해주세요.',
+        position: 'top',
+        topOffset: -150,
+      });
+      return;
+    }
+
+    // 견적서 발송 확인 Alert
+    Alert.alert(
+      '견적서 발송 확인',
+      '현재 내용으로 견적서를 발송하시겠습니까?',
+      [
+        {
+          text: '아니오',
+          style: 'cancel',
+        },
+        {
+          text: '예',
+          onPress: async () => {
+            await sendEstimate();
+          },
+        },
+      ],
+      { cancelable: false }
+    );
+  };
+
+  // 실제 견적서 발송 로직을 별도 함수로 분리
+  const sendEstimate = async () => {
     try {
-      if (!clientName.value.trim()) {
-        Toast.show({
-          type: 'error',
-          text1: '상주 이름을 입력해주세요.',
-          position: 'top',
-          topOffset: -150,
-        });
-        return;
-      }
-
-      if (!visitorCount.value.trim()) {
-        Toast.show({
-          type: 'error',
-          text1: '예상 조문객 수를 입력해주세요.',
-          position: 'top',
-          topOffset: -150,
-        });
-        return;
-      }
-
-      if (!admissionDate) {
-        Toast.show({
-          type: 'error',
-          text1: '입실일자를 선택해주세요.',
-          position: 'top',
-          topOffset: -150,
-        });
-        return;
-      }
-
-      if (!departureDate) {
-        Toast.show({
-          type: 'error',
-          text1: '퇴실일자를 선택해주세요.',
-          position: 'top',
-          topOffset: -150,
-        });
-        return;
-      }
-
-      if (!funeralHallIds || funeralHallIds.length === 0) {
-        Toast.show({
-          type: 'error',
-          text1: '선택된 장례식장이 없습니다.',
-          position: 'top',
-          topOffset: -150,
-        });
-        return;
-      }
-
-      const numberOfMourners = parseInt(visitorCount.value);
-      if (isNaN(numberOfMourners) || numberOfMourners <= 0) {
-        Toast.show({
-          type: 'error',
-          text1: '유효한 조문객 수를 입력해주세요.',
-          position: 'top',
-          topOffset: -150,
-        });
-        return;
-      }
-
       const formData = {
         funeralList: selectedFunerals.map((funeral) => funeral.funeralList.funeralListId),
         chiefMournerName: clientName.value.trim(),
         deceasedName: deceasedName.value.trim() || undefined,
-        numberOfMourners: numberOfMourners,
+        numberOfMourners: parseInt(visitorCount.value),
         roomSize: squareMeter.value.trim() ? parseInt(squareMeter.value.trim()) : undefined,
-        checkInDate: formatServerDate(admissionDate),
-        checkOutDate: formatServerDate(departureDate),
+        checkInDate: formatServerDate(admissionDate!),
+        checkOutDate: formatServerDate(departureDate!),
       };
 
       console.log('📋 견적서 발송 데이터:', formData);
@@ -218,6 +242,21 @@ const EstimateFormPage = () => {
         [{ text: '확인' }]
       );
     }
+  };
+
+  // 퇴실일자의 기본값 계산 함수
+  const getDefaultDepartureDate = () => {
+    if (departureDate) {
+      return departureDate;
+    }
+    if (admissionDate) {
+      const defaultDeparture = new Date(admissionDate);
+      defaultDeparture.setDate(defaultDeparture.getDate() + 2);
+      return defaultDeparture;
+    }
+    const defaultDeparture = new Date(currentDate);
+    defaultDeparture.setDate(defaultDeparture.getDate() + 2);
+    return defaultDeparture;
   };
 
   return (
@@ -267,7 +306,7 @@ const EstimateFormPage = () => {
                 </View>
                 <View style={styles.field}>
                   <Typo fontSize={16} style={styles.containerTitle}>
-                    평 수
+                    평 수 (선택사항)
                   </Typo>
                   <Input
                     input={squareMeter}
@@ -283,10 +322,10 @@ const EstimateFormPage = () => {
                     <CustomButton
                       style={styles.dateButton}
                       onPress={() => setShowAdmissionPicker(true)}>
-                      <Typo>
+                      <Typo style={!admissionDate && styles.placeholderText}>
                         {admissionDate
                           ? formatSimpleDate(admissionDate)
-                          : formatSimpleDate(currentDate)}
+                          : '선택해주세요'}
                       </Typo>
                       <CalandarIcon width={20} height={20} />
                     </CustomButton>
@@ -299,14 +338,10 @@ const EstimateFormPage = () => {
                     <CustomButton
                       style={styles.dateButton}
                       onPress={() => setShowDeparturePicker(true)}>
-                      <Typo>
+                      <Typo style={!departureDate && styles.placeholderText}>
                         {departureDate
                           ? formatSimpleDate(departureDate)
-                          : formatSimpleDate(
-                              new Date(
-                                currentDate.getTime() + 1000 * 60 * 60 * 24 * 2,
-                              ),
-                            )}
+                          : '선택해주세요'}
                       </Typo>
                       <CalandarIcon width={20} height={20} />
                     </CustomButton>
@@ -346,14 +381,16 @@ const EstimateFormPage = () => {
           </CustomButton>
         </View>
         <DateWheelBottomSheet
+          key={`admission-${admissionDate?.getTime() || 'none'}`}
           visible={showAdmissionPicker}
-          initialDate={currentDate}
+          initialDate={admissionDate || currentDate}
           onConfirm={handleAdmissionConfirm}
           onClose={() => setShowAdmissionPicker(false)}
         />
         <DateWheelBottomSheet
+          key={`departure-${departureDate?.getTime() || 'none'}`}
           visible={showDeparturePicker}
-          initialDate={currentDate}
+          initialDate={getDefaultDepartureDate()}
           onConfirm={handleDepartureConfirm}
           onClose={() => setShowDeparturePicker(false)}
         />
@@ -470,5 +507,9 @@ const styles = StyleSheet.create({
   selectedFuneralText: {
     fontSize: 14,
     color: '#333',
+  },
+  placeholderText: {
+    color: '#999999',
+    fontSize: 14,
   },
 });

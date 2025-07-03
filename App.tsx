@@ -23,9 +23,7 @@ function App(): React.JSX.Element {
   const isLogin = userInfo?.isLogin;
   const userType = userInfo?.userType;
 
-  // ✅ 다크모드 비활성화
   useEffect(() => {
-    // 항상 라이트 모드로 고정
     Appearance.setColorScheme('light');
   }, []);
 
