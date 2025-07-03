@@ -64,7 +64,7 @@ const FindEmailPage = ({navigation}: IFindEmailPageProps) => {
   return (
     <DefaultLayout
       headerShown={true}
-      headerTitle="아이디 찾기
+      headerTitle="아이디 찾기"
       color="white"
       homeButton={true}
       logoutButton={false}
