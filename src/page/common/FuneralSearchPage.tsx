@@ -10,24 +10,23 @@ import {
   TextInput,
 } from 'react-native';
 import {useInputBase} from '../../hooks/input/useInputBase';
-import {Input} from '../../components/common/input/Input';
 import Typo from '../../components/common/Typo';
 import {useEffect, useState, useCallback} from 'react';
 import FuneralCard from '../../components/common/FuneralCard';
 import CustomButton from '../../components/common/CustomButton';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useRoute, useNavigation} from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import ManagerLayout from '../../layout/ManagerLayout';
 import MoveIcon from '../../assets/Button/Button_MoveTransparent.svg';
 import CartIcon from '../../assets/Button/Button_Cart.svg';
-import { useFuneralSearch } from '../../hooks/useFuneralSearch';
-import { FuneralData } from '../../services/api/funeralService';
-import { useManagerCart } from '../../hooks/useManagerCart';
+import {useFuneralSearch} from '../../hooks/useFuneralSearch';
+import {FuneralData} from '../../services/api/funeralService';
+import {useManagerCart} from '../../hooks/useManagerCart';
 import FindCityBottomSheet from '../../components/funeralHall/FindLocation/FindCityBottomSheet';
 import FindGuBottomSheet from '../../components/funeralHall/FindLocation/FindGuBottomSheet';
 import Toast from 'react-native-toast-message';
 import { useAtom } from 'jotai';
+import {signupAtom} from '../../state/local_state/signupAtom';
 import { loginAtom } from '../../state/local_state/loginAtom';
 
 const FuneralSearchPage = () => {
@@ -87,10 +86,12 @@ const FuneralSearchPage = () => {
 
   const [selectedItems, setSelectedItems] = useState<FuneralData[]>([]);
 
+  const [signupInfo, setSignupInfo] = useAtom(signupAtom);
+
   // ✅ 초기 데이터 로드 (전체 목록)
   useEffect(() => {
     if (searchFunerals) {
-      searchFunerals({ page: 1, limit: 20 });
+      searchFunerals({page: 1, limit: 20});
     }
   }, [searchFunerals]);
 
@@ -107,9 +108,13 @@ const FuneralSearchPage = () => {
 
   const handleSelect = (item: FuneralData) => {
     setSelectedItems(prevSelected => {
-      const exists = prevSelected.find(selected => selected.funeralListId === item.funeralListId);
+      const exists = prevSelected.find(
+        selected => selected.funeralListId === item.funeralListId,
+      );
       if (exists) {
-        return prevSelected.filter(selected => selected.funeralListId !== item.funeralListId);
+        return prevSelected.filter(
+          selected => selected.funeralListId !== item.funeralListId,
+        );
       } else {
         return [...prevSelected, item];
       }
@@ -172,13 +177,31 @@ const FuneralSearchPage = () => {
   }, [addToCart, selectedItems, isLoggedIn, navigation]);
 
   const selectFuneral = async () => {
-    try {
-      const selectedFuneral = await AsyncStorage.getItem('funeralCart');
-      if (selectedFuneral !== null) {
-      }
-    } catch (err) {
-      console.error('장례식장 선택 실패', err);
-      }
+    if (selectedItems.length === 0) {
+      Alert.alert('알림', '선택된 장례식장이 없습니다.');
+      return;
+    }
+    console.log('🚀 ~ selectFuneral ~ selectedItems:', selectedItems);
+
+    // 선택된 장례식장 ID를 signupAtom에 저장
+    setSignupInfo(prev => ({
+      ...prev,
+      selectedFuneral: {
+        funeralId: selectedItems[0].funeralId,
+        funeralListId: selectedItems[0].funeralListId,
+        funeralName: selectedItems[0].funeralName,
+        funeralAddress: selectedItems[0].funeralAddress,
+      },
+    }));
+
+    Toast.show({
+      type: 'success',
+      text1: '장례식장이 선택되었습니다.',
+      position: 'top',
+    });
+
+    // 이전 화면으로 돌아가기
+    navigation.goBack();
   };
 
   //FlatList 끝에 도달했을 때 호출
@@ -331,22 +354,22 @@ const FuneralSearchPage = () => {
               styles.button, 
               selectedItems.length === 0 && styles.buttonDisabled
               ]}
-              disabled={selectedItems.length === 0}
-            >
+              disabled={selectedItems.length === 0}>
               <View style={styles.buttonIcon}>
-                <CartIcon 
-                width={24} 
-                height={24} 
-                fill={selectedItems.length === 0 ? '#ffffff' : '#ffffff'}
+                <CartIcon
+                  width={24}
+                  height={24}
+                  fill={selectedItems.length === 0 ? '#ffffff' : '#ffffff'}
                 />
-                <Typo style={[
-                  styles.buttonText, 
-                  selectedItems.length === 0 && styles.buttonTextDisabled
-                ]}>
+                <Typo
+                  style={[
+                    styles.buttonText,
+                    selectedItems.length === 0 && styles.buttonTextDisabled,
+                  ]}>
                   장바구니 담기 ({selectedItems.length})
                 </Typo>
               </View>
-              <MoveIcon width={24} height={24}/>
+              <MoveIcon width={24} height={24} />
             </CustomButton>
           </View>
         )}

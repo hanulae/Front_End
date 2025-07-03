@@ -34,14 +34,20 @@ export interface ISignupInfo {
   isUsernameChecked?: boolean; // 아이디 인증 여부
   confirmPassword: string; // 비밀번호 확인
   isPhoneVerified: boolean; // 휴대폰 인증 여부
+  selectedFuneral?: {
+    funeralId: string | null;
+    funeralListId: string;
+    funeralName: string;
+    funeralAddress: string;
+  };
 }
 
-export const signupAtom = atom<ISignupInfo>({
-  userType: 'manager',
+export const initialSignupState = {
+  userType: null,
   userName: '',
   password: '',
   phoneNumber: '',
-  attachedFiles: [], // 빈 배열로 초기화
+  attachedFiles: [],
   funeralName: '',
   accountInfo: {
     bankName: '',
@@ -58,4 +64,12 @@ export const signupAtom = atom<ISignupInfo>({
   isUsernameChecked: false,
   confirmPassword: '',
   isPhoneVerified: false,
-});
+  selectedFuneral: {
+    funeralId: null,
+    funeralListId: '',
+    funeralName: '',
+    funeralAddress: '',
+  },
+};
+
+export const signupAtom = atom<ISignupInfo>(initialSignupState);

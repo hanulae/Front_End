@@ -48,6 +48,10 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
 
+  // 선택한 장례식장 이름 가져오기
+  const selectedFuneralName = signupInfo.selectedFuneral?.funeralName || '장례식장이 없습니다.';
+  console.log("🚀 ~ FuneralStepTwo ~ selectedFuneralName:", selectedFuneralName)
+
   // 총 첨부파일 개수 계산
   const totalAttachedCount = useMemo(() => {
     return selectedImages.length + selectedFiles.length;
@@ -366,7 +370,7 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
           <View style={styles.funeralNameContainer}>
             <View style={styles.funeralNameInputContainer}>
               <Typo style={styles.funeralNameText}>
-                {myFuneral.funeralName}
+                {selectedFuneralName}
               </Typo>
             </View>
             <CustomButton
@@ -504,6 +508,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     fontFamily: 'Pretendard-Bold',
+    color: '#000',
   },
   buttonContainer: {
     flexDirection: 'row',

@@ -50,10 +50,9 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
   // 다음 버튼 활성화 여부
   const isNextEnabled = useMemo(() => {
     return (
-      signupInfo.isPhoneVerified === true &&
-      signupInfo.attachedFiles.length > 0
+      signupInfo.isPhoneVerified === true
     );
-  }, [signupInfo.isPhoneVerified, signupInfo.attachedFiles]);
+  }, [signupInfo.isPhoneVerified]);
 
   // signupInfo에서 첨부파일 복원
   useEffect(() => {
