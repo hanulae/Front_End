@@ -312,7 +312,7 @@ const ModifyUserInfoPage = () => {
 
     try {
       // TODO: funeral용 API 엔드포인트로 변경 필요
-      const res = await api.post('/funeral/bank/verify', {
+      const res = await api.post('/manager/bank/verify', {
         bankCode,
         bankNumber: accountNumber,
         name,
@@ -344,6 +344,9 @@ const ModifyUserInfoPage = () => {
 
     try {
       // TODO: funeral용 API 엔드포인트로 변경 필요
+      console.log('bankName', bankName);
+      console.log('bankCode', bankCode);
+      console.log('accountNumber', accountNumber);
       const res = await api.patch(
         '/funeral/auth/update/bank-number',
         {
@@ -495,11 +498,6 @@ const ModifyUserInfoPage = () => {
           </View>
 
           <View style={styles.fieldRow1}>
-            {/* <Input input={accountBank} placeholder="은행선택" />
-            <TouchableOpacity style={styles.subButton}>
-              <Typo style={styles.subButtonText}>인증코드받기</Typo>
-            </TouchableOpacity> */}
-
             <CustomButton
               onPress={openBankSelectSheet}
               style={styles.selectBankButton}>
@@ -513,21 +511,6 @@ const ModifyUserInfoPage = () => {
               onChangeText={setAccountNumber}
             />
           </View>
-
-          {/* <View style={styles.field1}>
-            <TextInput
-              style={styles.input}
-              placeholder="인증코드"
-              value={authCode}
-              onChangeText={setAuthCode}
-            />
-          </View> */}
-          {/* <Typo style={styles.label}>인증코드</Typo> */}
-          {/* <View style={styles.fieldRow}>
-            <Input input={authCodeAccount} placeholder="인증번호" />
-            <Typo style={styles.timerText}>02:56</Typo>
-          </View> */}
-
           <TouchableOpacity
             style={styles.subConfirmButton}
             onPress={handleAccountVerify}>
