@@ -145,6 +145,9 @@ const FuneralProfilePage = () => {
     setLogin({
       userType: null,
       isLogin: false,
+      userName: '',
+      accessToken: '',
+      refreshToken: '',
     });
     console.log('Logout');
     // navigation.navigate('ManagerMain');

@@ -27,14 +27,14 @@ import FindGuBottomSheet from '../../components/funeralHall/FindLocation/FindGuB
 import Toast from 'react-native-toast-message';
 import { useAtom } from 'jotai';
 import {signupAtom} from '../../state/local_state/signupAtom';
-import { loginAtom } from '../../state/local_state/loginAtom';
+import { userInfoAtom } from '../../state/local_state/userinfoAtom';
 
 const FuneralSearchPage = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
-  
+
   // 로그인 상태 체크
-  const [loginInfo] = useAtom(loginAtom);
-  const isLoggedIn = loginInfo.isLogin;
+  const [userInfo] = useAtom(userInfoAtom);
+  const isLoggedIn = userInfo.isLogin;
 
   const [_showLocationModal, _setShowLocationModal] = useState(false);
   const [_location, _setLocation] = useState<string>('');

@@ -92,9 +92,10 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
       setLogin({
         userType: userType,
         isLogin: true,
+        userName: userType === 'manager' ? response.data.manager?.managerName : response.data.funeral?.funeralName,
+        accessToken: response.data.accessToken,
+        refreshToken: response.data.refreshToken,
       });
-
-      console.log('Login success', response.data.accessToken);
     } catch (error) {
       console.error('Login error:', error);
     }

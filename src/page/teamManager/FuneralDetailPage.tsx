@@ -29,7 +29,7 @@ import {funeralService, FuneralDetail} from '../../services/api/funeralService';
 import { useManagerCart } from '../../hooks/useManagerCart';
 import Toast from 'react-native-toast-message';
 import { useAtom } from 'jotai';
-import { loginAtom } from '../../state/local_state/loginAtom';
+import { userInfoAtom } from '../../state/local_state/userinfoAtom';
 
 const {width} = Dimensions.get('window');
 
@@ -54,8 +54,8 @@ const FuneralDetailPage = ({navigation}: IFuneralDetailPageProps) => {
   const {funeralListId, funeralId} = route.params;
 
   // 로그인 상태 체크
-  const [loginInfo] = useAtom(loginAtom);
-  const isLoggedIn = loginInfo.isLogin;
+  const [userInfo] = useAtom(userInfoAtom);
+  const isLoggedIn = userInfo.isLogin;
 
   // 🆕 상태 관리
   const [funeralInfo, setFuneralInfo] = useState<FuneralDetail | null>(null);

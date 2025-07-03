@@ -19,7 +19,7 @@ const queryClient = new QueryClient();
 
 function App(): React.JSX.Element {
   const userInfo = useAtomValue(userInfoAtom);
-  console.log('userInfo', userInfo);
+  console.log('----userInfo----', userInfo);
   const isLogin = userInfo?.isLogin;
   const userType = userInfo?.userType;
 
