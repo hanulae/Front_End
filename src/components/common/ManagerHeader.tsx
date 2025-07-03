@@ -11,8 +11,9 @@ import Typo from './Typo';
 import HomeIcon from '../../assets/Header/Header_Home.svg';
 import LogoutButtonWhite from '../../assets/Header/Header_DoorWhite.svg';
 import {BackIcon} from '../svg/BackIcon';
-import { useAtom } from 'jotai';
-import { loginAtom } from '../../state/local_state/loginAtom';
+import {useAtom, useAtomValue} from 'jotai';
+import {loginAtom} from '../../state/local_state/loginAtom';
+import {userInfoAtom} from '../../state/local_state/userinfoAtom';
 
 interface IManagerHeaderProps {
   title: string;
@@ -34,8 +35,8 @@ const ManagerHeader = ({
   onLogoutPress,
 }: IManagerHeaderProps): JSX.Element => {
   const navigation = useNavigation<NavigationProp<any>>();
-  const [loginInfo] = useAtom(loginAtom);
-  
+  const userInfo = useAtomValue(userInfoAtom);
+  console.log('userInfo', userInfo);
   const goBack = navigation.goBack;
   const goHome = () => {
     // homeRouteName이 명시적으로 제공된 경우 우선 사용
@@ -50,7 +51,7 @@ const ManagerHeader = ({
     }
 
     // 로그인 상태에 따라 적절한 홈으로 이동
-    if (!loginInfo.isLogin) {
+    if (!userInfo.isLogin) {
       // 로그인하지 않은 사용자는 메인 페이지로
       navigation.dispatch(
         CommonActions.reset({
@@ -60,9 +61,13 @@ const ManagerHeader = ({
       );
     } else {
       // 로그인한 사용자는 사용자 타입에 따라 다른 홈으로
-      const homeRoute = loginInfo.userType === 'manager' ? 'ManagerMain' : 
-                       loginInfo.userType === 'funeral' ? 'FuneralMain' : 'Main';
-      
+      const homeRoute =
+        userInfo.userType === 'manager'
+          ? 'ManagerMain'
+          : userInfo.userType === 'funeral'
+          ? 'FuneralMain'
+          : 'Main';
+
       navigation.dispatch(
         CommonActions.reset({
           index: 0,
