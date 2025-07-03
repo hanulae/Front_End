@@ -25,7 +25,6 @@ import AlbumIcon from '../../../assets/Attachment/Attach_ImageActive.svg';
 import FileIcon from '../../../assets/Attachment/Attach_FileDisable.svg';
 import FileList from '../../../components/common/FileList';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {myFuneralAtom} from '../../../state/local_state/myFuneralAtom';
 import Toast from 'react-native-toast-message';
 import api from '../../../api/config';
 
@@ -41,7 +40,6 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
   const authCode = useInputBase();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   // const myFuneralName = useInputBase();
-  const myFuneral = useAtomValue(myFuneralAtom);
   const [selectedImages, setSelectedImages] = useState<IImage[]>([]);
   const [showAlbum, setShowAlbum] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<LocalFile[]>([]);

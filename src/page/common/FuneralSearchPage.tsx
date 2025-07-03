@@ -86,7 +86,7 @@ const FuneralSearchPage = () => {
 
   const [selectedItems, setSelectedItems] = useState<FuneralData[]>([]);
 
-  const [signupInfo, setSignupInfo] = useAtom(signupAtom);
+  const [_signupInfo, setSignupInfo] = useAtom(signupAtom);
 
   // ✅ 초기 데이터 로드 (전체 목록)
   useEffect(() => {
@@ -107,18 +107,35 @@ const FuneralSearchPage = () => {
   }, [hallName.value, selectedCity, selectedGu, searchFunerals]);
 
   const handleSelect = (item: FuneralData) => {
-    setSelectedItems(prevSelected => {
-      const exists = prevSelected.find(
-        selected => selected.funeralListId === item.funeralListId,
-      );
-      if (exists) {
-        return prevSelected.filter(
-          selected => selected.funeralListId !== item.funeralListId,
+    if (variant === 'signup') {
+      // 회원가입 시에는 단일 선택만 가능
+      setSelectedItems(prevSelected => {
+        const exists = prevSelected.find(
+          selected => selected.funeralListId === item.funeralListId,
         );
-      } else {
-        return [...prevSelected, item];
-      }
-    });
+        if (exists) {
+          // 이미 선택된 항목을 다시 클릭하면 선택 해제
+          return [];
+        } else {
+          // 새로운 항목 선택 (기존 선택 모두 해제하고 새로 선택)
+          return [item];
+        }
+      });
+    } else {
+      // 일반 모드에서는 다중 선택 가능
+      setSelectedItems(prevSelected => {
+        const exists = prevSelected.find(
+          selected => selected.funeralListId === item.funeralListId,
+        );
+        if (exists) {
+          return prevSelected.filter(
+            selected => selected.funeralListId !== item.funeralListId,
+          );
+        } else {
+          return [...prevSelected, item];
+        }
+      });
+    }
   };
 
   // ✅ 장바구니 추가 함수
@@ -181,22 +198,25 @@ const FuneralSearchPage = () => {
       Alert.alert('알림', '선택된 장례식장이 없습니다.');
       return;
     }
-    console.log('🚀 ~ selectFuneral ~ selectedItems:', selectedItems);
+    
+    // 회원가입 시에는 단일 선택이므로 첫 번째(유일한) 항목 사용
+    const selectedFuneral = selectedItems[0];
+    console.log('🚀 ~ selectFuneral ~ selectedFuneral:', selectedFuneral);
 
     // 선택된 장례식장 ID를 signupAtom에 저장
     setSignupInfo(prev => ({
       ...prev,
       selectedFuneral: {
-        funeralId: selectedItems[0].funeralId,
-        funeralListId: selectedItems[0].funeralListId,
-        funeralName: selectedItems[0].funeralName,
-        funeralAddress: selectedItems[0].funeralAddress,
+        funeralId: selectedFuneral.funeralId,
+        funeralListId: selectedFuneral.funeralListId,
+        funeralName: selectedFuneral.funeralName,
+        funeralAddress: selectedFuneral.funeralAddress,
       },
     }));
 
     Toast.show({
       type: 'success',
-      text1: '장례식장이 선택되었습니다.',
+      text1: `${selectedFuneral.funeralName}이(가) 선택되었습니다.`,
       position: 'top',
     });
 
@@ -306,9 +326,10 @@ const FuneralSearchPage = () => {
                       navigation.navigate('FuneralDetail', {
                         funeralListId: item.funeralListId,
                         funeralId: item.funeralId,
+                        variant: variant, // variant 정보 전달
                       });
                 }}
-                showCheckbox={isLoggedIn} // 로그인된 사용자만 체크박스 표시
+                showCheckbox={isLoggedIn || variant === 'signup'} // 회원가입 시에도 체크박스 표시
               />
             )}
             // 🆕 페이지네이션 관련 props
@@ -376,11 +397,23 @@ const FuneralSearchPage = () => {
 
           {variant === 'signup' && (
           <View style={styles.fixedButtonContainer}>
-            <CustomButton onPress={selectFuneral} style={styles.button}>
+            <CustomButton 
+              onPress={selectFuneral} 
+              style={[
+                styles.button, 
+                selectedItems.length === 0 && styles.buttonDisabled
+              ]}
+              disabled={selectedItems.length === 0}>
               <View style={styles.buttonIcon}>
                 <CartIcon width={24} height={24} />
-                <Typo style={styles.buttonText}>
-                  선택 ({selectedItems.length})
+                <Typo style={[
+                  styles.buttonText,
+                  selectedItems.length === 0 && styles.buttonTextDisabled,
+                ]}>
+                  {selectedItems.length === 0 
+                    ? '장례식장을 선택해주세요' 
+                    : '선택 완료'
+                  }
                 </Typo>
               </View>
               <MoveIcon width={24} height={24} />
