@@ -274,7 +274,7 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
         </View>
         <View style={styles.formToolSection}>
           <CustomButton onPress={goToFindEmail}>
-            <Typo style={styles.toolText}>이메일 찾기</Typo>
+            <Typo style={styles.toolText}>아이디 찾기</Typo>
           </CustomButton>
           <Typo style={styles.divider}> | </Typo>
           <CustomButton onPress={goToFindPassword}>

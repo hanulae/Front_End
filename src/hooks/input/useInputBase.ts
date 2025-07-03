@@ -54,5 +54,6 @@ export const useInputBase = ({
     onChangeText,
     onBlur,
     reset,
+    setValue,
   };
 };

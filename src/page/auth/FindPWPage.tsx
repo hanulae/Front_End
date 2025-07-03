@@ -10,6 +10,9 @@ import {usePhoneInput} from '../../hooks/input/usePhoneInput';
 import Typo from '../../components/common/Typo';
 import {useState} from 'react';
 
+//BSK IMPORT ADD
+import api from '../../api/config';
+
 interface IFindPWPageProps {
   navigation: NavigationProp<any>;
 }
@@ -31,14 +34,35 @@ const FindPWpage = ({navigation}: IFindPWPageProps) => {
   );
   const isFormValid =
     isPhoneVerified && password.isValid && confirmPassword.isValid;
-  const handleRequestCode = () => {
-    // 휴대전화 인증 코드 요청 로직
-  };
+  // 인증코드 요청 함수
+const handleRequestCode = async (phoneNumber: string) => {
+  console.log("🚀 ~ handleRequestCode ~ phoneNumber:", phoneNumber)
+  try {
+    const response = await api.post('funeral/auth/find/username/send-sms', {
+      funeralPhoneNumber: phoneNumber,
+    });
+    console.log('Code sent response:', response);
+  } catch (error) {
+    console.error('Send code error:', error);
+    throw error;
+  }
+};
 
-  const handleVerifyCode = () => {
-    // 인증 코드 확인 로직
+// 인증코드 확인 함수
+const handleVerifyCode = async (phoneNumber: string, authCode: string): Promise<boolean> => {
+  try {
+    const response = await api.post('funeral/auth/find/username/verify', {
+      funeralPhoneNumber: phoneNumber,
+      code: authCode,
+    });
+    console.log('Verify code response:', response);
     setIsPhoneVerified(true);
-  };
+    return response.data.success === true;
+  } catch (error) {
+    console.error('Verify code error:', error);
+    return false;
+  }
+};
 
   const handleChangePassword = () => {
     // 비밀번호 변경 로직
@@ -65,7 +89,7 @@ const FindPWpage = ({navigation}: IFindPWPageProps) => {
               type="phone"
             />
             <CustomButton
-              onPress={handleRequestCode}
+              onPress={() => handleRequestCode(phoneNumber.value)}
               style={styles.requestButton}>
               <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
                 인증코드받기
@@ -84,7 +108,7 @@ const FindPWpage = ({navigation}: IFindPWPageProps) => {
               type="number"
             />
             <CustomButton
-              onPress={handleVerifyCode}
+              onPress={() => handleVerifyCode(phoneNumber.value, authCode.value)}
               style={styles.verifyButton}>
               <Typo color="white" style={styles.verifyButtonText}>
                 인증코드확인
@@ -92,31 +116,35 @@ const FindPWpage = ({navigation}: IFindPWPageProps) => {
             </CustomButton>
           </View>
         </View>
-        <View style={styles.passwordContainer}>
-          <Typo fontSize={16} style={styles.containerTitle}>
-            새로운 비밀번호
-          </Typo>
-          <View style={styles.passwordSection}>
-            <Input
-              input={password}
-              placeholder="비밀번호를 입력하세요"
-              type="password"
-            />
-          </View>
-        </View>
-        <View style={styles.container}>
-          <Typo fontSize={16} style={styles.containerTitle}>
-            새로운 비밀번호 확인
-          </Typo>
-          <View style={styles.passwordSection}>
-            <Input
-              input={confirmPassword}
-              label="비밀번호 확인"
-              placeholder="비밀번호를 다시 입력하세요"
-              type="password"
-            />
-          </View>
-        </View>
+        {isPhoneVerified && (
+          <>
+            <View style={styles.passwordContainer}>
+              <Typo fontSize={16} style={styles.containerTitle}>
+                새로운 비밀번호
+              </Typo>
+              <View style={styles.passwordSection}>
+                <Input
+                  input={password}
+                  placeholder="비밀번호를 입력하세요"
+                  type="password"
+                />
+              </View>
+            </View>
+            <View style={styles.container}>
+              <Typo fontSize={16} style={styles.containerTitle}>
+                새로운 비밀번호 확인
+              </Typo>
+              <View style={styles.passwordSection}>
+                <Input
+                  input={confirmPassword}
+                  label="비밀번호 확인"
+                  placeholder="비밀번호를 다시 입력하세요"
+                  type="password"
+                />
+              </View>
+            </View>
+          </>
+        )}
       </View>
       <View style={styles.buttonConatiner}>
         <CustomButton
@@ -163,6 +191,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard-Light',
     // marginBottom: 5,
     marginLeft: 10,
+    color: '#000',
   },
   authSection: {
     flexDirection: 'row',

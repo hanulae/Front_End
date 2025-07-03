@@ -131,6 +131,26 @@ export const funeralService = {
   },
 };
 
+export const fetchFuneralHomeInfo = async () => {
+  try {
+    const response = await api.get('/funeral/funeralList/list');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching funeral home info:', error);
+    throw error;
+  }
+};
+
+export const updateFuneralHomeInfo = async (data: any) => {
+  try {
+    const response = await api.put(`/funeral/funeralList/update/funeralList`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating funeral home info:', error);
+    throw error;
+  }
+};
+
 export type {
   SearchFuneralParams,
   FuneralData,

@@ -1,4 +1,4 @@
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, View, Alert} from 'react-native';
 import DefaultLayout from '../../layout/DefaultLayout';
 import {usePhoneInput} from '../../hooks/input/usePhoneInput';
 import {Input} from '../../components/common/input/Input';
@@ -8,6 +8,8 @@ import {useInputBase} from '../../hooks/input/useInputBase';
 import BaseInput from '../../components/common/input/BaseInput';
 import {NavigationProp, useRoute} from '@react-navigation/native';
 import {request} from 'react-native-permissions';
+import api from '../../api/config';
+import { useState } from 'react';
 
 interface IFindEmailPageProps {
   navigation: NavigationProp<any>;
@@ -18,19 +20,42 @@ const FindEmailPage = ({navigation}: IFindEmailPageProps) => {
   const route = useRoute();
   const {userType} = route.params as {userType: 'manager' | 'funeral'};
   const authCode = useInputBase();
-  const dummyEmail = 'example@example.com';
+
+  const [username, setUsername] = useState<string | null>(null);
+
   const handleRequestCode = async () => {
-    // 휴대전화 인증 코드 요청 로직
-    // try {
-    //   const response = await api.post('')
-    // } catch (error) {
-    // }
+    try {
+      const response = await api.post('funeral/auth/find/username/send-sms', {
+        funeralPhoneNumber: phoneNumber.value,
+      });
+
+      if (response.status === 200) {
+        Alert.alert('성공', '인증 코드가 전송되었습니다.');
+      }
+    } catch (error: any) {
+      Alert.alert('오류', error.response?.data?.message || '인증 코드 전송에 실패했습니다.');
+    }
   };
   const pageName =
     userType === 'manager' ? '상조팀장 이메일 찾기' : '장례식장 이메일 찾기';
 
-  const handleVerifyCode = () => {
-    // 인증 코드 확인 로직
+  const handleVerifyCode = async () => {
+    try {
+      const response = await api.post('funeral/auth/find/username/verify', {
+        funeralPhoneNumber: phoneNumber.value,
+        code: authCode.value,
+      });
+      console.log("🚀 ~ handleVerifyCode ~ response:", response)
+
+      if (response.status === 200 && response.data.verified) {
+        setUsername(response.data.username);
+        Alert.alert('성공', '인증이 완료되었습니다. 아이디를 확인하세요.');
+      } else {
+        Alert.alert('오류', '인증에 실패했습니다.');
+      }
+    } catch (error: any) {
+      Alert.alert('오류', error.response?.data?.message || '인증에 실패했습니다.');
+    }
   };
 
   const handleCheckEmail = () => {
@@ -39,7 +64,7 @@ const FindEmailPage = ({navigation}: IFindEmailPageProps) => {
   return (
     <DefaultLayout
       headerShown={true}
-      headerTitle={pageName}
+      headerTitle="아이디 찾기
       color="white"
       homeButton={true}
       logoutButton={false}
@@ -85,14 +110,14 @@ const FindEmailPage = ({navigation}: IFindEmailPageProps) => {
         </View>
         <View style={styles.container}>
           <Typo fontSize={16} style={styles.containerTitle}>
-            나의 이메일
+            나의 아이디
           </Typo>
           <View style={styles.checkSection}>
             <BaseInput
-              value={dummyEmail}
+              value={username || '인증코드 확인 후 아이디를 확인하세요.'}
               editable={false}
               style={{flex: 1}}
-              placeholder="인증코드 확인 후 이메일을 확인하세요."
+              placeholder="인증코드 확인 후 아이디를 확인하세요."
               clearable={false}
             />
           </View>
@@ -123,6 +148,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard-Light',
     // marginBottom: 5,
     marginLeft: 10,
+    color: '#000',
   },
   authSection: {
     flexDirection: 'row',
