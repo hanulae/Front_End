@@ -144,7 +144,7 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
         formData.append('agreements', JSON.stringify(agrees));
 
         // Add funeral home information
-        formData.append('funeralHome', signupInfo.selectedFuneral?.funeralId); // Assuming funeralHome is a field in signupInfo
+        formData.append('funeralHome', signupInfo.selectedFuneral?.funeralListId || '');
       }
 
       // 🔹 중복된 managerAddFile 필드가 생기지 않도록 유일하게 append

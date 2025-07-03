@@ -23,6 +23,7 @@ import {useInputBase} from '../../hooks/input/useInputBase';
 import {FuneralInput} from '../../components/common/input/FuneralInput';
 import {usePhoneInput} from '../../hooks/input/usePhoneInput';
 import CustomButton from '../../components/common/CustomButton';
+import { fetchFuneralHomeInfo } from '../../services/api/funeralService';
 
 const FuneralModiftyPage = () => {
   // StatusBar 설정
@@ -59,6 +60,7 @@ const FuneralModiftyPage = () => {
     funeral_family_waiting_room: false, // 가족 대기실
     funeral_disabled_facility: false, // 장애인 시설
   });
+  const [funeralHomeInfo, setFuneralHomeInfo] = useState(null);
 
   // 임시로 데이터를 가져오는 useEffect
   // 실제로는 API 호출을 통해 데이터를 가져와야 함
@@ -71,6 +73,47 @@ const FuneralModiftyPage = () => {
     };
 
     setInfoData(fetched);
+  }, []);
+
+  useEffect(() => {
+    const loadFuneralHomeInfo = async () => {
+      try {
+        const response = await fetchFuneralHomeInfo();
+        if (response.data && response.data.length > 0) {
+          const data = response.data[0];
+          setFuneralHomeInfo(data);
+  
+          setInfoData({
+            funeral_scale: data.funeralScale || '',
+            funeral_total_rooms: data.funeralTotalRooms?.toString() || '',
+            funeral_operation_type: data.funeralOperationType || '',
+            funeral_style: data.funeralStyle || '',
+          });
+  
+          setConvenienceData({
+            funeral_parking_lot: data.funeralParkingLot || false,
+            funeral_store: data.funeralStore || false,
+            funeral_family_waiting_room: data.funeralFamilyWaitingRoom || false,
+            funeral_disabled_facility: data.funeralDisabledFacility || false,
+          });
+  
+          // ✅ undefined 방지
+          if (funeralAddress && 'setValue' in funeralAddress) {
+            funeralAddress.setValue(data.funeralAddress || '');
+          }
+          if (funeralWebsite && 'setValue' in funeralWebsite) {
+            funeralWebsite.setValue(data.funeralHomepage || '');
+          }
+          if (funeralPhone && 'setValue' in funeralPhone) {
+            funeralPhone.setValue(data.funeralPhone || '');
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load funeral home info:', error);
+      }
+    };
+  
+    loadFuneralHomeInfo();
   }, []);
 
   // 라벨과 키 매핑
@@ -164,8 +207,8 @@ const FuneralModiftyPage = () => {
             <Typo style={styles.titleText}>시설정보</Typo>
             <InfoTable
               editable={true}
-              data={labelData} // 사람이 보는 라벨 기준 데이터
-              onChange={handleChange} // label 기반으로 key 바꿔주는 함수
+              data={funeralHomeInfo ? funeralHomeInfo : labelData} // 데이터가 있으면 사용
+              onChange={handleChange}
             />
           </View>
           <View style={styles.convenienceContainer}>

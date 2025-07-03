@@ -457,8 +457,8 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
 
           <CustomButton
             onPress={handleNext}
-            style={[styles.button, (!isPhoneVerified || totalAttachedCount === 0) && {backgroundColor: '#D3D3D3'}]}
-            disabled={!isPhoneVerified || totalAttachedCount === 0}
+            style={[styles.button, !isPhoneVerified && {backgroundColor: '#D3D3D3'}]}
+            disabled={!isPhoneVerified}
           >
             <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
               다음
