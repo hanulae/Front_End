@@ -252,7 +252,14 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
                 ? {backgroundColor: '#2D81F1'}
                 : {backgroundColor: '#D3D3D3'},
             ]}>
-            <Typo>로그인</Typo>
+            <Typo
+              style={[
+                isPasswordValid(password.value)
+                  ? {color: 'white'}
+                  : {color: '#6F717D'},
+              ]}>
+              로그인
+            </Typo>
           </CustomButton>
         </View>
         <View style={styles.formToolSection}>
@@ -304,7 +311,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     paddingHorizontal: 20,
     paddingVertical: 18,
-    gap: 70,
+    gap: 35,
     // alignItems: 'center',
   },
   formToolSection: {
@@ -330,7 +337,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(137, 144, 160, 0.5)',
     paddingVertical: 18,
     marginHorizontal: 18,
-    marginTop: 60,
+    marginTop: 5,
     // marginVertical: 16,
     borderRadius: 8,
   },
