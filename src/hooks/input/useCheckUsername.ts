@@ -13,9 +13,10 @@ const useCheckUsername = (userType: 'manager' | 'funeral') => {
     setMessage('');
 
     try {
-      const endpoint = userType === 'manager' 
-        ? '/manager/user/checkUsername' 
-        : '/funeral/user/checkUsername';
+      const endpoint =
+        userType === 'manager'
+          ? '/manager/user/checkUsername'
+          : '/funeral/user/checkUsername';
 
       const res = await api.get(endpoint, {
         params: {username},
