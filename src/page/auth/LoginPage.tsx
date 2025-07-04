@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   Dimensions,
   Keyboard,
@@ -20,7 +20,7 @@ import {
 import {usePasswordInput} from '../../hooks/input/usePasswordInput';
 import {useSetAtom} from 'jotai';
 import {userInfoAtom} from '../../state/local_state/userinfoAtom';
-import {useCallback, useState} from 'react';
+import {useCallback} from 'react';
 import useEmailPartsInput from '../../hooks/input/useEmailPartsInput';
 import PhoneAuthInput from '../../components/common/input/PhoneAuthInput';
 import usePhoneAuthInput from '../../hooks/input/usePhoneAuthInput';
@@ -43,9 +43,6 @@ interface ILoginPageProps {
 // }
 const {height} = Dimensions.get('window');
 const LoginPage = ({navigation}: ILoginPageProps) => {
-  console.log('LoginPage');
-  const [showSelectSheet, setShowSelectSheet] = useState(false);
-
   useFocusEffect(
     useCallback(() => {
       if (Platform.OS === 'android') {
@@ -66,19 +63,22 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
   //BSK ADD LOGIN ATOM
   const [_loginInfo, _setLoginInfo] = useAtom(loginAtom);
 
-  // 직원 로그인 여부 확인
-  const isEmployeeLogin = userType === 'funeral' && email.isEmployee;
+  // 직원 로그인 여부 확인 (탭 방식으로 대체)
+  // const isEmployeeLogin = userType === 'funeral' && email.isEmployee;
+  const [funeralTab, setFuneralTab] = useState<'대표' | '직원'>('대표');
 
   const goToFindEmail = () => {
-    console.log('goToFindEmail');
     navigation.navigate('FindEmail', {userType});
   };
   const goToFindPassword = () => {
     navigation.navigate('FindPW', {userType});
   };
   const goToSignup = () => {
-    console.log('goToSignup');
-    setShowSelectSheet(true);
+    if (userType === 'manager') {
+      navigation.navigate('Signup', {userType: 'manager'});
+    } else if (userType === 'funeral') {
+      navigation.navigate('Signup', {userType: 'funeral'});
+    }
   };
 
   const handleLogin = async (response: any) => {
@@ -92,7 +92,10 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
       setLogin({
         userType: userType,
         isLogin: true,
-        userName: userType === 'manager' ? response.data.manager?.managerName : response.data.funeral?.funeralName,
+        userName:
+          userType === 'manager'
+            ? response.data.manager?.managerName
+            : response.data.funeral?.funeralName,
         accessToken: response.data.accessToken,
         refreshToken: response.data.refreshToken,
       });
@@ -231,18 +234,49 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
         <View style={styles.logoSection}>
           <Typo style={styles.logoText}>하늘애</Typo>
         </View>
+        {/* funeral일 때만 탭 노출 */}
+        {userType === 'funeral' && (
+          <View style={styles.tabContainer}>
+            <Pressable
+              style={[
+                styles.tabButton,
+                funeralTab === '대표' && styles.tabButtonActive,
+              ]}
+              onPress={() => setFuneralTab('대표')}>
+              <Typo
+                style={[
+                  styles.tabText,
+                  funeralTab === '대표' && styles.tabTextActive,
+                ]}>
+                대표 게정
+              </Typo>
+            </Pressable>
+            <Pressable
+              style={[
+                styles.tabButton,
+                funeralTab === '직원' && styles.tabButtonActive,
+              ]}
+              onPress={() => setFuneralTab('직원')}>
+              <Typo
+                style={[
+                  styles.tabText,
+                  funeralTab === '직원' && styles.tabTextActive,
+                ]}>
+                직원 계정
+              </Typo>
+            </Pressable>
+          </View>
+        )}
         <View
           style={[
             styles.formSection,
-            isEmployeeLogin && {height: height * 0.25, gap: 16},
+            // isEmployeeLogin && {height: height * 0.25, gap: 16},
+            userType === 'funeral' &&
+              funeralTab === '직원' && {height: height * 0.25, gap: 16},
           ]}>
-          {isEmployeeLogin ? (
-            <PhoneAuthInput
-              input={phoneAuth}
-              onSendCode={handleSendCode}
-              onVerifyCode={handleVerifyCode}
-            />
-          ) : (
+          {/* funeral + 대표 or manager: 아이디/비번, funeral+직원: 휴대폰 인증 */}
+          {userType === 'manager' ||
+          (userType === 'funeral' && funeralTab === '대표') ? (
             <>
               <Input input={username} placeholder="아이디를 입력하세요" />
               <Input
@@ -251,6 +285,12 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
                 placeholder="비밀번호를 입력하세요."
               />
             </>
+          ) : (
+            <PhoneAuthInput
+              input={phoneAuth}
+              onSendCode={handleSendCode}
+              onVerifyCode={handleVerifyCode}
+            />
           )}
         </View>
         <View style={styles.buttonSection}>
@@ -261,7 +301,9 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
               isPasswordValid(password.value)
                 ? {backgroundColor: '#2D81F1'}
                 : {backgroundColor: '#D3D3D3'},
-            ]}>
+            ]}
+            disabled={userType === 'funeral' && funeralTab === '직원'} // 직원 로그인은 버튼 비활성화(PhoneAuthInput에서 처리)
+          >
             <Typo
               style={[
                 isPasswordValid(password.value)
@@ -287,12 +329,6 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
         </View>
         {/* </ScrollView> */}
       </Pressable>
-      {showSelectSheet && (
-        <UserSelectSheet
-          onClose={() => setShowSelectSheet(false)}
-          targetScreen="Signup"
-        />
-      )}
       <Toast />
     </DefaultLayout>
   );
@@ -360,5 +396,33 @@ const styles = StyleSheet.create({
   divider: {
     fontSize: 10,
     color: '#AFB3BB',
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+    gap: 8,
+    paddingHorizontal: 20,
+  },
+  tabButton: {
+    flex: 1,
+    paddingVertical: 12,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  tabButtonActive: {
+    backgroundColor: '#2D81F1',
+  },
+  tabText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#6F717D',
+    fontFamily: 'Pretendard-Medium',
+  },
+  tabTextActive: {
+    color: '#fff',
+    fontWeight: '700',
   },
 });
