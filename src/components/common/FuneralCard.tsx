@@ -23,6 +23,8 @@ interface FuneralCardProps {
   onPressCheck: () => void;
   onPressDelete?: () => void;
   showCheckbox?: boolean; // 체크박스 표시 여부
+  disabled?: boolean;
+  cardDisabled?: boolean; // 카드 전체 비활성화 여부
 }
 
 const FuneralCard = ({
@@ -32,34 +34,43 @@ const FuneralCard = ({
   onPressCheck,
   onPressDelete,
   showCheckbox = true, // 기본값은 true (기존 동작 유지)
+  cardDisabled = false, // 카드 전체 비활성화 여부
 }: FuneralCardProps) => {
   const itemName = item.funeralName || item.name || '장례식장 이름';
   const itemAddress = item.funeralAddress || item.address || '주소 정보 없음';
   const itemImage = item.imageUrl || item.image || dummyHallImage;
 
   return (
-    <View style={styles.card}>
-      {/* 체크박스는 showCheckbox가 true일 때만 표시 */}
-      {showCheckbox && (
+    <View style={[styles.card, cardDisabled && styles.cardDisabled]}>
+      {/* 체크박스는 showCheckbox가 true이고 카드가 비활성화되지 않았을 때만 표시 */}
+      {showCheckbox && !cardDisabled && (
         <Pressable style={styles.checkContainer} onPress={onPressCheck}>
           {selected ? <CheckOnIcon /> : <CheckOffIcon />}
         </Pressable>
       )}
-      <Pressable style={[styles.contentArea, !showCheckbox && styles.contentAreaFullWidth]} onPress={onPressCard}>
-        <Image 
+      <Pressable
+        style={[
+          styles.contentArea,
+          !showCheckbox && styles.contentAreaFullWidth,
+          cardDisabled && styles.contentAreaDisabled,
+        ]}
+        onPress={cardDisabled ? undefined : onPressCard}
+        disabled={cardDisabled}>
+        <Image
           source={itemImage}
-          style={styles.image}
+          style={[styles.image, cardDisabled && styles.imageDisabled]}
         />
         <View style={styles.infoContainer}>
-          <Typo style={styles.infoName}>{itemName}</Typo>
-          <Typo 
-            style={styles.infoAddress}
+          <Typo style={[styles.infoName, cardDisabled && styles.textDisabled]}>
+            {itemName}
+          </Typo>
+          <Typo
+            style={[styles.infoAddress, cardDisabled && styles.textDisabled]}
             numberOfLines={2}
-            ellipsizeMode="tail"
-          >
+            ellipsizeMode="tail">
             {itemAddress}
           </Typo>
-          {onPressDelete && (
+          {onPressDelete && !cardDisabled && (
             <Pressable style={styles.deleteButton} onPress={onPressDelete}>
               <Typo fontSize={12} color="red" style={styles.deleteButtonText}>
                 삭제
@@ -82,6 +93,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
+  cardDisabled: {
+    opacity: 0.6,
+  },
   contentArea: {
     flex: 1,
     gap: 20,
@@ -91,10 +105,16 @@ const styles = StyleSheet.create({
   contentAreaFullWidth: {
     paddingLeft: 8, // 체크박스가 없을 때 적절한 여백 추가
   },
+  contentAreaDisabled: {
+    opacity: 0.6,
+  },
   image: {
     width: 100,
     height: 100,
     borderRadius: 12,
+  },
+  imageDisabled: {
+    opacity: 0.5,
   },
   infoContainer: {
     flex: 1,
@@ -118,6 +138,9 @@ const styles = StyleSheet.create({
     lineHeight: 12,
     flexWrap: 'wrap',
     flex: 1,
+  },
+  textDisabled: {
+    color: '#999',
   },
   checkContainer: {
     paddingLeft: 8,
