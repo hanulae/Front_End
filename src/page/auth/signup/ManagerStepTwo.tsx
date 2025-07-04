@@ -377,7 +377,7 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
           </View>
         </View>
         {/* 첨부파일 */}
-        <View style={styles.container}>
+        {/* <View style={styles.container}>
           <Typo fontSize={16} style={styles.containerTitle}>
             첨부파일 ({totalAttachedCount}/10)
           </Typo>
@@ -429,7 +429,7 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
             </CustomButton>
           </View>
           <Toast />
-        </View>
+        </View> */}
         {/* 버튼 */}
         <View style={styles.bottomButtonContainer}>
           <CustomButton onPress={handlePrev} style={styles.button}>

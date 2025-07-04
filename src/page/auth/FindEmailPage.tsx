@@ -37,7 +37,7 @@ const FindEmailPage = ({navigation}: IFindEmailPageProps) => {
     }
   };
   const pageName =
-    userType === 'manager' ? '상조팀장 이메일 찾기' : '장례식장 이메일 찾기';
+    userType === 'manager' ? '상조팀장 아이디 찾기' : '장례식장 아이디 찾기';
 
   const handleVerifyCode = async () => {
     try {
@@ -64,7 +64,7 @@ const FindEmailPage = ({navigation}: IFindEmailPageProps) => {
   return (
     <DefaultLayout
       headerShown={true}
-      headerTitle="아이디 찾기"
+      headerTitle={pageName}
       color="white"
       homeButton={true}
       logoutButton={false}

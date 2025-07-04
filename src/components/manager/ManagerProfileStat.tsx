@@ -1,9 +1,10 @@
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {StyleSheet, View} from 'react-native';
 import Typo from '../common/Typo';
 import PointIcon from '../../assets/Bullet/Bullet_PointCircle.svg';
 import CashIcon from '../../assets/Bullet/Bullet_CoinYellow.svg';
+import CustomButton from '../common/CustomButton';
 
 // BSK ADD IMPORTS
 import { useEffect, useState } from 'react';
@@ -24,6 +25,8 @@ const ManagerProfileStat = ({
   managerName,
 }: IManagerProfileStatProps) => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
+  const route = useRoute();
+
   const goToPointHistory = () => {
     console.log('Point History');
   };
@@ -58,6 +61,39 @@ const ManagerProfileStat = ({
     fetchCurrentPointAndCash();
   }, []);
 
+  const goToManagerPage = () => {
+    navigation.navigate('MyPage'); // TabNav에 정의된 이름과 일치해야 합니다.
+  };
+
+  // 페이지에 따라 다른 내용 보여주기
+  const renderContentBasedOnPage = () => {
+    console.log('🏁 route.name:', route.name);
+    if (route.name === 'MyPage') {
+      return (
+        <>
+        <View style={styles.pointContainer}>
+          <Typo style={styles.pointDesc}>보유 포인트</Typo>
+          <View style={styles.flexRow}>
+            <Typo style={styles.pointText}>{currentPoint.toLocaleString()}</Typo>
+          </View>
+        </View>
+        <View style={styles.cashContainer}>
+          <Typo style={styles.cashDesc}>보유 캐쉬</Typo>
+          <View style={styles.flexRow}>
+            <Typo style={styles.cashText}>{currentCash.toLocaleString()}</Typo>
+          </View>
+        </View>
+      </>
+      );
+    } else {
+      return (
+        <CustomButton onPress={goToManagerPage} style={styles.myPageButton}>
+          <Typo style={styles.myPageButtonText}>마이페이지 이동</Typo>
+        </CustomButton>
+      );
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Hello />
@@ -65,20 +101,14 @@ const ManagerProfileStat = ({
         <Typo style={styles.nameText}>{managerName}</Typo>
         <Typo style={styles.roleText}>상조팀장님</Typo>
       </View>
-      <View style={styles.pointContainer}>
-        <Typo style={styles.pointDesc}>보유 포인트</Typo>
-        <View style={styles.flexRow}>
-        <Typo style={styles.pointText}>{currentPoint.toLocaleString()}</Typo>
-          <PointIcon width={24} height={24} />
-        </View>
-      </View>
-      <View style={styles.cashContainer}>
+      {renderContentBasedOnPage()}
+      {/* <View style={styles.cashContainer}>
         <Typo style={styles.cashDesc}>보유 캐쉬</Typo>
         <View style={styles.flexRow}>
         <Typo style={styles.cashText}>{currentCash.toLocaleString()}</Typo>
           <CashIcon width={24} height={24} />
         </View>
-      </View>
+      </View> */}
 
       {/* <View style={styles.buttonContainer}>
         <CustomButton style={styles.leftbutton} onPress={goToPointHistory}>
@@ -128,9 +158,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#3D8FFB',
     paddingVertical: 16,
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
     borderTopRightRadius: 20,
     borderTopLeftRadius: 20,
+    paddingHorizontal: 20,
     marginBottom: 4,
   },
   pointDesc: {
@@ -196,5 +226,18 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#FFFFFF',
     fontFamily: 'Pretendard-Medium',
+  },
+  myPageButton: {
+    backgroundColor: '#4A98FD',
+    paddingVertical: 16,
+    borderRadius: 20,
+    alignItems: 'center',
+    marginHorizontal: 20,
+    marginBottom: 20,
+  },
+  myPageButtonText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
 });
