@@ -10,7 +10,7 @@ import Toast from 'react-native-toast-message';
 
 const PendingDispatchPage = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
-  const {error, fetchDispatchList} = useFuneralDispatch();
+  const {error, fetchDispatchList, fetchDispatchDetail} = useFuneralDispatch();
   const [dispatchList, setDispatchList] = useState<DispatchListItem[]>([]);
   console.log('dispatchList', dispatchList);
 
@@ -105,6 +105,35 @@ const PendingDispatchPage = () => {
     }
   };
 
+  // 입찰 상세 정보 버튼 클릭 시 - 입찰 상세 정보 페이지로 이동
+  const goToBidDetail = async (dispatchRequestId: string, _chiefMournerName: string) => {
+    try {
+      // 출동 상세정보를 가져와서 managerFormBidId 얻기
+      const detailData = await fetchDispatchDetail(dispatchRequestId);
+      
+      if (detailData && detailData.managerFormBidId) {
+        navigation.navigate('QuoteProposal', {
+          id: detailData.managerFormBidId,
+          status: 'bid_submitted', // 조회 모드로 강제 설정
+        });
+      } else {
+        // managerFormBidId가 없으면 Toast 메시지 표시
+        Toast.show({
+          type: 'error',
+          text1: '입찰 정보를 찾을 수 없습니다.',
+          position: 'top',
+        });
+      }
+    } catch (error) {
+      console.error('입찰 상세정보 가져오기 실패:', error);
+      Toast.show({
+        type: 'error',
+        text1: '입찰 정보를 불러오는데 실패했습니다.',
+        position: 'top',
+      });
+    }
+  };
+
   return (
     <FuneralLayout
       top={true}
@@ -126,6 +155,7 @@ const PendingDispatchPage = () => {
             onPress={() => {
               goToDispatchDetail(item.dispatchRequestId, item.isApproved);
             }}
+            onBidDetailPress={() => goToBidDetail(item.dispatchRequestId, item.chiefMournerName)}
           />
         ))}
       </ScrollView>

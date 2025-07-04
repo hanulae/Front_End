@@ -4,7 +4,8 @@ import CustomButton from '../common/CustomButton';
 
 interface IPendingDispatchCardProps {
   index: number;
-  onPress: () => void;
+  onPress: () => void; // 카드 전체 클릭
+  onBidDetailPress?: () => void; // 입찰 상세 보기 버튼 클릭
   status: string;
   name: string;
 }
@@ -12,6 +13,7 @@ interface IPendingDispatchCardProps {
 const PendingDispatchCard = ({
   index,
   onPress,
+  onBidDetailPress,
   status,
   name,
 }: IPendingDispatchCardProps) => {
@@ -41,8 +43,16 @@ const PendingDispatchCard = ({
             {status}
           </Typo>
         </View>
-        <CustomButton style={styles.detailButton} onPress={onPress}>
-          <Typo style={styles.detailButtonText}>상세보기</Typo>
+        <CustomButton 
+          style={styles.detailButton} 
+          onPress={() => {
+            if (onBidDetailPress) {
+              onBidDetailPress();
+            } else {
+              onPress(); // 폴백으로 기본 onPress 사용
+            }
+          }}>
+          <Typo style={styles.detailButtonText}>입찰 상세 보기</Typo>
         </CustomButton>
       </View>
     </TouchableOpacity>

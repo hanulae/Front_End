@@ -5,6 +5,7 @@ export interface DispatchListItem {
   chiefMournerName: string;
   isApproved: string;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface GetDispatchListResponse {
