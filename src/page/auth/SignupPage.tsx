@@ -42,7 +42,8 @@ const SignupPage = () => {
       color="white"
       homeButton={true}
       logoutButton={false}
-      homeRouteName="Main">
+      homeRouteName="Main"
+      backButton={step === 1}>
       <StepIndicator currentStep={step} />
       {step === 1 && <SignupStepOne onNext={() => setStep(2)} />}
       {step === 2 &&
