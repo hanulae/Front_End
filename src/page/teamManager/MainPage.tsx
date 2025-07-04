@@ -18,7 +18,7 @@ import MainSearchIcon from '../../assets/Main_FuneralSearch.svg';
 import MainAlarmIcon from '../../assets/Main_Alarm.svg';
 import MoveIcon from '../../components/svg/MoveIcon';
 import InfoCenterIcon from '../../assets/ServiceCenter.svg';
-import ManagerProfileStat from '../../components/manager/ManagerProfileStat';
+import ManagerMainProfile from '../../components/manager/ManagerMainProfile';
 interface IManagerMainPageProps {
   navigation: NavigationProp<any>;
 }
@@ -81,36 +81,38 @@ const ManagerMainPage = ({navigation}: IManagerMainPageProps) => {
         </View>
       </View>
       <View style={styles.mainContainer}>
-        <ManagerProfileStat point={100000} cash={100000} managerName={userInfo.userName} />
-        <ImageBackground
-          style={styles.buttonContainer}
-          source={require('../../assets/mainImage.png')}
-          resizeMode="contain">
-          <CustomButton onPress={goToSearchPage} style={styles.SearchButton}>
-            <MainSearchIcon />
-            <View style={styles.buttonTextContainer}>
-              <Typo style={styles.buttonTitle}>장례식장</Typo>
-              <View style={styles.buttonTextSubContainer}>
-                <Typo style={styles.buttonSub}>찾아보기</Typo>
-                <MoveIcon stroke="#397CFF" color="#397CFF" />
+        <ManagerMainProfile managerName={userInfo.userName} />
+        <View style={{flex: 1, justifyContent: 'flex-end'}}>
+          <ImageBackground
+            style={styles.buttonContainer}
+            source={require('../../assets/mainImage.png')}
+            resizeMode="contain">
+            <CustomButton onPress={goToSearchPage} style={styles.SearchButton}>
+              <MainSearchIcon />
+              <View style={styles.buttonTextContainer}>
+                <Typo style={styles.buttonTitle}>장례식장</Typo>
+                <View style={styles.buttonTextSubContainer}>
+                  <Typo style={styles.buttonSub}>찾아보기</Typo>
+                  <MoveIcon stroke="#397CFF" color="#397CFF" />
+                </View>
               </View>
-            </View>
-          </CustomButton>
-          <CustomButton onPress={goToNoticePage} style={styles.NoticeButton}>
-            <MainAlarmIcon />
-            <View style={styles.buttonTextContainer}>
-              <Typo style={styles.buttonTitle2}>견적내역</Typo>
-              <View style={styles.buttonTextSubContainer}>
-                <Typo style={styles.buttonSub2}>확인하기</Typo>
-                <MoveIcon stroke="#FFFFFF" color="#FFFFFF" />
+            </CustomButton>
+            <CustomButton onPress={goToNoticePage} style={styles.NoticeButton}>
+              <MainAlarmIcon />
+              <View style={styles.buttonTextContainer}>
+                <Typo style={styles.buttonTitle2}>견적내역</Typo>
+                <View style={styles.buttonTextSubContainer}>
+                  <Typo style={styles.buttonSub2}>확인하기</Typo>
+                  <MoveIcon stroke="#FFFFFF" color="#FFFFFF" />
+                </View>
               </View>
-            </View>
-          </CustomButton>
-        </ImageBackground>
-        <View style={styles.footerContainer}>
-          <InfoCenterIcon width={21.5} height={22} />
-          <Typo style={styles.footerText}>고객센터</Typo>
-          <Typo style={styles.footerNumber}>02-123-4567</Typo>
+            </CustomButton>
+          </ImageBackground>
+          <View style={styles.footerContainer}>
+            <InfoCenterIcon width={21.5} height={22} />
+            <Typo style={styles.footerText}>고객센터</Typo>
+            <Typo style={styles.footerNumber}>02-123-4567</Typo>
+          </View>
         </View>
       </View>
     </ManagerLayout>
