@@ -7,7 +7,8 @@ interface IDispatchCardProps {
   date: string;
   // count: number;
   index: number;
-  onPress: () => void;
+  onPress: () => void; // 카드 전체 클릭
+  onBidDetailPress?: () => void; // 입찰 상세 정보 버튼 클릭
 }
 
 const DispatchCard = ({
@@ -16,6 +17,7 @@ const DispatchCard = ({
   // count,
   index,
   onPress,
+  onBidDetailPress,
 }: IDispatchCardProps) => {
   return (
     <TouchableOpacity key={index} style={styles.card} onPress={onPress}>
@@ -30,8 +32,16 @@ const DispatchCard = ({
 
       <View style={styles.bottomRow}>
         <View style={styles.leftInfo}>
-          <CustomButton style={styles.detailButton} onPress={onPress}>
-            <Typo style={styles.detailButtonText}>상세보기</Typo>
+          <CustomButton 
+            style={styles.detailButton} 
+            onPress={() => {
+              if (onBidDetailPress) {
+                onBidDetailPress();
+              } else {
+                onPress(); // 폴백으로 기본 onPress 사용
+              }
+            }}>
+            <Typo style={styles.detailButtonText}>입찰 상세 정보</Typo>
           </CustomButton>
         </View>
         {/* <View style={styles.countContainer}>

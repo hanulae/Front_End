@@ -10,7 +10,7 @@ import Typo from '../../components/common/Typo';
 
 const DispatchHistoryPage = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
-  const {dispatchList, loading, error, fetchDispatchList} = useFuneralDispatch();
+  const {dispatchList, loading, error, fetchDispatchList, fetchDispatchDetail} = useFuneralDispatch();
   const [completedDispatches, setCompletedDispatches] = useState<DispatchListItem[]>([]);
 
   // StatusBar 설정
@@ -46,11 +46,41 @@ const DispatchHistoryPage = () => {
     }, [fetchDispatchList]),
   );
 
+  // 카드 전체 클릭 시 - 출동 상세 정보 페이지로 이동
   const goToDispatchDetail = (dispatchRequestId: string, chiefMournerName: string) => {
     navigation.navigate('DispatchDetail', {
       dispatchRequestId: dispatchRequestId,
       chiefMournerName: chiefMournerName,
     });
+  };
+
+  // 입찰 상세 정보 버튼 클릭 시 - 입찰 상세 정보 페이지로 이동
+  const goToBidDetail = async (dispatchRequestId: string, chiefMournerName: string) => {
+    try {
+      // 출동 상세정보를 가져와서 managerFormBidId 얻기
+      const detailData = await fetchDispatchDetail(dispatchRequestId);
+      
+      if (detailData && detailData.managerFormBidId) {
+        // QuoteProposalPage로 네비게이트 (완료된 출동이므로 status는 transaction_completed)
+        navigation.navigate('QuoteProposal', {
+          id: detailData.managerFormBidId,
+          status: 'transaction_completed',
+        });
+      } else {
+        // managerFormBidId가 없으면 출동 상세 페이지로 이동
+        navigation.navigate('DispatchDetail', {
+          dispatchRequestId: dispatchRequestId,
+          chiefMournerName: chiefMournerName,
+        });
+      }
+    } catch (error) {
+      console.error('입찰 상세정보 가져오기 실패:', error);
+      // 에러 발생 시 출동 상세 페이지로 이동
+      navigation.navigate('DispatchDetail', {
+        dispatchRequestId: dispatchRequestId,
+        chiefMournerName: chiefMournerName,
+      });
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -97,6 +127,7 @@ const DispatchHistoryPage = () => {
                 date={formatDate(item.createdAt)}
                 index={index}
                 onPress={() => goToDispatchDetail(item.dispatchRequestId, item.chiefMournerName)}
+                onBidDetailPress={() => goToBidDetail(item.dispatchRequestId, item.chiefMournerName)}
               />
             ))}
           </ScrollView>
