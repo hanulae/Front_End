@@ -70,6 +70,17 @@ const DispatchRequestDetailPage = () => {
         });
 
         // 거래 확정 페이지로 이동
+        navigation.reset({
+          index: 2,
+          routes: [
+            { name: 'FuneralMain'},
+            { name: 'PendingDispatch' },
+            {
+              name: 'ConfirmTransaction', params: {
+            dispatchRequestId: dispatchRequestId,
+            dispatchDetail: dispatchDetail,
+          }}],
+        });
         navigation.navigate('ConfirmTransaction', {
           dispatchRequestId: dispatchRequestId,
           dispatchDetail: dispatchDetail,
