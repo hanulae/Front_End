@@ -21,10 +21,8 @@ import {usePasswordInput} from '../../hooks/input/usePasswordInput';
 import {useSetAtom} from 'jotai';
 import {userInfoAtom} from '../../state/local_state/userinfoAtom';
 import {useCallback} from 'react';
-import useEmailPartsInput from '../../hooks/input/useEmailPartsInput';
 import PhoneAuthInput from '../../components/common/input/PhoneAuthInput';
 import usePhoneAuthInput from '../../hooks/input/usePhoneAuthInput';
-import UserSelectSheet from '../../components/common/UserSelectSheet';
 import Toast from 'react-native-toast-message';
 import api from '../../api/config';
 import {storeTokens, storeUserInfo} from '../../utils/tokenStorage';
@@ -55,7 +53,6 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
   );
   const route = useRoute();
   const {userType} = route.params as {userType: 'manager' | 'funeral'};
-  const email = useEmailPartsInput();
   const phoneAuth = usePhoneAuthInput();
   const password = usePasswordInput();
   const setLogin = useSetAtom(userInfoAtom);
