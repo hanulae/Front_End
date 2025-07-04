@@ -1,8 +1,6 @@
 import {StyleSheet, View} from 'react-native';
 import PointIcon from '../../assets/Bullet/Bullet_PointBlue.svg';
 import CashGrayIcon from '../../assets/Bullet/Bullet_CoinGray.svg';
-import PlusIcon from '../../assets/Bullet/Bullet_Plus.svg';
-import MinusIcon from '../../assets/Bullet/Bullet_Minus.svg';
 import CalendarIcon from '../../assets/Bullet/Bullet_Date.svg';
 import Typo from './Typo';
 
@@ -24,7 +22,15 @@ const PointHistoryCard = ({
   return (
     <View style={styles.wrapper}>
       <View style={styles.firstRow}>
-        {transactionType === 'refund' ? <MinusIcon /> : <PlusIcon />}
+        <Typo
+          style={[
+            styles.typeText,
+            transactionType === 'refund'
+              ? styles.typeWithdraw
+              : styles.typeDeposit,
+          ]}>
+          {transactionType === 'refund' ? '출금' : '적립'}
+        </Typo>
         <View style={styles.amountContainer}>
           <Typo style={styles.amountText}>{amount}</Typo>
           {assetType === 'point' ? <PointIcon /> : <CashGrayIcon />}
@@ -104,5 +110,16 @@ const styles = StyleSheet.create({
     fontWeight: 500,
     color: '#6F717D',
     fontFamily: 'Pretendard-Medium',
+  },
+  typeText: {
+    fontSize: 14,
+    fontWeight: 500,
+    fontFamily: 'Pretendard-Bold',
+  },
+  typeDeposit: {
+    color: '#2D81F1', // 입금(파란색)
+  },
+  typeWithdraw: {
+    color: '#F04452', // 출금(빨간색)
   },
 });

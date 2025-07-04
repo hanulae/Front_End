@@ -13,6 +13,7 @@ import CashIcon from '../../assets/Bullet/Bullet_CoinYellow.svg';
 import CustomButton from '../../components/common/CustomButton';
 import SelectIcon from '../../assets/Icon/Icon_DropDown03.svg';
 import PointHistoryCard from '../../components/common/PointHistoryCard';
+import TypeBottomSheet from '../../components/common/TypeBottomSheet';
 
 // BSK ADD IMPORTS
 
@@ -59,6 +60,11 @@ const PointHistoryPage = () => {
   const {variant} = route.params as {variant: 'manager' | 'funeral'};
   console.log('variant', variant);
   console.log('route.params', route.params);
+
+  const [typeSheetVisible, setTypeSheetVisible] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState('전체');
+  const [selectedType, setSelectedType] = useState('전체');
+  const [selectedOrder, setSelectedOrder] = useState('최신순');
 
   useEffect(() => {
     console.log('useEffect triggered with variant:', variant);
@@ -168,7 +174,7 @@ const PointHistoryPage = () => {
           <View style={styles.historySelector}>
             <CustomButton
               style={styles.historySelectorButton}
-              onPress={() => {}}>
+              onPress={() => setTypeSheetVisible(true)}>
               <Typo style={styles.historySelectorText}>유형</Typo>
               <SelectIcon width={16} height={16} />
             </CustomButton>
@@ -186,6 +192,17 @@ const PointHistoryPage = () => {
             ))}
           </ScrollView>
         </View>
+        <TypeBottomSheet
+          visible={typeSheetVisible}
+          onClose={() => setTypeSheetVisible(false)}
+          onConfirm={() => setTypeSheetVisible(false)}
+          selectedPeriod={selectedPeriod}
+          setSelectedPeriod={setSelectedPeriod}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
+          selectedOrder={selectedOrder}
+          setSelectedOrder={setSelectedOrder}
+        />
       </View>
     </DefaultLayout>
   );
