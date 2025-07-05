@@ -26,10 +26,10 @@ import StoreIcon from '../../assets/Icon/Icon_Store.svg';
 import FamilyWaitingRoomIcon from '../../assets/Icon/Icon_FamilyWaitingRoom.svg';
 import DisabledFacilityIcon from '../../assets/Icon/Icon_DisabledFacility.svg';
 import {funeralService, FuneralDetail} from '../../services/api/funeralService';
-import { useManagerCart } from '../../hooks/useManagerCart';
+import {useManagerCart} from '../../hooks/useManagerCart';
 import Toast from 'react-native-toast-message';
-import { useAtom } from 'jotai';
-import { userInfoAtom } from '../../state/local_state/userinfoAtom';
+import {useAtom} from 'jotai';
+import {userInfoAtom} from '../../state/local_state/userinfoAtom';
 
 const {width} = Dimensions.get('window');
 
@@ -49,6 +49,13 @@ const ICON_SIZES = {
   amenity: 68, // 편의시설 아이콘
   button: 24, // 버튼 아이콘
 } as const;
+
+// 빈소정보 더미데이터 (추후 funeralInfo.rooms로 대체 가능)
+const roomsDummyData = [
+  {name: '101호', size: '30평', capacity: '50명'},
+  {name: '201호', size: '25평', capacity: '40명'},
+  {name: 'VIP실', size: '50평', capacity: '100명'},
+];
 
 const FuneralDetailPage = ({navigation}: IFuneralDetailPageProps) => {
   const route = useRoute<RouteProp<{params: FuneralDetailParams}, 'params'>>();
@@ -84,7 +91,7 @@ const FuneralDetailPage = ({navigation}: IFuneralDetailPageProps) => {
       setError(null);
 
       const response = await funeralService.getFuneralDetail(funeralListId);
-
+      console.log('response', response);
       if (response.success && response.data) {
         setFuneralInfo(response.data);
       } else {
@@ -114,7 +121,7 @@ const FuneralDetailPage = ({navigation}: IFuneralDetailPageProps) => {
           position: 'top',
           topOffset: -150,
           visibilityTime: 2000,
-        })
+        });
       } else {
         console.error('장바구니 추가 실패');
         Toast.show({
@@ -123,7 +130,7 @@ const FuneralDetailPage = ({navigation}: IFuneralDetailPageProps) => {
           position: 'top',
           topOffset: -150,
           visibilityTime: 2000,
-        })
+        });
       }
     } catch (err) {
       console.error('❌ 장바구니 저장 실패', err);
@@ -217,32 +224,32 @@ const FuneralDetailPage = ({navigation}: IFuneralDetailPageProps) => {
           <Typo style={styles.hallName}>{funeralInfo.funeralName}</Typo>
           <Typo style={styles.hallAddress}>{funeralInfo.funeralAddress}</Typo>
 
-            <View style={styles.contactButtons}>
-              <TouchableOpacity
-                style={styles.contactButton}
-                onPress={handlePhoneCall}>
-                <PhoneIcon
-                  width={ICON_SIZES.contact}
-                  height={ICON_SIZES.contact}
-                />
-                <Typo style={styles.contactText}>전화</Typo>
-              </TouchableOpacity>
+          <View style={styles.contactButtons}>
+            <TouchableOpacity
+              style={styles.contactButton}
+              onPress={handlePhoneCall}>
+              <PhoneIcon
+                width={ICON_SIZES.contact}
+                height={ICON_SIZES.contact}
+              />
+              <Typo style={styles.contactText}>전화</Typo>
+            </TouchableOpacity>
 
-              <TouchableOpacity
-                style={styles.contactButton}
-                onPress={handleWebsite}>
-                <HomeIcon
-                  width={ICON_SIZES.contact}
-                  height={ICON_SIZES.contact}
-                />
-                <Typo style={styles.contactText}>홈페이지</Typo>
-              </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.contactButton}
+              onPress={handleWebsite}>
+              <HomeIcon
+                width={ICON_SIZES.contact}
+                height={ICON_SIZES.contact}
+              />
+              <Typo style={styles.contactText}>홈페이지</Typo>
+            </TouchableOpacity>
 
-              <TouchableOpacity style={styles.contactButton} onPress={handleMap}>
-                <MapIcon width={ICON_SIZES.contact} height={ICON_SIZES.contact} />
-                <Typo style={styles.contactText}>지도</Typo>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity style={styles.contactButton} onPress={handleMap}>
+              <MapIcon width={ICON_SIZES.contact} height={ICON_SIZES.contact} />
+              <Typo style={styles.contactText}>지도</Typo>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* 🏢 시설정보 */}
@@ -352,6 +359,41 @@ const FuneralDetailPage = ({navigation}: IFuneralDetailPageProps) => {
             </View>
           </View>
         </View>
+
+        {/* 🏠 빈소정보 */}
+        <View style={styles.section}>
+          <Typo style={styles.sectionTitle}>빈소정보</Typo>
+          <View style={[styles.facilityGrid, {marginBottom: 4}]}>
+            <View style={styles.facilityItem}>
+              <Typo style={styles.facilityLabel}>호실명</Typo>
+            </View>
+            <View style={styles.facilityItem}>
+              <Typo style={styles.facilityLabel}>평수</Typo>
+            </View>
+            <View style={styles.facilityItem}>
+              <Typo style={styles.facilityLabel}>수용인원</Typo>
+            </View>
+          </View>
+          {/* roomsDummyData를 map으로 렌더링 */}
+          {roomsDummyData.map((room, idx) => (
+            <View
+              key={room.name + idx}
+              style={[
+                styles.facilityGrid,
+                idx !== roomsDummyData.length - 1 && {marginBottom: 4},
+              ]}>
+              <View style={styles.facilityItem}>
+                <Typo style={styles.facilityValue}>{room.name}</Typo>
+              </View>
+              <View style={styles.facilityItem}>
+                <Typo style={styles.facilityValue}>{room.size}</Typo>
+              </View>
+              <View style={styles.facilityItem}>
+                <Typo style={styles.facilityValue}>{room.capacity}</Typo>
+              </View>
+            </View>
+          ))}
+        </View>
       </ScrollView>
 
       {/* 🛒 하단 고정 버튼 - 회원가입 중이 아닐 때만 표시 */}
@@ -361,20 +403,29 @@ const FuneralDetailPage = ({navigation}: IFuneralDetailPageProps) => {
             // 로그인된 사용자: 장바구니 담기 버튼
             <CustomButton onPress={handleAddToCart} style={styles.button}>
               <View style={styles.buttonIcon}>
-                <CartIcon width={ICON_SIZES.button} height={ICON_SIZES.button} />
+                <CartIcon
+                  width={ICON_SIZES.button}
+                  height={ICON_SIZES.button}
+                />
                 <Typo style={styles.buttonText}>장바구니 담기</Typo>
               </View>
               <MoveIcon width={ICON_SIZES.button} height={ICON_SIZES.button} />
             </CustomButton>
           ) : (
             // 로그인하지 않은 사용자: 로그인 안내 버튼
-            <CustomButton 
-              onPress={() => navigation.navigate('Login', { userType: 'manager' })} 
-              style={styles.loginPromptButton}
-            >
+            <CustomButton
+              onPress={() =>
+                navigation.navigate('Login', {userType: 'manager'})
+              }
+              style={styles.loginPromptButton}>
               <View style={styles.buttonIcon}>
-                <CartIcon width={ICON_SIZES.button} height={ICON_SIZES.button} />
-                <Typo style={styles.loginPromptButtonText}>더 많은 기능 사용을 위해 로그인하기</Typo>
+                <CartIcon
+                  width={ICON_SIZES.button}
+                  height={ICON_SIZES.button}
+                />
+                <Typo style={styles.loginPromptButtonText}>
+                  더 많은 기능 사용을 위해 로그인하기
+                </Typo>
               </View>
               <MoveIcon width={ICON_SIZES.button} height={ICON_SIZES.button} />
             </CustomButton>
@@ -503,6 +554,7 @@ const styles = StyleSheet.create({
   facilityGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    gap: 4,
   },
   facilityItem: {
     alignItems: 'center',
@@ -511,7 +563,7 @@ const styles = StyleSheet.create({
   facilityLabel: {
     fontSize: 16,
     color: '#2D81F1',
-    marginBottom: 8,
+    marginBottom: 12,
     fontFamily: 'Pretendard-Medium',
   },
   facilityValue: {
