@@ -1,4 +1,4 @@
-import {StyleSheet, TextInput, View} from 'react-native';
+import {StyleSheet, View, TouchableOpacity} from 'react-native';
 import Typo from './Typo';
 
 interface IInfoTableProps {
@@ -11,45 +11,88 @@ interface IInfoTableProps {
   };
   onChange?: (key: keyof IInfoTableProps['data'], value: string) => void;
 }
-// Labels spec
-// '규모' = funeral_scale
-// '빈소' = funeral_total_rooms
-// '운영' = funeral_operation_type
-// '형태' = funeral_style
-const LABELS = ['규모', '빈소', '운영', '형태'];
+
+// 선택 옵션 정의
+const SELECT_OPTIONS = {
+  규모: ['소형', '중형', '대형'],
+  운영: ['공설', '사설'],
+  형태: ['병원', '전문'],
+};
 
 const InfoTable = ({editable, data, onChange}: IInfoTableProps) => {
   console.log('🏁 data:', data);
+
+  const renderRow = (label: string) => {
+    const value = data[label as keyof typeof data];
+
+    if (label === '빈소') {
+      // 빈소는 항상 읽기 전용
+      return (
+        <View style={styles.row}>
+          <View style={styles.labelContainer}>
+            <Typo style={styles.labelText}>{label}</Typo>
+          </View>
+          <View style={styles.valueContainer}>
+            <Typo style={styles.valueText}>{value}</Typo>
+          </View>
+        </View>
+      );
+    }
+
+    if (!editable) {
+      // 편집 모드가 아닐 때는 모든 필드 읽기 전용
+      return (
+        <View style={styles.row}>
+          <View style={styles.labelContainer}>
+            <Typo style={styles.labelText}>{label}</Typo>
+          </View>
+          <View style={styles.valueContainer}>
+            <Typo style={styles.valueText}>{value}</Typo>
+          </View>
+        </View>
+      );
+    }
+
+    // 편집 모드에서 규모, 운영, 형태는 선택 옵션
+    if (SELECT_OPTIONS[label as keyof typeof SELECT_OPTIONS]) {
+      const options = SELECT_OPTIONS[label as keyof typeof SELECT_OPTIONS];
+      return (
+        <View style={styles.row}>
+          <View style={styles.labelContainer}>
+            <Typo style={styles.labelText}>{label}</Typo>
+          </View>
+          <View style={styles.optionsContainer}>
+            {options.map(option => (
+              <TouchableOpacity
+                key={option}
+                style={[
+                  styles.optionButton,
+                  value === option && styles.selectedOption,
+                ]}
+                onPress={() => onChange?.(label as keyof typeof data, option)}>
+                <Typo
+                  style={[
+                    styles.optionText,
+                    value === option && styles.selectedOptionText,
+                  ]}>
+                  {option}
+                </Typo>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <View style={styles.container}>
-      {/* 헤더 */}
-      <View style={styles.row1}>
-        {LABELS.map(label => (
-          <Typo key={label} style={styles.headerText}>
-            {label}
-          </Typo>
-        ))}
-      </View>
-      {/* 값 or 입력 */}
-      <View style={styles.row2}>
-        {LABELS.map(label => (
-          <View key={label} style={styles.cell}>
-            {editable ? (
-              <TextInput
-                style={styles.input}
-                value={data[label as keyof typeof data]}
-                onChangeText={text =>
-                  onChange?.(label as keyof typeof data, text)
-                }
-              />
-            ) : (
-              <Typo style={styles.valueText}>
-                {data[label as keyof typeof data]}
-              </Typo>
-            )}
-          </View>
-        ))}
-      </View>
+      {renderRow('규모')}
+      {renderRow('빈소')}
+      {renderRow('운영')}
+      {renderRow('형태')}
     </View>
   );
 };
@@ -58,55 +101,63 @@ export default InfoTable;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     width: '100%',
     paddingHorizontal: 10,
     borderRadius: 10,
+    backgroundColor: '#F8F9FB',
   },
-  row1: {
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-around',
-    backgroundColor: '#F8F9FB',
-    paddingVertical: 12,
+    paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(40, 48, 66, 0.1)',
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
   },
-  row2: {
-    flexDirection: 'row',
+  labelContainer: {
+    width: 60,
     alignItems: 'center',
-    backgroundColor: '#F8F9FB',
-    justifyContent: 'space-around',
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
   },
-  headerText: {
-    // flex: 1,
-    textAlign: 'center',
+  labelText: {
     fontSize: 14,
     color: '#2D81F1',
     fontWeight: '600',
     fontFamily: 'Pretendard-Medium',
   },
-  cell: {
-    // flex: 1,
+  valueContainer: {
+    flex: 1,
     alignItems: 'center',
-    justifyContent: 'center', // 👈 중요: 세로 중앙 정렬
-    minHeight: 40, // 👈 필수: 높이 확보
-  },
-  input: {
-    textAlign: 'center',
-    fontWeight: '500',
-    fontFamily: 'Pretendard-Medium',
-    // paddingVertical: 4,
-    color: '#283042', // 👈 혹시 몰라서 명시
-    fontSize: 14, // 👈 너무 작지 않게
   },
   valueText: {
     fontSize: 14,
-    textAlign: 'center',
-    color: '#000',
+    color: '#283042',
+    fontWeight: '500',
+    fontFamily: 'Pretendard-Medium',
+  },
+  optionsContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  optionButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#E1E4F5',
+    backgroundColor: '#FFFFFF',
+  },
+  selectedOption: {
+    backgroundColor: '#2D81F1',
+    borderColor: '#2D81F1',
+  },
+  optionText: {
+    fontSize: 12,
+    color: '#6F717D',
+    fontWeight: '500',
+    fontFamily: 'Pretendard-Medium',
+  },
+  selectedOptionText: {
+    color: '#FFFFFF',
   },
 });

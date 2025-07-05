@@ -23,7 +23,10 @@ import {useInputBase} from '../../hooks/input/useInputBase';
 import {FuneralInput} from '../../components/common/input/FuneralInput';
 import {usePhoneInput} from '../../hooks/input/usePhoneInput';
 import CustomButton from '../../components/common/CustomButton';
-import { fetchFuneralHomeInfo, updateFuneralHomeInfo } from '../../services/api/funeralService';
+import {
+  fetchFuneralHomeInfo,
+  updateFuneralHomeInfo,
+} from '../../services/api/funeralService';
 
 const FuneralModiftyPage = () => {
   // StatusBar 설정
@@ -82,21 +85,55 @@ const FuneralModiftyPage = () => {
         if (response.data && response.data.length > 0) {
           const data = response.data[0];
           setFuneralHomeInfo(data);
-  
+
+          // API 데이터를 InfoTable 선택 옵션에 맞게 변환
+          const convertScale = (scale: string) => {
+            if (scale?.includes('소형')) {
+              return '소형';
+            }
+            if (scale?.includes('중형')) {
+              return '중형';
+            }
+            if (scale?.includes('대형')) {
+              return '대형';
+            }
+            return '대형'; // 기본값
+          };
+
+          const convertOperation = (operation: string) => {
+            if (operation?.includes('공설')) {
+              return '공설';
+            }
+            if (operation?.includes('사설')) {
+              return '사설';
+            }
+            return '사설'; // 기본값
+          };
+
+          const convertStyle = (style: string) => {
+            if (style?.includes('병원')) {
+              return '병원';
+            }
+            if (style?.includes('전문')) {
+              return '전문';
+            }
+            return '전문'; // 기본값
+          };
+
           setInfoData({
-            funeral_scale: data.funeralScale || '',
+            funeral_scale: convertScale(data.funeralScale),
             funeral_total_rooms: data.funeralTotalRooms?.toString() || '',
-            funeral_operation_type: data.funeralOperationType || '',
-            funeral_style: data.funeralStyle || '',
+            funeral_operation_type: convertOperation(data.funeralOperationType),
+            funeral_style: convertStyle(data.funeralStyle),
           });
-  
+
           setConvenienceData({
             funeral_parking_lot: data.funeralParkingLot || false,
             funeral_store: data.funeralStore || false,
             funeral_family_waiting_room: data.funeralFamilyWaitingRoom || false,
             funeral_disabled_facility: data.funeralDisabledFacility || false,
           });
-  
+
           // ✅ undefined 방지
           if (funeralAddress && 'setValue' in funeralAddress) {
             funeralAddress.setValue(data.funeralAddress || '');
@@ -112,7 +149,7 @@ const FuneralModiftyPage = () => {
         console.error('Failed to load funeral home info:', error);
       }
     };
-  
+
     loadFuneralHomeInfo();
   }, []);
 
@@ -232,9 +269,6 @@ const FuneralModiftyPage = () => {
           </View>
           <View style={styles.facilityContainer}>
             <Typo style={styles.titleText}>시설정보</Typo>
-
-                {console.log('🏁 funeralHomeInfo:', funeralHomeInfo)}
-                {console.log('🏁 labelData:', labelData)}
 
             <InfoTable
               editable={true}
