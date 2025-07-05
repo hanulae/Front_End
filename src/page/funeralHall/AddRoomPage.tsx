@@ -1,5 +1,11 @@
 import {useRoute, useNavigation} from '@react-navigation/native';
-import {KeyboardAvoidingView, Platform, StyleSheet, View, ScrollView} from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  View,
+  ScrollView,
+} from 'react-native';
 import FuneralLayout from '../../layout/FuneralLayout';
 import {useEffect, useCallback, useState} from 'react';
 import {useInputBase} from '../../hooks/input/useInputBase';
@@ -8,7 +14,7 @@ import {FuneralInput} from '../../components/common/input/FuneralInput';
 import CustomButton from '../../components/common/CustomButton';
 import {useFuneralHallInfo} from '../../hooks/useFuneralHallInfo';
 import Toast from 'react-native-toast-message';
-import { FuneralHallDetail } from '../../services/api/funeral/funeralHallInfoService';
+import {FuneralHallDetail} from '../../services/api/funeral/funeralHallInfoService';
 
 const AddRoomPage = () => {
   const route = useRoute();
@@ -41,12 +47,16 @@ const AddRoomPage = () => {
       if (response) {
         // 상태에 호실 상세 정보 저장 (version 포함)
         setRoomDetail(response);
-        
+
         // 폼에 데이터 입력
         room_name.onChangeText(response.funeralHallName || '');
         room_space.onChangeText(response.funeralHallSize?.toString() || '');
-        room_capacity.onChangeText(response.funeralHallNumberOfMourners?.toString() || '');
-        room_sub_fee.onChangeText(response.funeralHallDetailPrice?.toString() || '');
+        room_capacity.onChangeText(
+          response.funeralHallNumberOfMourners?.toString() || '',
+        );
+        room_sub_fee.onChangeText(
+          response.funeralHallDetailPrice?.toString() || '',
+        );
         room_main_fee.onChangeText(response.funeralHallPrice?.toString() || '');
       }
     } catch (error) {
@@ -109,7 +119,9 @@ const AddRoomPage = () => {
 
   // 호실 추가 처리
   const handleAddRoom = async () => {
-    if (!validateInputs()) return;
+    if (!validateInputs()) {
+      return;
+    }
 
     try {
       const data = {
@@ -121,7 +133,7 @@ const AddRoomPage = () => {
       };
 
       const result = await addFuneralHallInfo(data);
-      
+
       if (result) {
         Toast.show({
           type: 'success',
@@ -130,7 +142,7 @@ const AddRoomPage = () => {
           position: 'top',
           topOffset: 0,
         });
-        
+
         // 이전 화면으로 돌아가기
         navigation.goBack();
       }
@@ -162,7 +174,7 @@ const AddRoomPage = () => {
       };
 
       const result = await updateFuneralHallInfo(data);
-      
+
       if (result) {
         Toast.show({
           type: 'success',
@@ -171,7 +183,7 @@ const AddRoomPage = () => {
           position: 'top',
           topOffset: 0,
         });
-        
+
         // 이전 화면으로 돌아가기
         navigation.goBack();
       }
@@ -233,9 +245,9 @@ const AddRoomPage = () => {
             </View>
             <View style={styles.roomContainer}>
               <Typo style={styles.titleText}>평수</Typo>
-              <FuneralInput 
-                input={room_space} 
-                placeholder="평수를 입력하세요" 
+              <FuneralInput
+                input={room_space}
+                placeholder="평수를 입력하세요"
                 disabled={purpose === 'detail'}
                 type="number"
               />
@@ -269,7 +281,7 @@ const AddRoomPage = () => {
             </View>
           </View>
         </ScrollView>
-        
+
         {purpose !== 'detail' && (
           <View style={styles.buttonContainer}>
             <CustomButton
@@ -277,12 +289,11 @@ const AddRoomPage = () => {
               style={[styles.button, loading && styles.buttonDisabled]}
               disabled={loading}>
               <Typo style={styles.buttonText}>
-                {loading 
-                  ? '처리 중...' 
-                  : purpose === 'modify' 
-                  ? '호실 수정' 
-                  : '호실 추가'
-                }
+                {loading
+                  ? '처리 중...'
+                  : purpose === 'modify'
+                  ? '호실 수정'
+                  : '호실 추가'}
               </Typo>
             </CustomButton>
           </View>

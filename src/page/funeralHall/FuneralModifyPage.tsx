@@ -64,19 +64,20 @@ const FuneralModiftyPage = () => {
     funeral_disabled_facility: false, // 장애인 시설
   });
   const [funeralHomeInfo, setFuneralHomeInfo] = useState(null);
+  console.log('🏁 funeralHomeInfo:', funeralHomeInfo);
 
   // 임시로 데이터를 가져오는 useEffect
   // 실제로는 API 호출을 통해 데이터를 가져와야 함
-  useEffect(() => {
-    const fetched = {
-      funeral_scale: '대형',
-      funeral_total_rooms: '5개',
-      funeral_operation_type: '직영',
-      funeral_style: '전통',
-    };
+  // useEffect(() => {
+  //   const fetched = {
+  //     funeral_scale: '대형',
+  //     funeral_total_rooms: '5개',
+  //     funeral_operation_type: '직영',
+  //     funeral_style: '전통',
+  //   };
 
-    setInfoData(fetched);
-  }, []);
+  //   setInfoData(fetched);
+  // }, []);
 
   useEffect(() => {
     const loadFuneralHomeInfo = async () => {
