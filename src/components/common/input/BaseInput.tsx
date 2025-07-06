@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 18,
+    // paddingVertical: 18,
   },
   input: {
     width: '100%',

@@ -90,6 +90,7 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
         color="#3287F8"
         headerShown={false}
         logoutButton={false}
+        top={false}
         backIconColor="white">
         <View style={styles.topSection}>
           <ManagerHeader
@@ -100,11 +101,7 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
             color="transparent"
           />
           <View style={styles.container}>
-            <ManagerProfileStat
-              point={100000}
-              cash={100000}
-              managerName={userInfo.userName}
-            />
+            <ManagerProfileStat managerName={userInfo.userName} />
           </View>
         </View>
         <CustomButton
