@@ -6,23 +6,17 @@ import PointIcon from '../../assets/Bullet/Bullet_PointCircle.svg';
 import CashIcon from '../../assets/Bullet/Bullet_CoinYellow.svg';
 
 // BSK ADD IMPORTS
-import { useEffect, useState } from 'react';
+import {useEffect, useState} from 'react';
 import api from '../../api/config';
-import { useAtomValue } from 'jotai';
-import { loginAtom } from '../../state/local_state/loginAtom';
+import {useAtomValue} from 'jotai';
+import {loginAtom} from '../../state/local_state/loginAtom';
 import Hello from './Hello';
 
 interface IManagerProfileStatProps {
-  point: number;
-  cash: number;
   managerName: string;
 }
 
-const ManagerProfileStat = ({
-  point,
-  cash,
-  managerName,
-}: IManagerProfileStatProps) => {
+const ManagerProfileStat = ({managerName}: IManagerProfileStatProps) => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const goToPointHistory = () => {
     console.log('Point History');
@@ -33,28 +27,31 @@ const ManagerProfileStat = ({
 
   // BSK ADD LOGIN INFO
   const loginInfo = useAtomValue(loginAtom);
-  const [currentPoint, setCurrentPoint] = useState<number>(point); // 초기값은 props로 받은 point
-  const [currentCash, setCurrentCash] = useState<number>(cash); // 초기값은 props로 받은 cash
+  const [currentPoint, setCurrentPoint] = useState<number>(0); // 초기값은 props로 받은 point
+  const [currentCash, setCurrentCash] = useState<number>(0); // 초기값은 props로 받은 cash
 
   useEffect(() => {
     const fetchCurrentPointAndCash = async () => {
       try {
         const [pointRes, cashRes] = await Promise.all([
           api.get('/manager/point/current', {
-            headers: { Authorization: `Bearer ${loginInfo.accessToken}` },
+            headers: {Authorization: `Bearer ${loginInfo.accessToken}`},
           }),
           api.get('/manager/cash/current', {
-            headers: { Authorization: `Bearer ${loginInfo.accessToken}` },
+            headers: {Authorization: `Bearer ${loginInfo.accessToken}`},
           }),
         ]);
-  
+
         setCurrentPoint(pointRes.data.currentPoint || 0);
         setCurrentCash(cashRes.data.currentCash || 0);
       } catch (error: any) {
-        console.error('포인트/캐시 조회 실패:', error.response?.data || error.message);
+        console.error(
+          '포인트/캐시 조회 실패:',
+          error.response?.data || error.message,
+        );
       }
     };
-  
+
     fetchCurrentPointAndCash();
   }, []);
 
@@ -68,14 +65,14 @@ const ManagerProfileStat = ({
       <View style={styles.pointContainer}>
         <Typo style={styles.pointDesc}>보유 포인트</Typo>
         <View style={styles.flexRow}>
-        <Typo style={styles.pointText}>{currentPoint.toLocaleString()}</Typo>
+          <Typo style={styles.pointText}>{currentPoint.toLocaleString()}</Typo>
           <PointIcon width={24} height={24} />
         </View>
       </View>
       <View style={styles.cashContainer}>
         <Typo style={styles.cashDesc}>보유 캐쉬</Typo>
         <View style={styles.flexRow}>
-        <Typo style={styles.cashText}>{currentCash.toLocaleString()}</Typo>
+          <Typo style={styles.cashText}>{currentCash.toLocaleString()}</Typo>
           <CashIcon width={24} height={24} />
         </View>
       </View>
