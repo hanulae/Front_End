@@ -25,6 +25,7 @@ import api from '../../../api/config';
 //Bsk add imports 
 import { useAtomValue } from 'jotai';
 import { loginAtom } from '.././../../state/local_state/loginAtom';
+import { getUserInfo } from '../../../utils/tokenStorage';
 
 
 interface IPermissions {
@@ -100,164 +101,237 @@ const StaffBottomSheet = ({
     }
   }, [visible, translateY]);
 
-  const phoneNumber = usePhoneInput();
-  const authCode = useInputBase();
-  const staffGrade = useInputBase();
-  const staffName = useInputBase();
-
   const [signupInfo, setSignupInfo] = useState({
     phoneNumber: '',
     isPhoneVerified: false,
   });
 
-  // BSK ADD USER INFO ATOM
-  const userInfo = useAtomValue(loginAtom); // 로그인 시 저장된 유저 정보
-  const accessToken = userInfo?.accessToken;
+  const phoneNumberInput = useInputBase();
+  const authCode = useInputBase();
+  const staffGrade = useInputBase();
+  const staffName = useInputBase();
+  const staffPhoneNumber = useInputBase();
+  const staffPassword = useInputBase();
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      const info = await getUserInfo();
+      console.log("🚀 ~ fetchUserInfo ~ info:", info)
+      if (info && info.data && info.data.funeralPhoneNumber) {
+        phoneNumberInput.onChangeText(info.data.funeralPhoneNumber);
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
+
+  useEffect(() => {
+    if (mode === 'edit' && _staff) {
+      console.log('Editing staff:', _staff);
+      console.log('Current permissions:', _staff.permissions);
+      // 직원 데이터를 폼 필드에 채우기
+      staffName.onChangeText(_staff.staffName);
+      staffGrade.onChangeText(_staff.staffGrade);
+      staffPhoneNumber.onChangeText(_staff.staffPhoneNumber);
+      staffPassword.onChangeText(_staff.staffPassword);
+
+      // 권한 데이터 설정
+      setPermissions(_staff.permissions[0]);
+      console.log('Permissions set:', _staff.permissions);
+    }else if(mode === 'add'){
+      staffPassword.onChangeText('funeral1234');
+    }
+  }, [mode, _staff]);
 
   // 인증 요청 함수
-const handleRequestCode = async () => {
-  const phone = phoneNumber.value.replace(/-/g, '').trim();
+  const handleRequestCode = async () => {
+    const phone = phoneNumberInput.value.replace(/-/g, '').trim();
 
-  if (!phone || phone.length < 10) {
-    Toast.show({
-      type: 'error',
-      text1: '입력 오류',
-      text2: '유효한 전화번호를 입력해주세요.',
-      position: 'top',
-    });
-    return;
-  }
-
-  try {
-    const res = await api.post('/funeral/sms/send', {
-      funeralPhone: phone,
-    });
-    console.log('📨 인증번호 전송 성공:', res.data);
-
-    Toast.show({
-      type: 'success',
-      text1: '인증번호가 발송되었습니다.',
-      position: 'top',
-    });
-  } catch (error: any) {
-    console.log('❌ 인증번호 전송 실패:', error.response?.data || error.message);
-    Toast.show({
-      type: 'error',
-      text1: '인증번호 전송 실패',
-      text2: error.response?.data?.message || '오류가 발생했습니다.',
-      position: 'top',
-    });
-  }
-};
-
-// 인증 확인 함수
-const handleVerifyCode = async () => {
-  const phone = phoneNumber.value.replace(/-/g, '').trim();
-  const code = authCode.value.trim();
-
-  if (!phone || !code) {
-    Toast.show({
-      type: 'error',
-      text1: '입력 오류',
-      text2: '전화번호와 인증코드를 모두 입력해주세요.',
-      position: 'top',
-    });
-    return;
-  }
-
-  try {
-    const res = await api.post('/funeral/sms/verify', {
-      funeralPhone: phone,
-      code,
-    });
-    console.log("🚀 ~ handleVerifyCode ~ res:", res)
-
-    if (res.data.verified) {
-      Toast.show({
-        type: 'success',
-        text1: '인증 성공',
-        position: 'top',
-      });
-
-      // 인증 완료 처리 필요 시 여기에서 상태 반영
-      setSignupInfo(prev => ({
-        ...prev,
-        phoneNumber: phone,
-        isPhoneVerified: true,
-      }));
-    } else {
+    if (!phone || phone.length < 10) {
       Toast.show({
         type: 'error',
-        text1: '인증 실패',
-        text2: '인증코드가 틀렸거나 만료되었습니다.',
+        text1: '입력 오류',
+        text2: '유효한 전화번호를 입력해주세요.',
+        position: 'top',
+      });
+      return;
+    }
+
+    try {
+      const res = await api.post('/funeral/sms/send/staff', {
+        funeralPhone: phone,
+      });
+      console.log('📨 인증번호 전송 성공:', res.data);
+
+      Toast.show({
+        type: 'success',
+        text1: '인증번호가 발송되었습니다.',
+        position: 'top',
+      });
+    } catch (error: any) {
+      console.log('❌ 인증번호 전송 실패:', error.response?.data || error.message);
+      Toast.show({
+        type: 'error',
+        text1: '인증번호 전송 실패',
+        text2: error.response?.data?.message || '오류가 발생했습니다.',
         position: 'top',
       });
     }
-  } catch (error: any) {
-    console.log('❌ 인증 실패:', error.response?.data || error.message);
-    Toast.show({
-      type: 'error',
-      text1: '서버 오류',
-      text2: error.response?.data?.message || '잠시 후 다시 시도해주세요.',
-      position: 'top',
-    });
-  }
-};
+  };
 
-const handleCreateStaff = async () => {
-  console.log('handleCreateStaff called');
-  if (!signupInfo.isPhoneVerified) {
-    Toast.show({
-      type: 'error',
-      text1: '휴대전화 인증을 완료해주세요.',
-      position: 'top',
-    });
-    return;
-  }
+  const handleCheckPhoneNumber = async () => {
+    const phone = staffPhoneNumber.value.replace(/-/g, '').trim();
 
-  if (!staffName.value || !staffGrade.value) {
-    Toast.show({
-      type: 'error',
-      text1: '이름과 직급을 입력해주세요.',
-      position: 'top',
-    });
-    return;
-  }
+    try {
+      const res = await api.post('/funeral/staff/phoneVerify', {
+        staffPhoneNumber: phone,
+      });
 
-  try {
-    const response = await api.post(
-      '/funeral/staff/create',
-      {
-        funeralStaffPhoneNumber: signupInfo.phoneNumber,
-        funeralStaffName: staffName.value,
-        funeralStaffRole: staffGrade.value,
-        permissions,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`, // ✅ 토큰 포함
-        },
-      },
-    );
+      if (res.status === 200) {
+        Toast.show({
+          type: 'success',
+          text1: '사용 가능한 전화번호입니다.',
+          position: 'top',
+        });
+      }
+    } catch (error: any) {
+      if (error.response?.status === 409) {
+        Toast.show({
+          type: 'error',
+          text1: '이미 사용 중인 전화번호입니다.',
+          position: 'top',
+        });
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: '오류가 발생했습니다.',
+          text2: error.response?.data?.message || '잠시 후 다시 시도해주세요.',
+          position: 'top',
+        });
+      }
+    }
+  };
 
-    Toast.show({
-      type: 'success',
-      text1: '직원이 등록되었습니다.',
-      position: 'top',
-    });
+  // 인증 확인 함수
+  const handleVerifyCode = async () => {
+    const phone = phoneNumberInput.value.replace(/-/g, '').trim();
+    const code = authCode.value.trim();
 
-    onConfirm(); // 모달 닫기
-  } catch (error: any) {
-    console.log('직원 생성 실패:', error.response?.data || error.message);
-    Toast.show({
-      type: 'error',
-      text1: '직원 등록 실패',
-      text2: error.response?.data?.message || '오류가 발생했습니다.',
-      position: 'top',
-    });
-    // ❌ 모달 닫지 않음
-  }
-};
+    if (!phone || !code) {
+      Toast.show({
+        type: 'error',
+        text1: '입력 오류',
+        text2: '전화번호와 인증코드를 모두 입력해주세요.',
+        position: 'top',
+      });
+      return;
+    }
+
+    try {
+      const res = await api.post('/funeral/sms/verify/staff', {
+        funeralPhone: phone,
+        code,
+      });
+      console.log("🚀 ~ handleVerifyCode ~ res:", res)
+
+      if (res.data.verified) {
+        Toast.show({
+          type: 'success',
+          text1: '인증 성공',
+          position: 'top',
+        });
+
+        // 인증 완료 처리 필요 시 여기에서 상태 반영
+        setSignupInfo(prev => ({
+          ...prev,
+          phoneNumber: phone,
+          isPhoneVerified: true,
+        }));
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: '인증 실패',
+          text2: '인증코드가 틀렸거나 만료되었습니다.',
+          position: 'top',
+        });
+      }
+    } catch (error: any) {
+      console.log('❌ 인증 실패:', error.response?.data || error.message);
+      Toast.show({
+        type: 'error',
+        text1: '서버 오류',
+        text2: error.response?.data?.message || '잠시 후 다시 시도해주세요.',
+        position: 'top',
+      });
+    }
+  };
+
+  const handleCreateStaff = async () => {
+    console.log('handleCreateStaff called');
+    if (!signupInfo.isPhoneVerified) {
+      Toast.show({
+        type: 'error',
+        text1: '휴대전화 인증을 완료해주세요.',
+        position: 'top',
+      });
+      return;
+    }
+
+    if (!staffName.value || !staffGrade.value) {
+      Toast.show({
+        type: 'error',
+        text1: '이름과 직급을 입력해주세요.',
+        position: 'top',
+      });
+      return;
+    }
+
+    try {
+      let response;
+      if (mode === 'edit') {
+        response = await api.patch(`/funeral/staff/update/${_staff.staffId}`, {
+          funeralStaffPassword: staffPassword.value,
+          funeralStaffPhoneNumber: staffPhoneNumber.value,
+          funeralStaffName: staffName.value,
+          funeralStaffRole: staffGrade.value,
+          permissions,
+          funeralPhoneNumber: phoneNumberInput.value,
+        });
+        console.log("🚀 ~ handleCreateStaff ~ update response:", response);
+        Toast.show({
+          type: 'success',
+          text1: '직원이 수정되었습니다.',
+          position: 'top',
+        });
+      } else {
+        response = await api.post('/funeral/staff/create', {
+          funeralStaffPassword: staffPassword.value,
+          funeralStaffPhoneNumber: staffPhoneNumber.value,
+          funeralStaffName: staffName.value,
+          funeralStaffRole: staffGrade.value,
+          permissions,
+          funeralPhoneNumber: phoneNumberInput.value,
+        });
+        console.log("🚀 ~ handleCreateStaff ~ create response:", response);
+        Toast.show({
+          type: 'success',
+          text1: '직원이 등록되었습니다.',
+          position: 'top',
+        });
+      }
+
+      onConfirm(); // 모달 닫기
+    } catch (error: any) {
+      console.log('직원 생성/수정 실패:', error.response?.data || error.message);
+      Toast.show({
+        type: 'error',
+        text1: '직원 등록/수정 실패',
+        text2: error.response?.data?.message || '오류가 발생했습니다.',
+        position: 'top',
+      });
+      // ❌ 모달 닫지 않음
+    }
+  };
 
   return (
     <Modal visible={visible} transparent animationType="none">
@@ -269,21 +343,21 @@ const handleCreateStaff = async () => {
             style={[styles.sheet, {transform: [{translateY}]}]}
             onStartShouldSetResponder={() => true}>
             <View style={styles.titleContainer}>
-              <Typo style={styles.titleText}>직원 관리</Typo>
+              <Typo style={styles.titleText}>
+                {mode === 'edit' ? '장례식장 직원 수정' : '장례식장 직원 등록'}
+              </Typo>
             </View>
             <ScrollView
               style={styles.scrollContainer}
               contentContainerStyle={styles.scrollContent}
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled">
-              <View style={styles.inputContainer}>
-                <Typo style={styles.inputTitle}>휴대전화번호</Typo>
-                <FuneralInput input={phoneNumber} placeholder="휴대전화번호" />
-                <CustomButton onPress={handleRequestCode} style={styles.button}>
-                  <Typo style={styles.buttonText}>인증코드요청</Typo>
-                </CustomButton>
-
+             <View style={styles.phoneBoxContainer}>
+                <Typo style={styles.phoneBoxText}>{phoneNumberInput.value}</Typo>
               </View>
+              <CustomButton onPress={handleRequestCode} style={styles.button}>
+                <Typo style={styles.buttonText}>인증코드요청</Typo>
+              </CustomButton>
               <View style={styles.inputContainer}>
                 <Typo style={styles.inputTitle}>인증코드</Typo>
                 <FuneralInput
@@ -293,6 +367,23 @@ const handleCreateStaff = async () => {
                 <CustomButton onPress={handleVerifyCode} style={styles.checkButton}>
                   <Typo style={styles.checkButtonText}>인증번호확인</Typo>
                 </CustomButton>
+              </View>
+              <View style={styles.inputContainer}>
+                <Typo style={styles.inputTitle}>직원 휴대전화번호</Typo>
+                <FuneralInput
+                  input={staffPhoneNumber}
+                  placeholder="휴대전화번호을 입력하세요"
+                />
+                <CustomButton onPress={handleCheckPhoneNumber} style={styles.checkButton}>
+                  <Typo style={styles.checkButtonText}>직원 휴대전화 중복 체크</Typo>
+                </CustomButton>
+              </View>
+              <View style={styles.inputContainer}>
+                <Typo style={styles.inputTitle}>직원 비밀번호</Typo>
+                <FuneralInput
+                  input={staffPassword}
+                  placeholder="비밀번호을 입력하세요"
+                />
               </View>
               <View style={styles.inputContainer}>
                 <Typo style={styles.inputTitle}>직급</Typo>
@@ -347,13 +438,14 @@ const handleCreateStaff = async () => {
               </View>
               <View style={styles.buttonContainer}>
                 <Pressable onPress={handleCreateStaff} style={styles.confirmButton}>
-                  <Typo style={styles.confirmText}>등록</Typo>
+                  <Typo style={styles.confirmText}>{mode === 'edit' ? '수정' : '등록'}</Typo>
                 </Pressable>
               </View>
             </ScrollView>
           </Animated.View>
         </KeyboardAvoidingView>
       </Pressable>
+      <Toast />
     </Modal>
   );
 };
@@ -495,5 +587,20 @@ const styles = StyleSheet.create({
     color: '#283042',
     fontFamily: 'Pretendard-Medium',
     flexShrink: 1,
+  },
+  phoneBoxContainer: {
+    width: '100%',
+    backgroundColor: '#F5F6F8',
+    borderRadius: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    marginBottom: 10,
+  },
+  
+  phoneBoxText: {
+    fontSize: 16,
+    color: '#000',
+    fontWeight: '500',
+    fontFamily: 'Pretendard-Medium',
   },
 });

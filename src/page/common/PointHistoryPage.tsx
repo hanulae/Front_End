@@ -53,6 +53,7 @@ const PointHistoryPage = () => {
   const loginInfo = useAtomValue(loginAtom);
   const [currentPoint, setCurrentPoint] = useState<number>(0);
   const [currentCash, setCurrentCash] = useState<number>(0);
+  const [transactions, setTransactions] = useState([]);
 
   // BSK ADD VARIANT
   const route = useRoute();
@@ -101,6 +102,12 @@ const PointHistoryPage = () => {
           },
         });
         setCurrentCash(cashRes.data.currentCash || 0);
+
+        // Fetch transaction history
+        const historyUrl = isManager ? '/manager/cash/history/list' : '/funeral/cash/history/list';
+        const historyRes = await api.get(historyUrl);
+        console.log("🚀 ~ fetchPointAndCash ~ historyRes:", historyRes)
+        setTransactions(historyRes.data.transactions || []);
       } catch (error: any) {
         console.error('잔액 조회 실패:', error.response?.data || error.message);
       }
@@ -180,7 +187,7 @@ const PointHistoryPage = () => {
             </CustomButton>
           </View>
           <ScrollView contentContainerStyle={styles.card}>
-            {DummyData.map(item => (
+            {transactions.map(item => (
               <PointHistoryCard
                 key={item.id}
                 assetType={item.assetType as 'point' | 'cash'}

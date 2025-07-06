@@ -230,8 +230,9 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
     // 인증 코드 요청 로직
     console.log('인증 코드 요청:', phoneNumber.value);
     try {
-      const res = await api.post('/funeral/sms/send', {
-        funeralPhone: phoneNumber.value,
+      const res = await api.post('/manager/sms/send', {
+        managerPhone: phoneNumber.value,
+        userType: 'funeral',
       });
       console.log('📨 인증번호 전송 성공:', res.data);
       Toast.show({

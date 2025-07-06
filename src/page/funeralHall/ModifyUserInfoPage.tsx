@@ -23,8 +23,7 @@ import BankSelectBottomSheet from '../../components/common/BankSelecSheet';
 //BSK ADD IMPORTS
 import api from '../../api/config';
 import Toast from 'react-native-toast-message';
-import {useAtomValue} from 'jotai';
-import {loginAtom} from '../../state/local_state/loginAtom';
+import { getUserInfo, storeUserInfo } from '../../utils/tokenStorage';
 
 const ModifyUserInfoPage = () => {
   useFocusEffect(
@@ -55,9 +54,10 @@ const ModifyUserInfoPage = () => {
   const authCodeAccount = useInputBase();
 
   // BSK ADD LOGIN INFO
-  const loginInfo = useAtomValue(loginAtom);
   const [name, setName] = useState('');
   const [bankCode, setBankCode] = useState('');
+
+  const [isPhoneVerified, setIsPhoneVerified] = useState(false);
 
   const BANK_LIST = [
     {name: 'KB국민은행', code: '004'},
@@ -120,12 +120,7 @@ const ModifyUserInfoPage = () => {
         '/funeral/auth/update/password',
         {
           newPassword: newPassword.value,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${loginInfo.accessToken}`,
-          },
-        },
+        }
       );
 
       Toast.show({
@@ -161,16 +156,7 @@ const ModifyUserInfoPage = () => {
     }
 
     try {
-      // TODO: funeral용 API 엔드포인트로 변경 필요
-      const res = await api.post(
-        '/funeral/sms/send',
-        {funeralPhone: phone},
-        {
-          headers: {
-            Authorization: `Bearer ${loginInfo.accessToken}`,
-          },
-        },
-      );
+      const res = await api.post('/funeral/sms/send/funeral', { funeralPhone: phone });
 
       Toast.show({
         type: 'success',
@@ -179,10 +165,7 @@ const ModifyUserInfoPage = () => {
         position: 'top',
       });
     } catch (error: any) {
-      console.error(
-        '인증번호 요청 실패:',
-        error.response?.data || error.message,
-      );
+      console.error('인증번호 요청 실패:', error.response?.data || error.message);
       Toast.show({
         type: 'error',
         text1: '전송 실패',
@@ -207,19 +190,7 @@ const ModifyUserInfoPage = () => {
     }
 
     try {
-      // TODO: funeral용 API 엔드포인트로 변경 필요
-      const res = await api.post(
-        '/funeral/sms/verify',
-        {
-          funeralPhone: phone,
-          code: code,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${loginInfo.accessToken}`,
-          },
-        },
-      );
+      const res = await api.post('/funeral/sms/verify/funeral', { funeralPhone: phone, code: code });
 
       if (res.data.verified) {
         Toast.show({
@@ -227,6 +198,7 @@ const ModifyUserInfoPage = () => {
           text1: '인증 성공',
           position: 'top',
         });
+        setIsPhoneVerified(true);
       } else {
         Toast.show({
           type: 'error',
@@ -247,10 +219,7 @@ const ModifyUserInfoPage = () => {
   };
 
   const handleChangePhoneNumber = async () => {
-    const currentPhone = loginInfo.phoneNumber?.replace(/[^0-9]/g, '');
-    console.log('🚀 ~ handleChangePhoneNumber ~ currentPhone:', currentPhone);
     const newPhone = phoneNumber.value.replace(/[^0-9]/g, '');
-    console.log('🚀 ~ handleChangePhoneNumber ~ newPhone:', newPhone);
 
     if (!newPhone || !authCodePhone.value) {
       Toast.show({
@@ -263,19 +232,7 @@ const ModifyUserInfoPage = () => {
     }
 
     try {
-      // TODO: funeral용 API 엔드포인트로 변경 필요
-      const res = await api.patch(
-        '/funeral/auth/update/phone',
-        {
-          currentPhone,
-          newPhone,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${loginInfo.accessToken}`,
-          },
-        },
-      );
+      const res = await api.patch('/funeral/auth/update/phone', { newPhone });
 
       Toast.show({
         type: 'success',
@@ -283,14 +240,22 @@ const ModifyUserInfoPage = () => {
         position: 'top',
       });
 
+      // 현재 사용자 정보 가져오기
+      const userInfo = await getUserInfo();
+      console.log("🚀 ~ handleChangePhoneNumber ~ userInfo:", userInfo)
+      if (userInfo) {
+        // 핸드폰 번호 업데이트
+        userInfo.data.funeralPhoneNumber = newPhone;
+
+        // 업데이트된 사용자 정보 저장
+        await storeUserInfo(userInfo);
+      }
+
       // 필요시 phoneNumber 초기화
       // phoneNumber.setValue('');
       // authCodePhone.setValue('');
     } catch (error: any) {
-      console.error(
-        '휴대전화번호 변경 실패:',
-        error.response?.data || error.message,
-      );
+      console.error('휴대전화번호 변경 실패:', error.response?.data || error.message);
       Toast.show({
         type: 'error',
         text1: '변경 실패',
@@ -352,13 +317,9 @@ const ModifyUserInfoPage = () => {
         {
           funeralBankName: bankName.trim(),
           funeralBankNumber: accountNumber.trim(),
-          funeralBankHolder: bankName.trim(), // 예금주 이름도 bankName에 들어 있다고 가정
+          funeralBankHolder: name.trim(), // 예금주 이름도 bankName에 들어 있다고 가정
         },
-        {
-          headers: {
-            Authorization: `Bearer ${loginInfo.accessToken}`,
-          },
-        },
+        
       );
 
       Toast.show({
@@ -444,8 +405,16 @@ const ModifyUserInfoPage = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.button}
-            onPress={handleChangePhoneNumber}>
+            style={[
+              styles.button,
+              {
+                opacity: isPhoneVerified ? 1 : 0.5,
+                backgroundColor: isPhoneVerified ? '#3287F8' : '#ccc',
+              },
+            ]}
+            onPress={handleChangePhoneNumber}
+            disabled={!isPhoneVerified}
+          >
             <Typo style={styles.buttonText}>휴대전화번호 변경</Typo>
           </TouchableOpacity>
         </View>
@@ -532,6 +501,7 @@ const ModifyUserInfoPage = () => {
           }}
         /> */}
       </ScrollView>
+      <Toast />
     </DefaultLayout>
   );
 };

@@ -11,6 +11,8 @@ import CloseIcon from '../../assets/Icon/Icon_BtnClose01.svg';
 import Typo from '../common/Typo';
 import {Input} from '../common/input/Input';
 import CustomButton from '../common/CustomButton';
+import { getUserInfo } from '../../utils/tokenStorage';
+
 const screenHeight = Dimensions.get('window').height;
 
 interface IPhoneAuthSheetProps {
@@ -28,10 +30,6 @@ const PhoneAuthSheet = ({
   const phoneNumber = usePhoneInput();
   const authCode = useInputBase();
 
-  // BSK ADD LOGIN INFO
-  const loginInfo = useAtomValue(loginAtom); // 로그인된 유저 정보
-  const token = loginInfo.accessToken;
-
   const confirmCode = async () => {
     const phone = phoneNumber.value.replace(/[^0-9]/g, '').trim();
     const code = authCode.value.trim();
@@ -47,7 +45,7 @@ const PhoneAuthSheet = ({
     }
 
     try {
-      const res = await api.post('/funeral/sms/verify', {
+      const res = await api.post('/funeral/sms/verify/funeral', {
         funeralPhone: phone,
         code: code,
       });
@@ -98,13 +96,8 @@ const PhoneAuthSheet = ({
 
     try {
       const res = await api.post(
-        '/funeral/sms/send',
+        '/funeral/sms/send/funeral',
         {funeralPhone: phone},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // ✅ 토큰 추가
-          },
-        },
       );
 
       console.log('📨 인증번호 전송 성공:', res.data);
@@ -127,6 +120,21 @@ const PhoneAuthSheet = ({
       });
     }
   };
+
+  useEffect(() => {
+    const fetchManagerPhoneNumber = async () => {
+      try {
+        const info = await getUserInfo(); // Assuming getUserInfo fetches the manager's info
+        if (info && info.data && info.data.funeralPhoneNumber) {
+          phoneNumber.onChangeText(info.data.funeralPhoneNumber);
+        }
+      } catch (error) {
+        console.error('Failed to fetch manager phone number:', error);
+      }
+    };
+
+    fetchManagerPhoneNumber();
+  }, []);
 
   useEffect(() => {
     Animated.timing(translateY, {
