@@ -21,8 +21,6 @@ import {usePasswordInput} from '../../hooks/input/usePasswordInput';
 import {useSetAtom} from 'jotai';
 import {userInfoAtom} from '../../state/local_state/userinfoAtom';
 import {useCallback} from 'react';
-import PhoneAuthInput from '../../components/common/input/PhoneAuthInput';
-import usePhoneAuthInput from '../../hooks/input/usePhoneAuthInput';
 import Toast from 'react-native-toast-message';
 import api from '../../api/config';
 import {storeTokens, storeUserInfo} from '../../utils/tokenStorage';
@@ -53,7 +51,6 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
   );
   const route = useRoute();
   const {userType} = route.params as {userType: 'manager' | 'funeral'};
-  const phoneAuth = usePhoneAuthInput();
   const password = usePasswordInput();
   const setLogin = useSetAtom(userInfoAtom);
 
@@ -101,37 +98,6 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
     }
   };
 
-  // 인증코드 발송 함수
-  const handleSendCode = async (phoneNumber: string) => {
-    try {
-      const response = await api.post('/funeral/auth/send-verification-code', {
-        phoneNumber: phoneNumber,
-      });
-      console.log('Code sent response:', response);
-    } catch (error) {
-      console.error('Send code error:', error);
-      throw error;
-    }
-  };
-
-  // 인증코드 확인 함수
-  const handleVerifyCode = async (
-    phoneNumber: string,
-    authCode: string,
-  ): Promise<boolean> => {
-    try {
-      const response = await api.post('/funeral/auth/verify-code', {
-        phoneNumber: phoneNumber,
-        verificationCode: authCode,
-      });
-      console.log('Verify code response:', response);
-      return response.data.success === true;
-    } catch (error) {
-      console.error('Verify code error:', error);
-      return false;
-    }
-  };
-
   const username = useInputBase({initialValue: ''});
 
   const isPasswordValid = (password: string) => {
@@ -173,10 +139,19 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
           managerPassword: password.value,
         });
       } else if (userType === 'funeral') {
-        response = await api.post('/funeral/auth/login', {
-          funeralUsername: username.value,
-          funeralPassword: password.value,
-        });
+        // 탭에 따라 다른 API 엔드포인트 호출
+        if (funeralTab === '대표') {
+          response = await api.post('/funeral/auth/login', {
+            funeralUsername: username.value,
+            funeralPassword: password.value,
+          });
+        } else {
+          // 직원 로그인 API (실제 엔드포인트는 백엔드에 맞게 조정 필요)
+          response = await api.post('/funeral/employee/auth/login', {
+            employeeUsername: username.value,
+            employeePassword: password.value,
+          });
+        }
       }
       if (!response || !response.data) {
         throw new Error('Login response is invalid');
@@ -264,31 +239,14 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
             </Pressable>
           </View>
         )}
-        <View
-          style={[
-            styles.formSection,
-            // isEmployeeLogin && {height: height * 0.25, gap: 16},
-            userType === 'funeral' &&
-              funeralTab === '직원' && {height: height * 0.25, gap: 16},
-          ]}>
-          {/* funeral + 대표 or manager: 아이디/비번, funeral+직원: 휴대폰 인증 */}
-          {userType === 'manager' ||
-          (userType === 'funeral' && funeralTab === '대표') ? (
-            <>
-              <Input input={username} placeholder="아이디를 입력하세요" />
-              <Input
-                input={password}
-                type="password"
-                placeholder="비밀번호를 입력하세요."
-              />
-            </>
-          ) : (
-            <PhoneAuthInput
-              input={phoneAuth}
-              onSendCode={handleSendCode}
-              onVerifyCode={handleVerifyCode}
-            />
-          )}
+        <View style={styles.formSection}>
+          {/* 모든 경우에 아이디/비밀번호 입력 UI 사용 */}
+          <Input input={username} placeholder="아이디를 입력하세요" />
+          <Input
+            input={password}
+            type="password"
+            placeholder="비밀번호를 입력하세요."
+          />
         </View>
         <View style={styles.buttonSection}>
           <CustomButton
@@ -298,9 +256,7 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
               isPasswordValid(password.value)
                 ? {backgroundColor: '#2D81F1'}
                 : {backgroundColor: '#D3D3D3'},
-            ]}
-            disabled={userType === 'funeral' && funeralTab === '직원'} // 직원 로그인은 버튼 비활성화(PhoneAuthInput에서 처리)
-          >
+            ]}>
             <Typo
               style={[
                 isPasswordValid(password.value)
