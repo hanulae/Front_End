@@ -47,8 +47,12 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
 
   // 선택한 장례식장 이름 가져오기
-  const selectedFuneralName = signupInfo.selectedFuneral?.funeralName || '장례식장이 없습니다.';
-  console.log("🚀 ~ FuneralStepTwo ~ selectedFuneralName:", selectedFuneralName)
+  const selectedFuneralName =
+    signupInfo.selectedFuneral?.funeralName || '장례식장이 없습니다.';
+  console.log(
+    '🚀 ~ FuneralStepTwo ~ selectedFuneralName:',
+    selectedFuneralName,
+  );
 
   // 총 첨부파일 개수 계산
   const totalAttachedCount = useMemo(() => {
@@ -241,7 +245,10 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
         position: 'top',
       });
     } catch (error: any) {
-      console.log('❌ 인증번호 전송 실패:', error.response?.data || error.message);
+      console.log(
+        '❌ 인증번호 전송 실패:',
+        error.response?.data || error.message,
+      );
       Toast.show({
         type: 'error',
         text1: '인증번호 전송 실패',
@@ -265,7 +272,7 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
     }
 
     try {
-      const res = await api.post('/funeral/sms/verify', {
+      const res = await api.post('/funeral/sms/verify/funeral', {
         funeralPhone: phoneNumber.value,
         code: authCode.value,
       });
@@ -368,9 +375,7 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
           </Typo>
           <View style={styles.funeralNameContainer}>
             <View style={styles.funeralNameInputContainer}>
-              <Typo style={styles.funeralNameText}>
-                {selectedFuneralName}
-              </Typo>
+              <Typo style={styles.funeralNameText}>{selectedFuneralName}</Typo>
             </View>
             <CustomButton
               onPress={() => {
@@ -456,9 +461,11 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
 
           <CustomButton
             onPress={handleNext}
-            style={[styles.button, !isPhoneVerified && {backgroundColor: '#D3D3D3'}]}
-            disabled={!isPhoneVerified}
-          >
+            style={[
+              styles.button,
+              !isPhoneVerified && {backgroundColor: '#D3D3D3'},
+            ]}
+            disabled={!isPhoneVerified}>
             <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
               다음
             </Typo>
@@ -469,6 +476,7 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
           visible={showAlbum}
           onClose={closeAlbum}
         />
+        <Toast />
       </ScrollView>
     </TouchableWithoutFeedback>
   );

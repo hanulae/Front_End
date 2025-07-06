@@ -6,11 +6,11 @@ import MoveIcon from '../../assets/Button/Button_Move.svg';
 import PointIcon from '../../assets/Bullet/Bullet_PointCircle.svg';
 import CashIcon from '../../assets/Bullet/Bullet_CoinYellow.svg';
 import Hello from './Hello';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useFocusEffect} from '@react-navigation/native';
 
 // BSK ADD IMPORTS
 import api from '../../api/config';
-import {useEffect, useState} from 'react';
+import {useCallback, useState} from 'react';
 import {useAtomValue} from 'jotai';
 import {loginAtom} from '../../state/local_state/loginAtom';
 
@@ -36,29 +36,31 @@ const ProfileStat = ({point, cash, hallName}: IProfileStatProps) => {
     navigation.navigate('FuneralModify');
   };
 
-  useEffect(() => {
-    const fetchCurrentPointAndCash = async () => {
-      try {
-        const [pointRes, cashRes] = await Promise.all([
-          api.get('/funeral/point/current', {
-            headers: {Authorization: `Bearer ${loginInfo.accessToken}`},
-          }),
-          api.get('/funeral/cash/current', {
-            headers: {Authorization: `Bearer ${loginInfo.accessToken}`},
-          }),
-        ]);
-        setCurrentPoint(pointRes.data.currentPoint || 0);
-        setCurrentCash(cashRes.data.currentCash || 0);
-      } catch (error: any) {
-        console.error(
-          '포인트/캐시 조회 실패:',
-          error.response?.data || error.message,
-        );
-      }
-    };
+  useFocusEffect(
+    useCallback(() => {
+      const fetchCurrentPointAndCash = async () => {
+        try {
+          const [pointRes, cashRes] = await Promise.all([
+            api.get('/funeral/point/current', {
+              headers: {Authorization: `Bearer ${loginInfo.accessToken}`},
+            }),
+            api.get('/funeral/cash/current', {
+              headers: {Authorization: `Bearer ${loginInfo.accessToken}`},
+            }),
+          ]);
+          setCurrentPoint(pointRes.data.currentPoint || 0);
+          setCurrentCash(cashRes.data.currentCash || 0);
+        } catch (error: any) {
+          console.error(
+            '포인트/캐시 조회 실패:',
+            error.response?.data || error.message,
+          );
+        }
+      };
 
-    fetchCurrentPointAndCash();
-  }, [loginInfo.accessToken]);
+      fetchCurrentPointAndCash();
+    }, [loginInfo.accessToken]),
+  );
 
   return (
     <View style={styles.container}>

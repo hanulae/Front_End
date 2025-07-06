@@ -22,11 +22,10 @@ import CheckCircleOnIcon from '../../../assets/Check/Check01=Check01_Active.svg'
 import Toast from 'react-native-toast-message'; // 상단 import 필요
 import api from '../../../api/config';
 
-//Bsk add imports 
-import { useAtomValue } from 'jotai';
-import { loginAtom } from '.././../../state/local_state/loginAtom';
-import { getUserInfo } from '../../../utils/tokenStorage';
-
+//Bsk add imports
+import {useAtomValue} from 'jotai';
+import {loginAtom} from '.././../../state/local_state/loginAtom';
+import {getUserInfo} from '../../../utils/tokenStorage';
 
 interface IPermissions {
   room_management: boolean;
@@ -116,7 +115,7 @@ const StaffBottomSheet = ({
   useEffect(() => {
     const fetchUserInfo = async () => {
       const info = await getUserInfo();
-      console.log("🚀 ~ fetchUserInfo ~ info:", info)
+      console.log('🚀 ~ fetchUserInfo ~ info:', info);
       if (info && info.data && info.data.funeralPhoneNumber) {
         phoneNumberInput.onChangeText(info.data.funeralPhoneNumber);
       }
@@ -138,7 +137,7 @@ const StaffBottomSheet = ({
       // 권한 데이터 설정
       setPermissions(_staff.permissions[0]);
       console.log('Permissions set:', _staff.permissions);
-    }else if(mode === 'add'){
+    } else if (mode === 'add') {
       staffPassword.onChangeText('funeral1234');
     }
   }, [mode, _staff]);
@@ -169,7 +168,10 @@ const StaffBottomSheet = ({
         position: 'top',
       });
     } catch (error: any) {
-      console.log('❌ 인증번호 전송 실패:', error.response?.data || error.message);
+      console.log(
+        '❌ 인증번호 전송 실패:',
+        error.response?.data || error.message,
+      );
       Toast.show({
         type: 'error',
         text1: '인증번호 전송 실패',
@@ -232,7 +234,7 @@ const StaffBottomSheet = ({
         funeralPhone: phone,
         code,
       });
-      console.log("🚀 ~ handleVerifyCode ~ res:", res)
+      console.log('🚀 ~ handleVerifyCode ~ res:', res);
 
       if (res.data.verified) {
         Toast.show({
@@ -297,7 +299,7 @@ const StaffBottomSheet = ({
           permissions,
           funeralPhoneNumber: phoneNumberInput.value,
         });
-        console.log("🚀 ~ handleCreateStaff ~ update response:", response);
+        console.log('🚀 ~ handleCreateStaff ~ update response:', response);
         Toast.show({
           type: 'success',
           text1: '직원이 수정되었습니다.',
@@ -312,7 +314,7 @@ const StaffBottomSheet = ({
           permissions,
           funeralPhoneNumber: phoneNumberInput.value,
         });
-        console.log("🚀 ~ handleCreateStaff ~ create response:", response);
+        console.log('🚀 ~ handleCreateStaff ~ create response:', response);
         Toast.show({
           type: 'success',
           text1: '직원이 등록되었습니다.',
@@ -322,7 +324,10 @@ const StaffBottomSheet = ({
 
       onConfirm(); // 모달 닫기
     } catch (error: any) {
-      console.log('직원 생성/수정 실패:', error.response?.data || error.message);
+      console.log(
+        '직원 생성/수정 실패:',
+        error.response?.data || error.message,
+      );
       Toast.show({
         type: 'error',
         text1: '직원 등록/수정 실패',
@@ -352,8 +357,10 @@ const StaffBottomSheet = ({
               contentContainerStyle={styles.scrollContent}
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled">
-             <View style={styles.phoneBoxContainer}>
-                <Typo style={styles.phoneBoxText}>{phoneNumberInput.value}</Typo>
+              <View style={styles.phoneBoxContainer}>
+                <Typo style={styles.phoneBoxText}>
+                  {phoneNumberInput.value}
+                </Typo>
               </View>
               <CustomButton onPress={handleRequestCode} style={styles.button}>
                 <Typo style={styles.buttonText}>인증코드요청</Typo>
@@ -364,7 +371,9 @@ const StaffBottomSheet = ({
                   input={authCode}
                   placeholder="인증코드를 입력하세요"
                 />
-                <CustomButton onPress={handleVerifyCode} style={styles.checkButton}>
+                <CustomButton
+                  onPress={handleVerifyCode}
+                  style={styles.checkButton}>
                   <Typo style={styles.checkButtonText}>인증번호확인</Typo>
                 </CustomButton>
               </View>
@@ -374,8 +383,12 @@ const StaffBottomSheet = ({
                   input={staffPhoneNumber}
                   placeholder="휴대전화번호을 입력하세요"
                 />
-                <CustomButton onPress={handleCheckPhoneNumber} style={styles.checkButton}>
-                  <Typo style={styles.checkButtonText}>직원 휴대전화 중복 체크</Typo>
+                <CustomButton
+                  onPress={handleCheckPhoneNumber}
+                  style={styles.checkButton}>
+                  <Typo style={styles.checkButtonText}>
+                    직원 휴대전화 중복 체크
+                  </Typo>
                 </CustomButton>
               </View>
               <View style={styles.inputContainer}>
@@ -437,8 +450,12 @@ const StaffBottomSheet = ({
                 </View>
               </View>
               <View style={styles.buttonContainer}>
-                <Pressable onPress={handleCreateStaff} style={styles.confirmButton}>
-                  <Typo style={styles.confirmText}>{mode === 'edit' ? '수정' : '등록'}</Typo>
+                <Pressable
+                  onPress={handleCreateStaff}
+                  style={styles.confirmButton}>
+                  <Typo style={styles.confirmText}>
+                    {mode === 'edit' ? '수정' : '등록'}
+                  </Typo>
                 </Pressable>
               </View>
             </ScrollView>
@@ -596,7 +613,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 10,
   },
-  
+
   phoneBoxText: {
     fontSize: 16,
     color: '#000',

@@ -49,9 +49,7 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
 
   // 다음 버튼 활성화 여부
   const isNextEnabled = useMemo(() => {
-    return (
-      signupInfo.isPhoneVerified === true
-    );
+    return signupInfo.isPhoneVerified === true;
   }, [signupInfo.isPhoneVerified]);
 
   // signupInfo에서 첨부파일 복원
@@ -105,7 +103,7 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
       });
       return;
     }
-  
+
     setSignupInfo(prev => ({
       ...prev,
       phoneNumber: phoneNumber.value,
@@ -256,7 +254,10 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
         position: 'top',
       });
     } catch (error: any) {
-      console.log('❌ 인증번호 전송 실패:', error.response?.data || error.message);
+      console.log(
+        '❌ 인증번호 전송 실패:',
+        error.response?.data || error.message,
+      );
       Toast.show({
         type: 'error',
         text1: '인증번호 전송 실패',
@@ -268,7 +269,7 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
 
   const handleVerifyCode = async () => {
     console.log('인증 코드 확인:', authCode.value);
-  
+
     if (!phoneNumber.value || !authCode.value) {
       Toast.show({
         type: 'error',
@@ -278,20 +279,20 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
       });
       return;
     }
-  
+
     try {
       const res = await api.post('/manager/sms/verify', {
         managerPhone: phoneNumber.value,
         code: authCode.value,
       });
-  
+
       if (res.data.verified) {
         Toast.show({
           type: 'success',
           text1: '인증 성공',
           position: 'top',
         });
-  
+
         // 인증 상태 저장
         setSignupInfo(prev => ({
           ...prev,
@@ -452,6 +453,7 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
           visible={showAlbum}
           onClose={closeAlbum}
         />
+        <Toast />
       </ScrollView>
     </TouchableWithoutFeedback>
   );

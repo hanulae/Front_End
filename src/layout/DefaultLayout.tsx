@@ -1,6 +1,6 @@
 import React, {JSX} from 'react';
 import {StyleSheet, View} from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import Header from '../components/common/Header';
 
 interface IDefaultLayoutProps {
@@ -30,9 +30,13 @@ const DefaultLayout = ({
   color,
   top,
 }: IDefaultLayoutProps): JSX.Element => {
+  const insets = useSafeAreaInsets();
   return (
     <SafeAreaView
-      style={[styles.safeArea, {backgroundColor: color}]}
+      style={[
+        styles.safeArea,
+        {backgroundColor: color, paddingBottom: insets.bottom},
+      ]}
       edges={[
         ...(top === false ? [] : ['top' as const]),
         'left' as const,

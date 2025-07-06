@@ -199,6 +199,7 @@ const PointRefundPage = () => {
           </CustomButton>
         </View>
       </View>
+      <Toast />
     </DefaultLayout>
   );
 };

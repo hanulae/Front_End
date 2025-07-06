@@ -5,7 +5,7 @@ import {
   useRoute,
   useNavigation,
 } from '@react-navigation/native';
-import {useCallback, useEffect, useState} from 'react';
+import {useCallback, useState} from 'react';
 import {Platform, StatusBar} from 'react-native';
 import Typo from '../../components/common/Typo';
 import PointIcon from '../../assets/Bullet/Bullet_PointBlue.svg';
@@ -21,39 +21,21 @@ import {useAtomValue} from 'jotai';
 import {loginAtom} from '../../state/local_state/loginAtom';
 import api from '../../api/config';
 
-const DummyData = [
-  {
-    id: 1,
-    assetType: 'point',
-    transactionType: 'earn',
-    transactionDate: '2025-05-30',
-    amount: 50000,
-    balance: 100000,
-  },
-  {
-    id: 2,
-    assetType: 'cash',
-    transactionType: 'refund',
-    transactionDate: '2025-05-30',
-    amount: 50000,
-    balance: 100000,
-  },
-  {
-    id: 3,
-    assetType: 'cash',
-    transactionType: 'earm',
-    transactionDate: '2025-05-30',
-    amount: 50000,
-    balance: 100000,
-  },
-];
+interface ITransaction {
+  id: string;
+  assetType: 'point' | 'cash';
+  transactionType: 'earn' | 'refund';
+  transactionDate: string;
+  amount: number;
+  balance: number;
+}
 
 const PointHistoryPage = () => {
   // BSK ADD LOGIN INFO
   const loginInfo = useAtomValue(loginAtom);
   const [currentPoint, setCurrentPoint] = useState<number>(0);
   const [currentCash, setCurrentCash] = useState<number>(0);
-  const [transactions, setTransactions] = useState([]);
+  const [transactions, setTransactions] = useState<ITransaction[]>([]);
 
   // BSK ADD VARIANT
   const route = useRoute();
@@ -67,54 +49,99 @@ const PointHistoryPage = () => {
   const [selectedType, setSelectedType] = useState('전체');
   const [selectedOrder, setSelectedOrder] = useState('최신순');
 
-  useEffect(() => {
-    console.log('useEffect triggered with variant:', variant);
-    if (!variant) {
-      console.log('variant is undefined or null');
-      return;
-    }
-    const fetchPointAndCash = async () => {
-      try {
-        const isManager = variant === 'manager';
-        console.log('isManager', isManager);
-        console.log('variant type:', typeof variant);
-        console.log('variant value:', variant);
-
-        const pointUrl = isManager
-          ? '/manager/point/current'
-          : '/funeral/point/current';
-        const cashUrl = isManager
-          ? '/manager/cash/current'
-          : '/funeral/cash/current';
-        console.log('pointUrl', pointUrl);
-        console.log('cashUrl', cashUrl);
-
-        const pointRes = await api.get(pointUrl, {
-          headers: {
-            Authorization: `Bearer ${loginInfo.accessToken}`,
-          },
-        });
-        setCurrentPoint(pointRes.data.currentPoint || 0);
-
-        const cashRes = await api.get(cashUrl, {
-          headers: {
-            Authorization: `Bearer ${loginInfo.accessToken}`,
-          },
-        });
-        setCurrentCash(cashRes.data.currentCash || 0);
-
-        // Fetch transaction history
-        const historyUrl = isManager ? '/manager/cash/history/list' : '/funeral/cash/history/list';
-        const historyRes = await api.get(historyUrl);
-        console.log("🚀 ~ fetchPointAndCash ~ historyRes:", historyRes)
-        setTransactions(historyRes.data.transactions || []);
-      } catch (error: any) {
-        console.error('잔액 조회 실패:', error.response?.data || error.message);
+  useFocusEffect(
+    useCallback(() => {
+      console.log('useFocusEffect triggered with variant:', variant);
+      if (!variant) {
+        console.log('variant is undefined or null');
+        return;
       }
-    };
+      const fetchPointAndCash = async () => {
+        try {
+          const isManager = variant === 'manager';
+          console.log('isManager', isManager);
+          console.log('variant type:', typeof variant);
+          console.log('variant value:', variant);
 
-    fetchPointAndCash();
-  }, [variant, loginInfo.accessToken]);
+          const pointUrl = isManager
+            ? '/manager/point/current'
+            : '/funeral/point/current';
+          const cashUrl = isManager
+            ? '/manager/cash/current'
+            : '/funeral/cash/current';
+          console.log('pointUrl', pointUrl);
+          console.log('cashUrl', cashUrl);
+
+          const pointRes = await api.get(pointUrl, {
+            headers: {
+              Authorization: `Bearer ${loginInfo.accessToken}`,
+            },
+          });
+          setCurrentPoint(pointRes.data.currentPoint || 0);
+
+          const cashRes = await api.get(cashUrl, {
+            headers: {
+              Authorization: `Bearer ${loginInfo.accessToken}`,
+            },
+          });
+          setCurrentCash(cashRes.data.currentCash || 0);
+
+          // Fetch transaction history
+          const historyUrl = isManager
+            ? '/manager/cash/history/list'
+            : '/funeral/cash/history/list';
+          const historyRes = await api.get(historyUrl);
+          console.log('🚀 ~ fetchPointAndCash ~ historyRes:', historyRes);
+          console.log('🚀 ~ historyRes.data:', historyRes.data);
+          console.log('🚀 ~ historyRes.data.data:', historyRes.data.data);
+
+          // API 응답 데이터를 PointHistoryCard 형식에 맞게 변환
+          const transformedTransactions = (historyRes.data.data || []).map(
+            (transaction: any) => {
+              console.log('🚀 ~ processing transaction:', transaction);
+              const transformed = {
+                id:
+                  transaction.managerCashHistoryId ||
+                  transaction.funeralCashHistoryId,
+                assetType: transaction.transactionType?.includes('cash')
+                  ? 'cash'
+                  : 'point',
+                transactionType: transaction.transactionType?.includes('earn')
+                  ? 'earn'
+                  : 'refund',
+                transactionDate: new Date(
+                  transaction.transactionDate,
+                ).toLocaleDateString('ko-KR'),
+                amount:
+                  transaction.managerCashAmount ||
+                  transaction.funeralCashAmount ||
+                  0,
+                balance:
+                  transaction.managerCashBalanceAfter ||
+                  transaction.funeralCashBalanceAfter ||
+                  0,
+              };
+              console.log('🚀 ~ transformed transaction:', transformed);
+              return transformed;
+            },
+          );
+
+          console.log(
+            '🚀 ~ final transformedTransactions:',
+            transformedTransactions,
+          );
+          setTransactions(transformedTransactions);
+        } catch (error: any) {
+          console.error(
+            '잔액 조회 실패:',
+            error.response?.data || error.message,
+          );
+        }
+      };
+
+      fetchPointAndCash();
+    }, [variant, loginInfo.accessToken]),
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -173,7 +200,9 @@ const PointHistoryPage = () => {
             <CustomButton
               style={styles.actionButton}
               onPress={handlePointCharge}>
-              <Typo style={styles.actionButtonText}>포인트 충전</Typo>
+              <Typo style={styles.actionButtonText}>
+                {variant === 'manager' ? '환급' : '포인트 충전'}
+              </Typo>
             </CustomButton>
           </View>
         </View>
@@ -187,16 +216,27 @@ const PointHistoryPage = () => {
             </CustomButton>
           </View>
           <ScrollView contentContainerStyle={styles.card}>
-            {transactions.map(item => (
-              <PointHistoryCard
-                key={item.id}
-                assetType={item.assetType as 'point' | 'cash'}
-                transactionType={item.transactionType as 'earn' | 'refund'}
-                transactionDate={item.transactionDate}
-                amount={item.amount}
-                balance={item.balance}
-              />
-            ))}
+            {(() => {
+              console.log('🚀 ~ rendering transactions:', transactions);
+              return transactions.length === 0 ? (
+                <View style={{padding: 20, alignItems: 'center'}}>
+                  <Typo style={{color: '#666', fontSize: 16}}>
+                    거래 내역이 없습니다.
+                  </Typo>
+                </View>
+              ) : (
+                transactions.map(item => (
+                  <PointHistoryCard
+                    key={item.id}
+                    assetType={item.assetType as 'point' | 'cash'}
+                    transactionType={item.transactionType as 'earn' | 'refund'}
+                    transactionDate={item.transactionDate}
+                    amount={item.amount}
+                    balance={item.balance}
+                  />
+                ))
+              );
+            })()}
           </ScrollView>
         </View>
         <TypeBottomSheet

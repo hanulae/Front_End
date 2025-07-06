@@ -1,5 +1,5 @@
 import {StyleSheet, View} from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import FuneralHeader from '../components/common/FuneralHeader';
 // import {Header} from 'react-native/Libraries/NewAppScreen';
 
@@ -33,9 +33,13 @@ const FuneralLayout = ({
   closeButton = false,
 }: IFuneralLayoutProps) => {
   // top이 true일 때 SafeAreaView의 edges에 'top' 추가
+  const insets = useSafeAreaInsets();
   return (
     <SafeAreaView
-      style={[styles.safeArea, {backgroundColor: color}]}
+      style={[
+        styles.safeArea,
+        {backgroundColor: color, paddingBottom: insets.bottom},
+      ]}
       edges={top ? ['top', 'left', 'right'] : []}>
       {headerShown && (
         <FuneralHeader

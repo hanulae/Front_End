@@ -13,7 +13,7 @@ import Typo from '../../components/common/Typo';
 import ImagePreviewList, {
   IImage,
 } from '../../components/common/ImagePreviewList';
-import {useFocusEffect} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {useCallback, useEffect, useState} from 'react';
 import AlbumBottomSheet from '../../components/common/AlbumBottomSheet';
 import {convertUrisToFiles} from '../../util/image';
@@ -78,6 +78,8 @@ const FuneralModiftyPage = () => {
 
   //   setInfoData(fetched);
   // }, []);
+
+  const navigation = useNavigation();
 
   useEffect(() => {
     const loadFuneralHomeInfo = async () => {
@@ -232,6 +234,7 @@ const FuneralModiftyPage = () => {
     try {
       const response = await updateFuneralHomeInfo(dataToUpdate);
       console.log('Update successful:', response);
+      navigation.goBack();
       // 성공 메시지 표시 또는 다른 작업 수행
     } catch (error) {
       console.error('Failed to update funeral home info:', error);
