@@ -109,60 +109,63 @@ const SignupStepOne = ({onNext}: Props) => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.wrapperContainer}>
-        <View style={styles.container}>
-          <Typo fontSize={16} style={styles.containerTitle}>
-            아이디
-          </Typo>
-          <View style={styles.authSection}>
-            <Input input={username} placeholder="아이디를 입력하세요" />
-            <CustomButton
-              onPress={handleCheckUsername}
-              style={styles.requestButton}>
-              <Typo color="white" fontSize={14} style={styles.buttonText}>
-                중복확인
+        <View style={styles.formContainer}>
+          <View style={styles.container}>
+            <Typo fontSize={16} style={styles.containerTitle}>
+              아이디
+            </Typo>
+            <View style={styles.authSection}>
+              <Input input={username} placeholder="아이디를 입력하세요" />
+              <CustomButton
+                onPress={handleCheckUsername}
+                style={styles.requestButton}>
+                <Typo color="white" fontSize={14} style={styles.buttonText}>
+                  중복확인
+                </Typo>
+              </CustomButton>
+            </View>
+            {message ? (
+              <Typo
+                fontSize={12}
+                color={available ? '#2D81F1' : 'red'}
+                style={{marginLeft: 10}}>
+                {message}
               </Typo>
-            </CustomButton>
+            ) : null}
           </View>
-          {message ? (
-            <Typo
-              fontSize={12}
-              color={available ? '#2D81F1' : 'red'}
-              style={{marginLeft: 10}}>
-              {message}
+          <View style={styles.container}>
+            <Typo fontSize={16} style={styles.containerTitle}>
+              비밀번호
             </Typo>
-          ) : null}
-        </View>
-        <View style={styles.container}>
-          <Typo fontSize={16} style={styles.containerTitle}>
-            비밀번호
-          </Typo>
-          <Input
-            input={password}
-            placeholder="비밀번호를 입력하세요"
-            type="password"
-          />
-          {password.touched && password.error ? (
-            <Typo fontSize={12} color="red" style={{marginLeft: 10}}>
-              {password.error}
+            <Input
+              input={password}
+              placeholder="비밀번호를 입력하세요"
+              type="password"
+            />
+            {password.touched && password.error ? (
+              <Typo fontSize={12} color="red" style={{marginLeft: 10}}>
+                {password.error}
+              </Typo>
+            ) : null}
+          </View>
+          <View style={styles.container}>
+            <Typo fontSize={16} style={styles.containerTitle}>
+              비밀번호 확인
             </Typo>
-          ) : null}
+            <Input
+              input={confirmPassword}
+              label="비밀번호 확인"
+              placeholder="비밀번호를 다시 입력하세요"
+              type="password"
+            />
+            {confirmPassword.touched && confirmPassword.error ? (
+              <Typo fontSize={12} color="red" style={{marginLeft: 10}}>
+                {confirmPassword.error}
+              </Typo>
+            ) : null}
+          </View>
         </View>
-        <View style={styles.container}>
-          <Typo fontSize={16} style={styles.containerTitle}>
-            비밀번호 확인
-          </Typo>
-          <Input
-            input={confirmPassword}
-            label="비밀번호 확인"
-            placeholder="비밀번호를 다시 입력하세요"
-            type="password"
-          />
-          {confirmPassword.touched && confirmPassword.error ? (
-            <Typo fontSize={12} color="red" style={{marginLeft: 10}}>
-              {confirmPassword.error}
-            </Typo>
-          ) : null}
-        </View>
+
         <View style={styles.confirmButtonContainer}>
           <CustomButton
             onPress={handleNext}
@@ -189,6 +192,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 18,
   },
+  formContainer: {
+    flex: 2,
+  },
   typeContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -208,6 +214,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     marginBottom: 30,
     gap: 10,
+    flex: 1,
   },
   typeButton: {
     flex: 1,
