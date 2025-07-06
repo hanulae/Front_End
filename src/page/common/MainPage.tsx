@@ -108,7 +108,7 @@ const MainPage = ({navigation}: IMainPageProps): JSX.Element => {
         <View style={styles.footerContainer}>
           <InfoCenterIcon width={21.5} height={22} />
           <Typo style={styles.footerText}>고객센터</Typo>
-          <Typo style={styles.footerNumber}>02-123-4567</Typo>
+          <Typo style={styles.footerNumber}>1661-1897</Typo>
         </View>
       </View>
       {showSelectSheet && (
