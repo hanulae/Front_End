@@ -220,7 +220,7 @@ const ConfirmTransactionPage = () => {
             </View>
             <View style={styles.bottomInfoContainer}>
               <Typo style={styles.bottomInfoText}>할인율</Typo>
-              <Typo style={styles.bottomValueText}>{funeralHallInfo?.discount || ''} %</Typo>
+              <Typo style={styles.bottomValueText}>{funeralHallInfo?.discount ?? ''} %</Typo>
             </View>
           </View>
           <CustomButton

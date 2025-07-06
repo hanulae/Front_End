@@ -36,7 +36,6 @@ const ManagerHeader = ({
 }: IManagerHeaderProps): JSX.Element => {
   const navigation = useNavigation<NavigationProp<any>>();
   const userInfo = useAtomValue(userInfoAtom);
-  console.log('userInfo', userInfo);
   const goBack = navigation.goBack;
   const goHome = () => {
     // homeRouteName이 명시적으로 제공된 경우 우선 사용
@@ -103,7 +102,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    padding: 14,
     backgroundColor: '#fff',
   },
   title: {

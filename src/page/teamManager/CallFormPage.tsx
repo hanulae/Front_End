@@ -1,10 +1,10 @@
 import {NavigationProp, useNavigation, RouteProp, useRoute} from '@react-navigation/native';
-import {StyleSheet, TouchableOpacity, View, TextInput, Alert} from 'react-native';
+import {StyleSheet, TouchableOpacity, View, TextInput, Alert, ScrollView} from 'react-native';
 import {usePhoneInput} from '../../hooks/input/usePhoneInput';
 import Typo from '../../components/common/Typo';
 import {Input} from '../../components/common/input/Input';
 import ManagerLayout from '../../layout/ManagerLayout';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useManagerDispatchRequest } from '../../hooks/useManagerDispatchRequest';
 import Toast from 'react-native-toast-message';
 import DaumPostcodeModal from '../../components/common/DaumPostcodeModal';
@@ -35,6 +35,11 @@ const CallFormPage = () => {
 
   // 이전 페이지에서 받아온 데이터
   const { managerFormBidId, managerFormId, funeralId } = route.params || {};
+
+  // 버튼 활성화 상태 계산
+  const isFormValid = useMemo(() => {
+    return address.trim() !== '' && managerPhone.value.trim() !== '';
+  }, [address, managerPhone.value]);
 
   const handleAddressSearch = () => {
     setShowPostcodeModal(true);
@@ -74,7 +79,7 @@ const CallFormPage = () => {
     if (!address) {
       Toast.show({
         type: 'error',
-        text1: '주소를 입력해주세요.',
+        text1: '(필수) 주소를 입력해주세요.',
         position: 'top',
         topOffset: 0,
       });
@@ -84,7 +89,7 @@ const CallFormPage = () => {
     if (!managerPhone.value) {
       Toast.show({
         type: 'error',
-        text1: '상조 팀장 연락처를 입력해주세요.',
+        text1: '(필수) 상조 팀장 연락처를 입력해주세요.',
         position: 'top',
         topOffset: 0,
       });
@@ -175,19 +180,25 @@ const CallFormPage = () => {
       homeButton={true}
       homeRouteName="ManagerMain"
       logoutButton={false}>
-      {/* 출동 신청서 내용 */}
-      <View style={styles.wrapper}>
+    
+    <View style={styles.container}>
+      {/* 스크롤 가능한 콘텐츠 영역 */}
+      <ScrollView 
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
         {/* 주소 입력 */}
         <View style={styles.section}>
           <Typo fontSize={16} style={styles.label}>
-            주소 입력
+            주소 입력 *
           </Typo>
-          <View style={styles.container}>
+          <View style={styles.addressContainer}>
             <View style={styles.addressRow}>
               <View style={styles.addressBox}>
                 <Typo style={[
                   styles.addressText,
-                  address && { color: '#000' } // 주소가 있으면 검은색으로
+                  address && { color: '#000' }
                 ]}>
                   {address || '주소를 검색해주세요'}
                 </Typo>
@@ -211,61 +222,73 @@ const CallFormPage = () => {
 
         {/* 연락처 입력 */}
         <View style={styles.bottomSection}>
-          <Typo style={styles.label}>가족 연락처</Typo>
+          <Typo style={styles.label}>가족 연락처 (선택)</Typo>
           <Input
             input={familyPhone}
             placeholder="가족 연락처를 입력해주세요."
             type="number"
           />
 
-          <Typo style={styles.label}>상조 팀장 연락처</Typo>
+          <Typo style={styles.label}>상조 팀장 연락처 (필수)</Typo>
           <Input
             input={managerPhone}
             placeholder="상조 팀장 연락처를 입력해주세요."
             type="number"
           />
 
-          <Typo style={styles.label}>비상 연락처</Typo>
+          <Typo style={styles.label}>비상 연락처 (선택)</Typo>
           <Input
             input={emergencyPhone}
             placeholder="비상 연락처를 입력해주세요."
             type="number"
           />
         </View>
-        <View style={styles.bottomContainer}>
-          <TouchableOpacity 
-            style={[
-              styles.nextButton,
-              loading && { opacity: 0.5 } // 로딩 중일 때 반투명
-            ]} 
-            onPress={showConfirmDialog}
-            disabled={loading} // 로딩 중일 때 비활성화
-          >
-            <Typo style={styles.nextButtonText}>
-              {loading ? '신청 중...' : '출동 신청'}
-            </Typo>
-          </TouchableOpacity>
-        </View>
+      </ScrollView>
+
+      {/* 고정된 버튼 영역 */}
+      <View style={styles.fixedBottomContainer}>
+        <TouchableOpacity 
+          style={[
+            styles.nextButton,
+            (!isFormValid || loading) && styles.disabledButton
+          ]} 
+          onPress={showConfirmDialog}
+          disabled={!isFormValid || loading}
+        >
+          <Typo style={[
+            styles.nextButtonText,
+            (!isFormValid || loading) && styles.disabledButtonText
+          ]}>
+            {loading ? '신청 중...' : 
+             !isFormValid ? '필수 정보를 입력해주세요' : 
+             '출동 신청'}
+          </Typo>
+        </TouchableOpacity>
       </View>
+    </View>
 
-      {/* 주소검색 모달 */}
-      <DaumPostcodeModal
-        visible={showPostcodeModal}
-        onClose={() => setShowPostcodeModal(false)}
-        onSelected={handleAddressSelected}
-      />
+    {/* 주소검색 모달 */}
+    <DaumPostcodeModal
+      visible={showPostcodeModal}
+      onClose={() => setShowPostcodeModal(false)}
+      onSelected={handleAddressSelected}
+    />
 
-      <Toast />
-    </ManagerLayout>
-  );
+    <Toast />
+  </ManagerLayout>
+);
 };
 
 export default CallFormPage;
 
 const styles = StyleSheet.create({
-  wrapper: {
-    // flexGrow: 1,
+  container: {
     flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
     paddingHorizontal: 16,
     paddingBottom: 16,
   },
@@ -273,16 +296,41 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     gap: 8,
   },
+  addressContainer: {
+    flexDirection: 'column',
+  },
   bottomSection: {
     flexDirection: 'column',
     gap: 8,
     marginBottom: 24,
   },
-  container: {
-    // flex: 1,
-    flexDirection: 'column',
-    // alignSelf: 'stretch',
+  fixedBottomContainer: {
+    backgroundColor: 'white',
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
   },
+  nextButton: {
+    backgroundColor: '#2D81F1',
+    paddingVertical: 18,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  nextButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  disabledButton: {
+    backgroundColor: '#D1D5DB',
+  },
+  disabledButtonText: {
+    color: '#9CA3AF',
+  },
+  
+  // 기존 스타일들...
   label: {
     fontSize: 16,
     fontWeight: '600',
@@ -331,23 +379,5 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#fff',
     fontFamily: 'Pretendard-Black',
-  },
-  nextButton: {
-    marginTop: 40,
-    backgroundColor: '#2D81F1',
-    paddingVertical: 18,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  bottomContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    paddingBottom: 16,
-  },
-
-  nextButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
   },
 });
