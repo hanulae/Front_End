@@ -12,8 +12,7 @@ const screenHeight = Dimensions.get('window').height;
 // BSK ADD IMPORTS
 import api from '../../api/config';
 import Toast from 'react-native-toast-message';
-import { useAtomValue } from 'jotai';
-import { loginAtom } from '../../state/local_state/loginAtom'; // 경로는 프로젝트 구조에 따라 조정
+import { getUserInfo } from '../../utils/tokenStorage';
 
 interface IPhoneAuthSheetProps {
   visible: boolean;
@@ -29,10 +28,6 @@ const PhoneAuthSheet = ({
 
   const phoneNumber = usePhoneInput();
   const authCode = useInputBase();
-
-  // BSK ADD LOGIN INFO
-  const loginInfo = useAtomValue(loginAtom); // 로그인된 유저 정보
-  const token = loginInfo.accessToken;
 
   const confirmCode = async () => {
     const phone = phoneNumber.value.replace(/[^0-9]/g, '').trim();
@@ -99,12 +94,9 @@ const PhoneAuthSheet = ({
     try {
       const res = await api.post(
         '/manager/sms/update/send',
-        { managerPhone: phone },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // ✅ 토큰 추가
-          },
-        },
+        { managerPhone: phone,
+          userType: 'manager'
+         }
       );
   
       console.log('📨 인증번호 전송 성공:', res.data);
@@ -124,6 +116,21 @@ const PhoneAuthSheet = ({
       });
     }
   };
+
+  useEffect(() => {
+    const fetchManagerPhoneNumber = async () => {
+      try {
+        const info = await getUserInfo(); // Assuming getUserInfo fetches the manager's info
+        if (info && info.data && info.data.managerPhoneNumber) {
+          phoneNumber.onChangeText(info.data.managerPhoneNumber);
+        }
+      } catch (error) {
+        console.error('Failed to fetch manager phone number:', error);
+      }
+    };
+
+    fetchManagerPhoneNumber();
+  }, []);
 
   useEffect(() => {
     Animated.timing(translateY, {

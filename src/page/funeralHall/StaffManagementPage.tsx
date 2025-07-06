@@ -15,11 +15,11 @@ import StaffBottomSheet from '../../components/funeralHall/management/StaffBotto
 import { IStaff } from './StaffManagementPage.types';
 import Toast from 'react-native-toast-message';
 import api from '../../api/config';
-import { useAtomValue } from 'jotai';
-import { loginAtom } from '../../state/local_state/loginAtom';
+
+
 
 const StaffManagementPage = () => {
-  const loginInfo = useAtomValue(loginAtom);
+  
   const [isEdit, setIsEdit] = useState(false);
   const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
   const [bottomSheetMode, setBottomSheetMode] = useState<'add' | 'edit' | null>(null);
@@ -40,18 +40,25 @@ const StaffManagementPage = () => {
 
   const fetchStaffList = async () => {
     try {
-      const res = await api.get('/funeral/staff/list', {
-        headers: {
-          Authorization: `Bearer ${loginInfo.accessToken}`,
-        },
-      });
+      const res = await api.get('/funeral/staff/list');
+      console.log("🚀 ~ fetchStaffList ~ res:", res);
 
       const staffList = res.data.data.map((staff: any) => ({
         staffId: staff.funeralStaffId,
         staffName: staff.funeralStaffName,
         staffGrade: staff.funeralStaffRole,
-        phone: staff.funeralStaffPhoneNumber,
+        staffPhoneNumber: staff.funeralStaffPhoneNumber,
+        staffPassword: staff.funeralStaffPassword,
+        permissions: staff.permissions.map((perm: any) => ({
+          room_management: perm.roomManagement,
+          info_edit: perm.infoEdit,
+          dispatch_history: perm.dispatchHistory,
+          dispatch_pending: perm.dispatchPending,
+          estimate_history: perm.estimateHistory,
+          app_settings: perm.appSettings,
+        })),
       }));
+
       setStaffList(staffList);
     } catch (error: any) {
       console.error('직원 목록 조회 실패:', error.response?.data || error.message);
@@ -65,11 +72,7 @@ const StaffManagementPage = () => {
 
   const handleDeleteStaff = async (staffId: string) => {
     try {
-      await api.delete(`/funeral/staff/${staffId}`, {
-        headers: {
-          Authorization: `Bearer ${loginInfo.accessToken}`,
-        },
-      });
+      await api.delete(`/funeral/staff/${staffId}`);
       Toast.show({
         type: 'success',
         text1: '직원 삭제 완료',
@@ -96,6 +99,7 @@ const StaffManagementPage = () => {
   };
 
   const openEditSheet = (staff: IStaff) => {
+    console.log("🚀 ~ openEditSheet ~ staff:", staff)
     setSelectedStaff(staff);
     setBottomSheetMode('edit');
     setBottomSheetVisible(true);
