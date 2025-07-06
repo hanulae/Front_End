@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
   infoContainer: {
     flex: 1,
     height: 110,
-    paddingTop: 8,
+    paddingTop: 6,
     flexDirection: 'column',
     justifyContent: 'flex-start',
   },
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '500',
     color: '#283042',
-    marginBottom: 10,
+    marginBottom: 8,
     fontFamily: 'Pretendard-Black',
   },
   infoAddress: {

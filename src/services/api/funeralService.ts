@@ -34,6 +34,18 @@ interface FuneralDetail {
   funeralHomepageUrl: string;
 }
 
+interface HallRoomSummary {
+  funeralHallId: string;
+  funeralHallName: string;
+  funeralHallSize: number;
+  funeralHallNumberOfMourners: number;
+}
+
+interface HallRoomSummaryResponse {
+  success: boolean;
+  data: HallRoomSummary[];
+}
+
 interface FuneralDetailResponse {
   success: boolean;
   data: FuneralDetail;
@@ -129,6 +141,40 @@ export const funeralService = {
       }
     }
   },
+
+  // 호실 요약 정보 API 호출
+  getHallRoomSummary: async (
+    funeralId: string,
+  ): Promise<HallRoomSummaryResponse> => {
+    try {
+      const response = await api.get(`/funeral/hall/summary/${funeralId}`);
+
+      console.log('response', response.data);
+
+      const data: HallRoomSummaryResponse = response.data;
+
+      return data;
+    } catch (error: any) {
+      if (error.response) {
+        console.error('❌ 호실 요약 정보 조회 서버 에러:', {
+          상태코드: error.response.status,
+          응답데이터: error.response.data,
+          URL: error.config?.url,
+        });
+        throw new Error(
+          `호실 정보 조회 실패: ${error.response.status} - ${
+            error.response.data?.message || '호실 정보를 찾을 수 없습니다'
+          }`,
+        );
+      } else if (error.request) {
+        console.error('❌ 호실 요약 정보 조회 네트워크 에러:', error.request);
+        throw new Error('네트워크 연결을 확인해주세요');
+      } else {
+        console.error('❌ 호실 요약 정보 조회 요청 에러:', error.message);
+        throw new Error(`요청 에러: ${error.message}`);
+      }
+    }
+  },
 };
 
 export const fetchFuneralHomeInfo = async () => {
@@ -143,7 +189,10 @@ export const fetchFuneralHomeInfo = async () => {
 
 export const updateFuneralHomeInfo = async (data: any) => {
   try {
-    const response = await api.put(`/funeral/funeralList/update/funeralList`, data);
+    const response = await api.put(
+      `/funeral/funeralList/update/funeralList`,
+      data,
+    );
     return response.data;
   } catch (error) {
     console.error('Error updating funeral home info:', error);
@@ -158,4 +207,6 @@ export type {
   SearchFuneralResponse,
   FuneralDetailResponse,
   FuneralDetail,
+  HallRoomSummary,
+  HallRoomSummaryResponse,
 };

@@ -4,7 +4,7 @@ import {
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
-import {ScrollView, StyleSheet, TouchableOpacity, View, ActivityIndicator} from 'react-native';
+import {ScrollView, StyleSheet, TouchableOpacity, View, ActivityIndicator, RefreshControl} from 'react-native';
 import Typo from '../../components/common/Typo';
 import ManagerLayout from '../../layout/ManagerLayout';
 import SMSIcon from '../../assets/Attachment/Attach_SMSActive.svg';
@@ -32,6 +32,9 @@ const ProceedCallPage = () => {
   // 출동 신청 상세 데이터 상태
   const [dispatchDetail, setDispatchDetail] = useState<any>(null);
   const [transactionStatus, setTransactionStatus] = useState<GetManagerDispatchRequestTransactionStatus | null>(null);
+  
+  // 새로고침 상태 추가
+  const [refreshing, setRefreshing] = useState(false);
 
   // 현재 상태 계산 (dispatchDetail과 transactionStatus를 종합)
   const getCurrentStatus = () => {
@@ -82,6 +85,30 @@ const ProceedCallPage = () => {
       loadDispatchDetail();
     }
   }, [callId, loadDispatchDetail]);
+
+  // 새로고침 함수
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await loadDispatchDetail();
+      Toast.show({
+        text1: '새로고침 완료',
+        type: 'success',
+        position: 'top',
+        topOffset: 0,
+      });
+    } catch (error) {
+      console.error('새로고침 중 오류 발생:', error);
+      Toast.show({
+        text1: '새로고침 실패',
+        type: 'error',
+        position: 'top',
+        topOffset: 0,
+      });
+    } finally {
+      setRefreshing(false);
+    }
+  }, [loadDispatchDetail]);
 
   const handleMessage = (phoneNumber?: string) => {
     if (!phoneNumber) {
@@ -395,7 +422,16 @@ const ProceedCallPage = () => {
       <ScrollView 
         contentContainerStyle={styles.wrapper}
         showsVerticalScrollIndicator={false}
-        bounces={false}>
+        bounces={true}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#2D81F1']} // Android
+            tintColor="#2D81F1"   // iOS
+            title="새로고침 중..." // iOS
+          />
+        }>
         {/* 로딩 상태 */}
         {loading && (
           <View style={styles.centerContainer}>

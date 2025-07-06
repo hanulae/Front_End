@@ -94,14 +94,14 @@ const EstimateDetailPage = () => {
               <CommaIcon width={6} height={6} />
               <Typo style={styles.label}>식장지불금액</Typo>
             </View>
-            <Typo style={styles.value}>{managerFormBidDetail?.funeralHallPrice}만원</Typo>
+            <Typo style={styles.value}>{managerFormBidDetail?.funeralHallDetailPrice}만원</Typo>
           </View>
           <View style={styles.listItem}>
             <View style={styles.labelContainer}>
               <CommaIcon width={6} height={6} />
               <Typo style={styles.label}>호실사용료</Typo>
             </View>
-            <Typo style={styles.value}>{managerFormBidDetail?.funeralHallDetailPrice}만원</Typo>
+            <Typo style={styles.value}>{managerFormBidDetail?.funeralHallPrice}만원</Typo>
           </View>
           <View style={styles.listItem}>
             <View style={styles.labelContainer}>

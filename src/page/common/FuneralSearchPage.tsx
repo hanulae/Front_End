@@ -49,11 +49,33 @@ const FuneralSearchPage = () => {
     setSelectedCity(region);
     setSelectedGu('시 / 군 / 구'); // 시/도가 변경되면 군/구 초기화
     setShowFindCityBottomSheet(false);
+    
+    //시/도 선택 시 자동 검색 실행
+    setTimeout(() => {
+      searchFunerals({
+        keyword: hallName.value.trim() || undefined,
+        sido: region === '시 / 도' ? undefined : region,
+        sigungu: undefined, // 시/도 변경 시 시/군/구는 초기화
+        page: 1,
+        limit: 20,
+      });
+    }, 100); // 상태 업데이트 후 검색 실행
   };
 
   const handleSelectGu = (gu: string) => {
     setSelectedGu(gu);
     setShowGuBottomSheet(false);
+    
+    //시/군/구 선택 시 자동 검색 실행
+    setTimeout(() => {
+      searchFunerals({
+        keyword: hallName.value.trim() || undefined,
+        sido: selectedCity === '시 / 도' ? undefined : selectedCity,
+        sigungu: gu === '시 / 군 / 구' ? undefined : gu,
+        page: 1,
+        limit: 20,
+      });
+    }, 100); // 상태 업데이트 후 검색 실행
   };
 
   useEffect(() => {
@@ -259,7 +281,7 @@ const FuneralSearchPage = () => {
             </View>
           )}
 
-              <View style={styles.searchContainer}>
+          <View style={styles.searchContainer}>
             {/* 🔍 검색 입력 영역 - 돋보기 아이콘 내장 */}
             <View style={styles.searchInputContainer}>
               <TextInput
@@ -296,12 +318,7 @@ const FuneralSearchPage = () => {
             {pageInfo && (
               <View style={styles.resultHeader}>
                 <Typo style={styles.resultText}>
-                  📊 총 {pageInfo.totalItems}개의 장례식장을 찾았습니다.
-                  (페이지 {pageInfo.currentPage}/{pageInfo.totalPages})
-                </Typo>
-                {/* 🆕 현재 표시 중인 데이터 수 */}
-                <Typo style={styles.currentResultText}>
-                  현재 {funerals.length}개 표시 중
+                  총 {pageInfo.totalItems} / {funerals.length}
                 </Typo>
               </View>
             )}
@@ -452,12 +469,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   wrapper: {
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     flex: 1,
   },
   searchContainer: {
     flexDirection: 'column',
-    gap: 10,
+    gap: 8,
   },
   // ✅ 검색 입력창 - 돋보기 아이콘 내장
   searchInputContainer: {
@@ -466,26 +484,26 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
     borderRadius: 10,
     paddingHorizontal: 16,
-    paddingVertical: 4,
+    paddingVertical: 2,
     position: 'relative',
   },
   searchInput: {
     flex: 1,
     fontSize: 14,
-    paddingVertical: 12,
+    paddingVertical: 10,
     paddingRight: 40, // 돋보기 아이콘 공간 확보
     color: '#333',
   },
   searchIconContainer: {
     position: 'absolute',
     right: 12,
-    padding: 8,
+    padding: 6,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#2d82f100',
     borderRadius: 8,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
   },
   searchIcon: {
     fontSize: 18,
@@ -531,7 +549,7 @@ const styles = StyleSheet.create({
   },
   // ✅ FlatList 컨텐츠 스타일
   flatListContent: {
-    paddingBottom: 20,
+    paddingBottom: 16,
   },
   // ✅ 고정된 버튼 컨테이너
   fixedButtonContainer: {
@@ -543,10 +561,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 8,
     paddingBottom: Platform.OS === 'ios' ? 34 : 16, // iOS Safe Area 고려
     backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
+    // borderTopWidth: 1,
     borderTopColor: '#E0E0E0',
     // 그림자 효과
     shadowColor: '#000',
@@ -609,16 +627,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   resultHeader: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#dedede',
-    borderTopWidth: 1,
-    borderTopColor: '#dedede',
+    marginLeft: 8,
+    marginBottom: 4,
+    // padding: 10,
+    // borderBottomColor: '#dedede',
+    // borderTopWidth: 1,
+    // borderTopColor: '#dedede',
   },
   resultText: {
     color: '#666',
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 10,
+    fontWeight: '400',
   },
   errorContainer: {
     padding: 16,
@@ -660,8 +679,8 @@ const styles = StyleSheet.create({
     borderColor: '#2D81F1',
     borderWidth: 1,
     borderRadius: 10,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
     alignItems: 'center',
   },
   locationButtonText: {

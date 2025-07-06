@@ -2,20 +2,17 @@ import {NavigationProp, useRoute, RouteProp} from '@react-navigation/native';
 import {
   StyleSheet,
   View,
-  Text,
   Image,
   ScrollView,
   TouchableOpacity,
-  Dimensions,
   Linking,
   ActivityIndicator,
 } from 'react-native';
-import {useEffect, useState} from 'react';
+import {useEffect, useState, useCallback} from 'react';
 import ManagerLayout from '../../layout/ManagerLayout';
 import CustomButton from '../../components/common/CustomButton';
 import CartIcon from '../../assets/Button/Button_Cart.svg';
 import Typo from '../../components/common/Typo';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import MoveIcon from '../../assets/Button/Button_MoveTransparent.svg';
 import dummyHallImage from '../../assets/dummyHall.png';
 import PhoneIcon from '../../assets/Icon/Icon_Phone.svg';
@@ -25,13 +22,11 @@ import ParkingLotIcon from '../../assets/Icon/Icon_ParkingLot.svg';
 import StoreIcon from '../../assets/Icon/Icon_Store.svg';
 import FamilyWaitingRoomIcon from '../../assets/Icon/Icon_FamilyWaitingRoom.svg';
 import DisabledFacilityIcon from '../../assets/Icon/Icon_DisabledFacility.svg';
-import {funeralService, FuneralDetail} from '../../services/api/funeralService';
+import {funeralService, FuneralDetail, HallRoomSummary} from '../../services/api/funeralService';
 import { useManagerCart } from '../../hooks/useManagerCart';
 import Toast from 'react-native-toast-message';
 import { useAtom } from 'jotai';
 import { userInfoAtom } from '../../state/local_state/userinfoAtom';
-
-const {width} = Dimensions.get('window');
 
 type FuneralDetailParams = {
   funeralListId: string;
@@ -43,14 +38,14 @@ interface IFuneralDetailPageProps {
   navigation: NavigationProp<any>;
 }
 
-// 🆕 아이콘 크기 상수 정의
+// 아이콘 크기 상수 정의
 const ICON_SIZES = {
   contact: 16, // 연락처 아이콘
   amenity: 68, // 편의시설 아이콘
   button: 24, // 버튼 아이콘
 } as const;
 
-const FuneralDetailPage = ({navigation}: IFuneralDetailPageProps) => {
+const FuneralDetailPage = ({navigation: _navigation}: IFuneralDetailPageProps) => {
   const route = useRoute<RouteProp<{params: FuneralDetailParams}, 'params'>>();
   const {funeralListId, funeralId, variant} = route.params;
 
@@ -61,32 +56,40 @@ const FuneralDetailPage = ({navigation}: IFuneralDetailPageProps) => {
   // 회원가입 중인지 확인
   const isSignupMode = variant === 'signup';
 
-  // 🆕 상태 관리
+  // 상태 관리
   const [funeralInfo, setFuneralInfo] = useState<FuneralDetail | null>(null);
+  const [hallRoomSummary, setHallRoomSummary] = useState<HallRoomSummary[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   const {
     addToCart,
-    loading: _cartLoading,
-    error: _cartError,
   } = useManagerCart();
 
-  useEffect(() => {
-    // 🚧 실제 API로 상세 정보 가져오기
-    fetchFuneralDetail();
-  }, [funeralListId, funeralId]);
-
-  // 🆕 실제 API 호출 함수
-  const fetchFuneralDetail = async () => {
+  // 실제 API 호출 함수
+  const fetchFuneralDetail = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const response = await funeralService.getFuneralDetail(funeralListId);
+      // 장례식장 상세 정보 조회
+      const funeralResponse = await funeralService.getFuneralDetail(funeralListId);
 
-      if (response.success && response.data) {
-        setFuneralInfo(response.data);
+      if (funeralResponse.success && funeralResponse.data) {
+        setFuneralInfo(funeralResponse.data);
+        
+        // 호실 요약 정보 조회
+        if (funeralId) {
+        try {
+          const hallRoomResponse = await funeralService.getHallRoomSummary(funeralId);
+          if (hallRoomResponse.success && hallRoomResponse.data) {
+            setHallRoomSummary(hallRoomResponse.data);
+          }
+        } catch (hallRoomError: any) {
+          console.warn('⚠️ 호실 요약 정보 로드 실패:', hallRoomError);
+            // 호실 정보 실패는 전체 페이지를 막지 않음
+          }
+        }
       } else {
         throw new Error('장례식장 정보를 불러올 수 없습니다');
       }
@@ -96,7 +99,12 @@ const FuneralDetailPage = ({navigation}: IFuneralDetailPageProps) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [funeralListId, funeralId]);
+
+  useEffect(() => {
+    // 실제 API로 상세 정보 가져오기
+    fetchFuneralDetail();
+  }, [fetchFuneralDetail]);
 
   const handleAddToCart = async () => {
     try {
@@ -152,7 +160,7 @@ const FuneralDetailPage = ({navigation}: IFuneralDetailPageProps) => {
     }
   };
 
-  // 🆕 로딩 중일 때 표시
+  // 로딩 중일 때 표시
   if (loading) {
     return (
       <ManagerLayout
@@ -169,7 +177,7 @@ const FuneralDetailPage = ({navigation}: IFuneralDetailPageProps) => {
     );
   }
 
-  // 🆕 에러 발생 시 표시
+  // 에러 발생 시 표시
   if (error || !funeralInfo) {
     return (
       <ManagerLayout
@@ -258,7 +266,7 @@ const FuneralDetailPage = ({navigation}: IFuneralDetailPageProps) => {
             <View style={styles.facilityItem}>
               <Typo style={styles.facilityLabel}>빈소</Typo>
               <Typo style={styles.facilityValue}>
-                {funeralInfo.funeralTotalRooms
+                {funeralInfo.funeralTotalRooms !== undefined && funeralInfo.funeralTotalRooms !== null
                   ? `${funeralInfo.funeralTotalRooms}개`
                   : '정보없음'}
               </Typo>
@@ -352,6 +360,42 @@ const FuneralDetailPage = ({navigation}: IFuneralDetailPageProps) => {
             </View>
           </View>
         </View>
+
+        {/* 🏠 빈소 정보 */}
+        {hallRoomSummary.length > 0 && (
+          <View style={styles.section}>
+            <Typo style={styles.sectionTitle}>빈소정보</Typo>
+            <View style={styles.hallRoomTable}>
+              {/* 테이블 헤더 */}
+              <View style={styles.tableHeader}>
+                <View style={styles.tableHeaderCell}>
+                  <Typo style={styles.tableHeaderText}>호실이름</Typo>
+                </View>
+                <View style={styles.tableHeaderCell}>
+                  <Typo style={styles.tableHeaderText}>평수</Typo>
+                </View>
+                <View style={styles.tableHeaderCell}>
+                  <Typo style={styles.tableHeaderText}>수용가능인원</Typo>
+                </View>
+              </View>
+              
+              {/* 테이블 데이터 */}
+              {hallRoomSummary.map((room) => (
+                <View key={room.funeralHallId} style={styles.tableRow}>
+                  <View style={styles.tableCell}>
+                    <Typo style={styles.tableCellText}>{room.funeralHallName}</Typo>
+                  </View>
+                  <View style={styles.tableCell}>
+                    <Typo style={styles.tableCellText}>{room.funeralHallSize}평</Typo>
+                  </View>
+                  <View style={styles.tableCell}>
+                    <Typo style={styles.tableCellText}>{room.funeralHallNumberOfMourners}명</Typo>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
       </ScrollView>
 
       {/* 🛒 하단 고정 버튼 - 회원가입 중이 아닐 때만 표시 */}
@@ -366,19 +410,7 @@ const FuneralDetailPage = ({navigation}: IFuneralDetailPageProps) => {
               </View>
               <MoveIcon width={ICON_SIZES.button} height={ICON_SIZES.button} />
             </CustomButton>
-          ) : (
-            // 로그인하지 않은 사용자: 로그인 안내 버튼
-            <CustomButton 
-              onPress={() => navigation.navigate('Login', { userType: 'manager' })} 
-              style={styles.loginPromptButton}
-            >
-              <View style={styles.buttonIcon}>
-                <CartIcon width={ICON_SIZES.button} height={ICON_SIZES.button} />
-                <Typo style={styles.loginPromptButtonText}>더 많은 기능 사용을 위해 로그인하기</Typo>
-              </View>
-              <MoveIcon width={ICON_SIZES.button} height={ICON_SIZES.button} />
-            </CustomButton>
-          )}
+          ) : null}
         </View>
       )}
       <Toast />
@@ -575,5 +607,49 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#FFFFFF',
     fontFamily: 'Pretendard-Black',
+  },
+
+  // 🏠 빈소 정보 테이블 스타일
+  hallRoomTable: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e5e5e5',
+  },
+  // 테이블 헤더
+  tableHeader: {
+    flexDirection: 'row',
+    backgroundColor: '#f8f9fa',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e5e5',
+  },
+  tableHeaderCell: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    alignItems: 'center',
+  },
+  tableHeaderText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    fontFamily: 'Pretendard-Medium',
+  },
+  // 테이블 데이터 행
+  tableRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e5e5',
+  },
+  tableCell: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    alignItems: 'center',
+  },
+  tableCellText: {
+    fontSize: 14,
+    color: '#333',
+    fontFamily: 'Pretendard-Medium',
   },
 });
