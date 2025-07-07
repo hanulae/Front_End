@@ -1,4 +1,4 @@
-import {useEffect, useRef} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {Animated, Dimensions, Pressable, StyleSheet, View} from 'react-native';
 import {usePhoneInput} from '../../hooks/input/usePhoneInput';
 import {useInputBase} from '../../hooks/input/useInputBase';
@@ -28,6 +28,8 @@ const PhoneAuthSheet = ({
 
   const phoneNumber = usePhoneInput();
   const authCode = useInputBase();
+
+  const [isPressed, setIsPressed] = useState(false);
 
   const confirmCode = async () => {
     const phone = phoneNumber.value.replace(/[^0-9]/g, '').trim();
@@ -162,13 +164,18 @@ const PhoneAuthSheet = ({
           </View>
           <View style={styles.authSection}>
             <Input input={phoneNumber} placeholder="전화번호를 입력하세요." />
-            <CustomButton
+            <Pressable
+              onPressIn={() => setIsPressed(true)}
+              onPressOut={() => setIsPressed(false)}
               onPress={handleRequestCode}
-              style={styles.requestButton}>
+              style={[
+                styles.requestButton,
+                {backgroundColor: isPressed ? '#CCCCCC' : '#2D81F1'}, // 클릭 시 그레이, 기본 파랑
+              ]}>
               <Typo color="white" style={styles.verifyButtonText}>
                 인증코드요청
               </Typo>
-            </CustomButton>
+            </Pressable>
           </View>
           <View style={styles.label}>
             <Typo fontSize={16} style={styles.containerTitle}>

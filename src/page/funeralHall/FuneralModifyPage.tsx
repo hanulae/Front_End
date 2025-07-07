@@ -25,8 +25,14 @@ import {usePhoneInput} from '../../hooks/input/usePhoneInput';
 import CustomButton from '../../components/common/CustomButton';
 import {
   fetchFuneralHomeInfo,
-  updateFuneralHomeInfo,
 } from '../../services/api/funeralService';
+import Toast from 'react-native-toast-message';
+import api from '../../api/config';
+
+interface ImageData {
+  imageUrl: string;
+  // 다른 필요한 속성들...
+}
 
 const FuneralModiftyPage = () => {
   // StatusBar 설정
@@ -83,9 +89,22 @@ const FuneralModiftyPage = () => {
     const loadFuneralHomeInfo = async () => {
       try {
         const response = await fetchFuneralHomeInfo();
+        console.log("🚀 ~ loadFuneralHomeInfo ~ response:", response)
         if (response.data && response.data.length > 0) {
           const data = response.data[0];
           setFuneralHomeInfo(data);
+
+          // 이미지 데이터 수신 및 상태 업데이트
+          if (response.images) {
+            const imageList = response.images.map((image: ImageData, index: number) => ({
+              uri: image.imageUrl,
+              name: `image-${index}.jpg`,
+              type: 'image/jpeg',
+            }));
+            setSelectedImages(imageList);
+          }
+
+          console.log("🚀 ~ loadFuneralHomeInfo ~ imageList:", selectedImages)
 
           // API 데이터를 InfoTable 선택 옵션에 맞게 변환
           const convertScale = (scale: string) => {
@@ -121,6 +140,7 @@ const FuneralModiftyPage = () => {
             return '전문'; // 기본값
           };
 
+          // 기존 데이터 처리
           setInfoData({
             funeral_scale: convertScale(data.funeralScale),
             funeral_total_rooms: data.funeralTotalRooms?.toString() || '',
@@ -213,24 +233,45 @@ const FuneralModiftyPage = () => {
   };
 
   const handleSave = async () => {
-    if (!funeralHomeInfo) return; // funeralHomeInfo가 없으면 실행하지 않음
+    console.log("🚀 ~ handleSave ~ funeralHomeInfo:", funeralHomeInfo)
+    if (!funeralHomeInfo) {
+        Toast.show({
+            type: 'error',
+            text1: '정보 누락',
+            text2: '장례식장 정보가 없습니다. 나중에 다시 시도해 주세요.',
+        });
+        return;
+    }
+console.log("🚀 ~ handleSave ~ funeralHomeInfo:", selectedImages.map(img => img.uri))
 
-    const dataToUpdate = {
-      funeralScale: infoData.funeral_scale,
-      funeralTotalRooms: parseInt(infoData.funeral_total_rooms, 10),
-      funeralOperationType: infoData.funeral_operation_type,
-      funeralStyle: infoData.funeral_style,
-      funeralAddress: funeralAddress.value,
-      funeralHomepage: funeralWebsite.value,
-      funeralPhone: funeralPhone.value,
-      funeralParkingLot: convenienceData.funeral_parking_lot,
-      funeralStore: convenienceData.funeral_store,
-      funeralFamilyWaitingRoom: convenienceData.funeral_family_waiting_room,
-      funeralDisabledFacility: convenienceData.funeral_disabled_facility,
-    };
+    const formData = new FormData();
+    selectedImages.forEach((img, index) => {
+      formData.append('funeralRoomFiles', {
+        uri: img.uri,
+        type: 'image/jpeg', // 이미지 타입에 맞게 설정
+        name: `image-${index}.jpg`, // 파일 이름 설정
+      });
+    });
+
+    // 기존 데이터도 formData에 추가
+    formData.append('funeralScale', infoData.funeral_scale);
+    formData.append('funeralTotalRooms', parseInt(infoData.funeral_total_rooms, 10));
+    formData.append('funeralOperationType', infoData.funeral_operation_type);
+    formData.append('funeralStyle', infoData.funeral_style);
+    formData.append('funeralAddress', funeralAddress.value);
+    formData.append('funeralHomepage', funeralWebsite.value);
+    formData.append('funeralPhone', funeralPhone.value);
+    formData.append('funeralParkingLot', convenienceData.funeral_parking_lot);
+    formData.append('funeralStore', convenienceData.funeral_store);
+    formData.append('funeralFamilyWaitingRoom', convenienceData.funeral_family_waiting_room);
+    formData.append('funeralDisabledFacility', convenienceData.funeral_disabled_facility);
 
     try {
-      const response = await updateFuneralHomeInfo(dataToUpdate);
+      const response = await api.put('/funeral/funeralList/update/funeralList', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       console.log('Update successful:', response);
       // 성공 메시지 표시 또는 다른 작업 수행
     } catch (error) {
@@ -340,6 +381,7 @@ const FuneralModiftyPage = () => {
         onClose={toggleAlbum}
         onSelect={handleSelectImages}
       />
+      <Toast />
     </FuneralLayout>
   );
 };

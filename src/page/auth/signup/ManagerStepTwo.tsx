@@ -452,6 +452,7 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
           visible={showAlbum}
           onClose={closeAlbum}
         />
+        <Toast />
       </ScrollView>
     </TouchableWithoutFeedback>
   );
