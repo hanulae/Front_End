@@ -168,84 +168,86 @@ const FuneralProfilePage = () => {
   };
 
   return (
-    <FuneralLayout headerShown={false}>
-      <View style={styles.topSection}>
-        <FuneralHeader
-          backButtonVisible={false}
-          logoutButton={true}
-          onLogoutPress={logout}
+    <>
+      <FuneralLayout headerShown={false}>
+        <View style={styles.topSection}>
+          <FuneralHeader
+            backButtonVisible={false}
+            logoutButton={true}
+            onLogoutPress={logout}
+          />
+          <View style={styles.container}>
+            <Pressable onPress={goToPointHistory}>
+              <ProfileStat point={100000} cash={50000} hallName="김상조" />
+            </Pressable>
+          </View>
+        </View>
+
+        <CustomButton
+          onPress={() => setShowPhoneAuthSheet(true)}
+          style={styles.floatingButton}>
+          <View style={styles.buttonNameContainer}>
+            <ModifyInfoIcon width={24} height={24} />
+            <Typo style={styles.topButtonText}>회원정보 수정</Typo>
+          </View>
+          <MoveWhiteIcon width={24} height={24} />
+        </CustomButton>
+
+        <ScrollView
+          style={styles.whiteSection}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}>
+          <CustomButton onPress={goToManageRomms} style={styles.button}>
+            <View style={styles.buttonNameContainer}>
+              <ManageRoomIcon width={24} height={24} />
+              <Typo style={styles.buttonText}>호실 관리</Typo>
+            </View>
+            <MoveGrayIcon width={24} height={24} />
+          </CustomButton>
+          <CustomButton onPress={goToManageMembers} style={styles.button}>
+            <View style={styles.buttonNameContainer}>
+              <ManageMemeberIcon width={24} height={24} />
+              <Typo style={styles.buttonText}>직원 관리</Typo>
+            </View>
+            <MoveGrayIcon width={24} height={24} />
+          </CustomButton>
+          <CustomButton onPress={goToDispatchHistory} style={styles.button}>
+            <View style={styles.buttonNameContainer}>
+              <DispatchHistoryIcon width={24} height={24} />
+              <Typo style={styles.buttonText}>지난 출동 내역</Typo>
+            </View>
+            <MoveGrayIcon width={24} height={24} />
+          </CustomButton>
+          <CustomButton onPress={goToDispatchRequest} style={styles.button}>
+            <View style={styles.buttonNameContainer}>
+              <DispatchRequestIcon width={24} height={24} />
+              <Typo style={styles.buttonText}>출동 대기 내역</Typo>
+            </View>
+            <MoveGrayIcon width={24} height={24} />
+          </CustomButton>
+          <CustomButton onPress={goToQuoteList} style={styles.button}>
+            <View style={styles.buttonNameContainer}>
+              <QuoteListIcon width={24} height={24} />
+              <Typo style={styles.buttonText}>견적 내역</Typo>
+            </View>
+            <MoveGrayIcon width={24} height={24} />
+          </CustomButton>
+          <CustomButton onPress={goToAppSetting} style={styles.button}>
+            <View style={styles.buttonNameContainer}>
+              <AppSettingIcon width={24} height={24} />
+              <Typo style={styles.buttonText}>앱 설정</Typo>
+            </View>
+            <MoveGrayIcon width={24} height={24} />
+          </CustomButton>
+        </ScrollView>
+        <PhoneAuthSheet
+          visible={showPhoneAuthSheet}
+          onClose={() => setShowPhoneAuthSheet(false)}
+          navigation={navigation}
         />
-        <View style={styles.container}>
-          <Pressable onPress={goToPointHistory}>
-            <ProfileStat point={100000} cash={50000} hallName="김상조" />
-          </Pressable>
-        </View>
-      </View>
-
-      <CustomButton
-        onPress={() => setShowPhoneAuthSheet(true)}
-        style={styles.floatingButton}>
-        <View style={styles.buttonNameContainer}>
-          <ModifyInfoIcon width={24} height={24} />
-          <Typo style={styles.topButtonText}>회원정보 수정</Typo>
-        </View>
-        <MoveWhiteIcon width={24} height={24} />
-      </CustomButton>
-
-      <ScrollView
-        style={styles.whiteSection}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}>
-        <CustomButton onPress={goToManageRomms} style={styles.button}>
-          <View style={styles.buttonNameContainer}>
-            <ManageRoomIcon width={24} height={24} />
-            <Typo style={styles.buttonText}>호실 관리</Typo>
-          </View>
-          <MoveGrayIcon width={24} height={24} />
-        </CustomButton>
-        <CustomButton onPress={goToManageMembers} style={styles.button}>
-          <View style={styles.buttonNameContainer}>
-            <ManageMemeberIcon width={24} height={24} />
-            <Typo style={styles.buttonText}>직원 관리</Typo>
-          </View>
-          <MoveGrayIcon width={24} height={24} />
-        </CustomButton>
-        <CustomButton onPress={goToDispatchHistory} style={styles.button}>
-          <View style={styles.buttonNameContainer}>
-            <DispatchHistoryIcon width={24} height={24} />
-            <Typo style={styles.buttonText}>지난 출동 내역</Typo>
-          </View>
-          <MoveGrayIcon width={24} height={24} />
-        </CustomButton>
-        <CustomButton onPress={goToDispatchRequest} style={styles.button}>
-          <View style={styles.buttonNameContainer}>
-            <DispatchRequestIcon width={24} height={24} />
-            <Typo style={styles.buttonText}>출동 대기 내역</Typo>
-          </View>
-          <MoveGrayIcon width={24} height={24} />
-        </CustomButton>
-        <CustomButton onPress={goToQuoteList} style={styles.button}>
-          <View style={styles.buttonNameContainer}>
-            <QuoteListIcon width={24} height={24} />
-            <Typo style={styles.buttonText}>견적 내역</Typo>
-          </View>
-          <MoveGrayIcon width={24} height={24} />
-        </CustomButton>
-        <CustomButton onPress={goToAppSetting} style={styles.button}>
-          <View style={styles.buttonNameContainer}>
-            <AppSettingIcon width={24} height={24} />
-            <Typo style={styles.buttonText}>앱 설정</Typo>
-          </View>
-          <MoveGrayIcon width={24} height={24} />
-        </CustomButton>
-      </ScrollView>
-      <PhoneAuthSheet
-        visible={showPhoneAuthSheet}
-        onClose={() => setShowPhoneAuthSheet(false)}
-        navigation={navigation}
-      />
+      </FuneralLayout>
       <Toast />
-    </FuneralLayout>
+    </>
   );
 };
 

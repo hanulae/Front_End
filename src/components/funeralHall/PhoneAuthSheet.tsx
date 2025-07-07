@@ -1,17 +1,16 @@
+import React from 'react';
 import {NavigationProp} from '@react-navigation/native';
 import {useEffect, useRef} from 'react';
 import {Animated, Dimensions, Pressable, StyleSheet, View} from 'react-native';
 import {usePhoneInput} from '../../hooks/input/usePhoneInput';
 import {useInputBase} from '../../hooks/input/useInputBase';
-import {useAtomValue} from 'jotai';
-import {loginAtom} from '../../state/local_state/loginAtom';
 import api from '../../api/config';
 import Toast from 'react-native-toast-message';
 import CloseIcon from '../../assets/Icon/Icon_BtnClose01.svg';
 import Typo from '../common/Typo';
 import {Input} from '../common/input/Input';
 import CustomButton from '../common/CustomButton';
-import { getUserInfo } from '../../utils/tokenStorage';
+import {getUserInfo} from '../../utils/tokenStorage';
 
 const screenHeight = Dimensions.get('window').height;
 
@@ -95,10 +94,9 @@ const PhoneAuthSheet = ({
     }
 
     try {
-      const res = await api.post(
-        '/funeral/sms/send/funeral',
-        {funeralPhone: phone},
-      );
+      const res = await api.post('/funeral/sms/send/funeral', {
+        funeralPhone: phone,
+      });
 
       console.log('📨 인증번호 전송 성공:', res.data);
       Toast.show({
@@ -134,7 +132,7 @@ const PhoneAuthSheet = ({
     };
 
     fetchManagerPhoneNumber();
-  }, []);
+  }, [phoneNumber]);
 
   useEffect(() => {
     Animated.timing(translateY, {
@@ -142,7 +140,7 @@ const PhoneAuthSheet = ({
       duration: 300,
       useNativeDriver: true,
     }).start();
-  }, [visible]);
+  }, [visible, translateY]);
 
   if (!visible) {
     return null;
