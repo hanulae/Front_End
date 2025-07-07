@@ -14,7 +14,7 @@ const Tab = createBottomTabNavigator();
 const TabNav = () => {
   return (
     <Tab.Navigator
-      initialRouteName="FindFuneral"
+      initialRouteName="FuneralSearch"
       screenOptions={{
         headerShown: false,
       }}>
