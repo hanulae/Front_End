@@ -14,6 +14,7 @@ import {useAtomValue} from 'jotai';
 import {userInfoAtom} from './src/state/local_state/userinfoAtom';
 import RootStack from './src/router/RootStack';
 import BootSplash from 'react-native-bootsplash';
+import notificationService from './src/services/notificationService';
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,21 @@ function App(): React.JSX.Element {
     };
 
     init();
+  }, []);
+
+  // ✅ 알림 서비스 초기화
+  useEffect(() => {
+    const initNotifications = async () => {
+      try {
+        await notificationService.initialize();
+        notificationService.setupNotificationListeners();
+        console.log('알림 서비스 초기화 완료');
+      } catch (error) {
+        console.error('알림 서비스 초기화 실패:', error);
+      }
+    };
+
+    initNotifications();
   }, []);
 
   return (
