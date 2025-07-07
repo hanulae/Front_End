@@ -23,7 +23,7 @@ import BankSelectBottomSheet from '../../components/common/BankSelecSheet';
 //BSK ADD IMPORTS
 import api from '../../api/config';
 import Toast from 'react-native-toast-message';
-import { getUserInfo, storeUserInfo } from '../../utils/tokenStorage';
+import {getUserInfo, storeUserInfo} from '../../utils/tokenStorage';
 
 const ModifyUserInfoPage = () => {
   useFocusEffect(
@@ -45,13 +45,9 @@ const ModifyUserInfoPage = () => {
   const confirmPassword = useConfirmPasswordInput(() => newPassword.value);
   const phoneNumber = useInputBase();
   const authCodePhone = useInputBase();
-  const [authCode, setAuthCode] = useState('');
-  // const accountBank = useInputBase(); // 은행선택은 나중에 바꿀 수도 있음
   const [showBankSelectSheet, setShowBankSelectSheet] = useState(false);
   const [bankName, setBankName] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
-  // const accountNumber = useInputBase();
-  const authCodeAccount = useInputBase();
 
   // BSK ADD LOGIN INFO
   const [name, setName] = useState('');
@@ -88,10 +84,6 @@ const ModifyUserInfoPage = () => {
     setShowBankSelectSheet(true);
   };
 
-  const closeBankSelectSheet = () => {
-    setShowBankSelectSheet(false);
-  };
-
   const handleChangePassword = async () => {
     console.log('비밀번호 변경 시도:');
     if (!newPassword.value || !confirmPassword.value) {
@@ -116,12 +108,9 @@ const ModifyUserInfoPage = () => {
     console.log('비밀번호 변경 요청:', newPassword.value);
     try {
       // TODO: funeral용 API 엔드포인트로 변경 필요
-      const res = await api.patch(
-        '/funeral/auth/update/password',
-        {
-          newPassword: newPassword.value,
-        }
-      );
+      await api.patch('/funeral/auth/update/password', {
+        newPassword: newPassword.value,
+      });
 
       Toast.show({
         type: 'success',
@@ -156,7 +145,7 @@ const ModifyUserInfoPage = () => {
     }
 
     try {
-      const res = await api.post('/funeral/sms/send/funeral', { funeralPhone: phone });
+      await api.post('/funeral/sms/send/funeral', {funeralPhone: phone});
 
       Toast.show({
         type: 'success',
@@ -165,7 +154,10 @@ const ModifyUserInfoPage = () => {
         position: 'top',
       });
     } catch (error: any) {
-      console.error('인증번호 요청 실패:', error.response?.data || error.message);
+      console.error(
+        '인증번호 요청 실패:',
+        error.response?.data || error.message,
+      );
       Toast.show({
         type: 'error',
         text1: '전송 실패',
@@ -190,7 +182,10 @@ const ModifyUserInfoPage = () => {
     }
 
     try {
-      const res = await api.post('/funeral/sms/verify/funeral', { funeralPhone: phone, code: code });
+      const res = await api.post('/funeral/sms/verify/funeral', {
+        funeralPhone: phone,
+        code: code,
+      });
 
       if (res.data.verified) {
         Toast.show({
@@ -232,7 +227,7 @@ const ModifyUserInfoPage = () => {
     }
 
     try {
-      const res = await api.patch('/funeral/auth/update/phone', { newPhone });
+      await api.patch('/funeral/auth/update/phone', {newPhone});
 
       Toast.show({
         type: 'success',
@@ -242,7 +237,7 @@ const ModifyUserInfoPage = () => {
 
       // 현재 사용자 정보 가져오기
       const userInfo = await getUserInfo();
-      console.log("🚀 ~ handleChangePhoneNumber ~ userInfo:", userInfo)
+      console.log('🚀 ~ handleChangePhoneNumber ~ userInfo:', userInfo);
       if (userInfo) {
         // 핸드폰 번호 업데이트
         userInfo.data.funeralPhoneNumber = newPhone;
@@ -255,7 +250,10 @@ const ModifyUserInfoPage = () => {
       // phoneNumber.setValue('');
       // authCodePhone.setValue('');
     } catch (error: any) {
-      console.error('휴대전화번호 변경 실패:', error.response?.data || error.message);
+      console.error(
+        '휴대전화번호 변경 실패:',
+        error.response?.data || error.message,
+      );
       Toast.show({
         type: 'error',
         text1: '변경 실패',
@@ -276,8 +274,7 @@ const ModifyUserInfoPage = () => {
     }
 
     try {
-      // TODO: funeral용 API 엔드포인트로 변경 필요
-      const res = await api.post('/manager/bank/verify', {
+      await api.post('/manager/bank/verify', {
         bankCode,
         bankNumber: accountNumber,
         name,
@@ -308,19 +305,11 @@ const ModifyUserInfoPage = () => {
     }
 
     try {
-      // TODO: funeral용 API 엔드포인트로 변경 필요
-      console.log('bankName', bankName);
-      console.log('bankCode', bankCode);
-      console.log('accountNumber', accountNumber);
-      const res = await api.patch(
-        '/funeral/auth/update/bank-number',
-        {
-          funeralBankName: bankName.trim(),
-          funeralBankNumber: accountNumber.trim(),
-          funeralBankHolder: name.trim(), // 예금주 이름도 bankName에 들어 있다고 가정
-        },
-        
-      );
+      await api.patch('/funeral/auth/update/bank-number', {
+        funeralBankName: bankName.trim(),
+        funeralBankNumber: accountNumber.trim(),
+        funeralBankHolder: name.trim(), // 예금주 이름도 bankName에 들어 있다고 가정
+      });
 
       Toast.show({
         type: 'success',
@@ -413,8 +402,7 @@ const ModifyUserInfoPage = () => {
               },
             ]}
             onPress={handleChangePhoneNumber}
-            disabled={!isPhoneVerified}
-          >
+            disabled={!isPhoneVerified}>
             <Typo style={styles.buttonText}>휴대전화번호 변경</Typo>
           </TouchableOpacity>
         </View>
@@ -531,6 +519,7 @@ const styles = StyleSheet.create({
   },
   field: {
     paddingHorizontal: 16,
+    marginBottom: 16,
   },
   field1: {
     paddingHorizontal: 16,
@@ -541,19 +530,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     paddingHorizontal: 16,
+    marginBottom: 16,
   },
   fieldRow1: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
     paddingHorizontal: 16,
-    paddingVertical: 16,
+    // paddingVertical: 16,
+    paddingBottom: 16,
   },
   label: {
     fontSize: 14,
     fontWeight: '600',
     color: '#333',
     paddingLeft: 24,
+    marginBottom: 16,
   },
   input: {
     flex: 1,
@@ -561,7 +553,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F6F8',
     borderRadius: 8,
     paddingHorizontal: 16,
-    // paddingVertical: ,
     fontSize: 14,
   },
   button: {
