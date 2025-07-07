@@ -10,14 +10,26 @@ import {useNavigation, useFocusEffect} from '@react-navigation/native';
 
 // BSK ADD IMPORTS
 import api from '../../api/config';
-import {useCallback, useState} from 'react';
+import {useCallback, useState, useEffect} from 'react';
 import {useAtomValue} from 'jotai';
 import {loginAtom} from '../../state/local_state/loginAtom';
+import {getUserInfo} from '../../utils/tokenStorage';
+import Toast from 'react-native-toast-message';
 
 interface IProfileStatProps {
   point: number;
   cash: number;
   hallName: string;
+}
+
+// 권한 타입 정의
+interface IPermissions {
+  roomManagement: boolean;
+  infoEdit: boolean;
+  dispatchHistory: boolean;
+  dispatchPending: boolean;
+  estimateHistory: boolean;
+  appSettings: boolean;
 }
 
 const ProfileStat = ({point, cash, hallName}: IProfileStatProps) => {
@@ -27,12 +39,43 @@ const ProfileStat = ({point, cash, hallName}: IProfileStatProps) => {
   const loginInfo = useAtomValue(loginAtom);
   const [currentPoint, setCurrentPoint] = useState<number>(point); // 초기값은 props로 받은 point
   const [currentCash, setCurrentCash] = useState<number>(cash); // 초기값은 props로 받은 cash
+  const [isStaff, setIsStaff] = useState(false);
+  const [permissions, setPermissions] = useState<IPermissions | null>(null);
+
+  // 사용자 정보 및 권한 로드
+  useEffect(() => {
+    const loadUserInfo = async () => {
+      try {
+        const userInfo = await getUserInfo();
+        if (userInfo && userInfo.data) {
+          setIsStaff(userInfo.data.isStaff || false);
+          setPermissions(userInfo.data.permissions || null);
+        }
+      } catch (error) {
+        console.error('사용자 정보 로드 실패:', error);
+      }
+    };
+
+    loadUserInfo();
+  }, []);
+
+  // 권한 체크 함수
+  const hasPermission = (permission: keyof IPermissions): boolean => {
+    if (!isStaff) return true; // 대표는 모든 권한
+    return permissions?.[permission] || false;
+  };
 
   const goToModifyFuneralInfo = () => {
-    // 권한 체크 (주석 처리)
-    // if (!checkPermission('info_edit', '정보 수정')) return;
-
-    // console.log('Modify Funeral Info');
+    if (!hasPermission('infoEdit')) {
+      Toast.show({
+        type: 'error',
+        text1: '접근 권한 없음',
+        text2: '정보 수정에 대한 접근 권한이 없습니다.',
+        position: 'top',
+        visibilityTime: 3000,
+      });
+      return;
+    }
     navigation.navigate('FuneralModify');
   };
 

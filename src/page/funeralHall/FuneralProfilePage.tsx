@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   Platform,
   StatusBar,
@@ -27,43 +28,17 @@ import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import Toast from 'react-native-toast-message';
 import PhoneAuthSheet from '../../components/funeralHall/PhoneAuthSheet';
+import {getUserInfo} from '../../utils/tokenStorage';
 
-// ===== 접근 권한 관련 타입 및 로직 (주석 처리) =====
-/*
-interface IUserPermissions {
-  room_management: boolean; // 호실 관리
-  info_edit: boolean; // 정보 수정
-  dispatch_history: boolean; // 지난 출동 내역
-  dispatch_pending: boolean; // 출동 대기 내역
-  estimate_history: boolean; // 견적 내역
-  app_settings: boolean; // 앱 설정
+// 권한 타입 정의
+interface IPermissions {
+  roomManagement: boolean;
+  infoEdit: boolean;
+  dispatchHistory: boolean;
+  dispatchPending: boolean;
+  estimateHistory: boolean;
+  appSettings: boolean;
 }
-
-// 임시 사용자 권한 정보 (추후 전역 상태에서 가져올 예정)
-const mockUserPermissions: IUserPermissions = {
-  room_management: true,
-  info_edit: true,
-  dispatch_history: false, // 테스트용으로 false 설정
-  dispatch_pending: true,
-  estimate_history: false, // 테스트용으로 false 설정
-  app_settings: true,
-};
-
-// 권한 체크 함수
-const checkPermission = (permission: keyof IUserPermissions, actionName: string): boolean => {
-  if (!mockUserPermissions[permission]) {
-    Toast.show({
-      type: 'error',
-      text1: '접근 권한 없음',
-      text2: `${actionName}에 대한 접근 권한이 없습니다.`,
-      position: 'top',
-      visibilityTime: 3000,
-    });
-    return false;
-  }
-  return true;
-};
-*/
 
 const FuneralProfilePage = () => {
   // StatusBar 설정
@@ -83,9 +58,29 @@ const FuneralProfilePage = () => {
   );
 
   const [showPhoneAuthSheet, setShowPhoneAuthSheet] = useState(false);
+  const [isStaff, setIsStaff] = useState(false);
+  const [permissions, setPermissions] = useState<IPermissions | null>(null);
 
   const setLogin = useSetAtom(userInfoAtom);
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
+
+  // 사용자 정보 및 권한 로드
+  useEffect(() => {
+    const loadUserInfo = async () => {
+      try {
+        const userInfo = await getUserInfo();
+        if (userInfo && userInfo.data) {
+          setIsStaff(userInfo.data.isStaff || false);
+          setPermissions(userInfo.data.permissions || null);
+        }
+      } catch (error) {
+        console.error('사용자 정보 로드 실패:', error);
+      }
+    };
+
+    loadUserInfo();
+  }, []);
+
   useEffect(() => {
     if (Platform.OS === 'android') {
       StatusBar.setBackgroundColor('#3287F8');
@@ -96,56 +91,110 @@ const FuneralProfilePage = () => {
     }
   }, []);
 
-  const goToModifyFuneralInfo = () => {
-    // 권한 체크 (주석 처리)
-    // if (!checkPermission('info_edit', '정보 수정')) return;
+  // 권한 체크 함수
+  const hasPermission = (permission: keyof IPermissions): boolean => {
+    if (!isStaff) return true; // 대표는 모든 권한
+    return permissions?.[permission] || false;
+  };
 
-    // console.log('Modify Funeral Info');
+  const goToModifyFuneralInfo = () => {
+    if (!hasPermission('infoEdit')) {
+      Toast.show({
+        type: 'error',
+        text1: '접근 권한 없음',
+        text2: '정보 수정에 대한 접근 권한이 없습니다.',
+        position: 'top',
+        visibilityTime: 3000,
+      });
+      return;
+    }
     navigation.navigate('FuneralModify');
   };
 
   const goToManageRomms = () => {
-    // 권한 체크 (주석 처리)
-    // if (!checkPermission('room_management', '호실 관리')) return;
-
-    // console.log('Manage Rooms');
+    if (!hasPermission('roomManagement')) {
+      Toast.show({
+        type: 'error',
+        text1: '접근 권한 없음',
+        text2: '호실 관리에 대한 접근 권한이 없습니다.',
+        position: 'top',
+        visibilityTime: 3000,
+      });
+      return;
+    }
     navigation.navigate('RoomManagement');
   };
 
   const goToManageMembers = () => {
-    // 직원 관리는 항상 접근 가능 (관리자 기능)
-    // console.log('Manage Members');
+    // 직원 관리는 대표만 접근 가능
+    if (isStaff) {
+      Toast.show({
+        type: 'error',
+        text1: '접근 권한 없음',
+        text2: '직원 관리에 대한 접근 권한이 없습니다.',
+        position: 'top',
+        visibilityTime: 3000,
+      });
+      return;
+    }
     navigation.navigate('StaffManagement');
   };
 
   const goToDispatchHistory = () => {
-    // 권한 체크 (주석 처리)
-    // if (!checkPermission('dispatch_history', '지난 출동 내역')) return;
-
-    // console.log('Dispatch History');
+    if (!hasPermission('dispatchHistory')) {
+      Toast.show({
+        type: 'error',
+        text1: '접근 권한 없음',
+        text2: '지난 출동 내역에 대한 접근 권한이 없습니다.',
+        position: 'top',
+        visibilityTime: 3000,
+      });
+      return;
+    }
     navigation.navigate('DispatchHistory');
   };
 
   const goToDispatchRequest = () => {
-    // 권한 체크 (주석 처리)
-    // if (!checkPermission('dispatch_pending', '출동 대기 내역')) return;
-
+    if (!hasPermission('dispatchPending')) {
+      Toast.show({
+        type: 'error',
+        text1: '접근 권한 없음',
+        text2: '출동 대기 내역에 대한 접근 권한이 없습니다.',
+        position: 'top',
+        visibilityTime: 3000,
+      });
+      return;
+    }
     console.log('Dispatch Request');
     navigation.navigate('PendingDispatch');
   };
 
   const goToQuoteList = () => {
-    // 권한 체크 (주석 처리)
-    // if (!checkPermission('estimate_history', '견적 내역')) return;
-
+    if (!hasPermission('estimateHistory')) {
+      Toast.show({
+        type: 'error',
+        text1: '접근 권한 없음',
+        text2: '견적 내역에 대한 접근 권한이 없습니다.',
+        position: 'top',
+        visibilityTime: 3000,
+      });
+      return;
+    }
     console.log('Quote List');
     navigation.navigate('EstimateHistory');
   };
 
   const goToAppSetting = () => {
-    // 권한 체크 (주석 처리)
-    // if (!checkPermission('app_settings', '앱 설정')) return;
-
+    if (!hasPermission('appSettings')) {
+      Toast.show({
+        type: 'error',
+        text1: '접근 권한 없음',
+        text2: '앱 설정에 대한 접근 권한이 없습니다.',
+        position: 'top',
+        visibilityTime: 3000,
+      });
+      return;
+    }
     console.log('App Setting');
     navigation.navigate('AppSetting', {userType: 'funeral'});
   };
@@ -184,7 +233,7 @@ const FuneralProfilePage = () => {
         </View>
 
         <CustomButton
-          onPress={() => setShowPhoneAuthSheet(true)}
+          onPress={goToModifyFuneralInfo}
           style={styles.floatingButton}>
           <View style={styles.buttonNameContainer}>
             <ModifyInfoIcon width={24} height={24} />
@@ -197,48 +246,60 @@ const FuneralProfilePage = () => {
           style={styles.whiteSection}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}>
-          <CustomButton onPress={goToManageRomms} style={styles.button}>
-            <View style={styles.buttonNameContainer}>
-              <ManageRoomIcon width={24} height={24} />
-              <Typo style={styles.buttonText}>호실 관리</Typo>
-            </View>
-            <MoveGrayIcon width={24} height={24} />
-          </CustomButton>
-          <CustomButton onPress={goToManageMembers} style={styles.button}>
-            <View style={styles.buttonNameContainer}>
-              <ManageMemeberIcon width={24} height={24} />
-              <Typo style={styles.buttonText}>직원 관리</Typo>
-            </View>
-            <MoveGrayIcon width={24} height={24} />
-          </CustomButton>
-          <CustomButton onPress={goToDispatchHistory} style={styles.button}>
-            <View style={styles.buttonNameContainer}>
-              <DispatchHistoryIcon width={24} height={24} />
-              <Typo style={styles.buttonText}>지난 출동 내역</Typo>
-            </View>
-            <MoveGrayIcon width={24} height={24} />
-          </CustomButton>
-          <CustomButton onPress={goToDispatchRequest} style={styles.button}>
-            <View style={styles.buttonNameContainer}>
-              <DispatchRequestIcon width={24} height={24} />
-              <Typo style={styles.buttonText}>출동 대기 내역</Typo>
-            </View>
-            <MoveGrayIcon width={24} height={24} />
-          </CustomButton>
-          <CustomButton onPress={goToQuoteList} style={styles.button}>
-            <View style={styles.buttonNameContainer}>
-              <QuoteListIcon width={24} height={24} />
-              <Typo style={styles.buttonText}>견적 내역</Typo>
-            </View>
-            <MoveGrayIcon width={24} height={24} />
-          </CustomButton>
-          <CustomButton onPress={goToAppSetting} style={styles.button}>
-            <View style={styles.buttonNameContainer}>
-              <AppSettingIcon width={24} height={24} />
-              <Typo style={styles.buttonText}>앱 설정</Typo>
-            </View>
-            <MoveGrayIcon width={24} height={24} />
-          </CustomButton>
+          {hasPermission('roomManagement') && (
+            <CustomButton onPress={goToManageRomms} style={styles.button}>
+              <View style={styles.buttonNameContainer}>
+                <ManageRoomIcon width={24} height={24} />
+                <Typo style={styles.buttonText}>호실 관리</Typo>
+              </View>
+              <MoveGrayIcon width={24} height={24} />
+            </CustomButton>
+          )}
+          {!isStaff && (
+            <CustomButton onPress={goToManageMembers} style={styles.button}>
+              <View style={styles.buttonNameContainer}>
+                <ManageMemeberIcon width={24} height={24} />
+                <Typo style={styles.buttonText}>직원 관리</Typo>
+              </View>
+              <MoveGrayIcon width={24} height={24} />
+            </CustomButton>
+          )}
+          {hasPermission('dispatchHistory') && (
+            <CustomButton onPress={goToDispatchHistory} style={styles.button}>
+              <View style={styles.buttonNameContainer}>
+                <DispatchHistoryIcon width={24} height={24} />
+                <Typo style={styles.buttonText}>지난 출동 내역</Typo>
+              </View>
+              <MoveGrayIcon width={24} height={24} />
+            </CustomButton>
+          )}
+          {hasPermission('dispatchPending') && (
+            <CustomButton onPress={goToDispatchRequest} style={styles.button}>
+              <View style={styles.buttonNameContainer}>
+                <DispatchRequestIcon width={24} height={24} />
+                <Typo style={styles.buttonText}>출동 대기 내역</Typo>
+              </View>
+              <MoveGrayIcon width={24} height={24} />
+            </CustomButton>
+          )}
+          {hasPermission('estimateHistory') && (
+            <CustomButton onPress={goToQuoteList} style={styles.button}>
+              <View style={styles.buttonNameContainer}>
+                <QuoteListIcon width={24} height={24} />
+                <Typo style={styles.buttonText}>견적 내역</Typo>
+              </View>
+              <MoveGrayIcon width={24} height={24} />
+            </CustomButton>
+          )}
+          {hasPermission('appSettings') && (
+            <CustomButton onPress={goToAppSetting} style={styles.button}>
+              <View style={styles.buttonNameContainer}>
+                <AppSettingIcon width={24} height={24} />
+                <Typo style={styles.buttonText}>앱 설정</Typo>
+              </View>
+              <MoveGrayIcon width={24} height={24} />
+            </CustomButton>
+          )}
         </ScrollView>
         <PhoneAuthSheet
           visible={showPhoneAuthSheet}

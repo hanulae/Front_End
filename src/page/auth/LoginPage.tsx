@@ -89,7 +89,9 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
         userName:
           userType === 'manager'
             ? response.data.manager?.managerName
-            : response.data.funeral?.funeralName,
+            : funeralTab === '대표'
+            ? response.data.funeral?.funeralName
+            : response.data.staff?.funeralStaffName,
         accessToken: response.data.accessToken,
         refreshToken: response.data.refreshToken,
       });
@@ -147,9 +149,9 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
           });
         } else {
           // 직원 로그인 API (실제 엔드포인트는 백엔드에 맞게 조정 필요)
-          response = await api.post('/funeral/employee/auth/login', {
-            employeeUsername: username.value,
-            employeePassword: password.value,
+          response = await api.post('/funeral/staff/login', {
+            funeralStaffPhoneNumber: username.value,
+            funeralStaffPassword: password.value,
           });
         }
       }
@@ -169,12 +171,35 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
           data: manager,
         });
       } else if (userType === 'funeral') {
-        const {funeral} = response.data;
-        await storeUserInfo({
-          userType,
-          userId: funeral.funeralId,
-          data: funeral,
-        });
+        if (funeralTab === '대표') {
+          const {funeral} = response.data;
+          await storeUserInfo({
+            userType,
+            userId: funeral.funeralId,
+            data: funeral,
+          });
+        } else {
+          // 직원 로그인 처리
+          const {staff} = response.data;
+          await storeUserInfo({
+            userType: 'funeral',
+            userId: staff.funeralStaffId,
+            data: {
+              funeralId: staff.funeralId,
+              funeralName: staff.funeralStaffName,
+              funeralPhoneNumber: staff.funeralStaffPhoneNumber,
+              funeralStaffRole: staff.funeralStaffRole,
+              // 직원 관련 추가 정보들
+              isStaff: true,
+              staffId: staff.funeralStaffId,
+              staffName: staff.funeralStaffName,
+              staffPhoneNumber: staff.funeralStaffPhoneNumber,
+              staffRole: staff.funeralStaffRole,
+              // 권한 정보 추가
+              permissions: response.data.permissions,
+            },
+          });
+        }
       }
 
       await storeTokens(accessToken, refreshToken);

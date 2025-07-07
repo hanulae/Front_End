@@ -31,6 +31,7 @@ interface IPermissions {
   dispatch_pending: boolean;
   estimate_history: boolean;
   app_settings: boolean;
+  point_history: boolean;
 }
 
 interface IStaff {
@@ -47,11 +48,12 @@ const PERMISSION_LABELS: {
   key: keyof IPermissions;
 }[] = [
   {label: '호실 관리', key: 'room_management'},
-  {label: '정보 수정', key: 'info_edit'},
+  {label: '장례식장 정보 수정', key: 'info_edit'},
   {label: '지난 출동 내역', key: 'dispatch_history'},
   {label: '출동 대기 내역', key: 'dispatch_pending'},
   {label: '견적 내역', key: 'estimate_history'},
   {label: '앱 설정', key: 'app_settings'},
+  {label: '포인트 내역', key: 'point_history'},
 ];
 
 interface IStaffBottomSheetProps {
@@ -81,6 +83,7 @@ const StaffBottomSheet = ({
     dispatch_pending: false,
     estimate_history: false,
     app_settings: false,
+    point_history: false,
   });
 
   const togglePermission = (key: keyof IPermissions) => {
@@ -424,38 +427,49 @@ const StaffBottomSheet = ({
               <View style={styles.inputContainer}>
                 <Typo style={styles.inputTitle}>접근 권한</Typo>
                 <View style={styles.permissionContainer}>
-                  {Array.from({length: 3}).map((_, rowIndex) => (
-                    <View key={rowIndex} style={styles.permissionRow}>
-                      {PERMISSION_LABELS.slice(
-                        rowIndex * 2,
-                        rowIndex * 2 + 2,
-                      ).map(({label, key}) => (
-                        <TouchableOpacity
-                          key={key}
-                          style={styles.permissionButton}
-                          onPress={() => togglePermission(key)}>
-                          <View style={styles.permissionContentWrapper}>
-                            {permissions[key] ? (
-                              <CheckCircleOnIcon
-                                width={18}
-                                height={18}
-                                style={styles.permissionIcon}
-                              />
-                            ) : (
-                              <CheckCircleOffIcon
-                                width={18}
-                                height={18}
-                                style={styles.permissionIcon}
-                              />
-                            )}
-                            <Typo style={styles.permissionLabelText}>
-                              {label}
-                            </Typo>
-                          </View>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  ))}
+                  {Array.from({length: 4}).map((_, rowIndex) => {
+                    const permissionsInRow = PERMISSION_LABELS.slice(
+                      rowIndex * 2,
+                      rowIndex * 2 + 2,
+                    );
+                    const isLastRow = rowIndex === 3;
+                    const hasSingleButton = permissionsInRow.length === 1;
+
+                    return (
+                      <View key={rowIndex} style={styles.permissionRow}>
+                        {permissionsInRow.map(({label, key}) => (
+                          <TouchableOpacity
+                            key={key}
+                            style={[
+                              styles.permissionButton,
+                              isLastRow &&
+                                hasSingleButton &&
+                                styles.singlePermissionButton,
+                            ]}
+                            onPress={() => togglePermission(key)}>
+                            <View style={styles.permissionContentWrapper}>
+                              {permissions[key] ? (
+                                <CheckCircleOnIcon
+                                  width={18}
+                                  height={18}
+                                  style={styles.permissionIcon}
+                                />
+                              ) : (
+                                <CheckCircleOffIcon
+                                  width={18}
+                                  height={18}
+                                  style={styles.permissionIcon}
+                                />
+                              )}
+                              <Typo style={styles.permissionLabelText}>
+                                {label}
+                              </Typo>
+                            </View>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    );
+                  })}
                 </View>
               </View>
               <View style={styles.buttonContainer}>
@@ -600,6 +614,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#E6EAF3',
+  },
+  singlePermissionButton: {
+    flex: 0.45, // 전체 너비의 절반만 차지
+    alignSelf: 'flex-start', // 왼쪽 정렬
   },
   permissionContentWrapper: {
     flexDirection: 'row',
