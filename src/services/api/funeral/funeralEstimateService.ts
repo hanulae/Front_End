@@ -68,7 +68,11 @@ export interface GetFuneralHallListResponse {
 // 입찰 제출 파라미터 타입
 export interface SubmitBidParams {
   managerFormBidId: string;
-  funeralHallId: string;
+  funeralHallName: string;
+  funeralHallSize: number;
+  funeralHallNumberOfMourners: number;
+  funeralHallDetailPrice: number;
+  funeralHallPrice: number;
   proponentMoney: number;
   discount: number;
 }
@@ -83,9 +87,13 @@ export interface SubmitBidResponse {
 export interface ManagerFormBidDetail {
   managerFormBidId: string;
   managerFormId: string;
-  funeralListId: string;
   funeralId: string;
-  funeralHallId: string;
+  funeralHallId?: string;
+  funeralHallName: string;
+  funeralHallSize: number;
+  funeralHallNumberOfMourners: number;
+  funeralHallDetailPrice: number;
+  funeralHallPrice: number;
   proponentMoney: number;
   discount: number;
   bidStatus: string;
@@ -163,9 +171,11 @@ export const funeralEstimateService = {
     managerFormBidId: string,
   ): Promise<GetManagerFormBidDetailResponse> => {
     try {
+      console.log('---managerFormBidId---', managerFormBidId);
       const response = await api.get(
         `/funeral/form/bid/detail?managerFormBidId=${managerFormBidId}`,
       );
+      console.log('장례식장 입찰 상세 내용 조회 성공:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('장례식장 입찰 상세 내용 조회 에러:', error.message);

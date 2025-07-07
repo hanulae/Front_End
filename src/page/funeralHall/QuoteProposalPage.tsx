@@ -64,9 +64,7 @@ const QuoteProposalPage = () => {
         const bidDetailResult = await fetchManagerFormBidDetail(id);
         if (bidDetailResult) {
           setBidDetail(bidDetailResult);
-          
-          // 입찰에 사용된 호실 정보를 가져오기 위해 호실 목록도 로드
-          await fetchHallList();
+          // 조회모드에서는 bidDetail에서 직접 호실 정보를 가져오므로 hallList 조회 불필요
         }
       }
     } catch (err) {
@@ -84,17 +82,34 @@ const QuoteProposalPage = () => {
 
   // 입찰 상세 내용이 로드되면 UI에 반영
   useEffect(() => {
-    if (bidDetail && hallList.length > 0) {
-      // 입찰에 사용된 호실 찾기
-      const usedRoom = hallList.find(hall => hall.funeralHallId === bidDetail.funeralHallId);
-      if (usedRoom) {
-        setSelectedRoom(usedRoom);
+    if (bidDetail) {
+      if (status === 'pending') {
+        // 작성모드: hallList에서 호실 찾기 (기존 방식)
+        if (hallList.length > 0) {
+          const usedRoom = hallList.find(hall => hall.funeralHallId === bidDetail.funeralHallId);
+          if (usedRoom) {
+            setSelectedRoom(usedRoom);
+          }
+        }
+      } else {
+        // 조회모드: bidDetail에서 직접 호실 정보 생성
+        const roomFromBidDetail: FuneralHallInfo = {
+          funeralHallId: bidDetail.funeralHallId || '',
+          funeralHallName: bidDetail.funeralHallName,
+          funeralHallSize: bidDetail.funeralHallSize,
+          funeralHallNumberOfMourners: bidDetail.funeralHallNumberOfMourners,
+          funeralHallDetailPrice: bidDetail.funeralHallDetailPrice,
+          funeralHallPrice: bidDetail.funeralHallPrice,
+          funeralHallStatus: 'available' as const,
+          version: 1,
+        };
+        setSelectedRoom(roomFromBidDetail);
       }
       
       // 제안가 설정
       setProposalPrice(bidDetail.proponentMoney.toString());
     }
-  }, [bidDetail, hallList]);
+  }, [bidDetail, hallList, status]);
 
   // 할인률 계산
   const calculateDiscountRate = (proposal: number, total: number): string => {
@@ -155,6 +170,7 @@ const QuoteProposalPage = () => {
     const funeralHallRoom = hallList[room.id];
     if (funeralHallRoom) {
       setSelectedRoom(funeralHallRoom);
+      console.log('funeralHallRoom', funeralHallRoom);
     }
     setProposalPrice(''); // 호실 변경 시 제안가 초기화
   };
@@ -172,7 +188,11 @@ const QuoteProposalPage = () => {
     try {
       const response = await submitBid({
         managerFormBidId: id,
-        funeralHallId: selectedRoom.funeralHallId,
+        funeralHallName: selectedRoom.funeralHallName,
+        funeralHallSize: selectedRoom.funeralHallSize,
+        funeralHallNumberOfMourners: selectedRoom.funeralHallNumberOfMourners,
+        funeralHallDetailPrice: selectedRoom.funeralHallDetailPrice,
+        funeralHallPrice: selectedRoom.funeralHallPrice,
         proponentMoney: Number(proposalPrice),
         discount: Number(currentDiscountRate),
       });

@@ -15,8 +15,9 @@ const ManagerMainProfile = ({managerName}: IManagerMainProfileProps) => {
     // TabNav의 MyPage 탭으로 이동
     navigation.dispatch(
       CommonActions.reset({
-        index: 0,
+        index: 1,
         routes: [
+          {name: 'ManagerMain'},
           {
             name: 'FindFuneral',
             params: {screen: 'MyPage'},

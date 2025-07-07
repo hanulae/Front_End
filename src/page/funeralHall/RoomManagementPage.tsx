@@ -179,7 +179,7 @@ const RoomManagementPage = () => {
       color="#F5F6F8"
       homeRouteName="FuneralMain"
       top={true}
-      headerTitle="호실관리">
+      headerTitle="호실 관리">
       <View style={styles.wrapper}>
         <View style={styles.editButtonContainer}>
           <CustomButton onPress={toggleEdit} style={styles.editButton}>

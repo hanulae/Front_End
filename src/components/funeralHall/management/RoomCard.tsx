@@ -52,10 +52,9 @@ const RoomCard = ({
             isVisible={isButtonVisible}
             isEdit={true}
             isDelete={true}
-            isCancel={true}
+            isCancel={false}
             onEditPress={MoveRoomModify}
             onDeletePress={handleDelete}
-            onCancelPress={toggleEdit}
           />
         )}
       </View>
