@@ -490,13 +490,13 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   container: {
-    // borderWidth: 1,
+    marginBottom: 24,
   },
   containerTitle: {
     fontSize: 16,
     fontWeight: '600',
     fontFamily: 'Pretendard-Bold',
-    // marginBottom: 5,
+    marginBottom: 8,
     marginLeft: 10,
   },
   funeralNameContainer: {
