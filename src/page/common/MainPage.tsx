@@ -62,10 +62,10 @@ const MainPage = ({navigation}: IMainPageProps): JSX.Element => {
             </Typo>
             <LoginIcon />
           </CustomButton>
-          <CustomButton onPress={goToAlarmPage} style={styles.alarmButton}>
+          {/* <CustomButton onPress={goToAlarmPage} style={styles.alarmButton}>
             <AlarmIcon />
             {/* <AlarmOff /> */}
-          </CustomButton>
+          {/* </CustomButton> */}
         </View>
       </View>
       <View style={styles.mainContainer}>

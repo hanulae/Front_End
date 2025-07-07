@@ -60,7 +60,7 @@ const ManagerMainPage = ({navigation}: IManagerMainPageProps) => {
   };
 
   const goToAlarmPage = () => {
-    console.log('Alarm Page');
+    navigation.navigate('Notification', {variant: 'manager'});
   };
 
   return (

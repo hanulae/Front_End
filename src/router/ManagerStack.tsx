@@ -17,6 +17,7 @@ import ClientDetailPage from '../page/teamManager/ClientDetailPage';
 import AppSettingPage from '../page/common/AppSettingPage';
 import FuneralDetailPage from '../page/teamManager/FuneralDetailPage';
 import ManagerProfilePage from '../page/teamManager/ManagerProfilePage';
+import NotificationListPage from '../page/common/NotificationListPage';
 
 const Stack = createNativeStackNavigator();
 
@@ -41,6 +42,7 @@ const ManagerStack = () => {
       <Stack.Screen name="AppSetting" component={AppSettingPage} />
       <Stack.Screen name="FuneralDetail" component={FuneralDetailPage} />
       <Stack.Screen name="MyPage" component={ManagerProfilePage} />
+      <Stack.Screen name="Notification" component={NotificationListPage} />
     </Stack.Navigator>
   );
 };
