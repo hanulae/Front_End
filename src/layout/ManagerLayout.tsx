@@ -35,7 +35,7 @@ const ManagerLayout = ({
   const route = useRoute();
 
   const isTabScreen =
-    route.name === 'FindFuneral' ||
+    route.name === 'FuneralSearch' ||
     route.name === 'Cart' ||
     route.name === 'MyPage';
   return (

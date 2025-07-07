@@ -19,7 +19,7 @@ const TabNav = () => {
         headerShown: false,
       }}>
       <Tab.Screen
-        name="FindFuneral"
+        name="FuneralSearch"
         component={FuneralSearchPage}
         initialParams={{variant: 'main'}}
         options={{
