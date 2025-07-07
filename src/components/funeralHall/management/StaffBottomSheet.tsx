@@ -12,19 +12,16 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import Typo from '../../common/Typo';
-import {IStaff} from '../../../page/funeralHall/StaffManagementPage';
-import {usePhoneInput} from '../../../hooks/input/usePhoneInput';
 import {useInputBase} from '../../../hooks/input/useInputBase';
 import {FuneralInput} from '../../common/input/FuneralInput';
 import CustomButton from '../../common/CustomButton';
 import CheckCircleOffIcon from '../../../assets/Check/Check01=Check01_default.svg';
 import CheckCircleOnIcon from '../../../assets/Check/Check01=Check01_Active.svg';
+import CloseIcon from '../../../assets/Icon/Icon_BtnClose01.svg';
 import Toast from 'react-native-toast-message'; // 상단 import 필요
 import api from '../../../api/config';
 
 //Bsk add imports
-import {useAtomValue} from 'jotai';
-import {loginAtom} from '.././../../state/local_state/loginAtom';
 import {getUserInfo} from '../../../utils/tokenStorage';
 
 interface IPermissions {
@@ -34,6 +31,15 @@ interface IPermissions {
   dispatch_pending: boolean;
   estimate_history: boolean;
   app_settings: boolean;
+}
+
+interface IStaff {
+  staffId: string;
+  staffName: string;
+  staffGrade: string;
+  staffPhoneNumber: string;
+  staffPassword: string;
+  permissions: IPermissions[];
 }
 
 const PERMISSION_LABELS: {
@@ -291,7 +297,7 @@ const StaffBottomSheet = ({
     try {
       let response;
       if (mode === 'edit') {
-        response = await api.patch(`/funeral/staff/update/${_staff.staffId}`, {
+        response = await api.patch(`/funeral/staff/update/${_staff?.staffId}`, {
           funeralStaffPassword: staffPassword.value,
           funeralStaffPhoneNumber: staffPhoneNumber.value,
           funeralStaffName: staffName.value,
@@ -351,6 +357,9 @@ const StaffBottomSheet = ({
               <Typo style={styles.titleText}>
                 {mode === 'edit' ? '장례식장 직원 수정' : '장례식장 직원 등록'}
               </Typo>
+              <Pressable onPress={onClose}>
+                <CloseIcon />
+              </Pressable>
             </View>
             <ScrollView
               style={styles.scrollContainer}
@@ -486,6 +495,9 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     marginBottom: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   titleText: {
     fontSize: 18,
