@@ -28,6 +28,7 @@ import {
 } from '../../services/api/funeralService';
 import Toast from 'react-native-toast-message';
 import api from '../../api/config';
+import DaumPostcodeModal from '../../components/common/DaumPostcodeModal';
 
 interface ImageData {
   imageUrl: string;
@@ -70,6 +71,11 @@ const FuneralModiftyPage = () => {
     funeral_disabled_facility: false, // 장애인 시설
   });
   const [funeralHomeInfo, setFuneralHomeInfo] = useState(null);
+  
+  // 주소 검색 모달 상태 추가
+  const [showPostcodeModal, setShowPostcodeModal] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState('');
+
   console.log('🏁 funeralHomeInfo:', funeralHomeInfo);
 
   // 임시로 데이터를 가져오는 useEffect
@@ -157,6 +163,11 @@ const FuneralModiftyPage = () => {
             funeral_disabled_facility: data.funeralDisabledFacility || false,
           });
 
+          // 주소 설정
+          if (data.funeralAddress) {
+            setSelectedAddress(data.funeralAddress);
+          }
+
           // ✅ undefined 방지
           if (funeralAddress && 'setValue' in funeralAddress) {
             funeralAddress.setValue(data.funeralAddress || '');
@@ -174,7 +185,7 @@ const FuneralModiftyPage = () => {
     };
 
     loadFuneralHomeInfo();
-  }, []);
+  }, []); // dependency array는 비워두고 useCallback으로 안정화
 
   // 라벨과 키 매핑
   const labelToKey = {
@@ -230,8 +241,31 @@ const FuneralModiftyPage = () => {
 
   // 주소 검색 핸들러
   const handleAddressSearch = () => {
-    console.log('주소 검색 페이지로 이동');
-    // navigation.navigate('AddressSearchPage'); // 추후 연결
+    setShowPostcodeModal(true);
+  };
+
+  // 주소 선택 핸들러
+  const handleAddressSelected = (postcodeData: any) => {
+    // 도로명주소가 있으면 도로명주소 사용, 없으면 지번주소 사용
+    const selectedAddr = postcodeData?.roadAddress ||
+                        postcodeData?.jibunAddress ||
+                        postcodeData?.address ||
+                        postcodeData?.autoRoadAddress ||
+                        postcodeData?.autoJibunAddress;
+
+    if (selectedAddr) {
+      setSelectedAddress(selectedAddr);
+      setShowPostcodeModal(false);
+    } else {
+      // 에러 토스트 표시
+      Toast.show({
+        type: 'error',
+        text1: '주소 선택에 실패했습니다.',
+        text2: '다시 시도해주세요.',
+        position: 'top',
+        topOffset: 0,
+      });
+    }
   };
 
   const handleSave = async () => {
@@ -260,7 +294,7 @@ console.log("🚀 ~ handleSave ~ funeralHomeInfo:", selectedImages.map(img => im
     formData.append('funeralTotalRooms', parseInt(infoData.funeral_total_rooms, 10));
     formData.append('funeralOperationType', infoData.funeral_operation_type);
     formData.append('funeralStyle', infoData.funeral_style);
-    formData.append('funeralAddress', funeralAddress.value);
+    formData.append('funeralAddress', selectedAddress + ' ' + funeralAddress.value); // 선택된 주소 + 상세주소
     formData.append('funeralHomepage', funeralWebsite.value);
     formData.append('funeralPhone', funeralPhone.value);
     formData.append('funeralParkingLot', convenienceData.funeral_parking_lot);
@@ -338,7 +372,12 @@ console.log("🚀 ~ handleSave ~ funeralHomeInfo:", selectedImages.map(img => im
             <View style={styles.locationInputContainer}>
               <View style={styles.addressRow}>
                 <View style={styles.addressBox}>
-                  <Typo style={styles.addressText}>하늘시 하늘구 하늘동</Typo>
+                  <Typo style={[
+                    styles.addressText,
+                    selectedAddress && { color: '#283042' }
+                  ]}>
+                    {selectedAddress || '주소를 검색해주세요'}
+                  </Typo>
                 </View>
                 <TouchableOpacity
                   style={styles.searchButton}
@@ -384,6 +423,14 @@ console.log("🚀 ~ handleSave ~ funeralHomeInfo:", selectedImages.map(img => im
         onClose={toggleAlbum}
         onSelect={handleSelectImages}
       />
+      
+      {/* 주소검색 모달 */}
+      <DaumPostcodeModal
+        visible={showPostcodeModal}
+        onClose={() => setShowPostcodeModal(false)}
+        onSelected={handleAddressSelected}
+      />
+      
       <Toast />
     </FuneralLayout>
   );
