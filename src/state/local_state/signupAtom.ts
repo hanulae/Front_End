@@ -32,6 +32,7 @@ export interface ISignupInfo {
   };
   agreedTerms: IAgreement;
   isUsernameChecked?: boolean; // 아이디 인증 여부
+  isUsernameAvailable?: boolean; // 아이디 중복 여부
   confirmPassword: string; // 비밀번호 확인
   isPhoneVerified: boolean; // 휴대폰 인증 여부
   selectedFuneral?: {
@@ -62,6 +63,7 @@ export const initialSignupState = {
     marketing: false,
   },
   isUsernameChecked: false,
+  isUsernameAvailable: false,
   confirmPassword: '',
   isPhoneVerified: false,
   selectedFuneral: {

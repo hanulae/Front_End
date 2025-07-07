@@ -38,18 +38,30 @@ const SignupStepOne = ({onNext}: Props) => {
     }
     return {valid: true, message: ''};
   };
-  const username = useInputBase({initialValue: '', validate: validateUsername});
+  const username = useInputBase({
+    initialValue: signupInfo.userName || '',
+    validate: validateUsername,
+  });
   const {available, message, checkUsername} = useCheckUsername(userType);
-  const password = usePasswordInput('');
+  const password = usePasswordInput(signupInfo.password || '');
   //const authCode = useInputBase();
-  const confirmPassword = useConfirmPasswordInput(() => password.value, '');
+  const confirmPassword = useConfirmPasswordInput(
+    () => password.value,
+    signupInfo.confirmPassword || '',
+  );
   const [isUsernameChecked, setIsUsernameChecked] = useState(
     signupInfo.isUsernameChecked,
+  );
+  const [isUsernameAvailable, setIsUsernameAvailable] = useState(
+    signupInfo.isUsernameAvailable,
   );
   const isPasswordValid = password.isValid;
   const isPasswordMatchValid = confirmPassword.isValid;
   const isFormValid =
-    isUsernameChecked && isPasswordMatchValid && isPasswordValid;
+    signupInfo.isUsernameChecked &&
+    signupInfo.isUsernameAvailable &&
+    isPasswordMatchValid &&
+    isPasswordValid;
 
   // ✅ 여기에 추가하세요
   console.log({
@@ -61,7 +73,7 @@ const SignupStepOne = ({onNext}: Props) => {
     userName: username.value,
   });
   const handleNext = () => {
-    if (!available) {
+    if (!isUsernameChecked || !isUsernameAvailable) {
       Toast.show({
         type: 'error',
         text1: '아이디 확인',
@@ -88,6 +100,12 @@ const SignupStepOne = ({onNext}: Props) => {
   const handleCheckUsername = () => {
     if (username.value.trim()) {
       checkUsername(username.value.trim());
+      // 중복확인 요청 시, 결과를 초기화
+      setSignupInfo(prev => ({
+        ...prev,
+        isUsernameChecked: false,
+        isUsernameAvailable: false,
+      }));
     }
   };
 
@@ -102,6 +120,14 @@ const SignupStepOne = ({onNext}: Props) => {
       setSignupInfo(prev => ({
         ...prev,
         isUsernameChecked: true,
+        isUsernameAvailable: true, // 추가
+      }));
+    } else if (available === false) {
+      setIsUsernameChecked(false);
+      setSignupInfo(prev => ({
+        ...prev,
+        isUsernameChecked: false,
+        isUsernameAvailable: false, // 추가
       }));
     }
   }, [available, setSignupInfo]);
