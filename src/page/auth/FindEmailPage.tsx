@@ -1,4 +1,4 @@
-import {StyleSheet, View, Alert, TouchableOpacity} from 'react-native';
+import {StyleSheet, View, TouchableOpacity} from 'react-native';
 import DefaultLayout from '../../layout/DefaultLayout';
 import {usePhoneInput} from '../../hooks/input/usePhoneInput';
 import {Input} from '../../components/common/input/Input';
@@ -10,6 +10,7 @@ import {NavigationProp, useRoute} from '@react-navigation/native';
 import {request} from 'react-native-permissions';
 import api from '../../api/config';
 import { useState } from 'react';
+import Toast from 'react-native-toast-message';
 
 interface IFindEmailPageProps {
   navigation: NavigationProp<any>;
@@ -25,15 +26,30 @@ const FindEmailPage = ({navigation}: IFindEmailPageProps) => {
 
   const handleRequestCode = async () => {
     try {
-      const response = await api.post('funeral/auth/find/username/send-sms', {
-        PhoneNumber: phoneNumber.value,
-      });
+      let response;
+      if (userType === 'manager') {
+        response = await api.post('manager/auth/find/username/send', {
+          managerPhoneNumber: phoneNumber.value,
+        });
+      } else {
+        response = await api.post('funeral/auth/find/username/send', {
+          funeralPhoneNumber: phoneNumber.value,
+        });
+      }
 
       if (response.status === 200) {
-        Alert.alert('성공', '인증 코드가 전송되었습니다.');
+        Toast.show({
+          type: 'success',
+          text1: '성공',
+          text2: '인증 코드가 전송되었습니다.',
+        });
       }
     } catch (error: any) {
-      Alert.alert('오류', error.response?.data?.message || '인증 코드 전송에 실패했습니다.');
+      Toast.show({
+        type: 'error',
+        text1: '오류',
+        text2: error.response?.data?.message || '인증 코드 전송에 실패했습니다.',
+      });
     }
   };
   const pageName =
@@ -41,20 +57,39 @@ const FindEmailPage = ({navigation}: IFindEmailPageProps) => {
 
   const handleVerifyCode = async () => {
     try {
-      const response = await api.post('funeral/auth/find/username/verify', {
-        PhoneNumber: phoneNumber.value,
-        code: authCode.value,
-      });
-      console.log("🚀 ~ handleVerifyCode ~ response:", response)
+      let response;
+      if (userType === 'manager') {
+        response = await api.post('manager/auth/find/username/verify', {
+          managerPhone: phoneNumber.value,
+          code: authCode.value,
+        });
+      } else {
+        response = await api.post('funeral/auth/find/username/verify', {
+          funeralPhoneNumber: phoneNumber.value,
+          code: authCode.value,
+        });
+      }
 
       if (response.status === 200 && response.data.verified) {
         setUsername(response.data.username);
-        Alert.alert('성공', '인증이 완료되었습니다. 아이디를 확인하세요.');
+        Toast.show({
+          type: 'success',
+          text1: '성공',
+          text2: '인증이 완료되었습니다. 아이디를 확인하세요.',
+        });
       } else {
-        Alert.alert('오류', '인증에 실패했습니다.');
+        Toast.show({
+          type: 'error',
+          text1: '오류',
+          text2: '인증에 실패했습니다.',
+        });
       }
     } catch (error: any) {
-      Alert.alert('오류', error.response?.data?.message || '인증에 실패했습니다.');
+      Toast.show({
+        type: 'error',
+        text1: '오류',
+        text2: error.response?.data?.message || '인증에 실패했습니다.',
+      });
     }
   };
 
@@ -129,6 +164,7 @@ const FindEmailPage = ({navigation}: IFindEmailPageProps) => {
             <Typo style={styles.confimButtonText}>확인</Typo>
           </CustomButton>
         </View>
+        <Toast />
       </View>
     </DefaultLayout>
   );

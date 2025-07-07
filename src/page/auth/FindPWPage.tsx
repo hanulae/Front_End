@@ -9,6 +9,7 @@ import {useInputBase} from '../../hooks/input/useInputBase';
 import {usePhoneInput} from '../../hooks/input/usePhoneInput';
 import Typo from '../../components/common/Typo';
 import {useState} from 'react';
+import Toast from 'react-native-toast-message';
 
 //BSK IMPORT ADD
 import api from '../../api/config';
@@ -38,8 +39,9 @@ const FindPWpage = ({navigation}: IFindPWPageProps) => {
 const handleRequestCode = async (phoneNumber: string) => {
   console.log("🚀 ~ handleRequestCode ~ phoneNumber:", phoneNumber)
   try {
-    const response = await api.post('funeral/auth/find/username/send-sms', {
-      PhoneNumber: phoneNumber,
+    const response = await api.post('manager/sms/send', {
+      phoneNumber: phoneNumber,
+      userType: userType,
     });
     console.log('Code sent response:', response);
   } catch (error) {
@@ -51,9 +53,10 @@ const handleRequestCode = async (phoneNumber: string) => {
 // 인증코드 확인 함수
 const handleVerifyCode = async (phoneNumber: string, authCode: string): Promise<boolean> => {
   try {
-    const response = await api.post('funeral/auth/find/username/verify', {
-      funeralPhoneNumber: phoneNumber,
+    const response = await api.post('manager/sms/verify', {
+      phoneNumber: phoneNumber,
       code: authCode,
+      userType: userType,
     });
     console.log('Verify code response:', response);
     setIsPhoneVerified(true);
@@ -64,9 +67,43 @@ const handleVerifyCode = async (phoneNumber: string, authCode: string): Promise<
   }
 };
 
-  const handleChangePassword = () => {
-    // 비밀번호 변경 로직
-    navigation.goBack();
+  const handleChangePassword = async () => {
+    try {
+      const phoneNumber = 'userPhoneNumber'; // Replace with actual phone number input
+      const newPassword = 'userNewPassword'; // Replace with actual new password input
+
+      let response;
+      if (userType === 'manager') {
+        // 상조팀장용 비밀번호 변경 API
+        response = await api.patch('manager/auth/update/password/lost', {
+          managerPhoneNumber: phoneNumber,
+          newPassword,
+        });
+      } else {
+        // 장례식장용 비밀번호 변경 API
+        response = await api.patch('funeral/auth/update/password/lost', {
+          funeralPhoneNumber: phoneNumber,
+          newPassword,
+        });
+      }
+
+      if (response.data) {
+        Toast.show({
+          type: 'success',
+          text1: '비밀번호 변경 완료',
+          position: 'top',
+        });
+        navigation.goBack();
+      }
+    } catch (error: any) {
+      console.error('비밀번호 변경 오류:', error.message);
+      Toast.show({
+        type: 'error',
+        text1: '비밀번호 변경 실패',
+        text2: error.response?.data?.message || '다시 시도해주세요.',
+        position: 'top',
+      });
+    }
   };
 
   return (
