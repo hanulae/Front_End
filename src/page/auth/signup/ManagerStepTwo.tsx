@@ -318,68 +318,69 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
     }
   };
 
-  const handlePickFiles = async () => {
-    try {
-      const picked = await pick({allowMultiSelection: true});
+  // const handlePickFiles = async () => {
+  //   try {
+  //     const picked = await pick({allowMultiSelection: true});
 
-      const inputFiles = picked.map(file => ({
-        uri: file.uri,
-        fileName: file.name ?? '이름없는파일',
-      }));
+  //     const inputFiles = picked.map(file => ({
+  //       uri: file.uri,
+  //       fileName: file.name ?? '이름없는파일',
+  //     }));
 
-      const localFiles = await getLocalFileCopies(inputFiles);
+  //     const localFiles = await getLocalFileCopies(inputFiles);
 
-      handleAddFile(localFiles); // 여러 개 전달
-    } catch (err) {
-      console.warn('파일 선택 실패:', err);
-    }
-  };
+  //     handleAddFile(localFiles); // 여러 개 전달
+  //   } catch (err) {
+  //     console.warn('파일 선택 실패:', err);
+  //   }
+  // };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <ScrollView style={styles.wrapper}>
-        {/* 휴대전화번호 인증 */}
-        <View style={styles.container}>
-          <Typo fontSize={16} style={styles.containerTitle}>
-            휴대전화번호 인증
-          </Typo>
-          <View style={styles.authSection}>
-            <Input
-              input={phoneNumber}
-              placeholder="전화번호를 입력하세요."
-              type="phone"
-            />
-            <CustomButton
-              onPress={handleRequestCode}
-              style={styles.requestButton}>
-              <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
-                인증코드받기
-              </Typo>
-            </CustomButton>
+      <View style={styles.wrapper}>
+        <View style={styles.formContainer}>
+          {/* 휴대전화번호 인증 */}
+          <View style={styles.container}>
+            <Typo fontSize={16} style={styles.containerTitle}>
+              휴대전화번호 인증
+            </Typo>
+            <View style={styles.authSection}>
+              <Input
+                input={phoneNumber}
+                placeholder="전화번호를 입력하세요."
+                type="phone"
+              />
+              <CustomButton
+                onPress={handleRequestCode}
+                style={styles.requestButton}>
+                <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
+                  인증코드받기
+                </Typo>
+              </CustomButton>
+            </View>
           </View>
-        </View>
-        {/* 인증코드 확인 */}
-        <View style={styles.container}>
-          <Typo fontSize={16} style={styles.containerTitle}>
-            인증코드 확인
-          </Typo>
-          <View style={styles.verifySection}>
-            <Input
-              input={authCode}
-              placeholder="인증코드를 입력하세요."
-              type="number"
-            />
-            <CustomButton
-              onPress={handleVerifyCode}
-              style={styles.requestButton}>
-              <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
-                인증코드확인
-              </Typo>
-            </CustomButton>
+          {/* 인증코드 확인 */}
+          <View style={styles.container}>
+            <Typo fontSize={16} style={styles.containerTitle}>
+              인증코드 확인
+            </Typo>
+            <View style={styles.verifySection}>
+              <Input
+                input={authCode}
+                placeholder="인증코드를 입력하세요."
+                type="number"
+              />
+              <CustomButton
+                onPress={handleVerifyCode}
+                style={styles.requestButton}>
+                <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
+                  인증코드확인
+                </Typo>
+              </CustomButton>
+            </View>
           </View>
-        </View>
-        {/* 첨부파일 */}
-        {/* <View style={styles.container}>
+          {/* 첨부파일 */}
+          {/* <View style={styles.container}>
           <Typo fontSize={16} style={styles.containerTitle}>
             첨부파일 ({totalAttachedCount}/10)
           </Typo>
@@ -432,6 +433,7 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
           </View>
           <Toast />
         </View> */}
+        </View>
         {/* 버튼 */}
         <View style={styles.bottomButtonContainer}>
           <CustomButton onPress={handlePrev} style={styles.button}>
@@ -454,7 +456,7 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
           onClose={closeAlbum}
         />
         <Toast />
-      </ScrollView>
+      </View>
     </TouchableWithoutFeedback>
   );
 };
@@ -467,7 +469,10 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   container: {
-    // borderWidth: 1,
+    marginBottom: 24,
+  },
+  formContainer: {
+    flex: 1,
   },
   imagePreviewContainer: {
     flexGrow: 0,
@@ -477,7 +482,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     fontFamily: 'Pretendard-Light',
-    // marginBottom: 5,
+    marginBottom: 16,
     marginLeft: 10,
   },
   buttonContainer: {
@@ -519,14 +524,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 16,
-    // paddingHorizontal: 16,
+    marginTop: 0,
   },
   verifySection: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 16,
-    // paddingHorizontal: 16,
+    marginTop: 0,
   },
   requestButton: {
     backgroundColor: '#8990A0',
@@ -553,7 +558,6 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     justifyContent: 'flex-end',
-    // borderWidth: 1,
     gap: 10,
     marginTop: 20,
   },
