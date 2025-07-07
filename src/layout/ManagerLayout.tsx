@@ -3,6 +3,7 @@ import {StyleSheet, View} from 'react-native';
 import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import Header from '../components/common/Header';
 import ManagerHeader from '../components/common/ManagerHeader';
+import {useNavigation, useRoute} from '@react-navigation/native';
 
 interface IManagerLayoutProps {
   children: React.ReactNode;
@@ -30,11 +31,21 @@ const ManagerLayout = ({
   top,
 }: IManagerLayoutProps): JSX.Element => {
   const insets = useSafeAreaInsets();
+  // const navigation = useNavigation();
+  const route = useRoute();
+
+  const isTabScreen =
+    route.name === 'FindFuneral' ||
+    route.name === 'Cart' ||
+    route.name === 'MyPage';
   return (
     <SafeAreaView
       style={[
         styles.safeArea,
-        {backgroundColor: color, paddingBottom: insets.bottom},
+        {
+          backgroundColor: color,
+          paddingBottom: isTabScreen ? 0 : insets.bottom,
+        },
       ]}
       edges={[
         ...(top === false ? [] : ['top' as const]),
