@@ -1,7 +1,8 @@
 import {useRoute} from '@react-navigation/native';
-import {StyleSheet, View} from 'react-native';
+import {ScrollView, StyleSheet, View} from 'react-native';
 import DefaultLayout from '../../../layout/DefaultLayout';
 import Typo from '../../../components/common/Typo';
+import {serviceAgreement} from '../../../constant/agreements/serviceAgreement';
 
 const AgreementDetailPage = () => {
   const route = useRoute();
@@ -29,7 +30,7 @@ const AgreementDetailPage = () => {
   const getContent = () => {
     switch (type) {
       case 'service':
-        return '서비스 이용약관 내용';
+        return serviceAgreement;
       case 'privacy':
         return '개인정보 처리방침 내용';
       case 'location':
@@ -53,14 +54,14 @@ const AgreementDetailPage = () => {
       logoutButton={false}
       homeRouteName="Main"
       headerTitle={getTitle()}>
-      <View style={{padding: 20}}>
+      <ScrollView style={{padding: 20}}>
         <Typo fontSize={16} style={{fontWeight: '700', marginBottom: 10}}>
           {getTitle()}
         </Typo>
         <Typo fontSize={14} style={{lineHeight: 20}}>
           {getContent()}
         </Typo>
-      </View>
+      </ScrollView>
     </DefaultLayout>
   );
 };

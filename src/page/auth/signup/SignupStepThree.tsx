@@ -144,7 +144,10 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
         formData.append('agreements', JSON.stringify(agrees));
 
         // Add funeral home information
-        formData.append('funeralHome', signupInfo.selectedFuneral?.funeralListId || '');
+        formData.append(
+          'funeralHome',
+          signupInfo.selectedFuneral?.funeralListId || '',
+        );
       }
 
       // 🔹 중복된 managerAddFile 필드가 생기지 않도록 유일하게 append
@@ -389,7 +392,7 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
             <Typo style={styles.moreInfoText}>보기</Typo>
           </TouchableOpacity>
         </TouchableOpacity>
-
+        {/* 
         <TouchableOpacity
           style={styles.checkboxRow}
           onPress={() => handleToggle('location')}>
@@ -406,7 +409,7 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
           <TouchableOpacity onPress={() => navigateMoreInfo('location')}>
             <Typo style={styles.moreInfoText}>보기</Typo>
           </TouchableOpacity>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         <TouchableOpacity
           style={styles.checkboxRow}
