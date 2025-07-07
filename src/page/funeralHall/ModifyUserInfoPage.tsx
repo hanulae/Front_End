@@ -16,7 +16,7 @@ import {usePasswordInput} from '../../hooks/input/usePasswordInput';
 import {useConfirmPasswordInput} from '../../hooks/input/useConfirmPasswordInput';
 import Typo from '../../components/common/Typo';
 import {useFocusEffect} from '@react-navigation/native';
-import {useCallback, useState} from 'react';
+import {useCallback, useState, useEffect} from 'react';
 import CustomButton from '../../components/common/CustomButton';
 import BankSelectBottomSheet from '../../components/common/BankSelecSheet';
 
@@ -54,6 +54,19 @@ const ModifyUserInfoPage = () => {
   const [bankCode, setBankCode] = useState('');
 
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
+
+  const [isButtonEnabled, setIsButtonEnabled] = useState(false);
+
+  const [isAccountVerified, setIsAccountVerified] = useState(false);
+
+  useEffect(() => {
+    // 비밀번호와 비밀번호 확인이 일치할 때 버튼 활성화
+    if (newPassword.value && confirmPassword.value && newPassword.value === confirmPassword.value) {
+      setIsButtonEnabled(true);
+    } else {
+      setIsButtonEnabled(false);
+    }
+  }, [newPassword.value, confirmPassword.value]);
 
   const BANK_LIST = [
     {name: 'KB국민은행', code: '004'},
@@ -281,6 +294,7 @@ const ModifyUserInfoPage = () => {
       });
 
       Alert.alert('인증 성공', '계좌 인증이 완료되었습니다.');
+      setIsAccountVerified(true);
     } catch (err: any) {
       console.log('계좌 인증 실패:', err.response?.data || err.message);
       Alert.alert(
@@ -351,6 +365,11 @@ const ModifyUserInfoPage = () => {
               input={newPassword}
               placeholder="비밀번호를 입력하세요"
             />
+            {newPassword.touched && newPassword.error ? (
+            <Typo fontSize={12} color="red" style={{marginLeft: 10}}>
+              {newPassword.error}
+            </Typo>
+          ) : null}
           </View>
           <Typo style={styles.label}>새로운 비밀번호 확인</Typo>
           <View style={styles.field}>
@@ -360,11 +379,21 @@ const ModifyUserInfoPage = () => {
               {...confirmPassword}
               type="password"
             />
+            {confirmPassword.touched && confirmPassword.error ? (
+            <Typo fontSize={12} color="red" style={{marginLeft: 10}}>
+              {confirmPassword.error}
+            </Typo>
+          ) : null}
           </View>
 
           <TouchableOpacity
-            style={styles.button}
-            onPress={handleChangePassword}>
+            style={[
+              styles.button,
+              {backgroundColor: isButtonEnabled ? '#2D81F1' : '#ccc'}, // 활성화 상태에 따라 색상 변경
+            ]}
+            onPress={handleChangePassword}
+            disabled={!isButtonEnabled} // 버튼 비활성화
+          >
             <Typo style={styles.buttonText}>비밀번호 변경</Typo>
           </TouchableOpacity>
         </View>
@@ -475,8 +504,12 @@ const ModifyUserInfoPage = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.button}
-            onPress={handleChangeBankInfo}>
+            style={[
+              styles.button,
+              { backgroundColor: isAccountVerified ? '#3287F8' : '#ccc' },
+            ]}
+            onPress={handleChangeBankInfo}
+            disabled={!isAccountVerified}>
             <Typo style={styles.buttonText}>계좌 정보 변경 신청</Typo>
           </TouchableOpacity>
         </View>

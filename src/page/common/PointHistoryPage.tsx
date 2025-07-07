@@ -106,9 +106,15 @@ const PointHistoryPage = () => {
                 assetType: transaction.transactionType?.includes('cash')
                   ? 'cash'
                   : 'point',
-                transactionType: transaction.transactionType?.includes('earn')
-                  ? 'earn'
-                  : 'refund',
+                transactionType: (() => {
+                  const type = transaction.transactionType;
+                  if (type?.includes('earn_cash') || type?.includes('service_cash')) {
+                    return 'earn';
+                  } else if (type?.includes('use_cash') || type?.includes('withdraw_cash')) {
+                    return 'refund';
+                  }
+                  return 'earn'; // 기본값
+                })(),
                 transactionDate: new Date(
                   transaction.transactionDate,
                 ).toLocaleDateString('ko-KR'),

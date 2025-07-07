@@ -244,7 +244,7 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
     console.log('인증 코드 요청:', phoneNumber.value);
     try {
       const res = await api.post('/manager/sms/send', {
-        managerPhone: phoneNumber.value,
+        phoneNumber: phoneNumber.value,
         userType: 'manager',
       });
       console.log('📨 인증번호 전송 성공:', res.data);
@@ -282,7 +282,7 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
 
     try {
       const res = await api.post('/manager/sms/verify', {
-        managerPhone: phoneNumber.value,
+        phoneNumber: phoneNumber.value,
         code: authCode.value,
       });
 
