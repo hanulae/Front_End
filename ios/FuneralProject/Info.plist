@@ -79,6 +79,8 @@
 		</dict>
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string></string>
+		<key>NSUserNotificationUsageDescription</key>
+		<string>앱에서 중요한 알림을 받기 위해 알림 권한이 필요합니다.</string>
 		<key>UILaunchStoryboardName</key>
 		<string>BootSplash</string>
 		<key>UIRequiredDeviceCapabilities</key>
@@ -93,5 +95,10 @@
 		</array>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<false/>
+		<key>UIBackgroundModes</key>
+		<array>
+			<string>remote-notification</string>
+			<string>background-processing</string>
+		</array>
 	</dict>
 </plist>
