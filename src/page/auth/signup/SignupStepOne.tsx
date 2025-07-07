@@ -58,19 +58,21 @@ const SignupStepOne = ({onNext}: Props) => {
   const isPasswordValid = password.isValid;
   const isPasswordMatchValid = confirmPassword.isValid;
   const isFormValid =
-    signupInfo.isUsernameChecked &&
-    signupInfo.isUsernameAvailable &&
+    isUsernameChecked &&
+    isUsernameAvailable &&
     isPasswordMatchValid &&
     isPasswordValid;
 
   // ✅ 여기에 추가하세요
   console.log({
     isUsernameChecked,
+    isUsernameAvailable,
     isPasswordValid,
     isPasswordMatchValid,
     password: password.value,
     confirmPassword: confirmPassword.value,
     userName: username.value,
+    isFormValid,
   });
   const handleNext = () => {
     if (!isUsernameChecked || !isUsernameAvailable) {
@@ -117,16 +119,18 @@ const SignupStepOne = ({onNext}: Props) => {
   useEffect(() => {
     if (available === true) {
       setIsUsernameChecked(true);
+      setIsUsernameAvailable(true);
       setSignupInfo(prev => ({
         ...prev,
         isUsernameChecked: true,
         isUsernameAvailable: true, // 추가
       }));
     } else if (available === false) {
-      setIsUsernameChecked(false);
+      setIsUsernameChecked(true);
+      setIsUsernameAvailable(false);
       setSignupInfo(prev => ({
         ...prev,
-        isUsernameChecked: false,
+        isUsernameChecked: true,
         isUsernameAvailable: false, // 추가
       }));
     }
