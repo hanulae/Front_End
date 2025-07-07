@@ -572,6 +572,7 @@ const styles = StyleSheet.create({
   },
   field: {
     paddingHorizontal: 16,
+    marginBottom: 16,
   },
   field1: {
     paddingHorizontal: 16,
@@ -582,19 +583,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     paddingHorizontal: 16,
+    marginBottom: 16,
   },
   fieldRow1: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
     paddingHorizontal: 16,
-    paddingVertical: 16,
+    // paddingVertical: 16,
+    paddingBottom: 16,
   },
   label: {
     fontSize: 14,
     fontWeight: '600',
     color: '#333',
     paddingLeft: 24,
+    marginBottom: 16,
   },
   input: {
     flex: 1,
@@ -602,7 +606,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F6F8',
     borderRadius: 8,
     paddingHorizontal: 16,
-    // paddingVertical: ,
     fontSize: 14,
   },
   button: {
