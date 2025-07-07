@@ -1,5 +1,4 @@
-import {StyleSheet, View, ScrollView, Alert} from 'react-native';
-import DefaultLayout from '../../layout/DefaultLayout';
+import {StyleSheet, View, ScrollView, Alert, Dimensions, Platform} from 'react-native';
 import {useInputBase} from '../../hooks/input/useInputBase';
 import {useState} from 'react';
 import Typo from '../../components/common/Typo';
@@ -14,6 +13,14 @@ import RequestIcon from '../../assets/Button/Button_RequestQuote.svg';
 import MoveIcon from '../../assets/Button/Button_MoveTransparent.svg';
 import {useManagerForm} from '../../hooks/useManagerForm';
 import {useManagerCart} from '../../hooks/useManagerCart';
+
+// 화면 크기 정보 가져오기
+const { width: screenWidth } = Dimensions.get('window');
+
+// 기기별 크기 판단
+const isTablet = screenWidth >= 768;
+const isSmallDevice = screenWidth < 375;
+const isLargeDevice = screenWidth > 414;
 
 const EstimateFormPage = () => {
   const navigation = useNavigation();
@@ -34,7 +41,7 @@ const EstimateFormPage = () => {
   const [showAdmissionPicker, setShowAdmissionPicker] = useState(false);
   const [showDeparturePicker, setShowDeparturePicker] = useState(false);
   const {deleteFromCart} = useManagerCart();
-  const { loading, error, createManagerForm, clearError } = useManagerForm();
+  const { loading, createManagerForm } = useManagerForm();
 
   const formatSimpleDate = (date: Date) => {
     return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(
@@ -410,33 +417,39 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: 16,
+    padding: isTablet ? 24 : isSmallDevice ? 12 : 16,
     paddingBottom: 20,
+    maxWidth: isTablet ? 600 : '100%',
+    alignSelf: isTablet ? 'center' : 'stretch',
   },
   authSection: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 10,
+    marginBottom: 20,
   },
   authContainer: {
     flexDirection: 'column',
+    gap: 8,
   },
   containerTitle: {
-    fontSize: 16,
+    fontSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
     fontWeight: '600',
     fontFamily: 'Pretendard-Light',
-    marginLeft: 10,
+    marginLeft: isTablet ? 12 : 10,
+    marginBottom: isTablet ? 10 : 8,
   },
   formContainer: {
     flex: 9,
   },
   form: {
-    gap: 16,
+    gap: isTablet ? 20 : 16,
   },
   field: {
     flexDirection: 'column',
-    // gap: 10,
+    marginBottom: isTablet ? 24 : isSmallDevice ? 16 : 20,
+    gap: isTablet ? 10 : 8,
   },
   label: {
     fontSize: 14,
@@ -447,35 +460,40 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: 8,
-    // marginTop: 10,
+    marginBottom: 20,
   },
   dateButton: {
     flexDirection: 'row',
     backgroundColor: '#F5F6F8',
     borderRadius: 10,
-    paddingHorizontal: 48,
-    paddingVertical: 18,
+    paddingHorizontal: isTablet ? 50 : isSmallDevice ? 36 : 42,
+    paddingVertical: isTablet ? 20 : isSmallDevice ? 12 : 16,
     alignItems: 'center',
-    // gap: 8,
+    justifyContent: 'space-between',
+    minHeight: isTablet ? 56 : 48,
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingHorizontal: isTablet ? 24 : 16,
+    paddingVertical: isTablet ? 20 : 16,
+    paddingBottom: Platform.OS === 'ios' ? (isLargeDevice ? 34 : 20) : 16,
     borderTopWidth: 1,
     borderTopColor: '#eeeeee',
     backgroundColor: 'white',
+    maxWidth: isTablet ? 600 : '100%',
+    alignSelf: isTablet ? 'center' : 'stretch',
   },
   button: {
     flexDirection: 'row',
-    flex: 1,
+    flex: isTablet ? 0 : 1,
+    minWidth: isTablet ? 200 : 'auto',
     alignItems: 'center',
     backgroundColor: '#2D81F1',
     borderRadius: 8,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
+    paddingVertical: isTablet ? 18 : 16,
+    paddingHorizontal: isTablet ? 24 : 20,
   },
   buttonDisabled: {
     backgroundColor: '#cccccc',
@@ -494,22 +512,22 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard-Black',
   },
   selectedFuneralsContainer: {
-    marginTop: 24,
-    padding: 16,
+    // marginTop: 10,
+    padding: isTablet ? 20 : 16,
     backgroundColor: '#f8f9fa',
-    borderRadius: 8,
-    borderLeftWidth: 4,
+    borderRadius: isTablet ? 12 : 8,
+    borderLeftWidth: isTablet ? 6 : 4,
     borderLeftColor: '#2D81F1',
   },
   selectedFuneralItem: {
-    marginTop: 8,
+    marginTop: isTablet ? 10 : 8,
   },
   selectedFuneralText: {
-    fontSize: 14,
+    fontSize: isTablet ? 16 : isSmallDevice ? 13 : 14,
     color: '#333',
   },
   placeholderText: {
     color: '#999999',
-    fontSize: 14,
+    fontSize: isTablet ? 16 : isSmallDevice ? 13 : 14,
   },
 });

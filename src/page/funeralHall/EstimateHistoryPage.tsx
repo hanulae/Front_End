@@ -1,4 +1,4 @@
-import {Platform, ScrollView, StatusBar, StyleSheet, View, ActivityIndicator, TouchableOpacity} from 'react-native';
+import {Platform, ScrollView, StatusBar, StyleSheet, View, ActivityIndicator, TouchableOpacity, RefreshControl} from 'react-native';
 import FuneralLayout from '../../layout/FuneralLayout';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {useCallback, useState, useEffect} from 'react';
@@ -12,6 +12,7 @@ const EstimateHistoryPage = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const { loading, error, fetchEstimateList } = useFuneralEstimate();
   const [estimateList, setEstimateList] = useState<any[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   // StatusBar 설정
   useFocusEffect(
@@ -46,6 +47,16 @@ const EstimateHistoryPage = () => {
       setEstimateList([]);
     }
   }, [fetchEstimateList]);
+
+  // 새로고침 처리
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await loadEstimateList();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [loadEstimateList]);
 
   // 페이지 포커스 시 데이터 로드
   useFocusEffect(
@@ -159,15 +170,33 @@ const EstimateHistoryPage = () => {
     // 데이터 없음
     if (estimateList.length === 0) {
       return (
-        <View style={styles.centerContainer}>
+        <ScrollView 
+          contentContainerStyle={styles.centerContainer}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={['#3287F8']} // Android
+              tintColor="#3287F8" // iOS
+            />
+          }>
           <Typo style={styles.emptyText}>아직 견적 요청이 없습니다.</Typo>
-        </View>
+        </ScrollView>
       );
     }
 
     // 데이터 표시 (현재 받는 장례식장용 API 응답 구조에 맞게)
     return (
-      <ScrollView contentContainerStyle={styles.scrollView}>
+      <ScrollView 
+        contentContainerStyle={styles.scrollView}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#3287F8']} // Android
+            tintColor="#3287F8" // iOS
+          />
+        }>
         {estimateList.map((item, index) => (
           <QuoteCard
             key={item.managerFormBidId || index}
@@ -215,7 +244,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   centerContainer: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 60,

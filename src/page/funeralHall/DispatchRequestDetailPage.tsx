@@ -1,6 +1,6 @@
 import {useFocusEffect, useNavigation, useRoute} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {StyleSheet, TextInput, View} from 'react-native';
+import {StyleSheet, TextInput, View, useWindowDimensions, ScrollView} from 'react-native';
 import FuneralLayout from '../../layout/FuneralLayout';
 import Typo from '../../components/common/Typo';
 import {useCallback, useEffect, useState} from 'react';
@@ -15,6 +15,25 @@ const DispatchRequestDetailPage = () => {
   const {dispatchRequestId} = route.params as {dispatchRequestId: string};
   const {loading, error, fetchDispatchDetail, approveDispatch} = useFuneralDispatch();
   const [dispatchDetail, setDispatchDetail] = useState<DispatchDetail | null>(null);
+  
+  // 반응형 디자인을 위한 윈도우 크기 감지
+  const {width} = useWindowDimensions();
+  
+  // 디바이스 크기에 따른 스타일 계산
+  const getResponsiveStyles = () => {
+    const isSmallDevice = width < 350;
+    const isMediumDevice = width >= 350 && width < 400;
+    
+    return {
+      horizontalPadding: isSmallDevice ? 15 : isMediumDevice ? 20 : 25,
+      verticalPadding: isSmallDevice ? 15 : isMediumDevice ? 20 : 25,
+      fontSize: isSmallDevice ? 16 : isMediumDevice ? 18 : 20,
+      inputHeight: isSmallDevice ? 45 : isMediumDevice ? 50 : 55,
+      buttonHeight: isSmallDevice ? 45 : isMediumDevice ? 50 : 55,
+    };
+  };
+  
+  const responsiveStyles = getResponsiveStyles();
 
   // 출동 요청 상세 데이터 로드
   const loadDispatchDetail = useCallback(async () => {
@@ -115,69 +134,79 @@ const DispatchRequestDetailPage = () => {
       homeRouteName="FuneralMain"
       color="white">
       <View style={styles.wrapper}>
-        {/* <View style={styles.detailContainer}>
-          <Typo style={styles.titleText}>상주이름</Typo>
-          <TextInput
-            value={clientInfo.name}
-            editable={false}
-            style={styles.input}
-          />
-        </View> */}
-        <View style={styles.detailContainer}>
-          <Typo style={styles.titleText}>주소</Typo>
-          <TextInput
-            value={dispatchDetail?.address || ''}
-            editable={false}
-            style={styles.input}
-          />
-          <TextInput
-            value={dispatchDetail?.addressDetail || ''}
-            placeholder={!dispatchDetail?.addressDetail ? '작성하지 않은 항목' : ''}
-            placeholderTextColor="#AFB3BB"
-            editable={false}
-            style={[
-              styles.input2,
-              !dispatchDetail?.addressDetail && styles.inputEmpty,
-            ]}
-          />
-        </View>
-        <View style={styles.detailContainer}>
-          <Typo style={styles.titleText}>가족연락처</Typo>
-          <TextInput
-            value={dispatchDetail?.famPhoneNumber || ''}
-            placeholder={!dispatchDetail?.famPhoneNumber ? '작성하지 않은 항목' : ''}
-            placeholderTextColor="#AFB3BB"
-            editable={false}
-            style={[
-              styles.input,
-              !dispatchDetail?.famPhoneNumber && styles.inputEmpty,
-            ]}
-          />
-        </View>
-        <View style={styles.detailContainer}>
-          <Typo style={styles.titleText}>팀장연락처</Typo>
-          <TextInput
-            value={dispatchDetail?.managerPhoneNumber || ''}
-            editable={false}
-            style={styles.input}
-          />
-        </View>
-        <View style={styles.detailContainer}>
-          <Typo style={styles.titleText}>비상연락처</Typo>
-          <TextInput
-            value={dispatchDetail?.emergencyPhoneNumber || ''}
-            placeholder={!dispatchDetail?.emergencyPhoneNumber ? '작성하지 않은 항목' : ''}
-            placeholderTextColor="#AFB3BB"
-            editable={false}
-            style={[
-              styles.input,
-              !dispatchDetail?.emergencyPhoneNumber && styles.inputEmpty,
-            ]}
-          />
-        </View>
-        <View style={styles.buttonContainer}>
+        <ScrollView 
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* <View style={styles.detailContainer}>
+            <Typo style={styles.titleText}>상주이름</Typo>
+            <TextInput
+              value={clientInfo.name}
+              editable={false}
+              style={styles.input}
+            />
+          </View> */}
+          <View style={[styles.detailContainer, {paddingHorizontal: responsiveStyles.horizontalPadding, paddingVertical: responsiveStyles.verticalPadding}]}>
+            <Typo style={[styles.titleText, {fontSize: responsiveStyles.fontSize}]}>주소</Typo>
+            <TextInput
+              value={dispatchDetail?.address || ''}
+              editable={false}
+              style={[styles.input, {height: responsiveStyles.inputHeight}]}
+            />
+            <TextInput
+              value={dispatchDetail?.addressDetail || ''}
+              placeholder={!dispatchDetail?.addressDetail ? '작성하지 않은 항목' : ''}
+              placeholderTextColor="#AFB3BB"
+              editable={false}
+              style={[
+                styles.input2,
+                {height: responsiveStyles.inputHeight},
+                !dispatchDetail?.addressDetail && styles.inputEmpty,
+              ]}
+            />
+          </View>
+          <View style={[styles.detailContainer, {paddingHorizontal: responsiveStyles.horizontalPadding, paddingVertical: responsiveStyles.verticalPadding}]}>
+            <Typo style={[styles.titleText, {fontSize: responsiveStyles.fontSize}]}>가족연락처</Typo>
+            <TextInput
+              value={dispatchDetail?.famPhoneNumber || ''}
+              placeholder={!dispatchDetail?.famPhoneNumber ? '작성하지 않은 항목' : ''}
+              placeholderTextColor="#AFB3BB"
+              editable={false}
+              style={[
+                styles.input,
+                {height: responsiveStyles.inputHeight},
+                !dispatchDetail?.famPhoneNumber && styles.inputEmpty,
+              ]}
+            />
+          </View>
+          <View style={[styles.detailContainer, {paddingHorizontal: responsiveStyles.horizontalPadding, paddingVertical: responsiveStyles.verticalPadding}]}>
+            <Typo style={[styles.titleText, {fontSize: responsiveStyles.fontSize}]}>팀장연락처</Typo>
+            <TextInput
+              value={dispatchDetail?.managerPhoneNumber || ''}
+              editable={false}
+              style={[styles.input, {height: responsiveStyles.inputHeight}]}
+            />
+          </View>
+          <View style={[styles.detailContainer, {paddingHorizontal: responsiveStyles.horizontalPadding, paddingVertical: responsiveStyles.verticalPadding}]}>
+            <Typo style={[styles.titleText, {fontSize: responsiveStyles.fontSize}]}>비상연락처</Typo>
+            <TextInput
+              value={dispatchDetail?.emergencyPhoneNumber || ''}
+              placeholder={!dispatchDetail?.emergencyPhoneNumber ? '작성하지 않은 항목' : ''}
+              placeholderTextColor="#AFB3BB"
+              editable={false}
+              style={[
+                styles.input,
+                {height: responsiveStyles.inputHeight},
+                !dispatchDetail?.emergencyPhoneNumber && styles.inputEmpty,
+              ]}
+            />
+          </View>
+        </ScrollView>
+        <View style={[styles.buttonContainer, {paddingHorizontal: responsiveStyles.horizontalPadding}]}>
           <CustomButton 
-            style={[styles.button, loading && styles.buttonDisabled]} 
+            style={[styles.button, {height: responsiveStyles.buttonHeight}, loading && styles.buttonDisabled]} 
             onPress={handleDispatchConfirm}
             disabled={loading}
           >
@@ -196,7 +225,13 @@ export default DispatchRequestDetailPage;
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
-    // padding: 16,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 10,
   },
   detailContainer: {
     flexDirection: 'column',
@@ -235,18 +270,22 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
   buttonContainer: {
-    flex: 1,
     flexDirection: 'row',
-    alignItems: 'flex-end',
+    alignItems: 'center',
     paddingBottom: 24,
+    paddingTop: 16,
     paddingHorizontal: 20,
+    backgroundColor: 'white',
+    borderTopWidth: 1,
+    borderTopColor: '#E5E8EB',
   },
   button: {
     flex: 1,
     borderRadius: 10,
     backgroundColor: '#2D81F1',
-    paddingVertical: 18,
-    // paddingHorizontal: 20,
+    paddingVertical: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   buttonText: {
     color: 'white',

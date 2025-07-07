@@ -8,7 +8,6 @@ interface IButtonGroupProps {
   isCancel: boolean;
   onEditPress: () => void;
   onDeletePress: () => void;
-  onCancelPress: () => void;
   isVisible?: boolean;
 }
 
@@ -19,7 +18,6 @@ const ButtonGroup = ({
   isCancel,
   onEditPress,
   onDeletePress,
-  onCancelPress,
 }: IButtonGroupProps) => {
   // if (!isVisible) {
   //   return null;
@@ -37,11 +35,6 @@ const ButtonGroup = ({
           {isDelete && (
             <CustomButton onPress={onDeletePress} style={styles.deleteButton}>
               <Typo style={styles.deleteButtonText}>삭제</Typo>
-            </CustomButton>
-          )}
-          {isCancel && (
-            <CustomButton onPress={onCancelPress} style={styles.cancelButton}>
-              <Typo style={styles.cancelButtonText}>취소</Typo>
             </CustomButton>
           )}
         </View>
