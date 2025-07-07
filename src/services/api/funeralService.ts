@@ -32,6 +32,7 @@ interface FuneralDetail {
   funeralImageUrl: string;
   funeralPhoneNumber: string;
   funeralHomepageUrl: string;
+  images?: { imageUrl: string }[]; 
 }
 
 interface HallRoomSummary {
@@ -49,6 +50,7 @@ interface HallRoomSummaryResponse {
 interface FuneralDetailResponse {
   success: boolean;
   data: FuneralDetail;
+  images?: { imageUrl: string }[]; // 이미지 속성 추가
 }
 
 interface PageInfo {

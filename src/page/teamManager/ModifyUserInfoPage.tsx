@@ -16,7 +16,7 @@ import {usePasswordInput} from '../../hooks/input/usePasswordInput';
 import {useConfirmPasswordInput} from '../../hooks/input/useConfirmPasswordInput';
 import Typo from '../../components/common/Typo';
 import {useFocusEffect} from '@react-navigation/native';
-import {useCallback, useState} from 'react';
+import {useCallback, useState, useEffect} from 'react';
 import CustomButton from '../../components/common/CustomButton';
 import BankSelectBottomSheet from '../../components/common/BankSelecSheet';
 
@@ -25,6 +25,7 @@ import api from '../../api/config';
 import Toast from 'react-native-toast-message';
 import {useAtomValue} from 'jotai';
 import {loginAtom} from '../../state/local_state/loginAtom';
+import { getUserInfo, storeUserInfo } from '../../utils/tokenStorage';
 
 const ModifyUserInfoPage = () => {
   useFocusEffect(
@@ -83,6 +84,19 @@ const ModifyUserInfoPage = () => {
     {name: 'K뱅크', code: '089'},
     {name: '카카오뱅크', code: '090'},
   ];
+
+  const [isButtonEnabled, setIsButtonEnabled] = useState(false);
+  const [isPhoneVerified, setIsPhoneVerified] = useState(false);
+  const [isAccountVerified, setIsAccountVerified] = useState(false);
+
+  useEffect(() => {
+    // 비밀번호와 비밀번호 확인이 일치할 때 버튼 활성화
+    if (newPassword.value && confirmPassword.value && newPassword.value === confirmPassword.value) {
+      setIsButtonEnabled(true);
+    } else {
+      setIsButtonEnabled(false);
+    }
+  }, [newPassword.value, confirmPassword.value]);
 
   const openBankSelectSheet = () => {
     setShowBankSelectSheet(true);
@@ -219,12 +233,14 @@ const ModifyUserInfoPage = () => {
       );
 
       if (res.data.verified) {
+        setIsPhoneVerified(true);
         Toast.show({
           type: 'success',
           text1: '인증 성공',
           position: 'top',
         });
       } else {
+        setIsPhoneVerified(false);
         Toast.show({
           type: 'error',
           text1: '인증 실패',
@@ -233,6 +249,7 @@ const ModifyUserInfoPage = () => {
         });
       }
     } catch (error: any) {
+      setIsPhoneVerified(false);
       console.error('인증 실패:', error.response?.data || error.message);
       Toast.show({
         type: 'error',
@@ -266,11 +283,6 @@ const ModifyUserInfoPage = () => {
           currentPhone,
           newPhone,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${loginInfo.accessToken}`,
-          },
-        },
       );
 
       Toast.show({
@@ -278,6 +290,18 @@ const ModifyUserInfoPage = () => {
         text1: '휴대전화번호 변경 완료',
         position: 'top',
       });
+
+      // 현재 사용자 정보 가져오기
+      const userInfo = await getUserInfo();
+      console.log("🚀 ~ handleChangePhoneNumber ~ userInfo:", userInfo)
+      if (userInfo) {
+        // 핸드폰 번호 업데이트
+        userInfo.data.managerPhoneNumber = newPhone;
+        userInfo.data.phoneNumber = newPhone;
+
+        // 업데이트된 사용자 정보 저장
+        await storeUserInfo(userInfo);
+      }
 
       // 필요시 phoneNumber 초기화
       // phoneNumber.setValue('');
@@ -313,8 +337,10 @@ const ModifyUserInfoPage = () => {
         name,
       });
 
+      setIsAccountVerified(true);
       Alert.alert('인증 성공', '계좌 인증이 완료되었습니다.');
     } catch (err: any) {
+      setIsAccountVerified(false);
       console.log('계좌 인증 실패:', err.response?.data || err.message);
       Alert.alert(
         '인증 실패',
@@ -392,6 +418,11 @@ const ModifyUserInfoPage = () => {
               input={newPassword}
               placeholder="비밀번호를 입력하세요"
             />
+            {newPassword.touched && newPassword.error ? (
+            <Typo fontSize={12} color="red" style={{marginLeft: 10}}>
+              {newPassword.error}
+            </Typo>
+          ) : null}
           </View>
           <Typo style={styles.label}>새로운 비밀번호 확인</Typo>
           <View style={styles.field}>
@@ -401,11 +432,21 @@ const ModifyUserInfoPage = () => {
               {...confirmPassword}
               type="password"
             />
+            {confirmPassword.touched && confirmPassword.error ? (
+            <Typo fontSize={12} color="red" style={{marginLeft: 10}}>
+              {confirmPassword.error}
+            </Typo>
+          ) : null}
           </View>
 
           <TouchableOpacity
-            style={styles.button}
-            onPress={handleChangePassword}>
+            style={[
+              styles.button,
+              {backgroundColor: isButtonEnabled ? '#2D81F1' : '#ccc'}, // 활성화 상태에 따라 색상 변경
+            ]}
+            onPress={handleChangePassword}
+            disabled={!isButtonEnabled} // 버튼 비활성화
+          >
             <Typo style={styles.buttonText}>비밀번호 변경</Typo>
           </TouchableOpacity>
         </View>
@@ -435,8 +476,13 @@ const ModifyUserInfoPage = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.button}
-            onPress={handleChangePhoneNumber}>
+            style={[
+              styles.button,
+              { backgroundColor: isPhoneVerified ? '#2D81F1' : '#ccc' }, // Change color based on verification status
+            ]}
+            onPress={handleChangePhoneNumber}
+            disabled={!isPhoneVerified} // Disable button if not verified
+          >
             <Typo style={styles.buttonText}>휴대전화번호 변경</Typo>
           </TouchableOpacity>
         </View>
@@ -529,8 +575,13 @@ const ModifyUserInfoPage = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.button}
-            onPress={handleChangeBankInfo}>
+            style={[
+              styles.button,
+              { backgroundColor: isAccountVerified ? '#2D81F1' : '#ccc' }, // 인증 상태에 따라 색상 변경
+            ]}
+            onPress={handleChangeBankInfo}
+            disabled={!isAccountVerified} // 인증되지 않으면 버튼 비활성화
+          >
             <Typo style={styles.buttonText}>계좌 정보 변경 신청</Typo>
           </TouchableOpacity>
         </View>
@@ -542,6 +593,7 @@ const ModifyUserInfoPage = () => {
             closeBankSelectSheet();
           }}
         /> */}
+        <Toast />
       </ScrollView>
     </DefaultLayout>
   );
@@ -620,7 +672,7 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   subButton: {
-    backgroundColor: '#bbb',
+    backgroundColor: '#2D81F1',
     paddingVertical: 16,
     paddingHorizontal: 16,
     borderRadius: 8,
@@ -630,6 +682,7 @@ const styles = StyleSheet.create({
   subButtonText: {
     fontSize: 14,
     color: '#fff',
+    fontWeight: 'bold',
   },
   timerText: {
     fontSize: 14,

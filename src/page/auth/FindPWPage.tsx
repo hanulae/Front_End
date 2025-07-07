@@ -39,7 +39,7 @@ const handleRequestCode = async (phoneNumber: string) => {
   console.log("🚀 ~ handleRequestCode ~ phoneNumber:", phoneNumber)
   try {
     const response = await api.post('funeral/auth/find/username/send-sms', {
-      funeralPhoneNumber: phoneNumber,
+      PhoneNumber: phoneNumber,
     });
     console.log('Code sent response:', response);
   } catch (error) {

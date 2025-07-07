@@ -241,7 +241,7 @@ const ModifyUserInfoPage = () => {
       if (userInfo) {
         // 핸드폰 번호 업데이트
         userInfo.data.funeralPhoneNumber = newPhone;
-
+        userInfo.data.phoneNumber = newPhone;
         // 업데이트된 사용자 정보 저장
         await storeUserInfo(userInfo);
       }

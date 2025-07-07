@@ -272,8 +272,8 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
     }
 
     try {
-      const res = await api.post('/funeral/sms/verify/funeral', {
-        funeralPhone: phoneNumber.value,
+      const res = await api.post('/manager/sms/verify', {
+        managerPhone: phoneNumber.value,
         code: authCode.value,
       });
 

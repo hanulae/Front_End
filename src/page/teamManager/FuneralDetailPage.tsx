@@ -80,9 +80,21 @@ const FuneralDetailPage = ({
       const funeralResponse = await funeralService.getFuneralDetail(
         funeralListId,
       );
+      console.log("🚀 ~ fetchFuneralDetail ~ funeralResponse:", funeralResponse)
 
       if (funeralResponse.success && funeralResponse.data) {
         setFuneralInfo(funeralResponse.data);
+
+        // 이미지가 응답에 포함되어 있는지 확인
+        if (funeralResponse.images) {
+          setFuneralInfo(prevInfo => {
+            if (!prevInfo) return null;
+            return {
+              ...prevInfo,
+              images: funeralResponse.images,
+            };
+          });
+        }
 
         // 호실 요약 정보 조회
         if (funeralId) {
@@ -218,14 +230,18 @@ const FuneralDetailPage = ({
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         {/* 🖼️ 장례식장 이미지 */}
         <View style={styles.imageContainer}>
-          <Image
-            source={
-              funeralInfo.funeralImageUrl
-                ? {uri: funeralInfo.funeralImageUrl}
-                : dummyHallImage
-            }
-            style={styles.hallImage}
-          />
+          {funeralInfo.images && funeralInfo.images.length > 0 ? (
+            funeralInfo.images.map((image, index) => (
+              <Image
+                key={index}
+                source={{ uri: image.imageUrl }}
+                style={styles.hallImage}
+                resizeMode="cover"
+              />
+            ))
+          ) : (
+            <Image source={dummyHallImage} style={styles.hallImage} resizeMode="cover" />
+          )}
         </View>
 
         {/* 📋 기본 정보 */}

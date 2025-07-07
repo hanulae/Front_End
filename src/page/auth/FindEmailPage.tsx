@@ -1,4 +1,4 @@
-import {StyleSheet, View, Alert} from 'react-native';
+import {StyleSheet, View, Alert, TouchableOpacity} from 'react-native';
 import DefaultLayout from '../../layout/DefaultLayout';
 import {usePhoneInput} from '../../hooks/input/usePhoneInput';
 import {Input} from '../../components/common/input/Input';
@@ -26,7 +26,7 @@ const FindEmailPage = ({navigation}: IFindEmailPageProps) => {
   const handleRequestCode = async () => {
     try {
       const response = await api.post('funeral/auth/find/username/send-sms', {
-        funeralPhoneNumber: phoneNumber.value,
+        PhoneNumber: phoneNumber.value,
       });
 
       if (response.status === 200) {
@@ -42,7 +42,7 @@ const FindEmailPage = ({navigation}: IFindEmailPageProps) => {
   const handleVerifyCode = async () => {
     try {
       const response = await api.post('funeral/auth/find/username/verify', {
-        funeralPhoneNumber: phoneNumber.value,
+        PhoneNumber: phoneNumber.value,
         code: authCode.value,
       });
       console.log("🚀 ~ handleVerifyCode ~ response:", response)
@@ -80,13 +80,15 @@ const FindEmailPage = ({navigation}: IFindEmailPageProps) => {
               placeholder="전화번호를 입력하세요."
               type="phone"
             />
-            <CustomButton
+            <TouchableOpacity
               onPress={handleRequestCode}
-              style={styles.requestButton}>
+              style={styles.requestButton}
+              activeOpacity={0.5}
+            >
               <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
                 인증코드받기
               </Typo>
-            </CustomButton>
+            </TouchableOpacity>
           </View>
         </View>
         <View style={styles.container}>
@@ -157,7 +159,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   requestButton: {
-    backgroundColor: '#8990A0',
+    backgroundColor: '#2D81F1',
     padding: 10,
     paddingVertical: 18,
     borderRadius: 10,
