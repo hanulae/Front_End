@@ -36,6 +36,7 @@ const PointHistoryPage = () => {
   const [currentPoint, setCurrentPoint] = useState<number>(0);
   const [currentCash, setCurrentCash] = useState<number>(0);
   const [transactions, setTransactions] = useState<ITransaction[]>([]);
+  const [allTransactions, setAllTransactions] = useState<ITransaction[]>([]);
 
   // BSK ADD VARIANT
   const route = useRoute();
@@ -106,9 +107,21 @@ const PointHistoryPage = () => {
                 assetType: transaction.transactionType?.includes('cash')
                   ? 'cash'
                   : 'point',
-                transactionType: transaction.transactionType?.includes('earn')
-                  ? 'earn'
-                  : 'refund',
+                transactionType: (() => {
+                  const type = transaction.transactionType;
+                  if (
+                    type?.includes('earn_cash') ||
+                    type?.includes('service_cash')
+                  ) {
+                    return 'earn';
+                  } else if (
+                    type?.includes('use_cash') ||
+                    type?.includes('withdraw_cash')
+                  ) {
+                    return 'refund';
+                  }
+                  return 'earn'; // 기본값
+                })(),
                 transactionDate: new Date(
                   transaction.transactionDate,
                 ).toLocaleDateString('ko-KR'),
@@ -130,6 +143,7 @@ const PointHistoryPage = () => {
             '🚀 ~ final transformedTransactions:',
             transformedTransactions,
           );
+          setAllTransactions(transformedTransactions);
           setTransactions(transformedTransactions);
         } catch (error: any) {
           console.error(
@@ -163,6 +177,54 @@ const PointHistoryPage = () => {
     // 포인트 충전 페이지로 이동
     // navigation.navigate('PointCharge', {variant});
     navigation.navigate('PointRefund', {variant});
+  };
+
+  // 필터링 함수
+  const filterTransactions = () => {
+    let filtered = [...allTransactions];
+    // 유형 필터
+    if (selectedType !== '전체') {
+      filtered = filtered.filter(t =>
+        selectedType === '적립'
+          ? t.transactionType === 'earn'
+          : t.transactionType === 'refund',
+      );
+    }
+    // 기간 필터 (예시: '1개월', '3개월')
+    if (selectedPeriod !== '전체') {
+      const now = new Date();
+      let fromDate = new Date();
+      if (selectedPeriod === '1개월') {
+        fromDate.setMonth(now.getMonth() - 1);
+      } else if (selectedPeriod === '3개월') {
+        fromDate.setMonth(now.getMonth() - 3);
+      }
+      filtered = filtered.filter(t => {
+        const date = new Date(t.transactionDate);
+        return date >= fromDate && date <= now;
+      });
+    }
+    // 정렬
+    if (selectedOrder === '최신순') {
+      filtered.sort((a, b) => {
+        const dateA = new Date(a.transactionDate).getTime();
+        const dateB = new Date(b.transactionDate).getTime();
+        return dateB - dateA;
+      });
+    } else {
+      filtered.sort((a, b) => {
+        const dateA = new Date(a.transactionDate).getTime();
+        const dateB = new Date(b.transactionDate).getTime();
+        return dateA - dateB;
+      });
+    }
+    setTransactions(filtered);
+  };
+
+  // TypeBottomSheet 확인 시 필터링 적용
+  const handleTypeSheetConfirm = () => {
+    setTypeSheetVisible(false);
+    filterTransactions();
   };
 
   return (
@@ -242,7 +304,7 @@ const PointHistoryPage = () => {
         <TypeBottomSheet
           visible={typeSheetVisible}
           onClose={() => setTypeSheetVisible(false)}
-          onConfirm={() => setTypeSheetVisible(false)}
+          onConfirm={handleTypeSheetConfirm}
           selectedPeriod={selectedPeriod}
           setSelectedPeriod={setSelectedPeriod}
           selectedType={selectedType}

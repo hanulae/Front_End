@@ -98,17 +98,18 @@ const FuneralProfilePage = () => {
   };
 
   const goToModifyFuneralInfo = () => {
-    if (!hasPermission('infoEdit')) {
-      Toast.show({
-        type: 'error',
-        text1: '접근 권한 없음',
-        text2: '정보 수정에 대한 접근 권한이 없습니다.',
-        position: 'top',
-        visibilityTime: 3000,
-      });
-      return;
-    }
-    navigation.navigate('FuneralModify');
+    // if (!hasPermission('infoEdit')) {
+    //   Toast.show({
+    //     type: 'error',
+    //     text1: '접근 권한 없음',
+    //     text2: '정보 수정에 대한 접근 권한이 없습니다.',
+    //     position: 'top',
+    //     visibilityTime: 3000,
+    //   });
+    //   return;
+    // }
+    // navigation.navigate('ModifyUserInfo');
+    setShowPhoneAuthSheet(true);
   };
 
   const goToManageRomms = () => {

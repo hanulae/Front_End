@@ -31,6 +31,7 @@ import {useManagerCart} from '../../hooks/useManagerCart';
 import Toast from 'react-native-toast-message';
 import {useAtom} from 'jotai';
 import {userInfoAtom} from '../../state/local_state/userinfoAtom';
+import ImageCarousel from '../../components/common/ImageCarousel';
 
 type FuneralDetailParams = {
   funeralListId: string;
@@ -80,7 +81,10 @@ const FuneralDetailPage = ({
       const funeralResponse = await funeralService.getFuneralDetail(
         funeralListId,
       );
-      console.log("🚀 ~ fetchFuneralDetail ~ funeralResponse:", funeralResponse)
+      console.log(
+        '🚀 ~ fetchFuneralDetail ~ funeralResponse:',
+        funeralResponse,
+      );
 
       if (funeralResponse.success && funeralResponse.data) {
         setFuneralInfo(funeralResponse.data);
@@ -231,16 +235,13 @@ const FuneralDetailPage = ({
         {/* 🖼️ 장례식장 이미지 */}
         <View style={styles.imageContainer}>
           {funeralInfo.images && funeralInfo.images.length > 0 ? (
-            funeralInfo.images.map((image, index) => (
-              <Image
-                key={index}
-                source={{ uri: image.imageUrl }}
-                style={styles.hallImage}
-                resizeMode="cover"
-              />
-            ))
+            <ImageCarousel images={funeralInfo.images} height={300} />
           ) : (
-            <Image source={dummyHallImage} style={styles.hallImage} resizeMode="cover" />
+            <Image
+              source={dummyHallImage}
+              style={styles.hallImage}
+              resizeMode="cover"
+            />
           )}
         </View>
 
