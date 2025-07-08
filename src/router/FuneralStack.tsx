@@ -15,6 +15,7 @@ import PointHistoryPage from '../page/common/PointHistoryPage';
 import PointRefundPage from '../page/common/PointRefundPage';
 import AppSettingPage from '../page/common/AppSettingPage';
 import ModifyUserInfoPage from '../page/funeralHall/ModifyUserInfoPage';
+import NotificationListPage from '../page/common/NotificationListPage';
 
 const Stack = createNativeStackNavigator();
 
@@ -45,6 +46,7 @@ const FuneralStack = () => {
       <Stack.Screen name="PointRefund" component={PointRefundPage} />
       <Stack.Screen name="AppSetting" component={AppSettingPage} />
       <Stack.Screen name="ModifyUserInfo" component={ModifyUserInfoPage} />
+      <Stack.Screen name="Notification" component={NotificationListPage} />
     </Stack.Navigator>
   );
 };

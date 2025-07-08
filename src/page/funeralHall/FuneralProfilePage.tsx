@@ -241,6 +241,7 @@ const FuneralProfilePage = () => {
             backButtonVisible={false}
             logoutButton={true}
             onLogoutPress={logout}
+            alarmButton={true}
           />
           <View style={styles.container}>
             <Pressable onPress={goToPointHistory}>

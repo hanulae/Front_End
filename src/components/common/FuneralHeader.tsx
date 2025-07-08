@@ -9,6 +9,7 @@ import LogoutButtonWhite from '../../assets/Header/Header_DoorWhite.svg';
 import BackIcon from '../../assets/Header/Header_Back.svg';
 import HomeIcon from '../../assets/Header/Header_Home.svg';
 import CloseIcon from '../../assets/Icon/Icon_BtnClose01.svg';
+import AlarmIcon from '../../assets/Header/Header_Alarm.svg';
 
 interface IFuneralHeaderProps {
   title?: string;
@@ -20,6 +21,7 @@ interface IFuneralHeaderProps {
   backButtonVisible?: boolean;
   logoutColor?: string;
   closeButton?: boolean;
+  alarmButton?: boolean;
 }
 
 const FuneralHeader = ({
@@ -32,6 +34,7 @@ const FuneralHeader = ({
   onLogoutPress,
   backButtonVisible = false,
   closeButton = false,
+  alarmButton = false,
 }: IFuneralHeaderProps): JSX.Element => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const goBack = navigation.goBack;
@@ -52,6 +55,9 @@ const FuneralHeader = ({
       );
     }
   };
+  const goAlarmPage = () => {
+    navigation.navigate('Notification', {variant: 'funeral'});
+  };
   return (
     <View style={[styles.header, {backgroundColor: color}]}>
       {backButtonVisible && (
@@ -61,25 +67,32 @@ const FuneralHeader = ({
       )}
 
       <Typo style={styles.title}>{title}</Typo>
-      {homeButton && (
-        <CustomButton onPress={goHome}>
-          <HomeIcon width={24} height={24} />
-        </CustomButton>
-      )}
-      {logoutButton && (
-        <CustomButton onPress={onLogoutPress}>
-          {logoutColor ? (
-            <LogoutButtonBlack width={24} height={24} />
-          ) : (
-            <LogoutButtonWhite width={24} height={24} />
-          )}
-        </CustomButton>
-      )}
-      {closeButton && (
-        <CustomButton onPress={goBack}>
-          <CloseIcon width={24} height={24} />
-        </CustomButton>
-      )}
+      <View style={styles.leftContainer}>
+        {homeButton && (
+          <CustomButton onPress={goHome}>
+            <HomeIcon width={24} height={24} />
+          </CustomButton>
+        )}
+        {logoutButton && (
+          <CustomButton onPress={onLogoutPress}>
+            {logoutColor ? (
+              <LogoutButtonBlack width={24} height={24} />
+            ) : (
+              <LogoutButtonWhite width={24} height={24} />
+            )}
+          </CustomButton>
+        )}
+        {alarmButton && (
+          <CustomButton onPress={goAlarmPage}>
+            <AlarmIcon width={24} height={24} />
+          </CustomButton>
+        )}
+        {closeButton && (
+          <CustomButton onPress={goBack}>
+            <CloseIcon width={24} height={24} />
+          </CustomButton>
+        )}
+      </View>
     </View>
   );
 };
@@ -97,5 +110,10 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '600',
     fontFamily: 'Pretendard-Bold',
+  },
+  leftContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
   },
 });
