@@ -1,78 +1,125 @@
-import React from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {View, Text, StyleSheet, FlatList, TouchableOpacity} from 'react-native';
 import DefaultLayout from '../../layout/DefaultLayout';
-import {useNavigation, useRoute} from '@react-navigation/native';
+import {useFocusEffect, useRoute} from '@react-navigation/native';
+import {getUserInfo, UserInfo} from '../../utils/tokenStorage';
+import {
+  notificationApiService,
+  NotificationItem,
+} from '../../services/api/notificationService';
 // import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-
-interface NotificationItem {
-  id: string;
-  type: 'estimate' | 'dispatch';
-  title: string;
-  content: string;
-  date: string; // ISO or formatted
-  isRead: boolean;
-  isRecent?: boolean;
-}
 
 interface NotificationListPageProps {
   variant: 'manager' | 'funeralHall';
 }
 
-// 더미 데이터
-const dummyData: NotificationItem[] = [
-  {
-    id: '1',
-    type: 'estimate',
-    title: '견적요청',
-    content: '김상조 팀장님으로부터 견적요청이 들어왔습니다.',
-    date: '1시간전',
-    isRead: false,
-    isRecent: true,
-  },
-  {
-    id: '2',
-    type: 'dispatch',
-    title: '출동요청',
-    content: '김상조 팀장님으로부터 견적요청이 들어왔습니다.',
-    date: '2025년 4월 8일',
-    isRead: true,
-  },
-  {
-    id: '3',
-    type: 'estimate',
-    title: '견적요청',
-    content: '김상조 팀장님으로부터 견적요청이 들어왔습니다.',
-    date: '2025년 3월 10일',
-    isRead: true,
-  },
-  {
-    id: '4',
-    type: 'dispatch',
-    title: '출동요청',
-    content: '김상조 팀장님으로부터 견적요청이 들어왔습니다.',
-    date: '2024년 12월 10일',
-    isRead: true,
-  },
-  {
-    id: '5',
-    type: 'estimate',
-    title: '견적요청',
-    content: '김상조 팀장님으로부터 견적요청이 들어왔습니다.',
-    date: '2024년 4월 8일',
-    isRead: true,
-  },
-];
-
 const NotificationListPage = (props: NotificationListPageProps) => {
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  // 컴포넌트 마운트 시 한 번만 실행
+  useEffect(() => {
+    const loadUserInfo = async () => {
+      try {
+        const info = await getUserInfo();
+        setUserInfo(info);
+      } catch (error) {
+        console.error('사용자 정보 로드 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUserInfo();
+  }, []); // 빈 의존성 배열로 한 번만 실행
+
+  // 알림 목록 조회 (useFocusEffect 사용)
+  useFocusEffect(
+    useCallback(() => {
+      const fetchNotifications = async () => {
+        try {
+          setLoading(true);
+          setError(null);
+          const response = await notificationApiService.getNotificationList();
+          console.log('알림 목록 조회 성공:', response);
+          setNotifications(response.data.notifications || []);
+        } catch (error: any) {
+          console.error('알림 목록 조회 실패:', error);
+          setError(error.message || '알림 목록을 불러오는데 실패했습니다.');
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchNotifications();
+    }, []),
+  );
+
+  console.log('userInfo', userInfo);
   // 네비게이션/route에서 variant를 받을 수도 있음
-  const navigation = useNavigation();
   const route = useRoute();
   const variant = (props.variant ||
     (route.params && (route.params as any).variant)) as
     | 'manager'
     | 'funeralHall';
 
-  // variant에 따라 분기할 내용이 있으면 여기에 작성
+  // 로딩 중일 때 표시할 화면
+  if (loading) {
+    return (
+      <DefaultLayout headerShown={true} headerTitle="알림" homeButton={true}>
+        <View style={styles.loadingContainer}>
+          <Text>로딩 중...</Text>
+        </View>
+      </DefaultLayout>
+    );
+  }
+
+  // 에러가 있을 때 표시할 화면
+  if (error) {
+    return (
+      <DefaultLayout
+        headerShown={true}
+        headerTitle="알림"
+        homeButton={true}
+        homeRouteName={
+          userInfo?.userType === 'manager' ? 'ManagerMain' : 'FuneralMain'
+        }>
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyTitle}>알림을 불러올 수 없습니다</Text>
+          <Text style={styles.emptySubtitle}>{error}</Text>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={() => {
+              // 화면에 다시 포커스될 때 자동으로 다시 로드됨
+            }}>
+            <Text style={styles.retryButtonText}>다시 시도</Text>
+          </TouchableOpacity>
+        </View>
+      </DefaultLayout>
+    );
+  }
+
+  // 알림이 없을 때 표시할 화면
+  if (notifications.length === 0) {
+    return (
+      <DefaultLayout
+        headerShown={true}
+        headerTitle="알림"
+        homeButton={true}
+        homeRouteName={
+          userInfo?.userType === 'manager' ? 'ManagerMain' : 'FuneralMain'
+        }>
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyTitle}>알림이 없습니다</Text>
+          <Text style={styles.emptySubtitle}>
+            새로운 알림이 도착하면 여기에 표시됩니다
+          </Text>
+        </View>
+      </DefaultLayout>
+    );
+  }
 
   const renderItem = ({item}: {item: NotificationItem}) => (
     <View style={[styles.itemContainer, !item.isRead && styles.unreadItem]}>
@@ -100,18 +147,15 @@ const NotificationListPage = (props: NotificationListPageProps) => {
   );
 
   return (
-    <DefaultLayout headerShown={false}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          {/* <Icon name="chevron-left" size={28} color="#222" /> */}
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>알림</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Main' as never)}>
-          {/* <Icon name="home-outline" size={24} color="#222" /> */}
-        </TouchableOpacity>
-      </View>
+    <DefaultLayout
+      headerShown={true}
+      headerTitle="알림"
+      homeButton={true}
+      homeRouteName={
+        userInfo?.userType === 'manager' ? 'ManagerMain' : 'FuneralMain'
+      }>
       <FlatList
-        data={dummyData}
+        data={notifications}
         renderItem={renderItem}
         keyExtractor={item => item.id}
         contentContainerStyle={{padding: 20}}
@@ -122,6 +166,42 @@ const NotificationListPage = (props: NotificationListPageProps) => {
 };
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#666',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: '#999',
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  retryButton: {
+    marginTop: 20,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    backgroundColor: '#397CFF',
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

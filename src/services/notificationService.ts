@@ -9,6 +9,9 @@ import {
   onMessage,
   setBackgroundMessageHandler,
 } from '@react-native-firebase/messaging';
+import {Platform} from 'react-native';
+import DeviceInfo from 'react-native-device-info';
+import api from '../api/config';
 
 export interface NotificationData {
   title: string;
@@ -80,6 +83,52 @@ class NotificationService {
     } catch (error) {
       console.error('FCM 토큰 획득 실패:', error);
       return null;
+    }
+  }
+
+  /**
+   * FCM 토큰을 백엔드로 전송
+   */
+  async registerFCMTokenToServer(): Promise<boolean> {
+    try {
+      const token = this.getCurrentToken();
+      console.log('ttttttttoooooooookkkkkkkeeeeeennnn', token);
+      if (!token) {
+        console.log('FCM 토큰이 없어서 서버 등록을 건너뜁니다.');
+        return false;
+      }
+
+      // react-native-device-info를 사용하여 고유한 기기 ID 생성
+      let deviceId: string;
+      try {
+        // 먼저 고유 ID를 시도
+        deviceId = await DeviceInfo.getUniqueId();
+        console.log('기기 고유 ID 획득:', deviceId);
+      } catch {
+        // 고유 ID 실패 시 기기 ID를 시도
+        try {
+          deviceId = await DeviceInfo.getDeviceId();
+          console.log('기기 ID 획득:', deviceId);
+        } catch {
+          // 모든 방법 실패 시 임시 ID 생성
+          deviceId = `device_${Date.now()}_${Math.random()
+            .toString(36)
+            .substr(2, 9)}`;
+          console.log('임시 기기 ID 생성:', deviceId);
+        }
+      }
+
+      const response = await api.post('/common/notification/fcm/token', {
+        fcmToken: token,
+        deviceId: deviceId,
+        deviceType: Platform.OS, // 'ios' 또는 'android'
+      });
+
+      console.log('FCM 토큰 서버 등록 성공:', response.data);
+      return true;
+    } catch (error) {
+      console.error('FCM 토큰 서버 등록 실패:', error);
+      return false;
     }
   }
 
