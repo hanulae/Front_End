@@ -1,8 +1,4 @@
-import {
-  useNavigation,
-  useRoute,
-  useFocusEffect,
-} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {StyleSheet, View} from 'react-native';
 import Typo from '../common/Typo';
@@ -11,17 +7,23 @@ import CashIcon from '../../assets/Bullet/Bullet_CoinYellow.svg';
 import CustomButton from '../common/CustomButton';
 
 // BSK ADD IMPORTS
-import {useCallback, useState} from 'react';
+import { useEffect, useState } from 'react';
 import api from '../../api/config';
-import {useAtomValue} from 'jotai';
-import {loginAtom} from '../../state/local_state/loginAtom';
+import { useAtomValue } from 'jotai';
+import { loginAtom } from '../../state/local_state/loginAtom';
 import Hello from './Hello';
 
 interface IManagerProfileStatProps {
+  point: number;
+  cash: number;
   managerName: string;
 }
 
-const ManagerProfileStat = ({managerName}: IManagerProfileStatProps) => {
+const ManagerProfileStat = ({
+  point,
+  cash,
+  managerName,
+}: IManagerProfileStatProps) => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const route = useRoute();
 
@@ -34,35 +36,32 @@ const ManagerProfileStat = ({managerName}: IManagerProfileStatProps) => {
 
   // BSK ADD LOGIN INFO
   const loginInfo = useAtomValue(loginAtom);
-  const [currentPoint, setCurrentPoint] = useState<number>(0); // 초기값은 props로 받은 point
-  const [currentCash, setCurrentCash] = useState<number>(0); // 초기값은 props로 받은 cash
+  const [currentPoint, setCurrentPoint] = useState<number>(point ?? 0);
+  const [currentCash, setCurrentCash] = useState<number>(cash ?? 0);
 
-  useFocusEffect(
-    useCallback(() => {
-      const fetchCurrentPointAndCash = async () => {
-        try {
-          const [pointRes, cashRes] = await Promise.all([
-            api.get('/manager/point/current', {
-              headers: {Authorization: `Bearer ${loginInfo.accessToken}`},
-            }),
-            api.get('/manager/cash/current', {
-              headers: {Authorization: `Bearer ${loginInfo.accessToken}`},
-            }),
-          ]);
-
-          setCurrentPoint(pointRes.data.currentPoint || 0);
-          setCurrentCash(cashRes.data.currentCash || 0);
-        } catch (error: any) {
-          console.error(
-            '포인트/캐시 조회 실패:',
-            error.response?.data || error.message,
-          );
-        }
-      };
-
-      fetchCurrentPointAndCash();
-    }, [loginInfo.accessToken]),
-  );
+  useEffect(() => {
+    const fetchCurrentPointAndCash = async () => {
+      try {
+        const [pointRes, cashRes] = await Promise.all([
+          api.get('/manager/point/current', {
+            headers: { Authorization: `Bearer ${loginInfo.accessToken}` },
+          }),
+          api.get('/manager/cash/current', {
+            headers: { Authorization: `Bearer ${loginInfo.accessToken}` },
+          }),
+        ]);
+  
+        setCurrentPoint(pointRes.data?.currentPoint ?? 0);
+        setCurrentCash(cashRes.data?.currentCash ?? 0);
+      } catch (error: any) {
+        console.error('포인트/캐시 조회 실패:', error.response?.data || error.message);
+        setCurrentPoint(0);
+        setCurrentCash(0);
+      }
+    };
+  
+    fetchCurrentPointAndCash();
+  }, []);
 
   const goToManagerPage = () => {
     navigation.navigate('MyPage'); // TabNav에 정의된 이름과 일치해야 합니다.
@@ -74,28 +73,24 @@ const ManagerProfileStat = ({managerName}: IManagerProfileStatProps) => {
     if (route.name === 'MyPage') {
       return (
         <>
-          <View style={styles.pointContainer}>
-            <Typo style={styles.pointDesc}>보유 포인트</Typo>
-            <View style={styles.flexRow}>
-              <Typo style={styles.pointText}>
-                {currentPoint.toLocaleString()}
-              </Typo>
-            </View>
+        <View style={styles.pointContainer}>
+          <Typo style={styles.pointDesc}>보유 포인트</Typo>
+          <View style={styles.flexRow}>
+            <Typo style={styles.pointText}>{(currentPoint ?? 0).toLocaleString()}</Typo>
           </View>
-          <View style={styles.cashContainer}>
-            <Typo style={styles.cashDesc}>보유 캐쉬</Typo>
-            <View style={styles.flexRow}>
-              <Typo style={styles.cashText}>
-                {currentCash.toLocaleString()}
-              </Typo>
-            </View>
+        </View>
+        <View style={styles.cashContainer}>
+          <Typo style={styles.cashDesc}>보유 캐쉬</Typo>
+          <View style={styles.flexRow}>
+            <Typo style={styles.cashText}>{(currentCash ?? 0).toLocaleString()}</Typo>
           </View>
-        </>
+        </View>
+      </>
       );
     } else {
       return (
         <CustomButton onPress={goToManagerPage} style={styles.myPageButton}>
-          <Typo style={styles.myPageButtonText}>마이페이지 이동</Typo>
+          <Typo style={styles.myPageButtonText}>프로필 이동</Typo>
         </CustomButton>
       );
     }
@@ -112,7 +107,7 @@ const ManagerProfileStat = ({managerName}: IManagerProfileStatProps) => {
       {/* <View style={styles.cashContainer}>
         <Typo style={styles.cashDesc}>보유 캐쉬</Typo>
         <View style={styles.flexRow}>
-          <Typo style={styles.cashText}>{currentCash.toLocaleString()}</Typo>
+        <Typo style={styles.cashText}>{currentCash.toLocaleString()}</Typo>
           <CashIcon width={24} height={24} />
         </View>
       </View> */}
