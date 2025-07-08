@@ -11,6 +11,8 @@ import Typo from '../common/Typo';
 import {Input} from '../common/input/Input';
 import CustomButton from '../common/CustomButton';
 import {getUserInfo} from '../../utils/tokenStorage';
+import {useAtomValue} from 'jotai';
+import {isStaffAtom} from '../../state/local_state/loginAtom';
 
 const screenHeight = Dimensions.get('window').height;
 
@@ -28,6 +30,7 @@ const PhoneAuthSheet = ({
   const translateY = useRef(new Animated.Value(screenHeight)).current;
   const phoneNumber = usePhoneInput();
   const authCode = useInputBase();
+  const isStaff = useAtomValue(isStaffAtom);
 
   const confirmCode = async () => {
     const phone = phoneNumber.value.replace(/[^0-9]/g, '').trim();
@@ -57,7 +60,13 @@ const PhoneAuthSheet = ({
         });
 
         // 인증 성공 시 페이지 이동
-        navigation.navigate('ModifyUserInfo');
+        if (isStaff) {
+          navigation.navigate('ModifyUserInfo', {
+            isStaff: true,
+          });
+        } else {
+          navigation.navigate('ModifyUserInfo');
+        }
         onClose();
       } else {
         Toast.show({
