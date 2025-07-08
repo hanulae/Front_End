@@ -19,6 +19,9 @@ import MainAlarmIcon from '../../assets/Main_Alarm.svg';
 import MoveIcon from '../../components/svg/MoveIcon';
 import InfoCenterIcon from '../../assets/ServiceCenter.svg';
 import ManagerMainProfile from '../../components/manager/ManagerMainProfile';
+import {getUserInfo} from '../../utils/tokenStorage';
+import DeviceInfo from 'react-native-device-info';
+import api from '../../api/config';
 interface IManagerMainPageProps {
   navigation: NavigationProp<any>;
 }
@@ -37,17 +40,33 @@ const ManagerMainPage = ({navigation}: IManagerMainPageProps) => {
     }, []),
   );
 
-  const logout = () => {
-    // 로그아웃 로직
-    setLogin({
-      userType: 'manager',
-      isLogin: false,
-      userName: '',
-      accessToken: '',
-      refreshToken: '',
-    });
-    navigation.navigate('ManagerMain');
+  const logout = async () => {
+    try {
+      const userInfos = await getUserInfo();
+      const deviceId = await DeviceInfo.getUniqueId();
+      const response = await api.post('/manager/auth/logout', {
+        userId: userInfos?.userId,
+        userType: userInfos?.userType,
+        deviceId: deviceId,
+      });
+      if (response.status === 200) {
+        // 로그아웃 로직
+        setLogin({
+          userType: null,
+          isLogin: false,
+          userName: '',
+          accessToken: '',
+          refreshToken: '',
+        });
+        console.log('Logout');
+      }
+    } catch (error) {
+      console.error('로그아웃 실패:', error);
+    }
+
+    // navigation.navigate('ManagerMain');
   };
+
   const goToNoticePage = () => {
     navigation.navigate('EstimateList');
   };

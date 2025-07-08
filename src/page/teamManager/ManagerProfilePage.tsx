@@ -18,6 +18,9 @@ import Toast from 'react-native-toast-message';
 import {userInfoAtom} from '../../state/local_state/userinfoAtom';
 import {useAtomValue, useSetAtom} from 'jotai';
 import ManagerHeader from '../../components/common/ManagerHeader';
+import {getUserInfo} from '../../utils/tokenStorage';
+import DeviceInfo from 'react-native-device-info';
+import api from '../../api/config';
 // import Toast from 'react-native-toast-message';
 
 interface IManagerProfilePageProps {
@@ -72,16 +75,31 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
     navigation.navigate('CallHistory');
   };
 
-  const logout = () => {
-    // 로그아웃 로직
-    setLogin({
-      userType: 'manager',
-      isLogin: false,
-      userName: '',
-      accessToken: '',
-      refreshToken: '',
-    });
-    navigation.navigate('ManagerMain');
+  const logout = async () => {
+    try {
+      const userInfos = await getUserInfo();
+      const deviceId = await DeviceInfo.getUniqueId();
+      const response = await api.post('/manager/auth/logout', {
+        userId: userInfos?.userId,
+        userType: userInfos?.userType,
+        deviceId: deviceId,
+      });
+      if (response.status === 200) {
+        // 로그아웃 로직
+        setLogin({
+          userType: null,
+          isLogin: false,
+          userName: '',
+          accessToken: '',
+          refreshToken: '',
+        });
+        console.log('Logout');
+      }
+    } catch (error) {
+      console.error('로그아웃 실패:', error);
+    }
+
+    // navigation.navigate('ManagerMain');
   };
 
   return (

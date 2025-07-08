@@ -29,6 +29,8 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import Toast from 'react-native-toast-message';
 import PhoneAuthSheet from '../../components/funeralHall/PhoneAuthSheet';
 import {getUserInfo} from '../../utils/tokenStorage';
+import api from '../../api/config';
+import DeviceInfo from 'react-native-device-info';
 
 // 권한 타입 정의
 interface IPermissions {
@@ -204,16 +206,30 @@ const FuneralProfilePage = () => {
     navigation.navigate('PointHistory', {variant: 'funeral'});
   };
 
-  const logout = () => {
-    // 로그아웃 로직
-    setLogin({
-      userType: null,
-      isLogin: false,
-      userName: '',
-      accessToken: '',
-      refreshToken: '',
-    });
-    console.log('Logout');
+  const logout = async () => {
+    try {
+      const userInfo = await getUserInfo();
+      const deviceId = await DeviceInfo.getUniqueId();
+      const response = await api.post('/funeral/auth/logout', {
+        userId: userInfo?.userId,
+        userType: userInfo?.userType,
+        deviceId: deviceId,
+      });
+      if (response.status === 200) {
+        // 로그아웃 로직
+        setLogin({
+          userType: null,
+          isLogin: false,
+          userName: '',
+          accessToken: '',
+          refreshToken: '',
+        });
+        console.log('Logout');
+      }
+    } catch (error) {
+      console.error('로그아웃 실패:', error);
+    }
+
     // navigation.navigate('ManagerMain');
   };
 
