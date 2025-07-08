@@ -15,7 +15,7 @@ import {Input} from '../../components/common/input/Input';
 import {usePasswordInput} from '../../hooks/input/usePasswordInput';
 import {useConfirmPasswordInput} from '../../hooks/input/useConfirmPasswordInput';
 import Typo from '../../components/common/Typo';
-import {useFocusEffect} from '@react-navigation/native';
+import {useFocusEffect, useRoute} from '@react-navigation/native';
 import {useCallback, useState, useEffect} from 'react';
 import CustomButton from '../../components/common/CustomButton';
 import BankSelectBottomSheet from '../../components/common/BankSelecSheet';
@@ -48,7 +48,8 @@ const ModifyUserInfoPage = () => {
   const [showBankSelectSheet, setShowBankSelectSheet] = useState(false);
   const [bankName, setBankName] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
-
+  const route = useRoute();
+  const isStaff = route.params;
   // BSK ADD LOGIN INFO
   const [name, setName] = useState('');
   const [bankCode, setBankCode] = useState('');
@@ -61,7 +62,11 @@ const ModifyUserInfoPage = () => {
 
   useEffect(() => {
     // 비밀번호와 비밀번호 확인이 일치할 때 버튼 활성화
-    if (newPassword.value && confirmPassword.value && newPassword.value === confirmPassword.value) {
+    if (
+      newPassword.value &&
+      confirmPassword.value &&
+      newPassword.value === confirmPassword.value
+    ) {
       setIsButtonEnabled(true);
     } else {
       setIsButtonEnabled(false);
@@ -366,10 +371,10 @@ const ModifyUserInfoPage = () => {
               placeholder="비밀번호를 입력하세요"
             />
             {newPassword.touched && newPassword.error ? (
-            <Typo fontSize={12} color="red" style={{marginLeft: 10}}>
-              {newPassword.error}
-            </Typo>
-          ) : null}
+              <Typo fontSize={12} color="red" style={{marginLeft: 10}}>
+                {newPassword.error}
+              </Typo>
+            ) : null}
           </View>
           <Typo style={styles.label}>새로운 비밀번호 확인</Typo>
           <View style={styles.field}>
@@ -380,10 +385,10 @@ const ModifyUserInfoPage = () => {
               type="password"
             />
             {confirmPassword.touched && confirmPassword.error ? (
-            <Typo fontSize={12} color="red" style={{marginLeft: 10}}>
-              {confirmPassword.error}
-            </Typo>
-          ) : null}
+              <Typo fontSize={12} color="red" style={{marginLeft: 10}}>
+                {confirmPassword.error}
+              </Typo>
+            ) : null}
           </View>
 
           <TouchableOpacity
@@ -397,122 +402,126 @@ const ModifyUserInfoPage = () => {
             <Typo style={styles.buttonText}>비밀번호 변경</Typo>
           </TouchableOpacity>
         </View>
+        {!isStaff && (
+          <>
+            {/* 휴대전화번호 변경 */}
+            <Typo style={styles.sectionTitle}>휴대전화번호 변경</Typo>
+            <View style={styles.form}>
+              <Typo style={styles.label}>휴대전화번호</Typo>
+              <View style={styles.fieldRow}>
+                <Input input={phoneNumber} placeholder="전화번호" />
+                <TouchableOpacity
+                  style={styles.subButton}
+                  onPress={handleRequestPhoneCode}>
+                  <Typo style={styles.subButtonText}>인증코드받기</Typo>
+                </TouchableOpacity>
+              </View>
+              <Typo style={styles.label}>인증코드</Typo>
+              <View style={styles.fieldRow}>
+                <Input input={authCodePhone} placeholder="인증번호" />
+                <Typo style={styles.timerText}>02:56</Typo>
+              </View>
 
-        {/* 휴대전화번호 변경 */}
-        <Typo style={styles.sectionTitle}>휴대전화번호 변경</Typo>
-        <View style={styles.form}>
-          <Typo style={styles.label}>휴대전화번호</Typo>
-          <View style={styles.fieldRow}>
-            <Input input={phoneNumber} placeholder="전화번호" />
-            <TouchableOpacity
-              style={styles.subButton}
-              onPress={handleRequestPhoneCode}>
-              <Typo style={styles.subButtonText}>인증코드받기</Typo>
-            </TouchableOpacity>
-          </View>
-          <Typo style={styles.label}>인증코드</Typo>
-          <View style={styles.fieldRow}>
-            <Input input={authCodePhone} placeholder="인증번호" />
-            <Typo style={styles.timerText}>02:56</Typo>
-          </View>
+              <TouchableOpacity
+                style={styles.subConfirmButton}
+                onPress={handleVerifyPhoneCode}>
+                <Typo style={styles.subConfirmButtonText}>인증 코드 확인</Typo>
+              </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.subConfirmButton}
-            onPress={handleVerifyPhoneCode}>
-            <Typo style={styles.subConfirmButtonText}>인증 코드 확인</Typo>
-          </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.button,
+                  {
+                    opacity: isPhoneVerified ? 1 : 0.5,
+                    backgroundColor: isPhoneVerified ? '#3287F8' : '#ccc',
+                  },
+                ]}
+                onPress={handleChangePhoneNumber}
+                disabled={!isPhoneVerified}>
+                <Typo style={styles.buttonText}>휴대전화번호 변경</Typo>
+              </TouchableOpacity>
+            </View>
 
-          <TouchableOpacity
-            style={[
-              styles.button,
-              {
-                opacity: isPhoneVerified ? 1 : 0.5,
-                backgroundColor: isPhoneVerified ? '#3287F8' : '#ccc',
-              },
-            ]}
-            onPress={handleChangePhoneNumber}
-            disabled={!isPhoneVerified}>
-            <Typo style={styles.buttonText}>휴대전화번호 변경</Typo>
-          </TouchableOpacity>
-        </View>
+            {/* 계좌정보 변경 */}
+            <Typo style={styles.sectionTitle}>계좌정보 변경</Typo>
+            <View style={styles.form}>
+              <Typo style={styles.label}>계좌인증</Typo>
+              {/* 은행 선택 바텀시트 */}
+              <BankSelectBottomSheet
+                visible={showBankSelectSheet}
+                onClose={() => setShowBankSelectSheet(false)}
+                onSelect={selectedBankName => {
+                  setBankName(selectedBankName);
 
-        {/* 계좌정보 변경 */}
-        <Typo style={styles.sectionTitle}>계좌정보 변경</Typo>
-        <View style={styles.form}>
-          <Typo style={styles.label}>계좌인증</Typo>
-          {/* 은행 선택 바텀시트 */}
-          <BankSelectBottomSheet
-            visible={showBankSelectSheet}
-            onClose={() => setShowBankSelectSheet(false)}
-            onSelect={selectedBankName => {
-              setBankName(selectedBankName);
+                  console.log(
+                    '📌 선택된 은행명:',
+                    JSON.stringify(selectedBankName),
+                  );
 
-              console.log(
-                '📌 선택된 은행명:',
-                JSON.stringify(selectedBankName),
-              );
+                  const matched = BANK_LIST.find(b => {
+                    console.log(
+                      '🔍 비교:',
+                      JSON.stringify(b.name),
+                      'vs',
+                      JSON.stringify(selectedBankName),
+                    );
+                    return b.name.trim() === selectedBankName.trim();
+                  });
 
-              const matched = BANK_LIST.find(b => {
-                console.log(
-                  '🔍 비교:',
-                  JSON.stringify(b.name),
-                  'vs',
-                  JSON.stringify(selectedBankName),
-                );
-                return b.name.trim() === selectedBankName.trim();
-              });
+                  if (matched) {
+                    console.log('✅ 매칭된 코드:', matched.code);
+                    setBankCode(matched.code);
+                  } else {
+                    console.warn('⚠️ 은행 코드 매칭 실패:', selectedBankName);
+                    setBankCode('');
+                  }
 
-              if (matched) {
-                console.log('✅ 매칭된 코드:', matched.code);
-                setBankCode(matched.code);
-              } else {
-                console.warn('⚠️ 은행 코드 매칭 실패:', selectedBankName);
-                setBankCode('');
-              }
+                  setShowBankSelectSheet(false);
+                }}
+              />
+              <View style={styles.field1}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="예금주 이름을 입력하세요."
+                  placeholderTextColor={'#283042'}
+                  value={name}
+                  onChangeText={setName}
+                />
+              </View>
 
-              setShowBankSelectSheet(false);
-            }}
-          />
-          <View style={styles.field1}>
-            <TextInput
-              style={styles.input}
-              placeholder="예금주 이름을 입력하세요."
-              placeholderTextColor={'#283042'}
-              value={name}
-              onChangeText={setName}
-            />
-          </View>
+              <View style={styles.fieldRow1}>
+                <CustomButton
+                  onPress={openBankSelectSheet}
+                  style={styles.selectBankButton}>
+                  <Typo style={styles.bankText}>{bankName || '은행 선택'}</Typo>
+                </CustomButton>
+                <TextInput
+                  style={styles.input}
+                  placeholder="계좌번호를 입력하세요."
+                  placeholderTextColor={'#283042'}
+                  value={accountNumber}
+                  onChangeText={setAccountNumber}
+                />
+              </View>
+              <TouchableOpacity
+                style={styles.subConfirmButton}
+                onPress={handleAccountVerify}>
+                <Typo style={styles.subConfirmButtonText}>계좌 인증</Typo>
+              </TouchableOpacity>
 
-          <View style={styles.fieldRow1}>
-            <CustomButton
-              onPress={openBankSelectSheet}
-              style={styles.selectBankButton}>
-              <Typo style={styles.bankText}>{bankName || '은행 선택'}</Typo>
-            </CustomButton>
-            <TextInput
-              style={styles.input}
-              placeholder="계좌번호를 입력하세요."
-              placeholderTextColor={'#283042'}
-              value={accountNumber}
-              onChangeText={setAccountNumber}
-            />
-          </View>
-          <TouchableOpacity
-            style={styles.subConfirmButton}
-            onPress={handleAccountVerify}>
-            <Typo style={styles.subConfirmButtonText}>계좌 인증</Typo>
-          </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.button,
+                  {backgroundColor: isAccountVerified ? '#3287F8' : '#ccc'},
+                ]}
+                onPress={handleChangeBankInfo}
+                disabled={!isAccountVerified}>
+                <Typo style={styles.buttonText}>계좌 정보 변경 신청</Typo>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
 
-          <TouchableOpacity
-            style={[
-              styles.button,
-              { backgroundColor: isAccountVerified ? '#3287F8' : '#ccc' },
-            ]}
-            onPress={handleChangeBankInfo}
-            disabled={!isAccountVerified}>
-            <Typo style={styles.buttonText}>계좌 정보 변경 신청</Typo>
-          </TouchableOpacity>
-        </View>
         {/* <BankSelectBottomSheet
           visible={showBankSelectSheet}
           onClose={closeBankSelectSheet}

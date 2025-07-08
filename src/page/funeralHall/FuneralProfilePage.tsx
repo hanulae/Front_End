@@ -22,7 +22,7 @@ import QuoteListIcon from '../../assets/Button/Button_QuoteRecordOff.svg';
 import AppSettingIcon from '../../assets/Button/Button_AppSettingoff.svg';
 import Typo from '../../components/common/Typo';
 import FuneralHeader from '../../components/common/FuneralHeader';
-import {useSetAtom} from 'jotai';
+import {useAtom, useSetAtom} from 'jotai';
 import {userInfoAtom} from '../../state/local_state/userinfoAtom';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -31,6 +31,7 @@ import PhoneAuthSheet from '../../components/funeralHall/PhoneAuthSheet';
 import {getUserInfo} from '../../utils/tokenStorage';
 import api from '../../api/config';
 import DeviceInfo from 'react-native-device-info';
+import {isStaffAtom} from '../../state/local_state/loginAtom';
 
 // 권한 타입 정의
 interface IPermissions {
@@ -60,7 +61,7 @@ const FuneralProfilePage = () => {
   );
 
   const [showPhoneAuthSheet, setShowPhoneAuthSheet] = useState(false);
-  const [isStaff, setIsStaff] = useState(false);
+  const [isStaff, setIsStaff] = useAtom(isStaffAtom);
   const [permissions, setPermissions] = useState<IPermissions | null>(null);
 
   const setLogin = useSetAtom(userInfoAtom);
