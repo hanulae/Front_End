@@ -23,3 +23,5 @@ export const loginAtom = atom<ILoginUser>({
   phoneNumber: '',
   password: '',
 });
+
+export const isStaffAtom = atom<boolean>(false);
