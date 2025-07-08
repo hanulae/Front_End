@@ -1,5 +1,7 @@
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import AlarmIconOn from '../../assets/Contents/Contents_AlarmOn.svg';
+import AlarmIconOff from '../../assets/Contents/Contents_AlarmOff.svg';
 
 export interface NotificationItem {
   notificationId: string;
@@ -22,6 +24,39 @@ interface NotificationCardProps {
   item: NotificationItem;
   onPress?: () => void;
 }
+
+// 상대적인 시간 계산 함수
+const getTimeAgo = (sentAt: string): string => {
+  const now = new Date();
+  const createdAt = new Date(sentAt);
+  const diff = now.getTime() - createdAt.getTime(); // 밀리초 단위
+
+  let timeAgo: string;
+
+  if (diff < 60 * 1000) {
+    // 60초 이내
+    timeAgo = `${Math.floor(diff / 1000)}초 전`;
+  } else if (diff < 3600 * 1000) {
+    // 1시간 이내
+    timeAgo = `${Math.floor(diff / (60 * 1000))}분 전`;
+  } else if (diff < 86400 * 1000) {
+    // 1일 이내
+    timeAgo = `${Math.floor(diff / (3600 * 1000))}시간 전`;
+  } else if (diff < 604800 * 1000) {
+    // 1주 이내
+    timeAgo = `${Math.floor(diff / (86400 * 1000))}일 전`;
+  } else if (diff < 2419200 * 1000) {
+    // 4주 이내
+    timeAgo = `${Math.floor(diff / (604800 * 1000))}주 전`;
+  } else if (diff < 29030400 * 1000) {
+    // 12개월 이내
+    timeAgo = `${Math.floor(diff / (2419200 * 1000))}개월 전`;
+  } else {
+    timeAgo = `${Math.floor(diff / (29030400 * 1000))}년 전`;
+  }
+
+  return timeAgo;
+};
 
 // 알림 타입 분류 및 스타일 정의
 const getNotificationStyle = (type: string) => {
@@ -82,63 +117,39 @@ const getNotificationStyle = (type: string) => {
   }
 };
 
-// 카테고리별 아이콘 텍스트 (실제 아이콘 라이브러리 사용 시 변경)
-const getCategoryIcon = (category: string) => {
-  switch (category) {
-    case '견적/입찰':
-      return '📋';
-    case '출동':
-      return '🚗';
-    case '거래':
-      return '✅';
-    case '환급':
-      return '💰';
-    case '시스템':
-      return '⚙️';
-    default:
-      return '🔔';
-  }
-};
-
 const NotificationCard: React.FC<NotificationCardProps> = ({item, onPress}) => {
   const style = getNotificationStyle(item.notificationType);
-  const icon = getCategoryIcon(style.category);
 
   return (
     <TouchableOpacity
       style={[
         styles.container,
-        {
-          backgroundColor: item.isRead ? '#F8F9FB' : style.backgroundColor,
-          borderLeftColor: style.borderColor,
-        },
+        // {
+        //   backgroundColor: item.isRead ? '#F8F9FB' : style.backgroundColor,
+        // },
         !item.isRead && styles.unreadContainer,
       ]}
       onPress={onPress}
       activeOpacity={0.7}>
       <View style={styles.header}>
         <View style={styles.leftSection}>
-          <Text style={[styles.icon, {color: style.iconColor}]}>{icon}</Text>
           <View style={styles.titleSection}>
+            {item.isRead ? (
+              <AlarmIconOff width={24} height={24} style={styles.iconStyle} />
+            ) : (
+              <AlarmIconOn width={24} height={24} style={styles.iconStyle} />
+            )}
             <Text style={[styles.title, !item.isRead && styles.unreadTitle]}>
               {item.title}
             </Text>
-            <Text style={styles.category}>{style.category}</Text>
           </View>
         </View>
-        {!item.isRead && <View style={styles.unreadDot} />}
       </View>
 
       <View style={styles.contentSection}>
         <Text style={styles.content}>{item.body}</Text>
-        <Text style={styles.date}>
-          {new Date(item.sentAt).toLocaleDateString('ko-KR', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-          })}
+        <Text style={[styles.date, item.isRead === false && styles.unReadDate]}>
+          {getTimeAgo(item.sentAt)}
         </Text>
       </View>
     </TouchableOpacity>
@@ -147,23 +158,17 @@ const NotificationCard: React.FC<NotificationCardProps> = ({item, onPress}) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#F8F9FB',
+    backgroundColor: 'white',
     borderRadius: 12,
     padding: 16,
-    marginBottom: 12,
-    borderLeftWidth: 4,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    borderBottomWidth: 1,
+    borderBottomColor: '#D8D8D8',
+    // marginBottom: 12,
+    // borderLeftWidth: 4,
   },
   unreadContainer: {
-    elevation: 3,
-    shadowOpacity: 0.15,
+    // elevation: 3,
+    // shadowOpacity: 0.15,
   },
   header: {
     flexDirection: 'row',
@@ -176,18 +181,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
   },
-  icon: {
-    fontSize: 20,
+  iconStyle: {
     marginRight: 12,
   },
   titleSection: {
     flex: 1,
+    flexDirection: 'row',
+    paddingHorizontal: 12,
   },
   title: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#222',
-    marginBottom: 2,
+    // marginBottom: 2,
+    lineHeight: 22,
   },
   unreadTitle: {
     color: '#1976D2',
@@ -197,14 +204,10 @@ const styles = StyleSheet.create({
     color: '#666',
     fontWeight: '500',
   },
-  unreadDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#1976D2',
-  },
   contentSection: {
-    marginLeft: 32,
+    // marginLeft: 32,
+    marginTop: 8,
+    paddingHorizontal: 16,
   },
   content: {
     fontSize: 14,
@@ -215,8 +218,9 @@ const styles = StyleSheet.create({
   date: {
     fontSize: 12,
     color: '#999',
+    textAlign: 'right',
   },
-  recentDate: {
+  unReadDate: {
     color: '#1976D2',
     fontWeight: '500',
   },

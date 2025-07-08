@@ -217,6 +217,7 @@ const NotificationListPage = (_props: NotificationListPageProps) => {
     <DefaultLayout
       headerShown={true}
       headerTitle="알림"
+      color="white"
       homeButton={true}
       homeRouteName={
         userInfo?.userType === 'manager' ? 'ManagerMain' : 'FuneralMain'
@@ -242,7 +243,7 @@ const NotificationListPage = (_props: NotificationListPageProps) => {
         data={notifications}
         renderItem={renderItem}
         keyExtractor={item => item.notificationId}
-        contentContainerStyle={{padding: 20}}
+        // contentContainerStyle={{gap: 1}}
         showsVerticalScrollIndicator={false}
       />
     </DefaultLayout>
