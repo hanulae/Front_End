@@ -1,5 +1,13 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import {View, Text, StyleSheet, FlatList, TouchableOpacity} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Platform,
+  StatusBar,
+} from 'react-native';
 import DefaultLayout from '../../layout/DefaultLayout';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {getUserInfo, UserInfo} from '../../utils/tokenStorage';
@@ -9,7 +17,6 @@ import {
   NotificationItem,
 } from '../../services/api/notificationService';
 import NotificationCard from '../../components/common/NotificationCard';
-import api from '../../api/config';
 // import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface NotificationListPageProps {
@@ -23,6 +30,21 @@ const NotificationListPage = (_props: NotificationListPageProps) => {
   const [error, setError] = useState<string | null>(null);
   const [markingAllAsRead, setMarkingAllAsRead] = useState(false);
   const navigation = useNavigation();
+  useFocusEffect(
+    useCallback(() => {
+      if (Platform.OS === 'android') {
+        StatusBar.setBackgroundColor('#3287F8');
+        StatusBar.setBarStyle('dark-content');
+      } else {
+        StatusBar.setBarStyle('dark-content');
+      }
+
+      return () => {
+        // 화면 포커스 해제 시 필요하다면 초기화 작업
+        // 예: StatusBar.setStyle('default')
+      };
+    }, []),
+  );
 
   // 컴포넌트 마운트 시 한 번만 실행
   useEffect(() => {
@@ -71,23 +93,27 @@ const NotificationListPage = (_props: NotificationListPageProps) => {
       // getNavigationTarget을 기반으로 네비게이션 처리
       const navigationTarget = getNavigationTarget(item.notificationType, item);
       console.log('네비게이션 타겟:', navigationTarget);
-      const response = await api.put(
-        `/common/notification/${item.notificationId}/read`,
-      );
-      console.log('알림 읽음 처리 결과:', response);
-      if (response.status === 200) {
-        if (navigationTarget) {
-          // getNavigationTarget에서 반환된 screen과 params로 직접 네비게이션
-          navigation.navigate(navigationTarget.screen, navigationTarget.params);
 
-          // 알림 읽음 처리 (선택사항)
-          // notificationApiService.markNotificationAsRead(item.notificationId);
-        } else {
-          console.log(
-            '해당 알림 타입에 대한 네비게이션 타겟이 없습니다:',
-            item.notificationType,
-          );
-        }
+      // 알림 읽음 처리는 notificationService에서 자동으로 처리되므로 여기서는 제거
+      // const response = await api.put(
+      //   `/common/notification/${item.notificationId}/read`,
+      // );
+      // console.log('알림 읽음 처리 결과:', response);
+
+      if (navigationTarget) {
+        // getNavigationTarget에서 반환된 screen과 params로 직접 네비게이션
+        (navigation as any).navigate(
+          navigationTarget.screen,
+          navigationTarget.params,
+        );
+
+        // 알림 읽음 처리 (선택사항)
+        // notificationApiService.markNotificationAsRead(item.notificationId);
+      } else {
+        console.log(
+          '해당 알림 타입에 대한 네비게이션 타겟이 없습니다:',
+          item.notificationType,
+        );
       }
     } catch (error) {
       console.error('알림 클릭 처리 중 오류:', error);
