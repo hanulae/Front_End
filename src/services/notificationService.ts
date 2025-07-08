@@ -1,387 +1,546 @@
-import notifee, {
-  AndroidImportance,
-  EventType,
-  AndroidColor,
-} from '@notifee/react-native';
-import {
-  getMessaging,
-  getToken,
-  onMessage,
-  setBackgroundMessageHandler,
-} from '@react-native-firebase/messaging';
+import notifee, {EventType, AndroidImportance} from '@notifee/react-native';
+import messaging from '@react-native-firebase/messaging';
 import {Platform} from 'react-native';
 import DeviceInfo from 'react-native-device-info';
 import api from '../api/config';
+import {getNavigationTarget} from './api/notificationService';
 
 export interface NotificationData {
   title: string;
   body: string;
-  data?: Record<string, string>;
+  data?: Record<string, any>;
 }
 
-class NotificationService {
-  private fcmToken: string | null = null;
+// 전역 상태 - 단순하게 관리
+let fcmToken: string | null = null;
+let navigationRef: any = null;
+let isInitialized = false;
 
-  /**
-   * 알림 권한 요청 및 초기화
-   */
-  async initialize(): Promise<void> {
-    try {
-      console.log('알림 서비스 초기화 시작...');
+// 전역 중복 처리 방지
+if (!(global as any).notificationHandlers) {
+  (global as any).notificationHandlers = {
+    isProcessing: false,
+    lastProcessedId: '',
+    lastProcessedTime: 0,
+  };
+}
 
-      // FCM 자동 초기화 활성화 (공식 문서 방식)
-      const messaging = getMessaging();
-      messaging.isAutoInitEnabled = true;
-      console.log('FCM 자동 초기화 활성화 완료');
-
-      // 기본 알림 권한 요청
-      await notifee.requestPermission();
-      console.log('기본 알림 권한 요청 완료');
-
-      // FCM 토큰 획득
-      try {
-        await this.getFCMToken();
-      } catch (fcmError) {
-        console.error('FCM 토큰 획득 실패, 계속 진행:', fcmError);
-      }
-
-      // 포그라운드 메시지 핸들러 설정 (안전하게)
-      try {
-        this.setupForegroundHandler();
-        console.log('포그라운드 핸들러 설정 완료');
-      } catch (foregroundError) {
-        console.error('포그라운드 핸들러 설정 실패:', foregroundError);
-      }
-
-      // 백그라운드 메시지 핸들러 설정 (안전하게)
-      try {
-        this.setupBackgroundHandler();
-        console.log('백그라운드 핸들러 설정 완료');
-      } catch (backgroundError) {
-        console.error('백그라운드 핸들러 설정 실패:', backgroundError);
-      }
-
-      console.log('알림 서비스 초기화 완료');
-    } catch (error) {
-      console.error('알림 서비스 초기화 실패:', error);
-    }
+/**
+ * 알림 서비스 초기화
+ */
+export const initialize = async (): Promise<void> => {
+  if (isInitialized) {
+    console.log('이미 초기화되어 있습니다.');
+    return;
   }
 
-  /**
-   * FCM 토큰 획득 (공식 문서 방식)
-   */
-  async getFCMToken(): Promise<string | null> {
-    try {
-      console.log('FCM 토큰 획득 시작...');
+  try {
+    console.log('=== 알림 서비스 초기화 시작 ===');
 
-      // 공식 문서 방식으로 토큰 획득
-      const token = await getToken(getMessaging());
-      this.fcmToken = token;
+    // 권한 요청
+    const authStatus = await messaging().requestPermission();
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
-      console.log('FCM 토큰 획득 성공:', this.fcmToken);
-      return this.fcmToken;
-    } catch (error) {
-      console.error('FCM 토큰 획득 실패:', error);
-      return null;
+    if (enabled) {
+      console.log('알림 권한이 허용되었습니다.');
+    } else {
+      console.log('알림 권한이 거부되었습니다.');
     }
+
+    // FCM 토큰 획득
+    fcmToken = await messaging().getToken();
+    console.log('FCM 토큰 획득:', fcmToken);
+
+    // 포그라운드 핸들러 설정
+    setupForegroundHandler();
+
+    // 백그라운드 핸들러 설정
+    setupBackgroundHandler();
+
+    isInitialized = true;
+    console.log('=== 알림 서비스 초기화 완료 ===');
+  } catch (error) {
+    console.error('알림 서비스 초기화 실패:', error);
+    throw error;
   }
+};
 
-  /**
-   * FCM 토큰을 백엔드로 전송
-   */
-  async registerFCMTokenToServer(): Promise<boolean> {
-    try {
-      const token = this.getCurrentToken();
-      console.log('ttttttttoooooooookkkkkkkeeeeeennnn', token);
-      if (!token) {
-        console.log('FCM 토큰이 없어서 서버 등록을 건너뜁니다.');
-        return false;
-      }
+/**
+ * FCM 토큰 획득
+ */
+export const getFCMToken = async (): Promise<string | null> => {
+  try {
+    if (!fcmToken) {
+      fcmToken = await messaging().getToken();
+      console.log('FCM 토큰 재획득:', fcmToken);
+    }
+    return fcmToken;
+  } catch (error) {
+    console.error('FCM 토큰 획득 실패:', error);
+    return null;
+  }
+};
 
-      // react-native-device-info를 사용하여 고유한 기기 ID 생성
-      let deviceId: string;
-      try {
-        // 먼저 고유 ID를 시도
-        deviceId = await DeviceInfo.getUniqueId();
-        console.log('기기 고유 ID 획득:', deviceId);
-      } catch {
-        // 고유 ID 실패 시 기기 ID를 시도
-        try {
-          deviceId = await DeviceInfo.getDeviceId();
-          console.log('기기 ID 획득:', deviceId);
-        } catch {
-          // 모든 방법 실패 시 임시 ID 생성
-          deviceId = `device_${Date.now()}_${Math.random()
-            .toString(36)
-            .substr(2, 9)}`;
-          console.log('임시 기기 ID 생성:', deviceId);
-        }
-      }
-
-      const response = await api.post('/common/notification/fcm/token', {
-        fcmToken: token,
-        deviceId: deviceId,
-        deviceType: Platform.OS, // 'ios' 또는 'android'
-      });
-
-      console.log('FCM 토큰 서버 등록 성공:', response.data);
-      return true;
-    } catch (error) {
-      console.error('FCM 토큰 서버 등록 실패:', error);
+/**
+ * FCM 토큰을 백엔드로 등록
+ */
+export const registerFCMTokenToServer = async (): Promise<boolean> => {
+  try {
+    const token = await getFCMToken();
+    if (!token) {
+      console.log('FCM 토큰이 없어서 등록을 건너뜁니다.');
       return false;
     }
-  }
 
-  /**
-   * 현재 FCM 토큰 반환
-   */
-  getCurrentToken(): string | null {
-    return this.fcmToken;
-  }
-
-  /**
-   * 로컬 알림 표시
-   */
-  async showLocalNotification(notification: NotificationData): Promise<string> {
+    // react-native-device-info를 사용하여 고유한 기기 ID 생성
+    let deviceId: string;
     try {
-      console.log('로컬 알림 표시 시작:', notification);
-
-      // 알림 데이터 검증
-      if (!notification.title || !notification.body) {
-        console.warn('알림 제목 또는 내용이 없습니다.');
-        return '';
+      // 먼저 고유 ID를 시도
+      deviceId = await DeviceInfo.getUniqueId();
+      console.log('기기 고유 ID 획득:', deviceId);
+    } catch {
+      // 고유 ID 실패 시 기기 ID를 시도
+      try {
+        deviceId = await DeviceInfo.getDeviceId();
+        console.log('기기 ID 획득:', deviceId);
+      } catch {
+        // 모든 방법 실패 시 임시 ID 생성
+        deviceId = `device_${Date.now()}_${Math.random()
+          .toString(36)
+          .substr(2, 9)}`;
+        console.log('임시 기기 ID 생성:', deviceId);
       }
+    }
 
-      const channelId = await notifee.createChannel({
-        id: 'default',
-        name: '기본 알림',
+    console.log('기기 ID:', deviceId);
+    console.log('기기 타입:', Platform.OS);
+
+    console.log('FCM 토큰 백엔드 등록 시작:', token);
+
+    const response = await api.post('/common/notification/fcm/token', {
+      fcmToken: token,
+      deviceId: deviceId,
+      deviceType: Platform.OS, // 'ios' 또는 'android'
+    });
+    console.log('FCM 토큰 백엔드 등록 응답:', response);
+
+    if (response.data.success) {
+      console.log('FCM 토큰 백엔드 등록 성공');
+      return true;
+    } else {
+      console.log('FCM 토큰 백엔드 등록 실패:', response.data.message);
+      return false;
+    }
+  } catch (error) {
+    console.error('FCM 토큰 백엔드 등록 중 오류:', error);
+    return false;
+  }
+};
+
+/**
+ * 현재 FCM 토큰 반환
+ */
+export const getCurrentToken = (): string | null => {
+  return fcmToken;
+};
+
+/**
+ * 로컬 알림 표시
+ */
+export const showLocalNotification = async (
+  notification: NotificationData,
+): Promise<string> => {
+  try {
+    console.log('로컬 알림 표시 시작:', notification);
+
+    // 알림 채널 생성
+    const channelId = await notifee.createChannel({
+      id: 'default',
+      name: 'Default Channel',
+      importance: AndroidImportance.HIGH,
+    });
+
+    // 알림 표시
+    const notificationId = await notifee.displayNotification({
+      title: notification.title,
+      body: notification.body,
+      data: notification.data,
+      android: {
+        channelId,
         importance: AndroidImportance.HIGH,
-        sound: 'default',
-        vibration: true,
-      });
+        pressAction: {
+          id: 'default',
+        },
+      },
+    });
 
-      const notificationId = await notifee.displayNotification({
+    console.log('로컬 알림 표시 완료, ID:', notificationId);
+    return notificationId;
+  } catch (error) {
+    console.error('로컬 알림 표시 실패:', error);
+    throw error;
+  }
+};
+
+/**
+ * 즉시 알림 표시 (포그라운드에서도 표시)
+ */
+export const showImmediateNotification = async (
+  notification: NotificationData,
+): Promise<string> => {
+  try {
+    console.log('즉시 알림 표시 시작:', notification);
+
+    // 알림 채널 생성
+    const channelId = await notifee.createChannel({
+      id: 'immediate',
+      name: 'Immediate Channel',
+      importance: AndroidImportance.HIGH,
+      sound: 'default',
+    });
+
+    // 알림 표시
+    const notificationId = await notifee.displayNotification({
+      title: notification.title,
+      body: notification.body,
+      data: notification.data,
+      android: {
+        channelId,
+        importance: AndroidImportance.HIGH,
+        pressAction: {
+          id: 'default',
+        },
+        sound: 'default',
+      },
+    });
+
+    console.log('즉시 알림 표시 완료, ID:', notificationId);
+    return notificationId;
+  } catch (error) {
+    console.error('즉시 알림 표시 실패:', error);
+    throw error;
+  }
+};
+
+/**
+ * 예약 알림 설정
+ */
+export const scheduleNotification = async (
+  notification: NotificationData,
+  trigger: {
+    date?: Date;
+    seconds?: number;
+  },
+): Promise<string> => {
+  try {
+    console.log('예약 알림 설정 시작:', notification, trigger);
+
+    // 알림 채널 생성
+    const channelId = await notifee.createChannel({
+      id: 'scheduled',
+      name: 'Scheduled Channel',
+      importance: AndroidImportance.HIGH,
+    });
+
+    // 트리거 설정
+    const triggerConfig: any = {};
+    if (trigger.date) {
+      triggerConfig.timestamp = trigger.date.getTime();
+    } else if (trigger.seconds) {
+      triggerConfig.timestamp = Date.now() + trigger.seconds * 1000;
+    }
+
+    // 예약 알림 설정
+    const notificationId = await notifee.createTriggerNotification(
+      {
         title: notification.title,
         body: notification.body,
-        data: notification.data || {},
+        data: notification.data,
         android: {
           channelId,
           importance: AndroidImportance.HIGH,
-          color: AndroidColor.BLUE,
           pressAction: {
             id: 'default',
           },
         },
-      });
+      },
+      triggerConfig,
+    );
 
-      console.log('로컬 알림 표시됨:', notificationId);
-      return notificationId;
-    } catch (error) {
-      console.error('로컬 알림 표시 실패:', error);
-      // 에러를 throw하지 않고 빈 문자열 반환
-      return '';
-    }
+    console.log('예약 알림 설정 완료, ID:', notificationId);
+    return notificationId;
+  } catch (error) {
+    console.error('예약 알림 설정 실패:', error);
+    throw error;
   }
+};
 
-  /**
-   * 즉시 알림 표시 (채널 없이)
-   */
-  async showImmediateNotification(
-    notification: NotificationData,
-  ): Promise<string> {
-    try {
-      const notificationId = await notifee.displayNotification({
-        title: notification.title,
-        body: notification.body,
-        data: notification.data || {},
+/**
+ * 포그라운드 핸들러 설정
+ */
+const setupForegroundHandler = (): void => {
+  messaging().onMessage(async (remoteMessage: any) => {
+    console.log('포그라운드에서 FCM 메시지 수신:', remoteMessage);
+
+    // 포그라운드에서도 로컬 알림 생성
+    if (remoteMessage.notification) {
+      const notificationId = remoteMessage.data?.id || Date.now().toString();
+
+      await notifee.displayNotification({
+        id: notificationId,
+        title: remoteMessage.notification.title,
+        body: remoteMessage.notification.body,
+        data: remoteMessage.data,
         android: {
+          channelId: 'default',
           importance: AndroidImportance.HIGH,
           pressAction: {
             id: 'default',
           },
         },
+        ios: {
+          foregroundPresentationOptions: {
+            badge: true,
+            sound: true,
+            banner: true,
+            list: true,
+          },
+        },
       });
 
-      console.log('즉시 알림 표시됨:', notificationId);
-      return notificationId;
-    } catch (error) {
-      console.error('즉시 알림 표시 실패:', error);
-      throw error;
+      console.log('포그라운드에서 로컬 알림 생성 완료:', notificationId);
     }
-  }
 
-  /**
-   * 예약 알림 표시 (간단한 방식)
-   */
-  async scheduleNotification(
-    notification: NotificationData,
-    trigger: {
-      date?: Date;
-      seconds?: number;
-    },
-  ): Promise<string> {
-    try {
-      const channelId = await notifee.createChannel({
-        id: 'scheduled',
-        name: '예약 알림',
-        importance: AndroidImportance.HIGH,
-        sound: 'default',
+    console.log('포그라운드 메시지 처리 완료');
+  });
+};
+
+/**
+ * 백그라운드 핸들러 설정
+ */
+const setupBackgroundHandler = (): void => {
+  messaging().setBackgroundMessageHandler(async (remoteMessage: any) => {
+    console.log('백그라운드에서 FCM 메시지 수신:', remoteMessage);
+
+    // 백그라운드에서는 로컬 알림 표시
+    if (remoteMessage.notification) {
+      await showLocalNotification({
+        title: remoteMessage.notification.title || '새 알림',
+        body: remoteMessage.notification.body || '',
+        data: remoteMessage.data,
       });
-
-      // 간단한 setTimeout 방식으로 변경
-      if (trigger.seconds) {
-        const notificationId = `scheduled_${Date.now()}`;
-
-        setTimeout(async () => {
-          try {
-            await notifee.displayNotification({
-              title: notification.title,
-              body: notification.body,
-              data: notification.data || {},
-              android: {
-                channelId,
-                importance: AndroidImportance.HIGH,
-              },
-            });
-            console.log('예약 알림 표시됨:', notificationId);
-          } catch (error) {
-            console.error('예약 알림 표시 실패:', error);
-          }
-        }, trigger.seconds * 1000);
-
-        console.log('예약 알림 설정됨:', notificationId);
-        return notificationId;
-      }
-
-      throw new Error('Invalid trigger configuration');
-    } catch (error) {
-      console.error('예약 알림 설정 실패:', error);
-      throw error;
     }
+
+    console.log('백그라운드 메시지 처리 완료');
+  });
+};
+
+/**
+ * 알림 이벤트 리스너 설정
+ */
+export const setupNotificationListeners = (navRef: any): void => {
+  // 네비게이션 참조 저장
+  navigationRef = navRef;
+  console.log('네비게이션 참조 저장됨:', !!navigationRef);
+  console.log('네비게이션 참조 current:', !!navigationRef?.current);
+  console.log('네비게이션 준비 상태:', navigationRef?.current?.isReady());
+
+  console.log('=== 알림 이벤트 리스너 설정 시작 ===');
+
+  // 포그라운드 이벤트 리스너
+  notifee.onForegroundEvent(({type, detail}) => {
+    if (type === EventType.PRESS) {
+      console.log('=== 포그라운드 알림 터치 ===');
+      handleNotificationPress(detail.notification);
+    }
+  });
+
+  // 백그라운드 이벤트 리스너
+  notifee.onBackgroundEvent(async ({type, detail}) => {
+    if (type === EventType.PRESS) {
+      console.log('=== 백그라운드 알림 터치 ===');
+      handleNotificationPress(detail.notification);
+    }
+  });
+
+  console.log('=== 알림 이벤트 리스너 설정 완료 ===');
+};
+
+/**
+ * 알림 클릭 시 네비게이션 처리
+ */
+const handleNotificationPress = async (notification: any): Promise<void> => {
+  // 강력한 중복 처리 방지
+  const currentTime = Date.now();
+  const notificationId =
+    notification?.data?.notificationId || notification?.id || '';
+
+  if ((global as any).notificationHandlers.isProcessing) {
+    console.log('이미 처리 중인 알림이 있습니다. 중복 처리 방지.');
+    return;
   }
 
-  /**
-   * 포그라운드 메시지 핸들러 설정
-   */
-  private setupForegroundHandler(): void {
-    onMessage(getMessaging(), async (remoteMessage: any) => {
+  if (
+    (global as any).notificationHandlers.lastProcessedId === notificationId &&
+    currentTime - (global as any).notificationHandlers.lastProcessedTime < 2000
+  ) {
+    console.log('2초 내 같은 알림 처리 방지:', notificationId);
+    return;
+  }
+
+  // 처리 시작
+  (global as any).notificationHandlers.isProcessing = true;
+  (global as any).notificationHandlers.lastProcessedId = notificationId;
+  (global as any).notificationHandlers.lastProcessedTime = currentTime;
+
+  try {
+    console.log('=== 알림 클릭 처리 시작 ===');
+    // console.log('알림 ID:', notificationId);
+    console.log('알림 데이터:', JSON.stringify(notification?.data, null, 2));
+
+    // 알림 읽음 처리
+    if (notification?.data) {
+      console.log('노티피케이션아이디', notification.data.notificationId);
       try {
-        console.log('포그라운드 메시지 수신:', remoteMessage);
-
-        // 메시지 데이터 검증
-        if (!remoteMessage || !remoteMessage.notification) {
-          console.log('유효하지 않은 메시지 데이터');
-          return;
+        const uuidRegex =
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (uuidRegex.test(notification.data.notificationId)) {
+          await api.put(
+            `/common/notification/${notification.data.notificationId}/read`,
+          );
+          console.log('알림 읽음 처리 완료');
         }
-
-        // 포그라운드에서 알림 표시 (에러 처리 강화)
-        await this.showLocalNotification({
-          title: remoteMessage.notification.title || '새 메시지',
-          body: remoteMessage.notification.body || '',
-          data: remoteMessage.data as Record<string, string>,
-        });
-
-        console.log('포그라운드 알림 표시 완료');
       } catch (error) {
-        console.error('포그라운드 메시지 처리 실패:', error);
-        // 에러가 발생해도 앱이 크래시되지 않도록 함
+        console.error('알림 읽음 처리 실패:', error);
       }
-    });
-  }
-
-  /**
-   * 백그라운드 메시지 핸들러 설정
-   */
-  private setupBackgroundHandler(): void {
-    setBackgroundMessageHandler(getMessaging(), async (remoteMessage: any) => {
-      try {
-        console.log('백그라운드 메시지 수신:', remoteMessage);
-
-        // 메시지 데이터 검증
-        if (!remoteMessage || !remoteMessage.notification) {
-          console.log('유효하지 않은 메시지 데이터');
-          return;
-        }
-
-        // 백그라운드에서 알림 표시 (에러 처리 강화)
-        await this.showLocalNotification({
-          title: remoteMessage.notification.title || '새 메시지',
-          body: remoteMessage.notification.body || '',
-          data: remoteMessage.data as Record<string, string>,
-        });
-
-        console.log('백그라운드 알림 표시 완료');
-      } catch (error) {
-        console.error('백그라운드 메시지 처리 실패:', error);
-        // 에러가 발생해도 앱이 크래시되지 않도록 함
-      }
-    });
-  }
-
-  /**
-   * 알림 이벤트 리스너 설정
-   */
-  setupNotificationListeners(): void {
-    notifee.onForegroundEvent(({type, detail}) => {
-      switch (type) {
-        case EventType.PRESS:
-          console.log('알림 터치됨:', detail.notification);
-          // 알림 터치 시 처리 로직
-          break;
-        case EventType.DISMISSED:
-          console.log('알림 닫힘:', detail.notification);
-          break;
-      }
-    });
-
-    notifee.onBackgroundEvent(async ({type, detail}) => {
-      switch (type) {
-        case EventType.PRESS:
-          console.log('백그라운드에서 알림 터치됨:', detail.notification);
-          // 백그라운드에서 알림 터치 시 처리 로직
-          break;
-      }
-    });
-  }
-
-  /**
-   * 모든 알림 취소
-   */
-  async cancelAllNotifications(): Promise<void> {
-    try {
-      await notifee.cancelAllNotifications();
-      console.log('모든 알림 취소됨');
-    } catch (error) {
-      console.error('알림 취소 실패:', error);
     }
-  }
 
-  /**
-   * 특정 알림 취소
-   */
-  async cancelNotification(notificationId: string): Promise<void> {
-    try {
-      await notifee.cancelNotification(notificationId);
-      console.log('알림 취소됨:', notificationId);
-    } catch (error) {
-      console.error('알림 취소 실패:', error);
+    // 네비게이션 처리
+    const notificationType = notification?.data?.notificationType;
+    const notificationData = notification?.data;
+
+    if (notificationType && notificationData) {
+      console.log('네비게이션 타겟 확인 시작');
+      const navigationTarget = getNavigationTarget(
+        notificationType,
+        notificationData,
+      );
+      console.log('네비게이션 타겟:', navigationTarget);
+
+      if (navigationTarget) {
+        // 네비게이션 실행
+        await executeNavigation(navigationTarget);
+      } else {
+        console.log('네비게이션 타겟이 없습니다.');
+      }
+    } else {
+      console.log('알림 타입 또는 데이터가 없습니다.');
     }
-  }
 
-  /**
-   * 예약된 알림 취소
-   */
-  async cancelTriggerNotification(notificationId: string): Promise<void> {
-    try {
-      await notifee.cancelTriggerNotification(notificationId);
-      console.log('예약 알림 취소됨:', notificationId);
-    } catch (error) {
-      console.error('예약 알림 취소 실패:', error);
+    console.log('=== 알림 클릭 처리 완료 ===');
+  } catch (error) {
+    console.error('알림 클릭 처리 중 오류:', error);
+  } finally {
+    // 처리 완료
+    (global as any).notificationHandlers.isProcessing = false;
+  }
+};
+
+/**
+ * 네비게이션 실행
+ */
+const executeNavigation = async (navigationTarget: any): Promise<void> => {
+  try {
+    console.log('네비게이션 실행 시작');
+    console.log('대상 화면:', navigationTarget.screen);
+    console.log('대상 파라미터:', navigationTarget.params);
+
+    // 네비게이션이 준비될 때까지 대기
+    let attempts = 0;
+    const maxAttempts = 30; // 15초 대기
+
+    while (attempts < maxAttempts) {
+      attempts++;
+      console.log(`네비게이션 준비 확인 ${attempts}/${maxAttempts}`);
+
+      if (navigationRef?.current?.isReady()) {
+        console.log('네비게이션이 준비되었습니다.');
+
+        // 네비게이션 실행
+        (navigationRef.current as any).navigate(
+          navigationTarget.screen,
+          navigationTarget.params,
+        );
+
+        console.log('네비게이션 실행 완료:', navigationTarget.screen);
+        return;
+      }
+
+      // 0.5초 대기
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
-  }
-}
 
-// 싱글톤 인스턴스 생성
-const notificationService = new NotificationService();
+    console.log('네비게이션 준비 시간 초과');
+  } catch (error) {
+    console.error('네비게이션 실행 중 오류:', error);
+  }
+};
+
+/**
+ * 모든 알림 취소
+ */
+export const cancelAllNotifications = async (): Promise<void> => {
+  try {
+    await notifee.cancelAllNotifications();
+    console.log('모든 알림 취소됨');
+  } catch (error) {
+    console.error('알림 취소 실패:', error);
+  }
+};
+
+/**
+ * 특정 알림 취소
+ */
+export const cancelNotification = async (
+  notificationId: string,
+): Promise<void> => {
+  try {
+    await notifee.cancelNotification(notificationId);
+    console.log('알림 취소됨:', notificationId);
+  } catch (error) {
+    console.error('알림 취소 실패:', error);
+  }
+};
+
+/**
+ * 예약된 알림 취소
+ */
+export const cancelTriggerNotification = async (
+  notificationId: string,
+): Promise<void> => {
+  try {
+    await notifee.cancelTriggerNotification(notificationId);
+    console.log('예약 알림 취소됨:', notificationId);
+  } catch (error) {
+    console.error('예약 알림 취소 실패:', error);
+  }
+};
+
+// 기본 내보내기 객체 (기존 코드와의 호환성을 위해)
+const notificationService = {
+  initialize,
+  getFCMToken,
+  registerFCMTokenToServer,
+  getCurrentToken,
+  showLocalNotification,
+  showImmediateNotification,
+  scheduleNotification,
+  setupNotificationListeners,
+  cancelAllNotifications,
+  cancelNotification,
+  cancelTriggerNotification,
+};
 
 export default notificationService;

@@ -24,7 +24,7 @@ export const getNavigationTarget = (notificationType: string, data: any) => {
       return {
         screen: 'EstimateHistory',
         params: {
-          managerFormId: data.data.managerFormId,
+          managerFormId: data.managerFormId,
         },
       };
     // 상조팀장
@@ -32,7 +32,7 @@ export const getNavigationTarget = (notificationType: string, data: any) => {
       return {
         screen: 'ClientEstimate',
         params: {
-          managerFormId: data.data.managerFormId,
+          managerFormId: data.managerFormId,
         },
       };
     // 장례식장
@@ -88,7 +88,7 @@ export const notificationApiService = {
   // 알림 읽음 처리
   markNotificationAsRead: async (notificationId: string): Promise<void> => {
     try {
-      await api.put(`/common/notification/read/${notificationId}`);
+      await api.put(`/common/notification/${notificationId}/read`);
     } catch (error: any) {
       console.error('알림 읽음 처리 에러:', error.message);
       throw new Error(`알림 읽음 처리 에러: ${error.message}`);
