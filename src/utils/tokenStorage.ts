@@ -5,6 +5,7 @@ const REFRESH_TOKEN_KEY = 'refreshToken';
 const USER_INFO_KEY = 'userInfo';
 
 export interface UserInfo {
+  isLogin: boolean;
   userType: 'manager' | 'funeral';
   userId: string;
   data: any;

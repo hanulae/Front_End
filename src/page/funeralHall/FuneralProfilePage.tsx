@@ -28,7 +28,7 @@ import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import Toast from 'react-native-toast-message';
 import PhoneAuthSheet from '../../components/funeralHall/PhoneAuthSheet';
-import {getUserInfo} from '../../utils/tokenStorage';
+import {clearTokens, getUserInfo} from '../../utils/tokenStorage';
 import api from '../../api/config';
 import DeviceInfo from 'react-native-device-info';
 import {isStaffAtom} from '../../state/local_state/loginAtom';
@@ -218,6 +218,7 @@ const FuneralProfilePage = () => {
       });
       if (response.status === 200) {
         // 로그아웃 로직
+        await clearTokens();
         setLogin({
           userType: null,
           isLogin: false,

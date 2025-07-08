@@ -166,6 +166,7 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
       if (userType === 'manager') {
         const {manager} = response.data;
         await storeUserInfo({
+          isLogin: true,
           userType,
           userId: manager.managerId,
           data: manager,
@@ -174,6 +175,7 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
         if (funeralTab === '대표') {
           const {funeral} = response.data;
           await storeUserInfo({
+            isLogin: true,
             userType,
             userId: funeral.funeralId,
             data: funeral,
@@ -182,6 +184,7 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
           // 직원 로그인 처리
           const {staff} = response.data;
           await storeUserInfo({
+            isLogin: true,
             userType: 'funeral',
             userId: staff.funeralStaffId,
             data: {

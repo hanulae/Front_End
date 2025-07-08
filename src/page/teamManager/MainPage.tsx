@@ -22,6 +22,7 @@ import ManagerMainProfile from '../../components/manager/ManagerMainProfile';
 import {getUserInfo} from '../../utils/tokenStorage';
 import DeviceInfo from 'react-native-device-info';
 import api from '../../api/config';
+import {clearTokens} from '../../utils/tokenStorage';
 interface IManagerMainPageProps {
   navigation: NavigationProp<any>;
 }
@@ -50,6 +51,8 @@ const ManagerMainPage = ({navigation}: IManagerMainPageProps) => {
         deviceId: deviceId,
       });
       if (response.status === 200) {
+        // AsyncStorage 정리
+        await clearTokens();
         // 로그아웃 로직
         setLogin({
           userType: null,
