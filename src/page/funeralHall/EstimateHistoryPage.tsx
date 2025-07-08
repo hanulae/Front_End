@@ -1,18 +1,56 @@
-import {Platform, ScrollView, StatusBar, StyleSheet, View, ActivityIndicator, TouchableOpacity, RefreshControl} from 'react-native';
+import {
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  View,
+  ActivityIndicator,
+  TouchableOpacity,
+  RefreshControl,
+} from 'react-native';
 import FuneralLayout from '../../layout/FuneralLayout';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import {useCallback, useState, useEffect} from 'react';
 import QuoteCard from '../../components/funeralHall/QuoteCard';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import { useFuneralEstimate } from '../../hooks/useFuneralEstimate';
+import {useFuneralEstimate} from '../../hooks/useFuneralEstimate';
 import Typo from '../../components/common/Typo';
 import Toast from 'react-native-toast-message';
 
 const EstimateHistoryPage = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
-  const { loading, error, fetchEstimateList } = useFuneralEstimate();
+  const {loading, error, fetchEstimateList} = useFuneralEstimate();
   const [estimateList, setEstimateList] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  // const route = useRoute();
+  // const managerFormId = route.params as {managerFormId: string};
+  // console.log('managerFormId', managerFormId);
+
+  // useEffect(() => {
+  //   const estimateStatus = estimateList.find(
+  //     item => item.managerFormId === managerFormId,
+  //   )?.bidStatus;
+  //   if (managerFormId) {
+  //     navigation.navigate('QuoteProposal', {
+  //       id: managerFormId,
+  //       status: estimateStatus,
+  //     });
+  //   }
+  // }, []);
+
+  // if (managerFormId) {
+  //   const estimateStatus = estimateList.find(
+  //     item => item.managerFormId === managerFormId,
+  //   )?.bidStatus;
+  //   navigation.navigate('EstimateHistory', {
+  //     id: managerFormId,
+  //     status: estimateStatus,
+  //   });
+  // }
 
   // StatusBar 설정
   useFocusEffect(
@@ -62,7 +100,7 @@ const EstimateHistoryPage = () => {
   useFocusEffect(
     useCallback(() => {
       loadEstimateList();
-    }, [loadEstimateList])
+    }, [loadEstimateList]),
   );
 
   // 에러 발생 시 토스트 표시
@@ -105,30 +143,33 @@ const EstimateHistoryPage = () => {
   const formatDate = (dateString?: string) => {
     if (!dateString) return '-';
     const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    }).replace(/\./g, '.').replace(/\s/g, '');
+    return date
+      .toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      })
+      .replace(/\./g, '.')
+      .replace(/\s/g, '');
   };
 
   // 시간 포맷팅 함수 - 월일 시분 형태로 반환
   const formatDateTime = (dateString?: string) => {
     if (!dateString) return '-';
-    
+
     try {
       const date = new Date(dateString);
-      
+
       // 유효한 날짜인지 확인
       if (isNaN(date.getTime())) {
         return '-';
       }
-      
+
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
       const hours = String(date.getHours()).padStart(2, '0');
       const minutes = String(date.getMinutes()).padStart(2, '0');
-      
+
       return `${month}월 ${day}일 ${hours}:${minutes}`;
     } catch (error) {
       console.warn('날짜 포맷팅 오류:', error);
@@ -160,7 +201,9 @@ const EstimateHistoryPage = () => {
       return (
         <View style={styles.centerContainer}>
           <Typo style={styles.errorText}>{error}</Typo>
-          <TouchableOpacity style={styles.retryButton} onPress={loadEstimateList}>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={loadEstimateList}>
             <Typo style={styles.retryButtonText}>다시 시도</Typo>
           </TouchableOpacity>
         </View>
@@ -170,7 +213,7 @@ const EstimateHistoryPage = () => {
     // 데이터 없음
     if (estimateList.length === 0) {
       return (
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={styles.centerContainer}
           refreshControl={
             <RefreshControl
@@ -187,7 +230,7 @@ const EstimateHistoryPage = () => {
 
     // 데이터 표시 (현재 받는 장례식장용 API 응답 구조에 맞게)
     return (
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={styles.scrollView}
         refreshControl={
           <RefreshControl
@@ -206,7 +249,9 @@ const EstimateHistoryPage = () => {
             requestedAt={formatDateTime(item.managerFormCreatedAt)}
             sentAt={formatDateTime(item.bidSubmittedAt)}
             id={item.managerFormBidId}
-            onPress={() => handleQuoteCardPress(item.managerFormBidId, item.bidStatus)}
+            onPress={() =>
+              handleQuoteCardPress(item.managerFormBidId, item.bidStatus)
+            }
           />
         ))}
       </ScrollView>
@@ -222,9 +267,7 @@ const EstimateHistoryPage = () => {
       backButtonVisible={true}
       homeButton={true}
       homeRouteName="FuneralMain">
-      <View style={styles.wrapper}>
-        {renderContent()}
-      </View>
+      <View style={styles.wrapper}>{renderContent()}</View>
       <Toast />
     </FuneralLayout>
   );

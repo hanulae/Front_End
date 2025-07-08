@@ -18,7 +18,7 @@ import {useCallback, useState} from 'react';
 import FuneralQuoteCard from '../../components/manager/FuneralQuoteCard';
 import CustomButton from '../../components/common/CustomButton';
 import {useManagerForm} from '../../hooks/useManagerForm';
-import { UserManagerFormList } from '../../services/api/manager/managerFormService';
+import {UserManagerFormList} from '../../services/api/manager/managerFormService';
 
 const ClientEstimatePage = () => {
   const navigation = useNavigation<NavigationProp<any>>();
@@ -26,7 +26,9 @@ const ClientEstimatePage = () => {
   const {managerFormId} = route.params as {managerFormId: string};
   const [selectedId, setSelectedId] = useState<string>('');
   const {getUserManagerFormList, loading, error} = useManagerForm();
-  const [userManagerFormList, setUserManagerFormList] = useState<UserManagerFormList[]>([]);
+  const [userManagerFormList, setUserManagerFormList] = useState<
+    UserManagerFormList[]
+  >([]);
   const [selectedFuneralName, setSelectedFuneralName] = useState<string>('');
 
   useFocusEffect(
@@ -56,7 +58,6 @@ const ClientEstimatePage = () => {
     } catch (error) {
       console.error('고객 견적서 리스트 로드 실패: ', error);
     }
-    
   };
 
   // 견적서 선택 (단일 선택)
@@ -73,7 +74,16 @@ const ClientEstimatePage = () => {
     });
   };
 
-  const getStatusText = (status: 'pending' | 'bid_submitted' | 'bid_selected' | 'bid_progress' | 'rejected' | 'expired' | 'transaction_completed') => {
+  const getStatusText = (
+    status:
+      | 'pending'
+      | 'bid_submitted'
+      | 'bid_selected'
+      | 'bid_progress'
+      | 'rejected'
+      | 'expired'
+      | 'transaction_completed',
+  ) => {
     switch (status) {
       case 'pending':
         return '입찰대기';
@@ -92,7 +102,7 @@ const ClientEstimatePage = () => {
       default:
         return status;
     }
-  }
+  };
 
   return (
     <DefaultLayout
@@ -110,7 +120,11 @@ const ClientEstimatePage = () => {
             <FuneralQuoteCard
               key={item.managerFormBidId}
               id={item.managerFormBidId}
-              handleSelect={canSelect ? () => handleSelect(item.managerFormBidId, item.funeralName) : () => {}}
+              handleSelect={
+                canSelect
+                  ? () => handleSelect(item.managerFormBidId, item.funeralName)
+                  : () => {}
+              }
               selected={item.managerFormBidId === selectedId}
               name={item.funeralName}
               address={item.funeralAddress}

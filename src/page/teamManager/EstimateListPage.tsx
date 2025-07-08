@@ -1,4 +1,11 @@
-import {Platform, ScrollView, StatusBar, StyleSheet, View, ActivityIndicator} from 'react-native';
+import {
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  View,
+  ActivityIndicator,
+} from 'react-native';
 import DefaultLayout from '../../layout/DefaultLayout';
 import {
   NavigationProp,
@@ -48,7 +55,6 @@ const EstimateListPage = () => {
     }
   };
 
-
   //날짜 포맷팅 함수
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -57,12 +63,20 @@ const EstimateListPage = () => {
     const day = String(date.getDate()).padStart(2, '0');
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
-    
+
     return `${year}.${month}.${day} | ${hours}:${minutes}`;
   };
 
   // ✅ 상태별 한글 변환
-  const getStatusText = (status: 'request' | 'bid_received' | 'bid_selected' | 'bid_progress' | 'completed' | 'cancelled') => {
+  const getStatusText = (
+    status:
+      | 'request'
+      | 'bid_received'
+      | 'bid_selected'
+      | 'bid_progress'
+      | 'completed'
+      | 'cancelled',
+  ) => {
     switch (status) {
       case 'request':
         return '견적 발송';
@@ -79,7 +93,6 @@ const EstimateListPage = () => {
       default:
         return status;
     }
-
   };
 
   const goToClientEstimate = (managerFormId: string) => {

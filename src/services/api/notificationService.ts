@@ -1,14 +1,54 @@
 import api from '../../api/config';
 
 export interface NotificationItem {
-  id: string;
-  type: 'estimate' | 'dispatch' | string;
+  notificationId: string;
   title: string;
-  content: string;
-  date: string;
+  body: string;
+  sentAt: string;
   isRead: boolean;
-  isRecent?: boolean;
+  notificationType: string;
+  data?: any;
+  createdAt?: string;
+  updatedAt?: string;
+  readAt?: string | null;
+  receiverId?: string;
+  receiverType?: string;
+  senderId?: string;
+  senderType?: string;
 }
+
+export const getNavigationTarget = (notificationType: string, data: any) => {
+  switch (notificationType) {
+    // 장레식장
+    case 'manager_form_created':
+      return {
+        screen: 'EstimateHistory',
+        params: {
+          managerFormId: data.data.managerFormId,
+        },
+      };
+    // 상조팀장
+    case 'bid_submitted':
+      return {
+        screen: 'ClientEstimate',
+        params: {
+          managerFormId: data.data.managerFormId,
+        },
+      };
+    // 장례식장
+    case 'dispatch_requested':
+      return {
+        screen: 'PendingDispatch',
+      };
+    // 상조팀장
+    case 'dispatch_approved':
+      return {
+        screen: 'CallHistory',
+      };
+    default:
+      return null;
+  }
+};
 
 export interface GetNotificationListParams {
   page?: number;
@@ -18,12 +58,10 @@ export interface GetNotificationListParams {
 
 export interface GetNotificationListResponse {
   message: string;
-  data: {
-    notifications: NotificationItem[];
-    totalCount: number;
-    currentPage: number;
-    totalPages: number;
-  };
+  rows: NotificationItem[];
+  totalCount: number;
+  currentPage: number;
+  totalPages: number;
 }
 
 export const notificationApiService = {
@@ -40,7 +78,7 @@ export const notificationApiService = {
         },
       });
 
-      return response.data;
+      return response.data.data;
     } catch (error: any) {
       console.error('알림 목록 조회 에러:', error.message);
       throw new Error(`알림 목록 조회 에러: ${error.message}`);
@@ -64,6 +102,16 @@ export const notificationApiService = {
     } catch (error: any) {
       console.error('알림 삭제 에러:', error.message);
       throw new Error(`알림 삭제 에러: ${error.message}`);
+    }
+  },
+
+  // 모든 알림 읽음 처리
+  markAllNotificationsAsRead: async (): Promise<void> => {
+    try {
+      await api.put('/common/notification/read-all');
+    } catch (error: any) {
+      console.error('모든 알림 읽음 처리 에러:', error.message);
+      throw new Error(`모든 알림 읽음 처리 에러: ${error.message}`);
     }
   },
 };

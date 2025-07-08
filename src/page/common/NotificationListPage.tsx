@@ -1,23 +1,28 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {View, Text, StyleSheet, FlatList, TouchableOpacity} from 'react-native';
 import DefaultLayout from '../../layout/DefaultLayout';
-import {useFocusEffect, useRoute} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {getUserInfo, UserInfo} from '../../utils/tokenStorage';
 import {
+  getNavigationTarget,
   notificationApiService,
   NotificationItem,
 } from '../../services/api/notificationService';
+import NotificationCard from '../../components/common/NotificationCard';
+import api from '../../api/config';
 // import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface NotificationListPageProps {
   variant: 'manager' | 'funeralHall';
 }
 
-const NotificationListPage = (props: NotificationListPageProps) => {
+const NotificationListPage = (_props: NotificationListPageProps) => {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [markingAllAsRead, setMarkingAllAsRead] = useState(false);
+  const navigation = useNavigation();
 
   // 컴포넌트 마운트 시 한 번만 실행
   useEffect(() => {
@@ -25,8 +30,8 @@ const NotificationListPage = (props: NotificationListPageProps) => {
       try {
         const info = await getUserInfo();
         setUserInfo(info);
-      } catch (error) {
-        console.error('사용자 정보 로드 실패:', error);
+      } catch (err) {
+        console.error('사용자 정보 로드 실패:', err);
       } finally {
         setLoading(false);
       }
@@ -44,10 +49,10 @@ const NotificationListPage = (props: NotificationListPageProps) => {
           setError(null);
           const response = await notificationApiService.getNotificationList();
           console.log('알림 목록 조회 성공:', response);
-          setNotifications(response.data.notifications || []);
-        } catch (error: any) {
-          console.error('알림 목록 조회 실패:', error);
-          setError(error.message || '알림 목록을 불러오는데 실패했습니다.');
+          setNotifications(response.rows || []);
+        } catch (err: any) {
+          console.error('알림 목록 조회 실패:', err);
+          setError(err.message || '알림 목록을 불러오는데 실패했습니다.');
         } finally {
           setLoading(false);
         }
@@ -57,14 +62,68 @@ const NotificationListPage = (props: NotificationListPageProps) => {
     }, []),
   );
 
-  console.log('userInfo', userInfo);
-  // 네비게이션/route에서 variant를 받을 수도 있음
-  const route = useRoute();
-  const variant = (props.variant ||
-    (route.params && (route.params as any).variant)) as
-    | 'manager'
-    | 'funeralHall';
+  const handleNotificationPress = async (item: NotificationItem) => {
+    try {
+      console.log('알림 클릭 - 타입:', item.notificationType);
+      console.log('알림 클릭 - 데이터:', item.data);
+      console.log('수신자 타입:', item.receiverType);
 
+      // getNavigationTarget을 기반으로 네비게이션 처리
+      const navigationTarget = getNavigationTarget(item.notificationType, item);
+      console.log('네비게이션 타겟:', navigationTarget);
+      const response = await api.put(
+        `/common/notification/${item.notificationId}/read`,
+      );
+      console.log('알림 읽음 처리 결과:', response);
+      if (response.status === 200) {
+        if (navigationTarget) {
+          // getNavigationTarget에서 반환된 screen과 params로 직접 네비게이션
+          navigation.navigate(navigationTarget.screen, navigationTarget.params);
+
+          // 알림 읽음 처리 (선택사항)
+          // notificationApiService.markNotificationAsRead(item.notificationId);
+        } else {
+          console.log(
+            '해당 알림 타입에 대한 네비게이션 타겟이 없습니다:',
+            item.notificationType,
+          );
+        }
+      }
+    } catch (error) {
+      console.error('알림 클릭 처리 중 오류:', error);
+    }
+  };
+
+  console.log('userInfo', userInfo);
+  console.log('알림개수', notifications.length);
+  console.log('notifications', notifications);
+  // 모든 알림 읽음 처리
+  const handleMarkAllAsRead = async () => {
+    try {
+      setMarkingAllAsRead(true);
+      await notificationApiService.markAllNotificationsAsRead();
+
+      // 로컬 상태 업데이트
+      setNotifications(prev =>
+        prev.map(notification => ({
+          ...notification,
+          isRead: true,
+        })),
+      );
+
+      console.log('모든 알림 읽음 처리 완료');
+    } catch (err: any) {
+      console.error('모든 알림 읽음 처리 실패:', err);
+      // 에러 처리 (필요시 토스트 메시지 등 추가)
+    } finally {
+      setMarkingAllAsRead(false);
+    }
+  };
+
+  // 읽지 않은 알림 개수 계산
+  const unreadCount = notifications.filter(
+    notification => !notification.isRead,
+  ).length;
   // 로딩 중일 때 표시할 화면
   if (loading) {
     return (
@@ -122,28 +181,10 @@ const NotificationListPage = (props: NotificationListPageProps) => {
   }
 
   const renderItem = ({item}: {item: NotificationItem}) => (
-    <View style={[styles.itemContainer, !item.isRead && styles.unreadItem]}>
-      <View style={styles.itemLeft}>
-        {/* <Icon
-          name={item.type === 'estimate' ? 'bell' : 'bell-outline'}
-          size={18}
-          color={item.isRead ? '#BDBDBD' : '#397CFF'}
-          style={{marginRight: 8}}
-        /> */}
-        <Text style={[styles.itemTitle, !item.isRead && styles.unreadTitle]}>
-          {item.title}
-        </Text>
-      </View>
-      <TouchableOpacity>
-        {/* <Icon name="close" size={18} color="#BDBDBD" /> */}
-      </TouchableOpacity>
-      <View style={styles.itemContentWrap}>
-        <Text style={styles.itemContent}>{item.content}</Text>
-        <Text style={[styles.itemDate, item.isRecent && styles.recentDate]}>
-          {item.date}
-        </Text>
-      </View>
-    </View>
+    <NotificationCard
+      item={item}
+      onPress={() => handleNotificationPress(item)}
+    />
   );
 
   return (
@@ -154,10 +195,27 @@ const NotificationListPage = (props: NotificationListPageProps) => {
       homeRouteName={
         userInfo?.userType === 'manager' ? 'ManagerMain' : 'FuneralMain'
       }>
+      {unreadCount > 0 && (
+        <View style={styles.headerButtonContainer}>
+          <TouchableOpacity
+            style={[
+              styles.markAllReadButton,
+              markingAllAsRead && styles.markingAllAsReadButton,
+            ]}
+            onPress={handleMarkAllAsRead}
+            disabled={markingAllAsRead}>
+            <Text style={styles.markAllReadButtonText}>
+              {markingAllAsRead
+                ? '처리 중...'
+                : `모든 알림 읽음 처리 (${unreadCount}개)`}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
       <FlatList
         data={notifications}
         renderItem={renderItem}
-        keyExtractor={item => item.id}
+        keyExtractor={item => item.notificationId}
         contentContainerStyle={{padding: 20}}
         showsVerticalScrollIndicator={false}
       />
@@ -202,59 +260,27 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  headerButtonContainer: {
     paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 16,
+    paddingVertical: 12,
     backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5E5',
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#222',
-  },
-  itemContainer: {
-    backgroundColor: '#F8F9FB',
-    borderRadius: 12,
-    padding: 18,
-    marginBottom: 16,
-    flexDirection: 'column',
-    position: 'relative',
-  },
-  unreadItem: {
-    backgroundColor: '#EAF2FF',
-  },
-  itemLeft: {
-    flexDirection: 'row',
+  markAllReadButton: {
+    backgroundColor: '#397CFF',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
     alignItems: 'center',
-    marginBottom: 6,
   },
-  itemTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#222',
+  markingAllAsReadButton: {
+    backgroundColor: '#BDBDBD',
   },
-  unreadTitle: {
-    color: '#397CFF',
-  },
-  itemContentWrap: {
-    marginLeft: 26,
-    marginTop: 2,
-  },
-  itemContent: {
+  markAllReadButtonText: {
+    color: '#fff',
     fontSize: 14,
-    color: '#222',
-    marginBottom: 6,
-  },
-  itemDate: {
-    fontSize: 12,
-    color: '#BDBDBD',
-  },
-  recentDate: {
-    color: '#397CFF',
+    fontWeight: 'bold',
   },
 });
 
