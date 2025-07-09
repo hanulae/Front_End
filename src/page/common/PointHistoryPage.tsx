@@ -74,16 +74,16 @@ const PointHistoryPage = () => {
           console.log('cashUrl', cashUrl);
 
           const pointRes = await api.get(pointUrl, {
-            headers: {
-              Authorization: `Bearer ${loginInfo.accessToken}`,
-            },
+            // headers: {
+            //   Authorization: `Bearer ${loginInfo.accessToken}`,
+            // },
           });
           setCurrentPoint(pointRes.data.currentPoint || 0);
 
           const cashRes = await api.get(cashUrl, {
-            headers: {
-              Authorization: `Bearer ${loginInfo.accessToken}`,
-            },
+            // headers: {
+            //   Authorization: `Bearer ${loginInfo.accessToken}`,
+            // },
           });
           setCurrentCash(cashRes.data.currentCash || 0);
 

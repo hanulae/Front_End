@@ -351,6 +351,7 @@ export const setupNotificationListeners = (): void => {
   // 포그라운드 이벤트 리스너
   notifee.onForegroundEvent(({type, detail}) => {
     if (type === EventType.PRESS) {
+      console.log('detail', detail);
       console.log('=== 포그라운드 알림 터치 ===');
       console.log('알림 데이터:', detail.notification);
       handleNotificationPress(detail.notification);
@@ -420,7 +421,7 @@ const handleNotificationPress = async (notification: any): Promise<void> => {
 
     // 네비게이션 처리
     const notificationType = notification?.data?.notificationType;
-    const notificationData = notification?.data;
+    const notificationData = notification;
 
     console.log('알림 타입:', notificationType);
     console.log('알림 데이터:', notificationData);
