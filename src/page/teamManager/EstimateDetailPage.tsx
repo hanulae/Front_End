@@ -1,5 +1,4 @@
-import {StyleSheet, TouchableOpacity, View} from 'react-native';
-import DefaultLayout from '../../layout/DefaultLayout';
+import {StyleSheet, View, useWindowDimensions} from 'react-native';
 import Typo from '../../components/common/Typo';
 import {NavigationProp, useNavigation, useRoute} from '@react-navigation/native';
 import ManagerLayout from '../../layout/ManagerLayout';
@@ -8,12 +7,12 @@ import CustomButton from '../../components/common/CustomButton';
 import DispatchIcon from '../../assets/Button/Button_Dispatch.svg';
 import MoveIcon from '../../assets/Button/Button_MoveTransparent.svg';
 import { useManagerForm } from '../../hooks/useManagerForm';
-import { useEffect, useState } from 'react';
-import { GetManagerFormBidDetailResponse } from '../../services/api/manager/managerFormService';
+import { useCallback, useEffect, useState } from 'react';
 
 const EstimateDetailPage = () => {
   const navigation = useNavigation<NavigationProp<any>>();
   const route = useRoute();
+  const {width} = useWindowDimensions();
   const {managerFormBidId, funeralName} = route.params as {managerFormBidId: string, funeralName: string};
   console.log('funeralName', funeralName);
   const {getManagerFormBidDetail, loading, error} = useManagerForm();
@@ -32,6 +31,34 @@ const EstimateDetailPage = () => {
     bidSubmittedAt: string;
   } | undefined>();
 
+  // 화면 크기에 따른 반응형 스타일 계산
+  const isTablet = width > 768;
+  const isSmallDevice = width < 375;
+  
+  const responsiveStyles = {
+    // 텍스트 크기
+    titleSize: isTablet ? 22 : isSmallDevice ? 16 : 18,
+    labelSize: isTablet ? 16 : isSmallDevice ? 12 : 14,
+    valueSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
+    buttonTextSize: isTablet ? 16 : isSmallDevice ? 12 : 14,
+    
+    // 패딩과 마진
+    containerPadding: isTablet ? 24 : isSmallDevice ? 12 : 16,
+    cardPadding: isTablet ? 28 : isSmallDevice ? 16 : 20,
+    itemPadding: isTablet ? 26 : isSmallDevice ? 18 : 22,
+    buttonPadding: isTablet ? 22 : isSmallDevice ? 14 : 18,
+    topPadding: isTablet ? 32 : isSmallDevice ? 16 : 24,
+    bottomMargin: isTablet ? 32 : isSmallDevice ? 16 : 24,
+    
+    // 아이콘 크기
+    iconSize: isTablet ? 28 : isSmallDevice ? 20 : 24,
+    commaIconSize: isTablet ? 8 : isSmallDevice ? 5 : 6,
+    
+    // 간격
+    gap: isTablet ? 12 : isSmallDevice ? 6 : 8,
+    buttonGap: isTablet ? 12 : isSmallDevice ? 6 : 8,
+  };
+
   const goToCallFormPage = () => {
     navigation.navigate('CallForm', {
       managerFormBidId: managerFormBidId,
@@ -40,7 +67,7 @@ const EstimateDetailPage = () => {
     });
   };
 
-  const loadManagerFormBidDetail = async () => {
+  const loadManagerFormBidDetail = useCallback(async () => {
     try {
       const result = await getManagerFormBidDetail(managerFormBidId);
       if (result) {
@@ -49,11 +76,43 @@ const EstimateDetailPage = () => {
     } catch (error) {
       console.error('고객 견적 입찰 상세 조회 에러: ', error);
     }
-  };
+  }, [getManagerFormBidDetail, managerFormBidId]);
 
   useEffect(() => {
     loadManagerFormBidDetail();
-  }, []);
+  }, [loadManagerFormBidDetail]);
+
+  // 로딩 상태 처리
+  if (loading) {
+    return (
+      <ManagerLayout
+        headerShown={true}
+        headerTitle="입찰 상세"
+        homeButton={true}
+        homeRouteName="ManagerMain"
+        logoutButton={false}>
+        <View style={[styles.centerContainer, {padding: responsiveStyles.containerPadding}]}>
+          <Typo style={[styles.loadingText, {fontSize: responsiveStyles.labelSize}]}>로딩 중...</Typo>
+        </View>
+      </ManagerLayout>
+    );
+  }
+
+  // 에러 상태 처리
+  if (error) {
+    return (
+      <ManagerLayout
+        headerShown={true}
+        headerTitle="입찰 상세"
+        homeButton={true}
+        homeRouteName="ManagerMain"
+        logoutButton={false}>
+        <View style={[styles.centerContainer, {padding: responsiveStyles.containerPadding}]}>
+          <Typo style={[styles.errorText, {fontSize: responsiveStyles.labelSize}]}>❌ {error}</Typo>
+        </View>
+      </ManagerLayout>
+    );
+  }
 
   return (
     <ManagerLayout
@@ -62,54 +121,55 @@ const EstimateDetailPage = () => {
       homeButton={true}
       homeRouteName="ManagerMain"
       logoutButton={false}>
-      <View style={styles.wrapper}>
-        <View style={styles.titleContainer}>
-          <Typo style={styles.title}>{`${funeralName} 입찰상세`}</Typo>
+      <View style={[styles.wrapper, {paddingHorizontal: responsiveStyles.containerPadding, paddingTop: responsiveStyles.topPadding}]}>
+        <View style={[styles.titleContainer, {paddingHorizontal: responsiveStyles.cardPadding, paddingVertical: responsiveStyles.itemPadding}]}>
+          <Typo style={[styles.title, {fontSize: responsiveStyles.titleSize}]}>{`${funeralName} 입찰상세`}</Typo>
         </View>
 
-        <View style={styles.listContainer}>
-          <View style={styles.listItem}>
-            <View style={styles.labelContainer}>
-              <CommaIcon width={6} height={6} />
-              <Typo style={styles.label}>장례식장</Typo>
+        <View style={[styles.listContainer, {paddingHorizontal: responsiveStyles.cardPadding, paddingVertical: responsiveStyles.containerPadding}]}>
+          <View style={[styles.listItem, {paddingVertical: responsiveStyles.itemPadding}]}>
+            <View style={[styles.labelContainer, {gap: responsiveStyles.gap}]}>
+              <CommaIcon width={responsiveStyles.commaIconSize} height={responsiveStyles.commaIconSize} />
+              <Typo style={[styles.label, {fontSize: responsiveStyles.labelSize}]}>장례식장</Typo>
             </View>
-            <Typo style={styles.value}>{managerFormBidDetail?.funeralHallName}</Typo>
+            <Typo style={[styles.value, {fontSize: responsiveStyles.valueSize}]}>{managerFormBidDetail?.funeralHallName}</Typo>
           </View>
-          <View style={styles.listItem}>
-            <View style={styles.labelContainer}>
-              <CommaIcon width={6} height={6} />
-              <Typo style={styles.label}>평수</Typo>
+          <View style={[styles.listItem, {paddingVertical: responsiveStyles.itemPadding}]}>
+            <View style={[styles.labelContainer, {gap: responsiveStyles.gap}]}>
+              <CommaIcon width={responsiveStyles.commaIconSize} height={responsiveStyles.commaIconSize} />
+              <Typo style={[styles.label, {fontSize: responsiveStyles.labelSize}]}>평수</Typo>
             </View>
-            <Typo style={styles.value}>{managerFormBidDetail?.funeralHallSize}평</Typo>
+            <Typo style={[styles.value, {fontSize: responsiveStyles.valueSize}]}>{managerFormBidDetail?.funeralHallSize}평</Typo>
           </View>
-          <View style={styles.listItem}>
-            <View style={styles.labelContainer}>
-              <CommaIcon width={6} height={6} />
-              <Typo style={styles.label}>수용인원</Typo>
+          <View style={[styles.listItem, {paddingVertical: responsiveStyles.itemPadding}]}>
+            <View style={[styles.labelContainer, {gap: responsiveStyles.gap}]}>
+              <CommaIcon width={responsiveStyles.commaIconSize} height={responsiveStyles.commaIconSize} />
+              <Typo style={[styles.label, {fontSize: responsiveStyles.labelSize}]}>수용인원</Typo>
             </View>
-            <Typo style={styles.value}>{managerFormBidDetail?.funeralHallNumberOfMourners}명</Typo>
+            <Typo style={[styles.value, {fontSize: responsiveStyles.valueSize}]}>{managerFormBidDetail?.funeralHallNumberOfMourners}명</Typo>
           </View>
-          <View style={styles.listItem}>
-            <View style={styles.labelContainer}>
-              <CommaIcon width={6} height={6} />
-              <Typo style={styles.label}>식장지불금액</Typo>
+          <View style={[styles.listItem, {paddingVertical: responsiveStyles.itemPadding}]}>
+            <View style={[styles.labelContainer, {gap: responsiveStyles.gap}]}>
+              <CommaIcon width={responsiveStyles.commaIconSize} height={responsiveStyles.commaIconSize} />
+              <Typo style={[styles.label, {fontSize: responsiveStyles.labelSize}]}>식장지불금액</Typo>
             </View>
-            <Typo style={styles.value}>{managerFormBidDetail?.funeralHallDetailPrice}만원</Typo>
+            <Typo style={[styles.value, {fontSize: responsiveStyles.valueSize}]}>{managerFormBidDetail?.funeralHallDetailPrice}만원</Typo>
           </View>
-          <View style={styles.listItem}>
-            <View style={styles.labelContainer}>
-              <CommaIcon width={6} height={6} />
-              <Typo style={styles.label}>호실사용료</Typo>
+          <View style={[styles.listItem, {paddingVertical: responsiveStyles.itemPadding}]}>
+            <View style={[styles.labelContainer, {gap: responsiveStyles.gap}]}>
+              <CommaIcon width={responsiveStyles.commaIconSize} height={responsiveStyles.commaIconSize} />
+              <Typo style={[styles.label, {fontSize: responsiveStyles.labelSize}]}>호실사용료</Typo>
             </View>
-            <Typo style={styles.value}>{managerFormBidDetail?.funeralHallPrice}만원</Typo>
+            <Typo style={[styles.value, {fontSize: responsiveStyles.valueSize}]}>{managerFormBidDetail?.funeralHallPrice}만원</Typo>
           </View>
-          <View style={styles.listItem}>
-            <View style={styles.labelContainer}>
-              <CommaIcon width={6} height={6} />
-              <Typo style={styles.label}>식장지불금액 + 호실사용료</Typo>
+          <View style={[styles.listItem, {paddingVertical: responsiveStyles.itemPadding}]}>
+            <View style={[styles.labelContainer, {gap: responsiveStyles.gap}]}>
+              <CommaIcon width={responsiveStyles.commaIconSize} height={responsiveStyles.commaIconSize} />
+              <Typo style={[styles.label, {fontSize: responsiveStyles.labelSize}]}>식장지불금액 + 호실사용료</Typo>
             </View>
             <Typo style={[
               styles.value,
+              {fontSize: responsiveStyles.valueSize},
               (managerFormBidDetail?.funeralHallPrice || 0) + (managerFormBidDetail?.funeralHallDetailPrice || 0) > 
               (managerFormBidDetail?.funeralProponentMoney ? managerFormBidDetail.funeralProponentMoney / 10000 : 0) 
               && { textDecorationLine: 'line-through', color: '#999' }
@@ -117,32 +177,40 @@ const EstimateDetailPage = () => {
               {(managerFormBidDetail?.funeralHallPrice || 0) + (managerFormBidDetail?.funeralHallDetailPrice || 0)}만원
             </Typo>
           </View>
-          <View style={styles.listItem}>
-            <View style={styles.labelContainer}>
-              <CommaIcon width={6} height={6} />
-              <Typo style={styles.label}>제안가</Typo>
+          <View style={[styles.listItem, {paddingVertical: responsiveStyles.itemPadding}]}>
+            <View style={[styles.labelContainer, {gap: responsiveStyles.gap}]}>
+              <CommaIcon width={responsiveStyles.commaIconSize} height={responsiveStyles.commaIconSize} />
+              <Typo style={[styles.label, {fontSize: responsiveStyles.labelSize}]}>제안가</Typo>
             </View>
-            <Typo style={styles.value}>{managerFormBidDetail?.funeralProponentMoney}만원</Typo>
+            <Typo style={[styles.value, {fontSize: responsiveStyles.valueSize}]}>{managerFormBidDetail?.funeralProponentMoney}만원</Typo>
           </View>
-          <View style={styles.listLastItem}>
-            <View style={styles.labelContainer}>
-              <CommaIcon width={6} height={6} />
-              <Typo style={styles.label}>할인율</Typo>
+          <View style={[styles.listLastItem, {paddingVertical: responsiveStyles.itemPadding}]}>
+            <View style={[styles.labelContainer, {gap: responsiveStyles.gap}]}>
+              <CommaIcon width={responsiveStyles.commaIconSize} height={responsiveStyles.commaIconSize} />
+              <Typo style={[styles.label, {fontSize: responsiveStyles.labelSize}]}>할인율</Typo>
             </View>
-            <Typo style={styles.discountValue}>{managerFormBidDetail?.funeralDiscount}%</Typo>
+            <Typo style={[styles.discountValue, {fontSize: responsiveStyles.valueSize}]}>{managerFormBidDetail?.funeralDiscount}%</Typo>
           </View>
         </View>
       </View>
       {/* 하단 버튼 */}
       <View style={styles.bottomContainer}>
-        <CustomButton onPress={goToCallFormPage} style={styles.button}>
-          <View style={styles.buttonIcon}>
-            <DispatchIcon width={24} height={24} />
-            <Typo fontSize={14} color="white">
+        <CustomButton onPress={goToCallFormPage} style={[
+          styles.button, 
+          {
+            paddingVertical: responsiveStyles.buttonPadding, 
+            paddingHorizontal: responsiveStyles.cardPadding,
+            marginHorizontal: responsiveStyles.containerPadding,
+            marginBottom: responsiveStyles.bottomMargin
+          }
+        ]}>
+          <View style={[styles.buttonIcon, {gap: responsiveStyles.buttonGap}]}>
+            <DispatchIcon width={responsiveStyles.iconSize} height={responsiveStyles.iconSize} />
+            <Typo fontSize={responsiveStyles.buttonTextSize} color="white">
               출동신청서 작성
             </Typo>
           </View>
-          <MoveIcon width={24} height={24} />
+          <MoveIcon width={responsiveStyles.iconSize} height={responsiveStyles.iconSize} />
         </CustomButton>
       </View>
     </ManagerLayout>
@@ -154,22 +222,29 @@ export default EstimateDetailPage;
 const styles = StyleSheet.create({
   wrapper: {
     backgroundColor: '#F5F5F5', // 상단 회색 배경
-    paddingHorizontal: 16,
-    paddingTop: 24,
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    color: '#666',
+    textAlign: 'center',
+  },
+  errorText: {
+    color: '#ff4444',
+    textAlign: 'center',
   },
   titleContainer: {
     backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
-    paddingHorizontal: 20,
-    paddingVertical: 26,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E5E5',
   },
   title: {
-    fontSize: 18,
     fontWeight: 'bold',
-    // marginBottom: 20,
     textAlign: 'center',
     color: '#283042',
     fontFamily: 'Pretendard-Bold',
@@ -178,46 +253,32 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderBottomLeftRadius: 12,
     borderBottomRightRadius: 12,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    // marginBottom: 32,
-    // shadowColor: '#000',
-    // shadowOffset: {width: 0, height: 2},
-    // shadowOpacity: 0.05,
-    // shadowRadius: 4,
-    // elevation: 2,
   },
   listItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 22,
     borderBottomColor: '#E5E5E5',
     borderBottomWidth: 1,
   },
   listLastItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 22,
   },
   labelContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
   },
   label: {
-    fontSize: 14,
     color: '#283042',
     fontWeight: '500',
     fontFamily: 'Pretendard-Regular',
   },
   value: {
-    fontSize: 16,
     fontWeight: '600',
     color: '#283042',
     fontFamily: 'Pretendard-Bold',
   },
   discountValue: {
-    fontSize: 16,
     fontWeight: '600',
     color: '#2D81F1',
     fontFamily: 'Pretendard-Bold',
@@ -229,18 +290,12 @@ const styles = StyleSheet.create({
   button: {
     flexDirection: 'row',
     backgroundColor: '#2D81F1',
-    paddingVertical: 18,
-    paddingHorizontal: 20,
-    marginHorizontal: 16,
     borderRadius: 12,
     alignItems: 'center',
-    marginBottom: 24,
   },
   buttonIcon: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
     flex: 1,
-    // marginLeft: 16,
   },
 });

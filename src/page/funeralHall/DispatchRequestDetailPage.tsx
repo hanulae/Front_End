@@ -41,7 +41,7 @@ const DispatchRequestDetailPage = () => {
       const result = await fetchDispatchDetail(dispatchRequestId);
       console.log('loadDispatchDetail result', result);
       if (result) {
-        setDispatchDetail(result);
+        setDispatchDetail(result.dispatchRequest);
         console.log('출동 요청 상세 데이터 로드 성공:', result);
       } else {
         console.log('❌ 출동 요청 상세 데이터 로드 실패 - 빈 데이터');

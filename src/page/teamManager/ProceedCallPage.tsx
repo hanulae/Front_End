@@ -48,6 +48,11 @@ const ProceedCallPage = () => {
       if (managerTransactionCompletedAt && !funeralTransactionCompletedAt) {
         return 'waiting_funeral_completion';
       }
+
+      // 장례식장은 완료했지만 매니저가 아직 완료하지 않음
+      if (funeralTransactionCompletedAt && !managerTransactionCompletedAt) {
+        return 'waiting_manager_completion';
+      }
       
       // 둘 다 완료
       if (managerTransactionCompletedAt && funeralTransactionCompletedAt) {
@@ -262,12 +267,17 @@ const ProceedCallPage = () => {
         };
       case 'approved':
         return {
-          text: '출동이 승인되었습니다! 도착예정이니 잠시만 기다려주세요.',
+          text: '출동이 승인되었습니다.',
           style: styles.approvedMessage,
         };
       case 'waiting_funeral_completion':
         return {
-          text: '거래완료 대기중 입니다. 장례식장의 거래완료를 기다리고 있습니다.',
+          text: '장례식장의 거래 완료 확인이 필요합니다.',
+          style: styles.waitingMessage,
+        };
+      case 'waiting_manager_completion':
+        return {
+          text: '거래완료 대기중 입니다. 거래를 완료해주세요.',
           style: styles.waitingMessage,
         };
       case 'transaction_completed':
@@ -328,7 +338,7 @@ const ProceedCallPage = () => {
                 onPress={() => handleComplete(dispatchDetail.dispatchRequestId)}
                 disabled={loading}>
                 <Typo style={styles.confirmButtonText}>
-                  {loading ? '확정 처리 중...' : '거래 확정'}
+                  {loading ? '거래완료 처리 중...' : '거래완료'}
                 </Typo>
               </TouchableOpacity>
               <TouchableOpacity
@@ -349,8 +359,26 @@ const ProceedCallPage = () => {
               style={[styles.waitingCompletionButton, loading && styles.disabledButton]}
               disabled={true}
             >
-              <Typo style={styles.waitingCompletionButtonText}>거래 완료 대기중</Typo>
+              <Typo style={styles.waitingCompletionButtonText}>장례식장 거래완료 대기중</Typo>
             </TouchableOpacity>
+          </View>
+        );
+
+      case 'waiting_manager_completion':
+        // 장례식장은 완료 했지만 상조팀장이 아직 완료하지 않음
+        return (
+          <View style={styles.actionButtons}>
+            <TouchableOpacity
+                style={[
+                  styles.confirmButton,
+                  loading && styles.disabledButton
+                ]}
+                onPress={() => handleComplete(dispatchDetail.dispatchRequestId)}
+                disabled={loading}>
+                <Typo style={styles.confirmButtonText}>
+                  {loading ? '거래완료 처리 중...' : '거래완료'}
+                </Typo>
+              </TouchableOpacity>
           </View>
         );
 
@@ -389,7 +417,7 @@ const ProceedCallPage = () => {
             <SMSIcon width={18} height={18} />
             <Typo style={styles.messageIconButtonText}>문자</Typo>
           </TouchableOpacity>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.phoneButton, loading && styles.disabledButton]}
             onPress={() => handleCall(dispatchDetail.managerPhoneNumber)}
             disabled={loading}>
@@ -503,6 +531,7 @@ const ProceedCallPage = () => {
           </View>
         )}
       </ScrollView>
+      <Toast />
     </ManagerLayout>
   );
 };

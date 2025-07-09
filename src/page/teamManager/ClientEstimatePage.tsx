@@ -3,7 +3,8 @@ import {
   ScrollView,
   StatusBar,
   StyleSheet,
-  TouchableOpacity,
+  RefreshControl,
+  ActivityIndicator,
   View,
 } from 'react-native';
 import DefaultLayout from '../../layout/DefaultLayout';
@@ -28,6 +29,25 @@ const ClientEstimatePage = () => {
   const {getUserManagerFormList, loading, error} = useManagerForm();
   const [userManagerFormList, setUserManagerFormList] = useState<UserManagerFormList[]>([]);
   const [selectedFuneralName, setSelectedFuneralName] = useState<string>('');
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadUserManagerFormList = useCallback(async () => {
+    try {
+      const result = await getUserManagerFormList(managerFormId);
+      if (result) {
+        setUserManagerFormList(result);
+      }
+    } catch (error) {
+      console.error('고객 견적서 리스트 로드 실패: ', error);
+    }
+  }, [getUserManagerFormList, managerFormId]);
+
+  // 풀 투 리프레시 함수
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadUserManagerFormList();
+    setRefreshing(false);
+  }, [loadUserManagerFormList]);
 
   useFocusEffect(
     useCallback(() => {
@@ -44,20 +64,8 @@ const ClientEstimatePage = () => {
         // 화면 포커스 해제 시 필요하다면 초기화 작업
         // 예: StatusBar.setStyle('default')
       };
-    }, []),
+    }, [loadUserManagerFormList]),
   );
-
-  const loadUserManagerFormList = async () => {
-    try {
-      const result = await getUserManagerFormList(managerFormId);
-      if (result) {
-        setUserManagerFormList(result);
-      }
-    } catch (error) {
-      console.error('고객 견적서 리스트 로드 실패: ', error);
-    }
-    
-  };
 
   // 견적서 선택 (단일 선택)
   const handleSelect = (id: string, funeralName: string) => {
@@ -94,6 +102,39 @@ const ClientEstimatePage = () => {
     }
   }
 
+  // ✅ 로딩 상태
+  if (loading) {
+    return (
+      <DefaultLayout
+        headerShown={true}
+        headerTitle="고객 견적서"
+        homeButton={true}
+        homeRouteName="ManagerMain"
+        logoutButton={false}>
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color="#3287F8" />
+          <Typo style={styles.loadingText}>견적서를 불러오는 중...</Typo>
+        </View>
+      </DefaultLayout>
+    );
+  }
+
+  // ✅ 에러 상태
+  if (error) {
+    return (
+      <DefaultLayout
+        headerShown={true}
+        headerTitle="고객 견적서"
+        homeButton={true}
+        homeRouteName="ManagerMain"
+        logoutButton={false}>
+        <View style={styles.centerContainer}>
+          <Typo style={styles.errorText}>❌ {error}</Typo>
+        </View>
+      </DefaultLayout>
+    );
+  }
+
   return (
     <DefaultLayout
       headerShown={true}
@@ -101,28 +142,44 @@ const ClientEstimatePage = () => {
       homeButton={true}
       homeRouteName="ManagerMain"
       logoutButton={false}>
-      <ScrollView contentContainerStyle={styles.wrapper}>
-        {userManagerFormList.map(item => {
-          const canSelect = item.bidStatus === 'bid_submitted';
-          console.log('item.bidStatus', item.bidStatus);
+      <ScrollView 
+        contentContainerStyle={styles.wrapper}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#3287F8']} // Android 색상
+            tintColor="#3287F8" // iOS 색상
+            title="새로고침 중..." // iOS 텍스트
+            titleColor="#3287F8" // iOS 텍스트 색상
+          />
+        }>
+        {userManagerFormList.length === 0 ? (
+          // ✅ 빈 상태
+          <View style={styles.centerContainer}>
+            <Typo style={styles.emptyText}>견적서가 없습니다.</Typo>
+          </View>
+        ) : (
+          userManagerFormList.map(item => {
+            const canSelect = item.bidStatus === 'bid_submitted';
+            console.log('item.bidStatus', item.bidStatus);
 
-          return (
-            <FuneralQuoteCard
-              key={item.managerFormBidId}
-              id={item.managerFormBidId}
-              handleSelect={canSelect ? () => handleSelect(item.managerFormBidId, item.funeralName) : () => {}}
-              selected={item.managerFormBidId === selectedId}
-              name={item.funeralName}
-              address={item.funeralAddress}
-              completed={!canSelect}
-              selectable={canSelect}
-              status={getStatusText(item.bidStatus)}
-              managerFormId={managerFormId}
-            />
-          );
-        })}
-
-        {/* 하단 버튼 */}
+            return (
+              <FuneralQuoteCard
+                key={item.managerFormBidId}
+                id={item.managerFormBidId}
+                handleSelect={canSelect ? () => handleSelect(item.managerFormBidId, item.funeralName) : () => {}}
+                selected={item.managerFormBidId === selectedId}
+                name={item.funeralName}
+                address={item.funeralAddress}
+                completed={!canSelect}
+                selectable={canSelect}
+                status={getStatusText(item.bidStatus)}
+                managerFormId={managerFormId}
+              />
+            );
+          })
+        )}
       </ScrollView>
       <CustomButton
         onPress={goToEstimateDetail}
@@ -143,6 +200,27 @@ const styles = StyleSheet.create({
   wrapper: {
     flexGrow: 1,
     padding: 16,
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#666',
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#ff4444',
+    textAlign: 'center',
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#999',
+    textAlign: 'center',
   },
   submitButton: {
     marginTop: 20,

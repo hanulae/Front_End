@@ -32,6 +32,7 @@ export interface DispatchDetail {
 
 export interface GetDispatchDetailResponse {
   success: boolean;
+  message?: string;
   data: DispatchDetail;
 }
 
@@ -57,6 +58,23 @@ export interface GetConfirmTransactionResponse {
   success: boolean;
   message: string;
   status: string;
+}
+
+export interface TransactionStatus {
+  transactionId: string;
+  dispatchRequestId: string;
+  funeralId: string;
+  managerId: string;
+  status: string;
+  managerTransactionCompletedAt: string;
+  funeralTransactionCompletedAt: string;
+  transactionCompletedAt: string;
+}
+
+export interface GetFuneralDispatchTransactionStatusResponse {
+  success: boolean;
+  message?: string;
+  data: TransactionStatus | null;
 }
 
 export const funeralDispatchService = {
@@ -145,6 +163,21 @@ export const funeralDispatchService = {
       }
 
       throw new Error(errorMessage);
+    }
+  },
+
+  // 거래 흐름 상태 조회
+  getFuneralDispatchTransactionStatus: async (
+    dispatchRequestId: string,
+  ): Promise<GetFuneralDispatchTransactionStatusResponse> => {
+    try {
+      const response = await api.get(
+        `/funeral/request/transaction-detail/${dispatchRequestId}`,
+      );
+      return response.data;
+    } catch (error: any) {
+      console.error('거래 흐름 상태 조회 에러: ', error.message);
+      throw new Error(`거래 흐름 상태 조회 에러: ${error.message}`);
     }
   },
 };

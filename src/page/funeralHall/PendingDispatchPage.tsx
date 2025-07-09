@@ -1,4 +1,4 @@
-import {Platform, ScrollView, StatusBar, StyleSheet} from 'react-native';
+import {Platform, ScrollView, StatusBar, StyleSheet, RefreshControl, View} from 'react-native';
 import FuneralLayout from '../../layout/FuneralLayout';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -7,11 +7,13 @@ import PendingDispatchCard from '../../components/funeralHall/PendingDispatchCar
 import { useFuneralDispatch } from '../../hooks/useFuneralDispatch';
 import { DispatchListItem } from '../../services/api/funeral/funeralDispatchService';
 import Toast from 'react-native-toast-message';
+import Typo from '../../components/common/Typo';
 
 const PendingDispatchPage = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const {error, fetchDispatchList, fetchDispatchDetail} = useFuneralDispatch();
   const [dispatchList, setDispatchList] = useState<DispatchListItem[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
   console.log('dispatchList', dispatchList);
 
   // StatusBar 설정
@@ -49,6 +51,13 @@ const PendingDispatchPage = () => {
       setDispatchList([]);
     }
   }, [fetchDispatchList]);
+
+  // 풀 투 리프레시 함수
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadDispatchList();
+    setRefreshing(false);
+  }, [loadDispatchList]);
 
   // 페이지 포커스 시 데이터 로드
   useFocusEffect(
@@ -145,19 +154,36 @@ const PendingDispatchPage = () => {
       color="white">
       <ScrollView
         contentContainerStyle={styles.scrollView}
-        style={styles.wrapper}>
-        {dispatchList.map((item, index) => (
-          <PendingDispatchCard
-            key={item.dispatchRequestId}
-            name={item.chiefMournerName}
-            index={index}
-            status={getStatusText(item.isApproved)}
-            onPress={() => {
-              goToDispatchDetail(item.dispatchRequestId, item.isApproved);
-            }}
-            onBidDetailPress={() => goToBidDetail(item.dispatchRequestId, item.chiefMournerName)}
+        style={styles.wrapper}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#3287F8']} // Android 색상
+            tintColor="#3287F8" // iOS 색상
+            title="새로고침 중..." // iOS 텍스트
+            titleColor="#3287F8" // iOS 텍스트 색상
           />
-        ))}
+        }>
+        {dispatchList.length === 0 ? (
+          // ✅ 빈 상태
+          <View style={styles.emptyContainer}>
+            <Typo style={styles.emptyText}>출동 대기 내역이 없습니다.</Typo>
+          </View>
+        ) : (
+          dispatchList.map((item, index) => (
+            <PendingDispatchCard
+              key={item.dispatchRequestId}
+              name={item.chiefMournerName}
+              index={index}
+              status={getStatusText(item.isApproved)}
+              onPress={() => {
+                goToDispatchDetail(item.dispatchRequestId, item.isApproved);
+              }}
+              onBidDetailPress={() => goToBidDetail(item.dispatchRequestId, item.chiefMournerName)}
+            />
+          ))
+        )}
       </ScrollView>
     </FuneralLayout>
   );
@@ -172,5 +198,16 @@ const styles = StyleSheet.create({
   wrapper: {
     backgroundColor: '#F5F6F8',
     padding: 20,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#999',
+    textAlign: 'center',
   },
 });
