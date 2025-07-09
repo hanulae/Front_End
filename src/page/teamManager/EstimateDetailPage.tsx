@@ -13,7 +13,11 @@ const EstimateDetailPage = () => {
   const navigation = useNavigation<NavigationProp<any>>();
   const route = useRoute();
   const {width} = useWindowDimensions();
-  const {managerFormBidId, funeralName} = route.params as {managerFormBidId: string, funeralName: string};
+  const {managerFormBidId, funeralName, hasBidSelected} = route.params as {
+    managerFormBidId: string;
+    funeralName: string;
+    hasBidSelected?: boolean;
+  };
   console.log('funeralName', funeralName);
   const {getManagerFormBidDetail, loading, error} = useManagerForm();
   const [managerFormBidDetail, setManagerFormBidDetail] = useState<{
@@ -195,22 +199,27 @@ const EstimateDetailPage = () => {
       </View>
       {/* 하단 버튼 */}
       <View style={styles.bottomContainer}>
-        <CustomButton onPress={goToCallFormPage} style={[
-          styles.button, 
-          {
-            paddingVertical: responsiveStyles.buttonPadding, 
-            paddingHorizontal: responsiveStyles.cardPadding,
-            marginHorizontal: responsiveStyles.containerPadding,
-            marginBottom: responsiveStyles.bottomMargin
-          }
-        ]}>
+        <CustomButton 
+          onPress={hasBidSelected ? () => {} : goToCallFormPage} 
+          style={[
+            styles.button, 
+            hasBidSelected && styles.disabledButton,
+            {
+              paddingVertical: responsiveStyles.buttonPadding, 
+              paddingHorizontal: responsiveStyles.cardPadding,
+              marginHorizontal: responsiveStyles.containerPadding,
+              marginBottom: responsiveStyles.bottomMargin
+            }
+          ]}
+          disabled={hasBidSelected}
+        >
           <View style={[styles.buttonIcon, {gap: responsiveStyles.buttonGap}]}>
             <DispatchIcon width={responsiveStyles.iconSize} height={responsiveStyles.iconSize} />
-            <Typo fontSize={responsiveStyles.buttonTextSize} color="white">
-              출동신청서 작성
+            <Typo fontSize={responsiveStyles.buttonTextSize} color={hasBidSelected ? "#999" : "white"}>
+              {hasBidSelected ? "이미 다른 장례식장에 출동 신청을 했습니다" : "출동신청서 작성"}
             </Typo>
           </View>
-          <MoveIcon width={responsiveStyles.iconSize} height={responsiveStyles.iconSize} />
+          {!hasBidSelected && <MoveIcon width={responsiveStyles.iconSize} height={responsiveStyles.iconSize} />}
         </CustomButton>
       </View>
     </ManagerLayout>
@@ -292,6 +301,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#2D81F1',
     borderRadius: 12,
     alignItems: 'center',
+  },
+  disabledButton: {
+    backgroundColor: '#D1D5DB',
   },
   buttonIcon: {
     flexDirection: 'row',

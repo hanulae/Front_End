@@ -1,5 +1,5 @@
 import {NavigationProp, useNavigation, RouteProp, useRoute} from '@react-navigation/native';
-import {StyleSheet, TouchableOpacity, View, TextInput, Alert, ScrollView} from 'react-native';
+import {StyleSheet, TouchableOpacity, View, TextInput, Alert, ScrollView, useWindowDimensions} from 'react-native';
 import {usePhoneInput} from '../../hooks/input/usePhoneInput';
 import Typo from '../../components/common/Typo';
 import {Input} from '../../components/common/input/Input';
@@ -16,9 +16,46 @@ type CallFormRouteParams = {
   funeralId: string;
 };
 
+// 반응형 디자인을 위한 유틸리티 함수들
+const getResponsiveSize = (screenWidth: number, baseSize: number) => {
+  const designWidth = 375; // 기준 디자인 폭 (iPhone X 기준)
+  return Math.round((screenWidth / designWidth) * baseSize);
+};
+
+const getResponsiveFontSize = (screenWidth: number, baseFontSize: number) => {
+  const designWidth = 375;
+  const ratio = screenWidth / designWidth;
+  return Math.max(12, Math.min(24, baseFontSize * ratio)); // 최소 12px, 최대 24px
+};
+
+const getResponsivePadding = (screenWidth: number, basePadding: number) => {
+  const designWidth = 375;
+  return Math.round((screenWidth / designWidth) * basePadding);
+};
+
 const CallFormPage = () => {
   const navigation = useNavigation<NavigationProp<any>>();
   const route = useRoute<RouteProp<{params: CallFormRouteParams}, 'params'>>();
+  const { width: screenWidth } = useWindowDimensions();
+
+  // 반응형 크기 계산
+  const responsiveSizes = useMemo(() => ({
+    horizontalPadding: getResponsivePadding(screenWidth, 16),
+    verticalPadding: getResponsivePadding(screenWidth, 16),
+    buttonHeight: getResponsiveSize(screenWidth, 18),
+    labelFontSize: getResponsiveFontSize(screenWidth, 16),
+    inputFontSize: getResponsiveFontSize(screenWidth, 16),
+    buttonFontSize: getResponsiveFontSize(screenWidth, 16),
+    searchButtonFontSize: getResponsiveFontSize(screenWidth, 15),
+    borderRadius: getResponsiveSize(screenWidth, 8),
+    searchButtonRadius: getResponsiveSize(screenWidth, 10),
+    inputPadding: getResponsivePadding(screenWidth, 18),
+    inputHorizontalPadding: getResponsivePadding(screenWidth, 20),
+    searchButtonPadding: getResponsivePadding(screenWidth, 24),
+    sectionGap: getResponsiveSize(screenWidth, 8),
+    bottomSectionGap: getResponsiveSize(screenWidth, 8),
+    marginBottom: getResponsiveSize(screenWidth, 24),
+  }), [screenWidth]);
 
   // 전화번호 입력
   const familyPhone = usePhoneInput();
@@ -172,6 +209,113 @@ const CallFormPage = () => {
     }
   };
 
+  // 동적 스타일 생성
+  const dynamicStyles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      paddingHorizontal: responsiveSizes.horizontalPadding,
+      paddingBottom: responsiveSizes.verticalPadding,
+    },
+    section: {
+      flexDirection: 'column',
+      gap: responsiveSizes.sectionGap,
+    },
+    addressContainer: {
+      flexDirection: 'column',
+    },
+    bottomSection: {
+      flexDirection: 'column',
+      gap: responsiveSizes.bottomSectionGap,
+      marginBottom: responsiveSizes.marginBottom,
+    },
+    fixedBottomContainer: {
+      backgroundColor: 'white',
+      paddingHorizontal: responsiveSizes.horizontalPadding,
+      paddingBottom: responsiveSizes.verticalPadding,
+      paddingTop: responsiveSizes.verticalPadding,
+      borderTopWidth: 1,
+      borderTopColor: '#E5E7EB',
+    },
+    nextButton: {
+      backgroundColor: '#2D81F1',
+      paddingVertical: responsiveSizes.buttonHeight,
+      borderRadius: responsiveSizes.borderRadius,
+      alignItems: 'center',
+      minHeight: getResponsiveSize(screenWidth, 54), // 최소 터치 영역 확보
+    },
+    nextButtonText: {
+      color: '#fff',
+      fontWeight: 'bold',
+      fontSize: responsiveSizes.buttonFontSize,
+    },
+    disabledButton: {
+      backgroundColor: '#D1D5DB',
+    },
+    disabledButtonText: {
+      color: '#9CA3AF',
+    },
+    label: {
+      fontSize: responsiveSizes.labelFontSize,
+      fontWeight: '600',
+      fontFamily: 'Pretendard-Bold',
+      marginLeft: getResponsivePadding(screenWidth, 10),
+      marginBottom: responsiveSizes.verticalPadding,
+      marginTop: responsiveSizes.verticalPadding,
+    },
+    addressRow: {
+      flexDirection: screenWidth < 400 ? 'column' : 'row', // 작은 화면에서는 세로 배치
+      alignItems: screenWidth < 400 ? 'stretch' : 'center',
+      marginBottom: getResponsivePadding(screenWidth, 12),
+      gap: screenWidth < 400 ? 8 : 0,
+    },
+    addressBox: {
+      flex: screenWidth < 400 ? 0 : 1,
+      paddingVertical: responsiveSizes.inputPadding,
+      paddingHorizontal: responsiveSizes.inputHorizontalPadding,
+      backgroundColor: '#F5F6F8',
+      borderRadius: responsiveSizes.borderRadius,
+      justifyContent: 'center',
+      minHeight: getResponsiveSize(screenWidth, 54),
+    },
+    addressText: {
+      fontSize: responsiveSizes.inputFontSize,
+      fontWeight: '500',
+      color: 'rgba(175, 179, 187, 0.5)',
+      fontFamily: 'Pretendard-Black',
+    },
+    addressDetailInput: {
+      paddingVertical: responsiveSizes.inputPadding,
+      paddingHorizontal: responsiveSizes.inputHorizontalPadding,
+      backgroundColor: '#F5F6F8',
+      borderRadius: responsiveSizes.borderRadius,
+      fontSize: responsiveSizes.inputFontSize,
+      fontFamily: 'Pretendard-Regular',
+      marginBottom: responsiveSizes.marginBottom,
+      minHeight: getResponsiveSize(screenWidth, 54),
+    },
+    searchButton: {
+      marginLeft: screenWidth < 400 ? 0 : 8,
+      backgroundColor: '#8990A0',
+      borderRadius: responsiveSizes.searchButtonRadius,
+      paddingVertical: responsiveSizes.inputPadding,
+      paddingHorizontal: responsiveSizes.searchButtonPadding,
+      minHeight: getResponsiveSize(screenWidth, 54),
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    searchButtonText: {
+      fontSize: responsiveSizes.searchButtonFontSize,
+      fontWeight: '600',
+      color: '#fff',
+      fontFamily: 'Pretendard-Black',
+    },
+  }), [responsiveSizes, screenWidth]);
+
   return (
     <ManagerLayout
       headerShown={true}
@@ -181,39 +325,39 @@ const CallFormPage = () => {
       homeRouteName="ManagerMain"
       logoutButton={false}>
     
-    <View style={styles.container}>
+    <View style={dynamicStyles.container}>
       {/* 스크롤 가능한 콘텐츠 영역 */}
       <ScrollView 
-        style={styles.scrollView}
+        style={dynamicStyles.scrollView}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={dynamicStyles.scrollContent}
       >
         {/* 주소 입력 */}
-        <View style={styles.section}>
-          <Typo fontSize={16} style={styles.label}>
+        <View style={dynamicStyles.section}>
+          <Typo fontSize={responsiveSizes.labelFontSize} style={dynamicStyles.label}>
             주소 입력 *
           </Typo>
-          <View style={styles.addressContainer}>
-            <View style={styles.addressRow}>
-              <View style={styles.addressBox}>
+          <View style={dynamicStyles.addressContainer}>
+            <View style={dynamicStyles.addressRow}>
+              <View style={dynamicStyles.addressBox}>
                 <Typo style={[
-                  styles.addressText,
+                  dynamicStyles.addressText,
                   address && { color: '#000' }
                 ]}>
                   {address || '주소를 검색해주세요'}
                 </Typo>
               </View>
               <TouchableOpacity
-                style={styles.searchButton}
+                style={dynamicStyles.searchButton}
                 onPress={handleAddressSearch}>
-                <Typo style={styles.searchButtonText}>주소검색</Typo>
+                <Typo style={dynamicStyles.searchButtonText}>주소검색</Typo>
               </TouchableOpacity>
             </View>
           </View>
           
           {/* 상세주소 입력 */}
           <TextInput
-            style={styles.addressDetailInput}
+            style={dynamicStyles.addressDetailInput}
             placeholder="상세주소를 입력해주세요"
             value={addressDetail}
             onChangeText={handleAddressDetailChange}
@@ -221,22 +365,22 @@ const CallFormPage = () => {
         </View>
 
         {/* 연락처 입력 */}
-        <View style={styles.bottomSection}>
-          <Typo style={styles.label}>가족 연락처 (선택)</Typo>
+        <View style={dynamicStyles.bottomSection}>
+          <Typo style={dynamicStyles.label}>가족 연락처 (선택)</Typo>
           <Input
             input={familyPhone}
             placeholder="가족 연락처를 입력해주세요."
             type="number"
           />
 
-          <Typo style={styles.label}>상조 팀장 연락처 (필수)</Typo>
+          <Typo style={dynamicStyles.label}>상조 팀장 연락처 (필수)</Typo>
           <Input
             input={managerPhone}
             placeholder="상조 팀장 연락처를 입력해주세요."
             type="number"
           />
 
-          <Typo style={styles.label}>비상 연락처 (선택)</Typo>
+          <Typo style={dynamicStyles.label}>비상 연락처 (선택)</Typo>
           <Input
             input={emergencyPhone}
             placeholder="비상 연락처를 입력해주세요."
@@ -246,18 +390,18 @@ const CallFormPage = () => {
       </ScrollView>
 
       {/* 고정된 버튼 영역 */}
-      <View style={styles.fixedBottomContainer}>
+      <View style={dynamicStyles.fixedBottomContainer}>
         <TouchableOpacity 
           style={[
-            styles.nextButton,
-            (!isFormValid || loading) && styles.disabledButton
+            dynamicStyles.nextButton,
+            (!isFormValid || loading) && dynamicStyles.disabledButton
           ]} 
           onPress={showConfirmDialog}
           disabled={!isFormValid || loading}
         >
           <Typo style={[
-            styles.nextButtonText,
-            (!isFormValid || loading) && styles.disabledButtonText
+            dynamicStyles.nextButtonText,
+            (!isFormValid || loading) && dynamicStyles.disabledButtonText
           ]}>
             {loading ? '신청 중...' : 
              !isFormValid ? '필수 정보를 입력해주세요' : 
@@ -280,104 +424,3 @@ const CallFormPage = () => {
 };
 
 export default CallFormPage;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-  },
-  section: {
-    flexDirection: 'column',
-    gap: 8,
-  },
-  addressContainer: {
-    flexDirection: 'column',
-  },
-  bottomSection: {
-    flexDirection: 'column',
-    gap: 8,
-    marginBottom: 24,
-  },
-  fixedBottomContainer: {
-    backgroundColor: 'white',
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-  },
-  nextButton: {
-    backgroundColor: '#2D81F1',
-    paddingVertical: 18,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  nextButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  disabledButton: {
-    backgroundColor: '#D1D5DB',
-  },
-  disabledButtonText: {
-    color: '#9CA3AF',
-  },
-  
-  // 기존 스타일들...
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    fontFamily: 'Pretendard-Bold',
-    marginLeft: 10,
-    marginBottom: 16,
-    marginTop: 16,
-  },
-  addressRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  addressBox: {
-    flex: 1,
-    paddingVertical: 18,
-    paddingHorizontal: 20,
-    backgroundColor: '#F5F6F8',
-    borderRadius: 8,
-    justifyContent: 'center',
-  },
-  addressText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: 'rgba(175, 179, 187, 0.5)',
-    fontFamily: 'Pretendard-Black',
-  },
-  addressDetailInput: {
-    paddingVertical: 18,
-    paddingHorizontal: 20,
-    backgroundColor: '#F5F6F8',
-    borderRadius: 8,
-    fontSize: 16,
-    fontFamily: 'Pretendard-Regular',
-    marginBottom: 24,
-  },
-  searchButton: {
-    marginLeft: 8,
-    backgroundColor: '#8990A0',
-    borderRadius: 10,
-    paddingVertical: 18,
-    paddingHorizontal: 24,
-  },
-  searchButtonText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#fff',
-    fontFamily: 'Pretendard-Black',
-  },
-});

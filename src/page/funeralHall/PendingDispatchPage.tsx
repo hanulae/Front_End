@@ -120,9 +120,9 @@ const PendingDispatchPage = () => {
       // 출동 상세정보를 가져와서 managerFormBidId 얻기
       const detailData = await fetchDispatchDetail(dispatchRequestId);
       
-      if (detailData && detailData.managerFormBidId) {
+      if (detailData && detailData.dispatchRequest.managerFormBidId) {
         navigation.navigate('QuoteProposal', {
-          id: detailData.managerFormBidId,
+          id: detailData.dispatchRequest.managerFormBidId,
           status: 'bid_submitted', // 조회 모드로 강제 설정
         });
       } else {

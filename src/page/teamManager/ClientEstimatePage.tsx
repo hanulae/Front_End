@@ -77,9 +77,15 @@ const ClientEstimatePage = () => {
 
   // 견적서 상세 보기
   const goToEstimateDetail = () => {
+    // bid_selected 상태가 있는지 체크
+    const hasBidSelected = userManagerFormList.some(
+      item => item.bidStatus === 'bid_selected'
+    );
+
     navigation.navigate('EstimateDetail', {
       managerFormBidId: selectedId,
       funeralName: selectedFuneralName,
+      hasBidSelected: hasBidSelected,
     });
   };
 
@@ -188,7 +194,7 @@ const ClientEstimatePage = () => {
                 selected={item.managerFormBidId === selectedId}
                 name={item.funeralName}
                 address={item.funeralAddress}
-                completed={!canSelect}
+                _completed={!canSelect}
                 selectable={canSelect}
                 status={getStatusText(item.bidStatus)}
                 managerFormId={managerFormId}

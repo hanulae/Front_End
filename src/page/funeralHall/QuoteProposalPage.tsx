@@ -61,10 +61,18 @@ const QuoteProposalPage = () => {
         await fetchHallList();
       } else {
         // pending이 아닌 상태: 입찰 조회 모드 - 입찰 상세 내용 로드
-        const bidDetailResult = await fetchManagerFormBidDetail(id);
-        if (bidDetailResult) {
-          setBidDetail(bidDetailResult);
-          // 조회모드에서는 bidDetail에서 직접 호실 정보를 가져오므로 hallList 조회 불필요
+        try {
+          const bidDetailResult = await fetchManagerFormBidDetail(id);
+          if (bidDetailResult) {
+            setBidDetail(bidDetailResult);
+          } else {
+            // bidDetail이 없는 경우 (expired 등의 상태에서 발생 가능)
+            console.warn('입찰 상세 정보를 찾을 수 없습니다.');
+          }
+        } catch (bidDetailError) {
+          console.error('입찰 상세 정보 로드 실패:', bidDetailError);
+          // 입찰 상세 정보 로드에 실패해도 페이지는 표시하되, 기본값으로 설정
+          setBidDetail(null);
         }
       }
     } catch (err) {
@@ -92,22 +100,27 @@ const QuoteProposalPage = () => {
           }
         }
       } else {
-        // 조회모드: bidDetail에서 직접 호실 정보 생성
+        // 조회모드: bidDetail에서 직접 호실 정보 생성 (null 체크 추가)
         const roomFromBidDetail: FuneralHallInfo = {
           funeralHallId: bidDetail.funeralHallId || '',
-          funeralHallName: bidDetail.funeralHallName,
-          funeralHallSize: bidDetail.funeralHallSize,
-          funeralHallNumberOfMourners: bidDetail.funeralHallNumberOfMourners,
-          funeralHallDetailPrice: bidDetail.funeralHallDetailPrice,
-          funeralHallPrice: bidDetail.funeralHallPrice,
+          funeralHallName: bidDetail.funeralHallName || '정보 없음',
+          funeralHallSize: bidDetail.funeralHallSize || 0,
+          funeralHallNumberOfMourners: bidDetail.funeralHallNumberOfMourners || 0,
+          funeralHallDetailPrice: bidDetail.funeralHallDetailPrice || 0,
+          funeralHallPrice: bidDetail.funeralHallPrice || 0,
           funeralHallStatus: 'available' as const,
           version: 1,
         };
         setSelectedRoom(roomFromBidDetail);
       }
       
-      // 제안가 설정
-      setProposalPrice(bidDetail.proponentMoney.toString());
+      // 제안가 설정 (null 체크 추가)
+      const proposalMoney = bidDetail.proponentMoney;
+      if (proposalMoney !== null && proposalMoney !== undefined) {
+        setProposalPrice(proposalMoney.toString());
+      } else {
+        setProposalPrice('0');
+      }
     }
   }, [bidDetail, hallList, status]);
 
@@ -289,7 +302,7 @@ const QuoteProposalPage = () => {
           )}
 
           {/* 입찰 상세 정보 (조회 모드에서만 표시) */}
-          {!isWriteMode && bidDetail && (
+          {!isWriteMode && (
             <View style={styles.bidDetailContainer}>
               <Typo style={styles.sectionTitle}>입찰 정보</Typo>
               
@@ -298,24 +311,32 @@ const QuoteProposalPage = () => {
                 <Typo style={styles.infoValue}>{getStatusText(status)}</Typo>
               </View>
               
-              {bidDetail.bidSubmittedAt && (
+              {bidDetail ? (
+                <>
+                  {bidDetail.bidSubmittedAt && (
+                    <View style={styles.infoRow}>
+                      <Typo style={styles.infoLabel}>입찰 제출일:</Typo>
+                      <Typo style={styles.infoValue}>{formatDate(bidDetail.bidSubmittedAt)}</Typo>
+                    </View>
+                  )}
+                  
+                  {bidDetail.bidSelectedAt && (
+                    <View style={styles.infoRow}>
+                      <Typo style={styles.infoLabel}>입찰 성공일:</Typo>
+                      <Typo style={styles.infoValue}>{formatDate(bidDetail.bidSelectedAt)}</Typo>
+                    </View>
+                  )}
+                  
+                  {bidDetail.transactionCompletedAt && (
+                    <View style={styles.infoRow}>
+                      <Typo style={styles.infoLabel}>거래 완료일:</Typo>
+                      <Typo style={styles.infoValue}>{formatDate(bidDetail.transactionCompletedAt)}</Typo>
+                    </View>
+                  )}
+                </>
+              ) : (
                 <View style={styles.infoRow}>
-                  <Typo style={styles.infoLabel}>입찰 제출일:</Typo>
-                  <Typo style={styles.infoValue}>{formatDate(bidDetail.bidSubmittedAt)}</Typo>
-                </View>
-              )}
-              
-              {bidDetail.bidSelectedAt && (
-                <View style={styles.infoRow}>
-                  <Typo style={styles.infoLabel}>입찰 성공일:</Typo>
-                  <Typo style={styles.infoValue}>{formatDate(bidDetail.bidSelectedAt)}</Typo>
-                </View>
-              )}
-              
-              {bidDetail.transactionCompletedAt && (
-                <View style={styles.infoRow}>
-                  <Typo style={styles.infoLabel}>거래 완료일:</Typo>
-                  <Typo style={styles.infoValue}>{formatDate(bidDetail.transactionCompletedAt)}</Typo>
+                  <Typo style={styles.infoLabel}>입찰 상세 정보를 불러올 수 없습니다.</Typo>
                 </View>
               )}
             </View>
@@ -327,7 +348,19 @@ const QuoteProposalPage = () => {
               {isWriteMode ? "입찰 제안서" : "제출한 입찰 내용"}
             </Typo>
             
-            <View style={styles.inputContainer}>
+            {/* 조회 모드에서 bidDetail이 없는 경우 메시지 표시 */}
+            {!isWriteMode && !bidDetail && (
+              <View style={styles.noDataContainer}>
+                <Typo style={styles.noDataText}>
+                  {status === 'expired' ? '입찰 기간이 만료되어 입찰 정보가 없습니다.' : '입찰 정보를 불러올 수 없습니다.'}
+                </Typo>
+              </View>
+            )}
+            
+            {/* 입찰 정보가 있거나 작성 모드인 경우에만 표시 */}
+            {(isWriteMode || bidDetail) && (
+              <>
+                <View style={styles.inputContainer}>
               <Typo style={styles.titleText}>호실 선택</Typo>
               <CustomButton
                 onPress={() => {
@@ -429,6 +462,8 @@ const QuoteProposalPage = () => {
                 <Typo style={styles.inputValueText}>%</Typo>
               </View>
             </View>
+              </>
+            )}
           </View>
 
           {/* 입찰 작성 모드에서만 입찰 버튼 표시 */}
@@ -619,5 +654,19 @@ const styles = StyleSheet.create({
   buttonTextDisabled: {
     color: '#FFFFFF',
     opacity: 0.7,
+  },
+  noDataContainer: {
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F8F9FA',
+    borderRadius: 8,
+    margin: 10,
+  },
+  noDataText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    fontFamily: 'Pretendard-Regular',
   },
 });

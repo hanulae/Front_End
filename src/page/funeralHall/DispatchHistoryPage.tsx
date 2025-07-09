@@ -60,10 +60,10 @@ const DispatchHistoryPage = () => {
       // 출동 상세정보를 가져와서 managerFormBidId 얻기
       const detailData = await fetchDispatchDetail(dispatchRequestId);
       
-      if (detailData && detailData.managerFormBidId) {
+      if (detailData && detailData.dispatchRequest.managerFormBidId) {
         // QuoteProposalPage로 네비게이트 (완료된 출동이므로 status는 transaction_completed)
         navigation.navigate('QuoteProposal', {
-          id: detailData.managerFormBidId,
+          id: detailData.dispatchRequest.managerFormBidId,
           status: 'transaction_completed',
         });
       } else {
