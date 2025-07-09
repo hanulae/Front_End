@@ -243,7 +243,7 @@ const EstimateHistoryPage = () => {
         {estimateList.map((item, index) => (
           <QuoteCard
             key={item.managerFormBidId || index}
-            name={`견적 신청서 ${index + 1}`} // 임시로 순번 표시
+            name={`${item.managerForm.chiefMournerName} 상주님`} // 임시로 순번 표시
             date={formatDate(item.managerFormCreatedAt)}
             status={getStatusText(item.bidStatus)}
             requestedAt={formatDateTime(item.managerFormCreatedAt)}

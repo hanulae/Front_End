@@ -5,6 +5,7 @@ import {
   StyleSheet,
   View,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import DefaultLayout from '../../layout/DefaultLayout';
 import {
@@ -23,6 +24,26 @@ const EstimateListPage = () => {
   const navigation = useNavigation<NavigationProp<any>>();
 
   const [managerFormList, setManagerFormList] = useState<ManagerFormList[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // ✅ 견적 내역 로드 함수
+  const loadManagerFormList = useCallback(async () => {
+    try {
+      const result = await getManagerFormList();
+      if (result) {
+        setManagerFormList(result);
+      }
+    } catch (error) {
+      console.error('견적 내역 로드 실패:', error);
+    }
+  }, [getManagerFormList]);
+
+  // ✅ 풀 투 리프레시 함수
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadManagerFormList();
+    setRefreshing(false);
+  }, [loadManagerFormList]);
 
   // ✅ 페이지 포커스 시 데이터 로드
   useFocusEffect(
@@ -40,20 +61,8 @@ const EstimateListPage = () => {
       return () => {
         // 화면 포커스 해제 시 필요하다면 초기화 작업
       };
-    }, []),
+    }, [loadManagerFormList]),
   );
-
-  // ✅ 견적 내역 로드 함수
-  const loadManagerFormList = async () => {
-    try {
-      const result = await getManagerFormList();
-      if (result) {
-        setManagerFormList(result);
-      }
-    } catch (error) {
-      console.error('견적 내역 로드 실패:', error);
-    }
-  };
 
   //날짜 포맷팅 함수
   const formatDate = (dateString: string) => {
@@ -139,7 +148,18 @@ const EstimateListPage = () => {
       homeButton={true}
       homeRouteName="ManagerMain"
       logoutButton={false}>
-      <ScrollView contentContainerStyle={styles.wrapper}>
+      <ScrollView
+        contentContainerStyle={styles.wrapper}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#3287F8']} // Android 색상
+            tintColor="#3287F8" // iOS 색상
+            title="새로고침 중..." // iOS 텍스트
+            titleColor="#3287F8" // iOS 텍스트 색상
+          />
+        }>
         {managerFormList.length === 0 ? (
           // ✅ 빈 상태
           <View style={styles.centerContainer}>

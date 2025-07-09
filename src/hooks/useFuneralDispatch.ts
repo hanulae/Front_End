@@ -45,14 +45,33 @@ export const useFuneralDispatch = () => {
     setError(null);
 
     try {
+      // 1. 출동 신청 내역 상세 조회
       const response = await funeralDispatchService.getDispatchDetail(
         dispatchRequestId,
       );
-      const detailData = response.data || null;
 
-      setDispatchDetail(detailData);
-      console.log('출동 요청 상세 조회 성공 In hook: ', detailData);
-      return detailData;
+      // 2. 거래 흐름 상태 조회
+      const transactionStatus =
+        await funeralDispatchService.getFuneralDispatchTransactionStatus(
+          dispatchRequestId,
+        );
+
+      if (response.success && transactionStatus !== null) {
+        return {
+          dispatchRequest: response.data,
+          transactionStatus: transactionStatus,
+        };
+      } else if (transactionStatus === null) {
+        return {
+          dispatchRequest: response.data,
+          transactionStatus: null,
+        };
+      } else {
+        setError(
+          response.message || '출동 신청 내역 상세 조회에 실패했습니다.',
+        );
+        return false;
+      }
     } catch (err: any) {
       setError(err.message);
       console.error('출동 요청 상세 조회 에러 In hook: ', err.message);

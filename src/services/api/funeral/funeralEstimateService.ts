@@ -14,6 +14,7 @@ export interface EstimateListItem {
     | 'transaction_completed'
     | 'rejected'
     | 'expired';
+  chiefMournerName: string;
 }
 
 // 견적 내역 리스트 응답 타입 (장례식장용)
@@ -114,6 +115,7 @@ export const funeralEstimateService = {
   getEstimateList: async (): Promise<GetEstimateListResponse> => {
     try {
       const response = await api.get('/funeral/form/list');
+      console.log('견적 내역 리스트 조회 성공:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('견적 내역 리스트 조회 에러:', error.message);
