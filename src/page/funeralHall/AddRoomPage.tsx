@@ -226,9 +226,10 @@ const AddRoomPage = () => {
       color="white"
       headerShown={true}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'height' : 'height'}
-        keyboardVerticalOffset={0}
-        style={{flex: 1}}>
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
+        style={{ flex: 1 }}
+      >
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
