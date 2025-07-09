@@ -21,11 +21,12 @@ import notificationService from './src/services/notificationService';
 import notifee from '@notifee/react-native';
 import {getNavigationTarget} from './src/services/api/notificationService';
 import {getUserInfo} from './src/utils/tokenStorage';
+import {navigationRef} from './src/util/navigationRef';
 
 const queryClient = new QueryClient();
 
 // 네비게이션 참조 생성
-const navigationRef = createNavigationContainerRef();
+// const navigationRef = createNavigationContainerRef();
 
 function App(): React.JSX.Element {
   // const userInfo = useAtomValue(userInfoAtom);
@@ -166,25 +167,7 @@ function App(): React.JSX.Element {
       try {
         // 알림 서비스 초기화
         await notificationService.initialize();
-
-        // 네비게이션이 준비된 후에 이벤트 리스너 설정
-        const setupListeners = () => {
-          console.log(
-            '네비게이션 준비 상태 확인:',
-            navigationRef.current?.isReady(),
-          );
-          console.log('네비게이션 참조 존재:', !!navigationRef.current);
-
-          if (navigationRef.current?.isReady()) {
-            notificationService.setupNotificationListeners(navigationRef);
-            console.log('알림 서비스 초기화 완료');
-          } else {
-            // 네비게이션이 준비되지 않았으면 준비될 때까지 대기
-            setTimeout(setupListeners, 200);
-          }
-        };
-
-        setupListeners();
+        console.log('알림 서비스 초기화 완료');
       } catch (error) {
         console.error('알림 서비스 초기화 실패:', error);
       }
@@ -221,7 +204,12 @@ function App(): React.JSX.Element {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-        <NavigationContainer ref={navigationRef}>
+        <NavigationContainer
+          ref={navigationRef}
+          onReady={() => {
+            console.log('✅ NavigationContainer is ready');
+            notificationService.setupNotificationListeners(); // 이제 navRef 인자 필요 없음
+          }}>
           <RootStack isLogin={isLogin} userType={userType} />
         </NavigationContainer>
       </QueryClientProvider>

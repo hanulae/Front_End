@@ -4,6 +4,8 @@ import {Platform} from 'react-native';
 import DeviceInfo from 'react-native-device-info';
 import api from '../api/config';
 import {getNavigationTarget} from './api/notificationService';
+// Navigation types removed as they're not used directly here
+import {navigationRef} from '../util/navigationRef';
 
 export interface NotificationData {
   title: string;
@@ -13,7 +15,7 @@ export interface NotificationData {
 
 // 전역 상태 - 단순하게 관리
 let fcmToken: string | null = null;
-let navigationRef: any = null;
+// let navigationRef: any = null;
 let isInitialized = false;
 
 // 전역 중복 처리 방지
@@ -340,19 +342,17 @@ const setupBackgroundHandler = (): void => {
 /**
  * 알림 이벤트 리스너 설정
  */
-export const setupNotificationListeners = (navRef: any): void => {
-  // 네비게이션 참조 저장
-  navigationRef = navRef;
-  console.log('네비게이션 참조 저장됨:', !!navigationRef);
-  console.log('네비게이션 참조 current:', !!navigationRef?.current);
-  console.log('네비게이션 준비 상태:', navigationRef?.current?.isReady());
-
+export const setupNotificationListeners = (): void => {
   console.log('=== 알림 이벤트 리스너 설정 시작 ===');
+  console.log('네비게이션 참조 존재:', !!navigationRef);
+  console.log('네비게이션 current 존재:', !!navigationRef?.current);
+  console.log('네비게이션 준비 상태:', navigationRef?.current?.isReady());
 
   // 포그라운드 이벤트 리스너
   notifee.onForegroundEvent(({type, detail}) => {
     if (type === EventType.PRESS) {
       console.log('=== 포그라운드 알림 터치 ===');
+      console.log('알림 데이터:', detail.notification);
       handleNotificationPress(detail.notification);
     }
   });
@@ -361,6 +361,7 @@ export const setupNotificationListeners = (navRef: any): void => {
   notifee.onBackgroundEvent(async ({type, detail}) => {
     if (type === EventType.PRESS) {
       console.log('=== 백그라운드 알림 터치 ===');
+      console.log('알림 데이터:', detail.notification);
       handleNotificationPress(detail.notification);
     }
   });
@@ -421,6 +422,9 @@ const handleNotificationPress = async (notification: any): Promise<void> => {
     const notificationType = notification?.data?.notificationType;
     const notificationData = notification?.data;
 
+    console.log('알림 타입:', notificationType);
+    console.log('알림 데이터:', notificationData);
+
     if (notificationType && notificationData) {
       console.log('네비게이션 타겟 확인 시작');
       const navigationTarget = getNavigationTarget(
@@ -430,13 +434,15 @@ const handleNotificationPress = async (notification: any): Promise<void> => {
       console.log('네비게이션 타겟:', navigationTarget);
 
       if (navigationTarget) {
-        // 네비게이션 실행
+        // 네비게이션 실행 - 포그라운드에서는 즉시 실행
+        console.log('네비게이션 실행 시작');
         await executeNavigation(navigationTarget);
       } else {
         console.log('네비게이션 타겟이 없습니다.');
       }
     } else {
       console.log('알림 타입 또는 데이터가 없습니다.');
+      console.log('사용 가능한 데이터:', Object.keys(notification?.data || {}));
     }
 
     console.log('=== 알림 클릭 처리 완료 ===');
@@ -456,30 +462,48 @@ const executeNavigation = async (navigationTarget: any): Promise<void> => {
     console.log('네비게이션 실행 시작');
     console.log('대상 화면:', navigationTarget.screen);
     console.log('대상 파라미터:', navigationTarget.params);
+    console.log('네비게이션 참조 존재:', !!navigationRef);
+    console.log('네비게이션 current 존재:', !!navigationRef?.current);
 
     // 네비게이션이 준비될 때까지 대기
     let attempts = 0;
-    const maxAttempts = 30; // 15초 대기
+    const maxAttempts = 60; // 30초 대기
+    const waitTime = 500; // 0.5초씩 대기
 
     while (attempts < maxAttempts) {
       attempts++;
       console.log(`네비게이션 준비 확인 ${attempts}/${maxAttempts}`);
 
-      if (navigationRef?.current?.isReady()) {
+      // 네비게이션 참조와 current 상태 확인
+      if (
+        navigationRef &&
+        navigationRef.current &&
+        navigationRef.current.isReady()
+      ) {
         console.log('네비게이션이 준비되었습니다.');
 
-        // 네비게이션 실행
-        (navigationRef.current as any).navigate(
-          navigationTarget.screen,
-          navigationTarget.params,
-        );
+        // 짧은 지연 후 네비게이션 실행 (React Native 렌더링 완료 대기)
+        setTimeout(() => {
+          try {
+            if (navigationRef.current && navigationRef.current.isReady()) {
+              navigationRef.current.navigate(
+                navigationTarget.screen,
+                navigationTarget.params,
+              );
+              console.log('네비게이션 실행 완료:', navigationTarget.screen);
+            } else {
+              console.log('네비게이션 실행 시점에 준비되지 않음');
+            }
+          } catch (navError) {
+            console.error('네비게이션 실행 중 오류:', navError);
+          }
+        }, 100);
 
-        console.log('네비게이션 실행 완료:', navigationTarget.screen);
         return;
       }
 
       // 0.5초 대기
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, waitTime));
     }
 
     console.log('네비게이션 준비 시간 초과');

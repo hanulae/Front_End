@@ -27,6 +27,17 @@ export const getNavigationTarget = (notificationType: string, data: any) => {
           managerFormId: data.managerFormId,
         },
       };
+    case 'dispatch_requested':
+      return {
+        screen: 'PendingDispatch',
+      };
+    case 'transaction_completed_requested':
+      return {
+        screen: 'ConfirmTransaction',
+        params: {
+          dispatchRequestId: data.dispatchRequestId,
+        },
+      };
     // 상조팀장
     case 'bid_submitted':
       return {
@@ -35,16 +46,11 @@ export const getNavigationTarget = (notificationType: string, data: any) => {
           managerFormId: data.managerFormId,
         },
       };
-    // 장례식장
-    case 'dispatch_requested':
-      return {
-        screen: 'PendingDispatch',
-      };
-    // 상조팀장
     case 'dispatch_approved':
       return {
         screen: 'CallHistory',
       };
+
     default:
       return null;
   }
