@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import {
   Alert,
   Animated,
@@ -9,6 +9,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from 'react-native';
 import {
   requestCameraPermission,
@@ -25,7 +26,9 @@ interface IAlbumBottomSheetProps {
 }
 
 const MAX_IMAGE_COUNT = 10;
+const PHOTOS_PER_PAGE = 20; // 한 번에 로드할 사진 개수
 const {height} = Dimensions.get('window');
+
 const AlbumBottomSheet = ({
   visible,
   onClose,
@@ -33,23 +36,53 @@ const AlbumBottomSheet = ({
 }: IAlbumBottomSheetProps) => {
   const [albumPhotos, setAlbumPhotos] = useState<{uri: string}[]>([]);
   const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set());
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasNextPage, setHasNextPage] = useState(true);
+  const [endCursor, setEndCursor] = useState<string | undefined>(undefined);
 
   const translateY = useRef(new Animated.Value(300)).current;
   console.log('AlbumBottomSheet', visible);
-  const fetchPhotos = async () => {
-    const hasPermission = await requestPhotoLibraryPermission();
-    if (!hasPermission) {
-      Alert.alert('사진 접근 권한이 거부되었습니다.');
-      return;
-    }
-
-    const photos = await CameraRoll.getPhotos({first: 50, assetType: 'Photos'});
-    setAlbumPhotos(photos.edges.map(edge => ({uri: edge.node.image.uri})));
-  };
 
   useEffect(() => {
     if (visible) {
-      fetchPhotos();
+      // 초기화
+      setAlbumPhotos([]);
+      setSelectedPhotos(new Set());
+      setHasNextPage(true);
+      setEndCursor(undefined);
+
+      // 초기 로딩을 위한 직접 호출
+      const loadInitialPhotos = async () => {
+        const hasPermission = await requestPhotoLibraryPermission();
+        if (!hasPermission) {
+          Alert.alert('사진 접근 권한이 거부되었습니다.');
+          return;
+        }
+
+        setIsLoading(true);
+        try {
+          const photos = await CameraRoll.getPhotos({
+            first: PHOTOS_PER_PAGE,
+            assetType: 'Photos',
+          });
+
+          const newPhotos = photos.edges.map(edge => ({
+            uri: edge.node.image.uri,
+          }));
+
+          setAlbumPhotos(newPhotos);
+          setHasNextPage(photos.page_info.has_next_page);
+          setEndCursor(photos.page_info.end_cursor);
+        } catch (error) {
+          console.error('사진을 불러오는 중 오류가 발생했습니다:', error);
+          Alert.alert('사진을 불러오는 중 오류가 발생했습니다.');
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      loadInitialPhotos();
+
       Animated.timing(translateY, {
         toValue: 1,
         duration: 200,
@@ -59,7 +92,7 @@ const AlbumBottomSheet = ({
       translateY.setValue(0);
       setSelectedPhotos(new Set());
     }
-  }, [visible]);
+  }, [visible, translateY]);
 
   const toggleSelect = (uri: string) => {
     setSelectedPhotos(prev => {
@@ -98,6 +131,38 @@ const AlbumBottomSheet = ({
     });
   };
 
+  const handleLoadMore = useCallback(async () => {
+    if (!hasNextPage || isLoading) return;
+
+    const hasPermission = await requestPhotoLibraryPermission();
+    if (!hasPermission) {
+      Alert.alert('사진 접근 권한이 거부되었습니다.');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const photos = await CameraRoll.getPhotos({
+        first: PHOTOS_PER_PAGE,
+        assetType: 'Photos',
+        after: endCursor,
+      });
+
+      const newPhotos = photos.edges.map(edge => ({
+        uri: edge.node.image.uri,
+      }));
+
+      setAlbumPhotos(prev => [...prev, ...newPhotos]);
+      setHasNextPage(photos.page_info.has_next_page);
+      setEndCursor(photos.page_info.end_cursor);
+    } catch (error) {
+      console.error('사진을 불러오는 중 오류가 발생했습니다:', error);
+      Alert.alert('사진을 불러오는 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [hasNextPage, isLoading, endCursor]);
+
   const renderItem = ({item, index}: {item: {uri: string}; index: number}) => {
     if (index === 0) {
       return (
@@ -114,6 +179,16 @@ const AlbumBottomSheet = ({
         style={[styles.photoBox, isSelected && styles.selected]}>
         <Image source={{uri: item.uri}} style={styles.image} />
       </TouchableOpacity>
+    );
+  };
+
+  const renderFooter = () => {
+    if (!isLoading) return null;
+    return (
+      <View style={styles.footerLoader}>
+        <ActivityIndicator size="small" color="#3287F8" />
+        <Typo style={styles.loadingText}>사진을 불러오는 중...</Typo>
+      </View>
     );
   };
 
@@ -136,6 +211,9 @@ const AlbumBottomSheet = ({
             numColumns={3}
             keyExtractor={(item, index) => index.toString()}
             contentContainerStyle={styles.grid}
+            onEndReached={handleLoadMore}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={renderFooter}
           />
 
           <TouchableOpacity onPress={handleDone} style={styles.doneButton}>
@@ -202,5 +280,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#3287F8',
     alignItems: 'center',
     borderRadius: 8,
+  },
+  footerLoader: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  loadingText: {
+    marginLeft: 8,
+    fontSize: 14,
+    color: '#666',
   },
 });
