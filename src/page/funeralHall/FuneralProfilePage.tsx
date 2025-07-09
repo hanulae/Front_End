@@ -63,7 +63,7 @@ const FuneralProfilePage = () => {
   const [showPhoneAuthSheet, setShowPhoneAuthSheet] = useState(false);
   const [isStaff, setIsStaff] = useAtom(isStaffAtom);
   const [permissions, setPermissions] = useState<IPermissions | null>(null);
-
+  const [funeralName, setFuneralName] = useState('');
   const setLogin = useSetAtom(userInfoAtom);
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
 
@@ -75,6 +75,7 @@ const FuneralProfilePage = () => {
         if (userInfo && userInfo.data) {
           setIsStaff(userInfo.data.isStaff || false);
           setPermissions(userInfo.data.permissions || null);
+          setFuneralName(userInfo.data.funeralName || '');
         }
       } catch (error) {
         console.error('사용자 정보 로드 실패:', error);
@@ -247,7 +248,7 @@ const FuneralProfilePage = () => {
           />
           <View style={styles.container}>
             <Pressable onPress={goToPointHistory}>
-              <ProfileStat point={100000} cash={50000} hallName="김상조" />
+              <ProfileStat point={100000} cash={50000} hallName={funeralName} />
             </Pressable>
           </View>
         </View>

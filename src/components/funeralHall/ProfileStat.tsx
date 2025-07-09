@@ -110,7 +110,7 @@ const ProfileStat = ({point, cash, hallName}: IProfileStatProps) => {
       <Hello />
       <View style={styles.nameContainer}>
         <Typo style={styles.nameText}>{hallName}</Typo>
-        <Typo style={styles.roleText}>장례식장님</Typo>
+        {/* <Typo style={styles.roleText}>장례식장님</Typo> */}
       </View>
 
       <View style={styles.pointContainer}>
@@ -150,23 +150,24 @@ const styles = StyleSheet.create({
     // padding: 8,
   },
   nameContainer: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'baseline',
-    marginLeft: 16,
+    // marginLeft: 16,
   },
   nameText: {
     fontSize: 34,
     fontWeight: '700',
     color: '#FFFFFF',
-    marginTop: 13,
-    marginBottom: 18,
+    // marginTop: 13,
+    marginBottom: 30,
     marginLeft: 16,
   },
   roleText: {
     fontSize: 20,
     fontWeight: '400',
     color: '#FFFFFF',
-    marginLeft: 4,
+    marginLeft: 18,
+    marginBottom: 12,
   },
   flexRow: {
     flexDirection: 'row',
