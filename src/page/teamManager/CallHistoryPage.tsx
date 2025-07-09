@@ -12,8 +12,8 @@ import DefaultLayout from '../../layout/DefaultLayout';
 import {useCallback, useEffect, useState} from 'react';
 import Typo from '../../components/common/Typo';
 import ManagerLayout from '../../layout/ManagerLayout';
-import { useManagerDispatchRequest } from '../../hooks/useManagerDispatchRequest';
-import { ActivityIndicator } from 'react-native';
+import {useManagerDispatchRequest} from '../../hooks/useManagerDispatchRequest';
+import {ActivityIndicator} from 'react-native';
 
 interface ICallHistoryPageProps {
   navigation: NavigationProp<any>;
@@ -21,7 +21,8 @@ interface ICallHistoryPageProps {
 
 const CallHistoryPage = ({navigation}: ICallHistoryPageProps) => {
   const [selectedTab, setSelectedTab] = useState<'진행중' | '완료'>('진행중');
-  const { loading, error, getManagerDispatchRequestList } = useManagerDispatchRequest();
+  const {loading, error, getManagerDispatchRequestList} =
+    useManagerDispatchRequest();
   const [dispatchList, setDispatchList] = useState<any[]>([]);
   const [filteredList, setFilteredList] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -33,7 +34,9 @@ const CallHistoryPage = ({navigation}: ICallHistoryPageProps) => {
       if (result && result.data) {
         const formattedData = result.data.map((item: any) => {
           // 완료 상태 정의: completed, rejected, cancelled
-          const isCompleted = ['completed', 'rejected', 'cancelled'].includes(item.isApproved);
+          const isCompleted = ['completed', 'rejected', 'cancelled'].includes(
+            item.isApproved,
+          );
 
           return {
             id: item.dispatchRequestId,
@@ -117,12 +120,18 @@ const CallHistoryPage = ({navigation}: ICallHistoryPageProps) => {
   // 상태별 태그 텍스트 반환 함수
   const getStatusText = (isApproved: string) => {
     switch (isApproved) {
-      case 'pending': return '출동 대기';
-      case 'approved': return '출동 승인';
-      case 'completed': return '거래 완료';
-      case 'rejected': return '출동 거부';
-      case 'cancelled': return '출동 취소';
-      default: return '출동 신청';
+      case 'pending':
+        return '출동 대기';
+      case 'approved':
+        return '출동 승인';
+      case 'completed':
+        return '거래 완료';
+      case 'rejected':
+        return '출동 거부';
+      case 'cancelled':
+        return '출동 취소';
+      default:
+        return '출동 신청';
     }
   };
 
@@ -132,32 +141,32 @@ const CallHistoryPage = ({navigation}: ICallHistoryPageProps) => {
       case 'pending':
         return {
           container: [styles.tag, styles.pendingTag],
-          text: [styles.tagText, styles.pendingTagText]
+          text: [styles.tagText, styles.pendingTagText],
         };
       case 'approved':
         return {
           container: [styles.tag, styles.approvedTag],
-          text: [styles.tagText, styles.approvedTagText]
+          text: [styles.tagText, styles.approvedTagText],
         };
       case 'completed':
         return {
           container: [styles.tag, styles.completedTag],
-          text: [styles.tagText, styles.completedTagText]
+          text: [styles.tagText, styles.completedTagText],
         };
       case 'rejected':
         return {
           container: [styles.tag, styles.rejectedTag],
-          text: [styles.tagText, styles.rejectedTagText]
+          text: [styles.tagText, styles.rejectedTagText],
         };
       case 'cancelled':
         return {
           container: [styles.tag, styles.cancelledTag],
-          text: [styles.tagText, styles.cancelledTagText]
+          text: [styles.tagText, styles.cancelledTagText],
         };
       default:
         return {
           container: [styles.tag],
-          text: [styles.tagText]
+          text: [styles.tagText],
         };
     }
   };
@@ -169,7 +178,6 @@ const CallHistoryPage = ({navigation}: ICallHistoryPageProps) => {
       headerTitle="출동 신청 내역"
       homeButton={true}
       homeRouteName="ManagerMain">
-
       {/* 탭 */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
@@ -200,7 +208,7 @@ const CallHistoryPage = ({navigation}: ICallHistoryPageProps) => {
       </View>
 
       {/* 리스트 */}
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={styles.wrapper}
         refreshControl={
           <RefreshControl
@@ -209,23 +217,24 @@ const CallHistoryPage = ({navigation}: ICallHistoryPageProps) => {
             colors={['#2D81F1']} // Android
             tintColor="#2D81F1" // iOS
           />
-        }
-      >
+        }>
         {/* 로딩 상태 */}
         {loading && (
           <View style={styles.centerContainer}>
             <ActivityIndicator size="large" color="#2D81F1" />
-            <Typo style={styles.loadingText}>출동 신청 내역을 불러오는 중...</Typo>
+            <Typo style={styles.loadingText}>
+              출동 신청 내역을 불러오는 중...
+            </Typo>
           </View>
         )}
 
         {/* 에러 상태 */}
         {error && !loading && (
           <View style={styles.centerContainer}>
-            <Typo style={styles.errorText}>
-              {error}
-            </Typo>
-            <TouchableOpacity style={styles.retryButton} onPress={loadDispatchList}>
+            <Typo style={styles.errorText}>{error}</Typo>
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={loadDispatchList}>
               <Typo style={styles.retryButtonText}>다시 시도</Typo>
             </TouchableOpacity>
           </View>
@@ -235,13 +244,16 @@ const CallHistoryPage = ({navigation}: ICallHistoryPageProps) => {
         {!loading && !error && filteredList.length === 0 && (
           <View style={styles.centerContainer}>
             <Typo style={styles.emptyText}>
-              {selectedTab === '진행중' ? '진행 중인' : '완료된'} 출동 신청이 없습니다.
+              {selectedTab === '진행중' ? '진행 중인' : '완료된'} 출동 신청이
+              없습니다.
             </Typo>
           </View>
         )}
 
         {/* 실제 데이터 리스트 */}
-        {!loading && !error && filteredList.length > 0 && 
+        {!loading &&
+          !error &&
+          filteredList.length > 0 &&
           filteredList.map(item => (
             <TouchableOpacity
               key={item.id}
@@ -252,10 +264,8 @@ const CallHistoryPage = ({navigation}: ICallHistoryPageProps) => {
                 <Typo style={styles.clientDesc}>고객님</Typo>
               </View>
               <View style={styles.bottomRow}>
-                <View
-                  style={getStatusTagStyle(item.isApproved).container}>
-                  <Typo
-                    style={getStatusTagStyle(item.isApproved).text}>
+                <View style={getStatusTagStyle(item.isApproved).container}>
+                  <Typo style={getStatusTagStyle(item.isApproved).text}>
                     {getStatusText(item.isApproved)}
                   </Typo>
                 </View>
@@ -273,8 +283,7 @@ const CallHistoryPage = ({navigation}: ICallHistoryPageProps) => {
                 </View>
               </View>
             </TouchableOpacity>
-          ))
-        }
+          ))}
       </ScrollView>
     </ManagerLayout>
   );
@@ -433,14 +442,14 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     fontFamily: 'Pretendard-Regular',
   },
-  pendingTag: { borderColor: '#FFB74D' },
-  pendingTagText: { color: '#F57C00' },
-  approvedTag: { borderColor: '#42A5F5' },
-  approvedTagText: { color: '#1976D2' },
-  completedTag: { borderColor: '#4CAF50' },
-  completedTagText: { color: '#2E7D32' },
-  rejectedTag: { borderColor: '#EF5350' },
-  rejectedTagText: { color: '#D32F2F' },
-  cancelledTag: { borderColor: '#9E9E9E' },
-  cancelledTagText: { color: '#616161' },
+  pendingTag: {borderColor: '#FFB74D'},
+  pendingTagText: {color: '#F57C00'},
+  approvedTag: {borderColor: '#42A5F5'},
+  approvedTagText: {color: '#1976D2'},
+  completedTag: {borderColor: '#4CAF50'},
+  completedTagText: {color: '#2E7D32'},
+  rejectedTag: {borderColor: '#EF5350'},
+  rejectedTagText: {color: '#D32F2F'},
+  cancelledTag: {borderColor: '#9E9E9E'},
+  cancelledTagText: {color: '#616161'},
 });

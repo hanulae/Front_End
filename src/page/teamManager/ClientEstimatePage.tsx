@@ -30,7 +30,7 @@ const ClientEstimatePage = () => {
     UserManagerFormList[]
   >([]);
   const [selectedFuneralName, setSelectedFuneralName] = useState<string>('');
-
+  console.log('managerFormId', managerFormId);
   useFocusEffect(
     useCallback(() => {
       if (Platform.OS === 'android') {

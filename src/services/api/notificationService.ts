@@ -24,31 +24,50 @@ export const getNavigationTarget = (notificationType: string, data: any) => {
       return {
         screen: 'EstimateHistory',
         params: {
-          managerFormId: data.managerFormId,
+          managerFormId: data.data.managerFormId,
         },
       };
     case 'dispatch_requested':
       return {
         screen: 'PendingDispatch',
       };
-    case 'transaction_completed_requested':
-      return {
-        screen: 'ConfirmTransaction',
-        params: {
-          dispatchRequestId: data.dispatchRequestId,
-        },
-      };
+
     // 상조팀장
     case 'bid_submitted':
       return {
         screen: 'ClientEstimate',
         params: {
-          managerFormId: data.managerFormId,
+          managerFormId: data.data.managerFormId,
         },
       };
     case 'dispatch_approved':
       return {
         screen: 'CallHistory',
+      };
+
+    // 공통
+    case 'transaction_completed_requested':
+      if (data.data.requesterType === 'manager') {
+        return {
+          screen: 'ConfirmTransaction',
+          params: {
+            dispatchRequestId: data.data.dispatchRequestId,
+          },
+        };
+      } else {
+        return {
+          screen: 'ProceedCall',
+          params: {
+            callId: data.data.dispatchRequestId,
+          },
+        };
+      }
+    case 'transaction_completed':
+      return {
+        screen: 'PointHistory',
+        params: {
+          variant: data.receiverType,
+        },
       };
 
     default:

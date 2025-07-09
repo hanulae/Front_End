@@ -20,12 +20,18 @@ const ClientDetailPage = () => {
   };
 
   const isDataEmpty = (value: any) => {
-    return value === null || value === undefined || value === '' || value === '' || value === 0;
+    return (
+      value === null ||
+      value === undefined ||
+      value === '' ||
+      value === '' ||
+      value === 0
+    );
   };
 
   const getValueStyle = (value: any) => {
     return isDataEmpty(value) ? styles.emptyValue : styles.value;
-  }
+  };
 
   return (
     <ManagerLayout
@@ -53,7 +59,9 @@ const ClientDetailPage = () => {
               <Typo style={styles.label}>고인이름</Typo>
             </View>
             <Typo style={getValueStyle(data.deceasedName)}>
-              {isDataEmpty(data.deceasedName) ? '작성하지 않음' : data.deceasedName}
+              {isDataEmpty(data.deceasedName)
+                ? '작성하지 않음'
+                : data.deceasedName}
             </Typo>
           </View>
           <View style={styles.listItem}>
@@ -62,7 +70,9 @@ const ClientDetailPage = () => {
               <Typo style={styles.label}>평수</Typo>
             </View>
             <Typo style={getValueStyle(data.roomSize)}>
-              {isDataEmpty(data.roomSize) ? '작성하지 않음' : `${data.roomSize}평`}
+              {isDataEmpty(data.roomSize)
+                ? '작성하지 않음'
+                : `${data.roomSize}평`}
             </Typo>
           </View>
           <View style={styles.listItem}>

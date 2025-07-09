@@ -93,10 +93,7 @@ const NotificationListPage = (_props: NotificationListPageProps) => {
       console.log('수신자 타입:', item.receiverType);
 
       // getNavigationTarget을 기반으로 네비게이션 처리
-      const navigationTarget = getNavigationTarget(
-        item.notificationType,
-        item.data,
-      );
+      const navigationTarget = getNavigationTarget(item.notificationType, item);
       console.log('네비게이션 타겟:', navigationTarget);
 
       // 알림 읽음 처리는 notificationService에서 자동으로 처리되므로 여기서는 제거
