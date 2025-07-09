@@ -17,6 +17,7 @@ import {
   NotificationItem,
 } from '../../services/api/notificationService';
 import NotificationCard from '../../components/common/NotificationCard';
+import api from '../../api/config';
 // import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface NotificationListPageProps {
@@ -86,19 +87,23 @@ const NotificationListPage = (_props: NotificationListPageProps) => {
 
   const handleNotificationPress = async (item: NotificationItem) => {
     try {
+      console.log('item1231231231231', item);
       console.log('알림 클릭 - 타입:', item.notificationType);
       console.log('알림 클릭 - 데이터:', item.data);
       console.log('수신자 타입:', item.receiverType);
 
       // getNavigationTarget을 기반으로 네비게이션 처리
-      const navigationTarget = getNavigationTarget(item.notificationType, item);
+      const navigationTarget = getNavigationTarget(
+        item.notificationType,
+        item.data,
+      );
       console.log('네비게이션 타겟:', navigationTarget);
 
       // 알림 읽음 처리는 notificationService에서 자동으로 처리되므로 여기서는 제거
-      // const response = await api.put(
-      //   `/common/notification/${item.notificationId}/read`,
-      // );
-      // console.log('알림 읽음 처리 결과:', response);
+      const response = await api.put(
+        `/common/notification/${item.notificationId}/read`,
+      );
+      console.log('알림 읽음 처리 결과:', response);
 
       if (navigationTarget) {
         // getNavigationTarget에서 반환된 screen과 params로 직접 네비게이션
