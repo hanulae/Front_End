@@ -124,28 +124,34 @@ const ModifyUserInfoPage = () => {
       return;
     }
     console.log('비밀번호 변경 요청:', newPassword.value);
-    try {
-      // TODO: funeral용 API 엔드포인트로 변경 필요
-      await api.patch('/funeral/auth/update/password', {
-        newPassword: newPassword.value,
-      });
 
-      Toast.show({
-        type: 'success',
-        text1: '비밀번호 변경 완료',
-        position: 'top',
-      });
-    } catch (error: any) {
-      console.error(
-        '비밀번호 변경 실패:',
-        error.response?.data || error.message,
-      );
-      Toast.show({
-        type: 'error',
-        text1: '비밀번호 변경 실패',
-        text2: error.response?.data?.message || '다시 시도해주세요.',
-        position: 'top',
-      });
+    if (isStaff) {
+      // 직원용 API
+      await handleChangeStaffPassword();
+    } else {
+      // 대표용 API
+      try {
+        await api.patch('/funeral/auth/update/password', {
+          newPassword: newPassword.value,
+        });
+
+        Toast.show({
+          type: 'success',
+          text1: '비밀번호 변경 완료',
+          position: 'top',
+        });
+      } catch (error: any) {
+        console.error(
+          '비밀번호 변경 실패:',
+          error.response?.data || error.message,
+        );
+        Toast.show({
+          type: 'error',
+          text1: '비밀번호 변경 실패',
+          text2: error.response?.data?.message || '다시 시도해주세요.',
+          position: 'top',
+        });
+      }
     }
   };
 
@@ -346,6 +352,60 @@ const ModifyUserInfoPage = () => {
         type: 'error',
         text1: '변경 실패',
         text2: error.response?.data?.message || '서버 오류가 발생했습니다.',
+        position: 'top',
+      });
+    }
+  };
+
+  const handleChangeStaffPassword = async () => {
+    const userInfo = await getUserInfo();
+    const staffId = userInfo?.userId; // 또는 userInfo?.data?.staffId
+
+    if (!staffId) {
+      Toast.show({
+        type: 'error',
+        text1: '오류',
+        text2: '직원 정보를 찾을 수 없습니다.',
+        position: 'top',
+      });
+      return;
+    }
+
+    if (!newPassword.value || !confirmPassword.value) {
+      Toast.show({
+        type: 'error',
+        text1: '비밀번호 입력 오류',
+        text2: '새 비밀번호와 확인 비밀번호를 모두 입력해주세요.',
+        position: 'top',
+      });
+      return;
+    }
+    if (newPassword.value !== confirmPassword.value) {
+      Toast.show({
+        type: 'error',
+        text1: '비밀번호 불일치',
+        text2: '입력한 비밀번호가 일치하지 않습니다.',
+        position: 'top',
+      });
+      return;
+    }
+
+    try {
+      await api.patch(`/funeral/staff/updatePassword/${staffId}`, {
+        funeralStaffPassword: newPassword.value,
+      });
+
+      Toast.show({
+        type: 'success',
+        text1: '비밀번호 변경 완료',
+        position: 'top',
+      });
+    } catch (error: any) {
+      console.error('비밀번호 변경 실패:', error.response?.data || error.message);
+      Toast.show({
+        type: 'error',
+        text1: '비밀번호 변경 실패',
+        text2: error.response?.data?.message || '다시 시도해주세요.',
         position: 'top',
       });
     }

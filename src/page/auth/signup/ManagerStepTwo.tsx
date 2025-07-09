@@ -246,6 +246,7 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
       const res = await api.post('/manager/sms/send', {
         phoneNumber: phoneNumber.value,
         userType: 'manager',
+        status: 'signup',
       });
       console.log('📨 인증번호 전송 성공:', res.data);
       Toast.show({
@@ -352,8 +353,9 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
               />
               <CustomButton
                 onPress={handleRequestCode}
-                style={styles.requestButton}>
-                <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
+                style={[styles.requestButton, { backgroundColor: '#2D81F1' }]}
+              >
+                <Typo color="white" fontSize={14} style={{ fontWeight: '700' }}>
                   인증코드받기
                 </Typo>
               </CustomButton>
@@ -372,8 +374,9 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
               />
               <CustomButton
                 onPress={handleVerifyCode}
-                style={styles.requestButton}>
-                <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
+                style={[styles.requestButton, { backgroundColor: '#2D81F1' }]}
+              >
+                <Typo color="white" fontSize={14} style={{ fontWeight: '700' }}>
                   인증코드확인
                 </Typo>
               </CustomButton>
@@ -534,7 +537,6 @@ const styles = StyleSheet.create({
     marginTop: 0,
   },
   requestButton: {
-    backgroundColor: '#8990A0',
     padding: 10,
     paddingVertical: 18,
     borderRadius: 10,

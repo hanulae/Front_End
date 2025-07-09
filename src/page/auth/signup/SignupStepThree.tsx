@@ -133,7 +133,7 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
       } else if (userType === 'funeral') {
         formData.append('funeralUsername', signupInfo.userName);
         formData.append('funeralPassword', signupInfo.password);
-        formData.append('funeralName', name);
+        formData.append('funeralName', signupInfo.selectedFuneral?.funeralName);
         formData.append(
           'funeralPhoneNumber',
           signupInfo.phoneNumber.replace(/-/g, ''),

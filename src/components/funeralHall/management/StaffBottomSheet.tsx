@@ -14,6 +14,7 @@ import {
 import Typo from '../../common/Typo';
 import {useInputBase} from '../../../hooks/input/useInputBase';
 import {FuneralInput} from '../../common/input/FuneralInput';
+import {usePasswordInput} from '../../../hooks/input/usePasswordInput';
 import CustomButton from '../../common/CustomButton';
 import CheckCircleOffIcon from '../../../assets/Check/Check01=Check01_default.svg';
 import CheckCircleOnIcon from '../../../assets/Check/Check01=Check01_Active.svg';
@@ -119,7 +120,7 @@ const StaffBottomSheet = ({
   const staffGrade = useInputBase();
   const staffName = useInputBase();
   const staffPhoneNumber = useInputBase();
-  const staffPassword = useInputBase();
+  const staffPassword = usePasswordInput();
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -147,7 +148,7 @@ const StaffBottomSheet = ({
       setPermissions(_staff.permissions[0]);
       console.log('Permissions set:', _staff.permissions);
     } else if (mode === 'add') {
-      staffPassword.onChangeText('funeral1234');
+      staffPassword.onChangeText('Funeral1234!');
     }
   }, [mode, _staff]);
 
@@ -192,6 +193,37 @@ const StaffBottomSheet = ({
 
   const handleCheckPhoneNumber = async () => {
     const phone = staffPhoneNumber.value.replace(/-/g, '').trim();
+
+    // 1. 빈 값 체크
+    if (!phone) {
+      Toast.show({
+        type: 'error',
+        text1: '전화번호를 입력해주세요.',
+        position: 'top',
+      });
+      return;
+    }
+
+    // 2. 숫자만 있는지 체크
+    if (!/^\d+$/.test(phone)) {
+      Toast.show({
+        type: 'error',
+        text1: '전화번호는 숫자만 입력해주세요.',
+        position: 'top',
+      });
+      return;
+    }
+
+    // 3. 길이 체크 (10~11자리)
+    if (phone.length < 10 || phone.length > 11) {
+      Toast.show({
+        type: 'error',
+        text1: '유효한 전화번호를 입력해주세요.',
+        text2: '01012345678 형식으로 입력해주세요.',
+        position: 'top',
+      });
+      return;
+    }
 
     try {
       const res = await api.post('/funeral/staff/phoneVerify', {

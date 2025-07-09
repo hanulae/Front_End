@@ -44,9 +44,23 @@ const handleRequestCode = async (phoneNumber: string) => {
       userType: userType,
     });
     console.log('Code sent response:', response);
-  } catch (error) {
+
+    // 성공 Toast
+    Toast.show({
+      type: 'success',
+      text1: '인증번호가 발송되었습니다.',
+      position: 'top',
+    });
+  } catch (error: any) {
     console.error('Send code error:', error);
-    throw error;
+
+    // 실패 Toast
+    Toast.show({
+      type: 'error',
+      text1: '인증번호 발송 실패',
+      text2: error.response?.data?.message || '오류가 발생했습니다.',
+      position: 'top',
+    });
   }
 };
 
@@ -59,30 +73,52 @@ const handleVerifyCode = async (phoneNumber: string, authCode: string): Promise<
       userType: userType,
     });
     console.log('Verify code response:', response);
-    setIsPhoneVerified(true);
-    return response.data.success === true;
-  } catch (error) {
+
+    if (response.data.success === true) {
+      setIsPhoneVerified(true);
+      Toast.show({
+        type: 'success',
+        text1: '인증 성공',
+        position: 'top',
+      });
+      return response.data.success === true;
+    } else {
+      Toast.show({
+        type: 'error',
+        text1: '인증 실패',
+        text2: '인증코드가 틀렸거나 만료되었습니다.',
+        position: 'top',
+      });
+      return false;
+    }
+  } catch (error: any) {
     console.error('Verify code error:', error);
+    Toast.show({
+      type: 'error',
+      text1: '서버 오류',
+      text2: error.response?.data?.message || '잠시 후 다시 시도해주세요.',
+      position: 'top',
+    });
     return false;
   }
 };
 
   const handleChangePassword = async () => {
     try {
-      const phoneNumber = 'userPhoneNumber'; // Replace with actual phone number input
-      const newPassword = 'userNewPassword'; // Replace with actual new password input
+      const phone = phoneNumber.value; // phoneNumber 훅의 value
+      const newPassword = password.value;
 
       let response;
       if (userType === 'manager') {
         // 상조팀장용 비밀번호 변경 API
         response = await api.patch('manager/auth/update/password/lost', {
-          managerPhoneNumber: phoneNumber,
+          phoneNumber: phone,
           newPassword,
         });
       } else {
         // 장례식장용 비밀번호 변경 API
         response = await api.patch('funeral/auth/update/password/lost', {
-          funeralPhoneNumber: phoneNumber,
+          phoneNumber: phone,
           newPassword,
         });
       }
@@ -204,6 +240,7 @@ const handleVerifyCode = async (phoneNumber: string, authCode: string): Promise<
             다음
           </Typo>
         </CustomButton> */}
+        <Toast />
       </View>
     </DefaultLayout>
   );
