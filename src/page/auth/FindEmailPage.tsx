@@ -9,7 +9,7 @@ import BaseInput from '../../components/common/input/BaseInput';
 import {NavigationProp, useRoute} from '@react-navigation/native';
 import {request} from 'react-native-permissions';
 import api from '../../api/config';
-import { useState } from 'react';
+import {useState} from 'react';
 import Toast from 'react-native-toast-message';
 
 interface IFindEmailPageProps {
@@ -48,7 +48,8 @@ const FindEmailPage = ({navigation}: IFindEmailPageProps) => {
       Toast.show({
         type: 'error',
         text1: '오류',
-        text2: error.response?.data?.message || '인증 코드 전송에 실패했습니다.',
+        text2:
+          error.response?.data?.message || '인증 코드 전송에 실패했습니다.',
       });
     }
   };
@@ -118,8 +119,7 @@ const FindEmailPage = ({navigation}: IFindEmailPageProps) => {
             <TouchableOpacity
               onPress={handleRequestCode}
               style={styles.requestButton}
-              activeOpacity={0.5}
-            >
+              activeOpacity={0.5}>
               <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
                 인증코드받기
               </Typo>
@@ -193,6 +193,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 16,
+    marginVertical: 16,
   },
   requestButton: {
     backgroundColor: '#2D81F1',
@@ -212,6 +213,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 16,
+    marginVertical: 16,
   },
   verifyButton: {
     backgroundColor: '#FFFFFF',
@@ -233,6 +235,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 16,
+    marginVertical: 16,
   },
   buttonConatiner: {
     flex: 1,

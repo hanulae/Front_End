@@ -36,72 +36,75 @@ const FindPWpage = ({navigation}: IFindPWPageProps) => {
   const isFormValid =
     isPhoneVerified && password.isValid && confirmPassword.isValid;
   // 인증코드 요청 함수
-const handleRequestCode = async (phoneNumber: string) => {
-  console.log("🚀 ~ handleRequestCode ~ phoneNumber:", phoneNumber)
-  try {
-    const response = await api.post('manager/sms/send', {
-      phoneNumber: phoneNumber,
-      userType: userType,
-    });
-    console.log('Code sent response:', response);
+  const handleRequestCode = async (phoneNumber: string) => {
+    console.log('🚀 ~ handleRequestCode ~ phoneNumber:', phoneNumber);
+    try {
+      const response = await api.post('manager/sms/send', {
+        phoneNumber: phoneNumber,
+        userType: userType,
+      });
+      console.log('Code sent response:', response);
 
-    // 성공 Toast
-    Toast.show({
-      type: 'success',
-      text1: '인증번호가 발송되었습니다.',
-      position: 'top',
-    });
-  } catch (error: any) {
-    console.error('Send code error:', error);
-
-    // 실패 Toast
-    Toast.show({
-      type: 'error',
-      text1: '인증번호 발송 실패',
-      text2: error.response?.data?.message || '오류가 발생했습니다.',
-      position: 'top',
-    });
-  }
-};
-
-// 인증코드 확인 함수
-const handleVerifyCode = async (phoneNumber: string, authCode: string): Promise<boolean> => {
-  try {
-    const response = await api.post('manager/sms/verify', {
-      phoneNumber: phoneNumber,
-      code: authCode,
-      userType: userType,
-    });
-    console.log('Verify code response:', response);
-
-    if (response.data.success === true) {
-      setIsPhoneVerified(true);
+      // 성공 Toast
       Toast.show({
         type: 'success',
-        text1: '인증 성공',
+        text1: '인증번호가 발송되었습니다.',
         position: 'top',
       });
-      return response.data.success === true;
-    } else {
+    } catch (error: any) {
+      console.error('Send code error:', error);
+
+      // 실패 Toast
       Toast.show({
         type: 'error',
-        text1: '인증 실패',
-        text2: '인증코드가 틀렸거나 만료되었습니다.',
+        text1: '인증번호 발송 실패',
+        text2: error.response?.data?.message || '오류가 발생했습니다.',
+        position: 'top',
+      });
+    }
+  };
+
+  // 인증코드 확인 함수
+  const handleVerifyCode = async (
+    phoneNumber: string,
+    authCode: string,
+  ): Promise<boolean> => {
+    try {
+      const response = await api.post('manager/sms/verify', {
+        phoneNumber: phoneNumber,
+        code: authCode,
+        userType: userType,
+      });
+      console.log('Verify code response:', response);
+
+      if (response.data.success === true) {
+        setIsPhoneVerified(true);
+        Toast.show({
+          type: 'success',
+          text1: '인증 성공',
+          position: 'top',
+        });
+        return response.data.success === true;
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: '인증 실패',
+          text2: '인증코드가 틀렸거나 만료되었습니다.',
+          position: 'top',
+        });
+        return false;
+      }
+    } catch (error: any) {
+      console.error('Verify code error:', error);
+      Toast.show({
+        type: 'error',
+        text1: '서버 오류',
+        text2: error.response?.data?.message || '잠시 후 다시 시도해주세요.',
         position: 'top',
       });
       return false;
     }
-  } catch (error: any) {
-    console.error('Verify code error:', error);
-    Toast.show({
-      type: 'error',
-      text1: '서버 오류',
-      text2: error.response?.data?.message || '잠시 후 다시 시도해주세요.',
-      position: 'top',
-    });
-    return false;
-  }
-};
+  };
 
   const handleChangePassword = async () => {
     try {
@@ -181,7 +184,9 @@ const handleVerifyCode = async (phoneNumber: string, authCode: string): Promise<
               type="number"
             />
             <CustomButton
-              onPress={() => handleVerifyCode(phoneNumber.value, authCode.value)}
+              onPress={() =>
+                handleVerifyCode(phoneNumber.value, authCode.value)
+              }
               style={styles.verifyButton}>
               <Typo color="white" style={styles.verifyButtonText}>
                 인증코드확인
@@ -272,6 +277,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 16,
+    marginVertical: 16,
   },
   requestButton: {
     backgroundColor: '#8990A0',
@@ -291,6 +297,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 16,
+    marginVertical: 16,
   },
   verifyButton: {
     backgroundColor: '#FFFFFF',
