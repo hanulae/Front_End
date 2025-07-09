@@ -343,7 +343,11 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
             />
             <CustomButton
               onPress={handleRequestCode}
-              style={styles.requestButton}>
+              style={[
+                styles.requestButton,
+                {backgroundColor: '#2D81F1'},
+              ]}
+              activeOpacity={0.5}>
               <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
                 인증코드받기
               </Typo>
@@ -362,7 +366,11 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
             />
             <CustomButton
               onPress={handleVerifyCode}
-              style={styles.requestButton}>
+              style={[
+                styles.requestButton,
+                {backgroundColor: '#2D81F1'},
+              ]}
+              activeOpacity={0.5}>
               <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
                 인증코드확인
               </Typo>
@@ -383,7 +391,11 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
                   variant: 'signup',
                 });
               }}
-              style={styles.findButton}>
+              style={[
+                styles.findButton,
+                {backgroundColor: '#2D81F1'},
+              ]}
+              activeOpacity={0.5}>
               <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
                 장례식장 찾기
               </Typo>
@@ -453,7 +465,7 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
           }}
         /> */}
         <View style={styles.bottomButtonContainer}>
-          <CustomButton onPress={handlePrev} style={styles.button}>
+          <CustomButton onPress={handlePrev} style={styles.button} activeOpacity={0.5}>
             <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
               이전
             </Typo>
@@ -465,7 +477,8 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
               styles.button,
               !isPhoneVerified && {backgroundColor: '#D3D3D3'},
             ]}
-            disabled={!isPhoneVerified}>
+            disabled={!isPhoneVerified}
+            activeOpacity={0.5}>
             <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
               다음
             </Typo>
@@ -566,20 +579,17 @@ const styles = StyleSheet.create({
     // paddingHorizontal: 16,
   },
   requestButton: {
-    backgroundColor: '#8990A0',
     padding: 10,
     paddingVertical: 18,
     borderRadius: 10,
     alignItems: 'center',
   },
   findButton: {
-    backgroundColor: '#2D81F1',
     padding: 10,
     paddingVertical: 18,
     borderRadius: 10,
     alignItems: 'center',
     marginVertical: 16,
-    // flex: 1,
   },
   button: {
     backgroundColor: '#2D81F1',

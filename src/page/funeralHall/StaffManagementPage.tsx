@@ -56,6 +56,7 @@ const StaffManagementPage = () => {
           dispatch_pending: perm.dispatchPending,
           estimate_history: perm.estimateHistory,
           app_settings: perm.appSettings,
+          point_history: perm.pointHistory,
         })),
       }));
 
