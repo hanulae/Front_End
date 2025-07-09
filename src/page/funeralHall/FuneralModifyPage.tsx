@@ -163,14 +163,21 @@ const FuneralModiftyPage = () => {
             funeral_disabled_facility: data.funeralDisabledFacility || false,
           });
 
-          // 주소 설정
+          // 주소 설정 - 기본주소만 저장하는 방식
           if (data.funeralAddress) {
+            // API에서 받은 주소를 기본주소로 설정
             setSelectedAddress(data.funeralAddress);
-          }
 
-          // ✅ undefined 방지
-          if (funeralAddress && 'setValue' in funeralAddress) {
-            funeralAddress.setValue(data.funeralAddress || '');
+            // 상세주소는 항상 빈 문자열로 초기화 (저장하지 않음)
+            if (funeralAddress && 'setValue' in funeralAddress) {
+              funeralAddress.setValue('');
+            }
+          } else {
+            // 주소가 없는 경우 초기화
+            setSelectedAddress('');
+            if (funeralAddress && 'setValue' in funeralAddress) {
+              funeralAddress.setValue('');
+            }
           }
           if (funeralWebsite && 'setValue' in funeralWebsite) {
             funeralWebsite.setValue(data.funeralHomepage || '');
@@ -185,7 +192,8 @@ const FuneralModiftyPage = () => {
     };
 
     loadFuneralHomeInfo();
-  }, []); // dependency array는 비워두고 useCallback으로 안정화
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // 초기 로딩만을 위한 useEffect
 
   // 라벨과 키 매핑
   const labelToKey = {
@@ -301,10 +309,7 @@ const FuneralModiftyPage = () => {
     );
     formData.append('funeralOperationType', infoData.funeral_operation_type);
     formData.append('funeralStyle', infoData.funeral_style);
-    formData.append(
-      'funeralAddress',
-      selectedAddress + ' ' + funeralAddress.value,
-    ); // 선택된 주소 + 상세주소
+    formData.append('funeralAddress', selectedAddress); // 기본주소만 저장 (상세주소 제외)
     formData.append('funeralHomepage', funeralWebsite.value);
     formData.append('funeralPhone', funeralPhone.value);
     formData.append('funeralParkingLot', convenienceData.funeral_parking_lot);

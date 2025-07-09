@@ -38,28 +38,19 @@ export const initialize = async (): Promise<void> => {
 
   try {
     console.log('=== 알림 서비스 초기화 시작 ===');
-
-    // 권한 요청
-    const authStatus = await messaging().requestPermission();
-    const enabled =
-      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-
-    if (enabled) {
-      console.log('알림 권한이 허용되었습니다.');
-    } else {
-      console.log('알림 권한이 거부되었습니다.');
-    }
+    console.log('(권한 요청은 App.tsx에서 이미 완료됨)');
 
     // FCM 토큰 획득
     fcmToken = await messaging().getToken();
-    console.log('FCM 토큰 획득:', fcmToken);
+    console.log('✅ FCM 토큰 획득:', fcmToken);
 
     // 포그라운드 핸들러 설정
     setupForegroundHandler();
+    console.log('✅ 포그라운드 핸들러 설정 완료');
 
     // 백그라운드 핸들러 설정
     setupBackgroundHandler();
+    console.log('✅ 백그라운드 핸들러 설정 완료');
 
     isInitialized = true;
     console.log('=== 알림 서비스 초기화 완료 ===');

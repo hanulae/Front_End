@@ -6,6 +6,7 @@ import FuneralLayout from '../../layout/FuneralLayout';
 import Typo from '../../components/common/Typo';
 import CustomButton from '../../components/common/CustomButton';
 import CustomToggle from '../../components/common/CustomToggle';
+import DeviceInfo from 'react-native-device-info';
 // import DeviceInfo from 'react-native-device-info'; // 앱 버전용 라이브러리
 
 interface INotificationSettings {
@@ -42,8 +43,7 @@ const AppSettingPage = () => {
   });
 
   // 앱 버전 가져오기 (라이브러리 설치 후 사용)
-  // const appVersion = DeviceInfo.getVersion();
-  const appVersion = 'V1.0.0'; // 임시값
+  const appVersion = DeviceInfo.getVersion();
 
   // 토글 변경 핸들러
   const toggleNotification = (key: keyof INotificationSettings) => {

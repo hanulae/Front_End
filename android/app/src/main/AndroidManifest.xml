@@ -14,6 +14,8 @@
   <uses-permission android:name="android.permission.VIBRATE" />
   <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
   <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+  <!-- Android 13+ (API 33) 필수 권한 -->
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
   <!-- android:roundIcon="@mipmap/ic_launcher_round" -->
   <application
     android:name=".MainApplication"
