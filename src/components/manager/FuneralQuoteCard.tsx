@@ -2,8 +2,6 @@ import {StyleSheet, TouchableOpacity, View} from 'react-native';
 import Typo from '../common/Typo';
 import CheckActiveIcon from '../../assets/Check/Check01=Check01_Active.svg';
 import CheckinActiveIcon from '../../assets/Check/Check01=Check01_default.svg';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useNavigation} from '@react-navigation/native';
 
 interface IFuneralQuoteCardProps {
   id: string;
@@ -11,7 +9,7 @@ interface IFuneralQuoteCardProps {
   selected: boolean;
   name: string;
   address: string;
-  completed: boolean;
+  _completed: boolean;
   status: string;
   selectable: boolean;
   managerFormId: string;
@@ -23,11 +21,10 @@ const FuneralQuoteCard = ({
   selected,
   name,
   address,
-  completed,
+  _completed,
   status,
   selectable,
 }: IFuneralQuoteCardProps) => {
-
 
   const getStatusStyle = (status: string) => {
     switch (status) {
@@ -114,14 +111,16 @@ const FuneralQuoteCard = ({
           ) : (
             <CheckinActiveIcon width={24} height={24} />
           )}
-          {/* <Typo style={styles.addressText}>{address}</Typo> */}
         </View>
         <View style={styles.secondRow}>
-          <Typo style={[
-            styles.addressText,
-            // ✅ 입찰만료/실패시 주소 텍스트도 흐리게
-            isExpiredOrFailed && styles.disabledText,
-          ]}>
+          <Typo 
+            style={[
+              styles.addressText,
+              // ✅ 입찰만료/실패시 주소 텍스트도 흐리게
+              isExpiredOrFailed && styles.disabledText,
+            ]}
+            numberOfLines={1}
+            ellipsizeMode="tail">
             {address}
           </Typo>
           <View style={[styles.statusButton, {borderColor: statusStyle.borderColor, backgroundColor: statusStyle.backgroundColor}]}>
@@ -134,39 +133,7 @@ const FuneralQuoteCard = ({
             </Typo>
           </View>
         </View>
-        {/* <View style={styles.thirdRow}>
-          <TouchableOpacity
-            style={styles.detailButton}
-            onPress={goToClientDetail}>
-            <Typo style={styles.detailText}>상세보기</Typo>
-          </TouchableOpacity>
-        </View> */}
-
-        {/* <View style={styles.checkWrapper}>
-          <View
-            style={[
-              styles.checkCircle,
-              selected
-                ? styles.checkCircleSelected
-                : completed
-                ? styles.checkCircleCompletedOnly
-                : styles.checkCircleUnselected,
-            ]}
-          />
-        </View> */}
       </View>
-
-      {/* <View style={styles.bottomRow}>
-        <View style={styles.statusButton}>
-          <Typo
-            style={[
-              styles.statusButtonText,
-              completed ? styles.statusComplete : styles.statusPending,
-            ]}>
-            {status}
-          </Typo>
-        </View>
-      </View> */}
     </TouchableOpacity>
   );
 };
@@ -177,7 +144,6 @@ const styles = StyleSheet.create({
   card: {
     borderWidth: 1,
     borderRadius: 12,
-    // padding: 16,
     marginBottom: 16,
   },
   cardSelected: {
@@ -205,10 +171,9 @@ const styles = StyleSheet.create({
   secondRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     alignSelf: 'stretch',
+    gap: 12,
   },
-  thirdRow: {},
   nameText: {
     fontSize: 16,
     fontWeight: '600',
@@ -220,75 +185,24 @@ const styles = StyleSheet.create({
     color: '#4F7CFF',
   },
   addressText: {
+    flex: 1,
     fontSize: 14,
     fontWeight: '600',
     color: 'rgba(111, 113, 125, 0.75)',
     fontFamily: 'Pretendard-Medium',
-    // lineHeight: 22,
-  },
-  checkWrapper: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkCircle: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-  },
-  checkCircleSelected: {
-    borderColor: '#4F7CFF',
-    backgroundColor: '#4F7CFF',
-  },
-  checkCircleCompletedOnly: {
-    borderColor: '#4F7CFF',
-    backgroundColor: '#ffffff',
-  },
-  checkCircleUnselected: {
-    borderColor: '#ccc',
-    backgroundColor: '#eee',
   },
   statusButton: {
-    // marginTop: 12,
     alignSelf: 'flex-start',
     paddingVertical: 4,
     paddingHorizontal: 12,
     borderRadius: 12,
     backgroundColor: '#ddd',
+    flexShrink: 0,
   },
   statusButtonText: {
     fontSize: 12,
     fontWeight: 'bold',
     fontFamily: 'Pretendard-Bold',
-  },
-  statusComplete: {
-    color: '#2D81F1',
-  },
-  statusPending: {
-    color: '#999',
-  },
-  bottomRow: {
-    marginTop: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-
-  detailButton: {
-    // paddingVertical: 4,
-    // paddingHorizontal: 8,
-  },
-
-  detailText: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#3A83E3',
-    textDecorationLine: 'underline',
-    textDecorationColor: '#3A83E3',
-    fontFamily: 'Pretendard-Bold',
-  },
-  completedButton: {
-    backgroundColor: '#E2F2FF',
   },
   cardDisabled: {
     opacity: 0.5,
