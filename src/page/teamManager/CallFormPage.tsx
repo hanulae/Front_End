@@ -123,6 +123,16 @@ const CallFormPage = () => {
       return false;
     }
 
+    if (!addressDetail) {
+      Toast.show({
+        type: 'error',
+        text1: '(필수) 상세주소를 입력해주세요.',
+        position: 'top',
+        topOffset: 0,
+      });
+      return false;
+    }
+
     if (!managerPhone.value) {
       Toast.show({
         type: 'error',

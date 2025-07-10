@@ -1,13 +1,17 @@
-import {useFocusEffect, useRoute} from '@react-navigation/native';
+import {useFocusEffect, useNavigation, useRoute, CommonActions} from '@react-navigation/native';
 import {useCallback, useState} from 'react';
-import {Platform, StatusBar, StyleSheet, View, Alert} from 'react-native';
+import {Platform, StatusBar, StyleSheet, View, Alert, TouchableOpacity} from 'react-native';
 import ManagerLayout from '../../layout/ManagerLayout';
 import FuneralLayout from '../../layout/FuneralLayout';
 import Typo from '../../components/common/Typo';
 import CustomButton from '../../components/common/CustomButton';
 import CustomToggle from '../../components/common/CustomToggle';
 import DeviceInfo from 'react-native-device-info';
-// import DeviceInfo from 'react-native-device-info'; // 앱 버전용 라이브러리
+import CheckOnIcon from '../../assets/Check/Check01=Check01_Active.svg';
+import CheckOffIcon from '../../assets/Check/Check01=Check01_default.svg';
+import {managerWithdrawalService, funeralWithdrawalService} from '../../services/api/withdrawalService';
+import {clearTokens} from '../../utils/tokenStorage';
+import SMSInputModal from '../../components/common/SMSInputModal';
 
 interface INotificationSettings {
   appNotification: boolean;
@@ -16,6 +20,7 @@ interface INotificationSettings {
 }
 
 const AppSettingPage = () => {
+  const navigation = useNavigation();
   // StatusBar 색상 변경
   useFocusEffect(
     useCallback(() => {
@@ -42,6 +47,13 @@ const AppSettingPage = () => {
     emailNotification: false,
   });
 
+  // 회원탈퇴 동의 체크박스 상태
+  const [withdrawalAgreed, setWithdrawalAgreed] = useState(false);
+  
+  // SMS 인증 모달 상태
+  const [smsModalVisible, setSmsModalVisible] = useState(false);
+  const [smsPhoneNumber, setSmsPhoneNumber] = useState('');
+
   // 앱 버전 가져오기 (라이브러리 설치 후 사용)
   const appVersion = DeviceInfo.getVersion();
 
@@ -53,26 +65,122 @@ const AppSettingPage = () => {
     }));
   };
 
+  // 회원탈퇴 동의 체크박스 토글
+  const toggleWithdrawalAgreement = () => {
+    setWithdrawalAgreed(prev => !prev);
+  };
+
   // 회원탈퇴 핸들러
-  const handleWithdraw = () => {
-    Alert.alert(
-      '회원탈퇴',
-      '정말로 탈퇴하시겠습니까?\n탈퇴 시 모든 데이터가 삭제됩니다.',
-      [
-        {
-          text: '취소',
-          style: 'cancel',
-        },
-        {
-          text: '탈퇴',
-          style: 'destructive',
-          onPress: () => {
-            // 회원탈퇴 로직 구현
-            console.log('회원탈퇴 처리');
+  const handleWithdraw = async () => {
+    if (!withdrawalAgreed) {
+      Alert.alert('알림', '회원탈퇴에 동의해주세요.');
+      return;
+    }
+
+    // 회원탈퇴 서비스 선택
+    const withdrawalService = userType === 'manager' 
+      ? managerWithdrawalService 
+      : funeralWithdrawalService;
+
+    try {
+      // 1. 탈퇴 가능 여부 확인
+      const eligibilityResult = await withdrawalService.checkDeletionEligibility();
+      
+      if (!eligibilityResult.data.canDelete) {
+        Alert.alert('탈퇴 불가', eligibilityResult.data.message);
+        return;
+      }
+
+      // 2. 탈퇴 확인 및 SMS 인증 진행
+      Alert.alert(
+        '회원탈퇴',
+        `정말로 탈퇴하시겠습니까?\n${eligibilityResult.data.message}\n${eligibilityResult.data.cashMessage || ''}`,
+        [
+          {
+            text: '취소',
+            style: 'cancel',
           },
-        },
-      ],
-    );
+          {
+            text: '탈퇴 진행',
+            style: 'destructive',
+            onPress: () => processSMSAuthentication(),
+          },
+        ],
+      );
+    } catch (error: any) {
+      console.error('탈퇴 가능 여부 확인 실패:', error);
+      Alert.alert('오류', '탈퇴 가능 여부 확인 중 오류가 발생했습니다.');
+    }
+  };
+
+  // SMS 인증 처리
+  const processSMSAuthentication = async () => {
+    // 회원탈퇴 서비스 선택
+    const withdrawalService = userType === 'manager' 
+      ? managerWithdrawalService 
+      : funeralWithdrawalService;
+      
+    try {
+      // SMS 발송
+      const smsResult = await withdrawalService.sendVerificationSMS();
+      
+      if (smsResult.success) {
+        setSmsPhoneNumber(smsResult.phoneNumber || '');
+        setSmsModalVisible(true);
+      }
+    } catch (error: any) {
+      console.error('SMS 발송 실패:', error);
+      Alert.alert('오류', error.response?.data?.message || '인증번호 발송 중 오류가 발생했습니다.');
+    }
+  };
+
+  // SMS 모달 닫기
+  const handleSMSModalClose = () => {
+    setSmsModalVisible(false);
+    setSmsPhoneNumber('');
+  };
+
+  // SMS 인증번호 확인
+  const handleSMSConfirm = (smsCode: string) => {
+    setSmsModalVisible(false);
+    setSmsPhoneNumber('');
+    executeWithdrawal(smsCode);
+  };
+
+  // 회원탈퇴 실행
+  const executeWithdrawal = async (smsCode: string) => {
+    // 회원탈퇴 서비스 선택
+    const withdrawalService = userType === 'manager' 
+      ? managerWithdrawalService 
+      : funeralWithdrawalService;
+      
+    try {
+      const result = await withdrawalService.deleteAccount({ smsCode });
+      
+      if (result.success) {
+        Alert.alert(
+          '탈퇴 완료',
+          '회원탈퇴가 완료되었습니다.',
+          [
+            {
+              text: '확인',
+              onPress: async () => {
+                // 토큰 삭제 및 로그아웃 처리
+                await clearTokens();
+                navigation.dispatch(CommonActions.reset({
+                  index: 0,
+                  routes: [{name: 'Main'}],
+                }));
+                console.log('로그아웃 처리 완료');
+              },
+            },
+          ],
+        );
+      }
+    } catch (error: any) {
+      console.error('회원탈퇴 실패:', error);
+      Alert.alert('오류', error.response?.data?.message || '회원탈퇴 중 오류가 발생했습니다.');
+    }
   };
 
   // 공통 컨텐츠
@@ -120,10 +228,39 @@ const AppSettingPage = () => {
         <Typo style={styles.versionSubText}>최신버전 사용중</Typo>
       </View>
 
-      {/* 회원탈퇴 버튼 */}
+      {/* 회원탈퇴 섹션 */}
       <View style={styles.withdrawSection}>
-        <CustomButton style={styles.withdrawButton} onPress={handleWithdraw}>
-          <Typo style={styles.withdrawText}>회원탈퇴</Typo>
+        {/* 회원탈퇴 동의 체크박스 */}
+        <TouchableOpacity 
+          style={styles.agreementContainer}
+          onPress={toggleWithdrawalAgreement}
+          activeOpacity={0.7}
+        >
+          {withdrawalAgreed ? (
+            <CheckOnIcon width={20} height={20} />
+          ) : (
+            <CheckOffIcon width={20} height={20} />
+          )}
+          <Typo style={styles.agreementText}>
+            회원탈퇴에 동의합니다.
+          </Typo>
+        </TouchableOpacity>
+
+        {/* 회원탈퇴 버튼 */}
+        <CustomButton
+          style={[
+            styles.withdrawButton,
+            withdrawalAgreed && styles.withdrawButtonActive,
+          ]}
+          onPress={handleWithdraw}
+          disabled={!withdrawalAgreed}
+        >
+          <Typo style={[
+            styles.withdrawText,
+            withdrawalAgreed && styles.withdrawTextActive,
+          ]}>
+            회원탈퇴
+          </Typo>
         </CustomButton>
       </View>
     </View>
@@ -132,20 +269,36 @@ const AppSettingPage = () => {
   // Layout 분기 처리
   if (userType === 'manager') {
     return (
-      <ManagerLayout headerShown={true} color="#FFFFFF" backIconColor="black">
-        {renderContent()}
-      </ManagerLayout>
+      <>
+        <ManagerLayout headerShown={true} color="#FFFFFF" backIconColor="black">
+          {renderContent()}
+        </ManagerLayout>
+        <SMSInputModal
+          visible={smsModalVisible}
+          onClose={handleSMSModalClose}
+          onConfirm={handleSMSConfirm}
+          phoneNumber={smsPhoneNumber}
+        />
+      </>
     );
   } else {
     return (
-      <FuneralLayout
-        headerShown={true}
-        headerColor="white"
-        color="white"
-        backButtonVisible={true}
-        top={true}>
-        {renderContent()}
-      </FuneralLayout>
+      <>
+        <FuneralLayout
+          headerShown={true}
+          headerColor="white"
+          color="white"
+          backButtonVisible={true}
+          top={true}>
+          {renderContent()}
+        </FuneralLayout>
+        <SMSInputModal
+          visible={smsModalVisible}
+          onClose={handleSMSModalClose}
+          onConfirm={handleSMSConfirm}
+          phoneNumber={smsPhoneNumber}
+        />
+      </>
     );
   }
 };
@@ -155,8 +308,6 @@ export default AppSettingPage;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // backgroundColor: '#F5F5F5',
-    // paddingHorizontal: 20,
     paddingTop: 20,
   },
   header: {
@@ -172,7 +323,6 @@ const styles = StyleSheet.create({
   section: {
     backgroundColor: '#FFFFFF',
     paddingVertical: 8,
-    // paddingHorizontal: 20,
     marginBottom: 20,
     borderBottomWidth: 5,
     borderBottomColor: 'rgba(205, 209, 215, 0.25)',
@@ -229,6 +379,19 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     paddingHorizontal: 16,
   },
+  agreementContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingVertical: 10,
+  },
+  agreementText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#283042',
+    fontFamily: 'Pretendard-Medium',
+    marginLeft: 8,
+  },
   withdrawButton: {
     backgroundColor: 'rgba(205, 209, 215, 0.25)',
     borderRadius: 10,
@@ -237,10 +400,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E6EAF3',
   },
+  withdrawButtonActive: {
+    backgroundColor: '#F04452',
+    borderColor: '#F04452',
+  },
   withdrawText: {
     fontSize: 16,
     fontWeight: '600',
     color: 'rgba(137, 144, 160, 0.75)',
     fontFamily: 'Pretendard-Medium',
+  },
+  withdrawTextActive: {
+    color: '#FFFFFF',
   },
 });
