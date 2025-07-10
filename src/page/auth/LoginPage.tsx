@@ -26,6 +26,7 @@ import api from '../../api/config';
 import {storeTokens, storeUserInfo} from '../../utils/tokenStorage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useInputBase} from '../../hooks/input/useInputBase';
+import notificationService from '../../services/notificationService';
 
 //BSK ADD IMPORTS
 import {useAtom} from 'jotai';
@@ -95,6 +96,42 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
         accessToken: response.data.accessToken,
         refreshToken: response.data.refreshToken,
       });
+
+      // ✅ 로그인 성공 후 FCM 토큰 등록
+      try {
+        // 3. 로그인된 경우 알림 서비스 초기화
+        await notificationService.initialize();
+        console.log('🔔 로그인 성공 - FCM 토큰 등록 시작');
+        const success = await notificationService.registerFCMTokenToServer();
+        if (success) {
+          console.log('✅ FCM 토큰 백엔드 등록 완료');
+          Toast.show({
+            type: 'success',
+            text1: '로그인 완료',
+            text2: '알림 설정이 완료되었습니다.',
+            position: 'top',
+            topOffset: 100,
+          });
+        } else {
+          console.log('❌ FCM 토큰 백엔드 등록 실패');
+          // FCM 등록 실패해도 로그인 자체는 성공으로 처리
+          Toast.show({
+            type: 'success',
+            text1: '로그인 완료',
+            position: 'top',
+            topOffset: 100,
+          });
+        }
+      } catch (fcmError) {
+        console.error('FCM 토큰 등록 중 오류:', fcmError);
+        // FCM 등록 실패해도 로그인 자체는 성공으로 처리
+        Toast.show({
+          type: 'success',
+          text1: '로그인 완료',
+          position: 'top',
+          topOffset: 100,
+        });
+      }
     } catch (error) {
       console.error('Login error:', error);
     }
