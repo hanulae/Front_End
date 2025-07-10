@@ -119,7 +119,7 @@ export const registerFCMTokenToServer = async (): Promise<boolean> => {
     });
     console.log('FCM 토큰 백엔드 등록 응답:', response);
 
-    if (response.data.success) {
+    if (response.data.data.success) {
       console.log('FCM 토큰 백엔드 등록 성공');
       return true;
     } else {
@@ -280,14 +280,18 @@ const setupForegroundHandler = (): void => {
     // 포그라운드에서도 로컬 알림 생성
     if (remoteMessage.notification) {
       const notificationId = remoteMessage.data?.id || Date.now().toString();
-
+      const channelId = await notifee.createChannel({
+        id: 'default',
+        name: 'Default Channel',
+        importance: AndroidImportance.HIGH,
+      });
       await notifee.displayNotification({
         id: notificationId,
         title: remoteMessage.notification.title,
         body: remoteMessage.notification.body,
         data: remoteMessage.data,
         android: {
-          channelId: 'default',
+          channelId: channelId,
           importance: AndroidImportance.HIGH,
           pressAction: {
             id: 'default',

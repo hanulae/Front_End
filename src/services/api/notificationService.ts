@@ -35,6 +35,13 @@ export const getNavigationTarget = (notificationType: string, data: any) => {
     //   return {
     //     screen:
     //   }
+    case 'cash_refund_approved':
+      return {
+        screen: 'PointHistory',
+        params: {
+          variant: data.data.receiverType,
+        },
+      };
 
     // 상조팀장
     case 'bid_submitted':
@@ -70,7 +77,7 @@ export const getNavigationTarget = (notificationType: string, data: any) => {
       return {
         screen: 'PointHistory',
         params: {
-          variant: data.data.receiverType,
+          variant: data.receiverType,
         },
       };
 
