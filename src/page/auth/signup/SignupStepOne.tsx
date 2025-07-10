@@ -5,6 +5,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import {signupAtom} from '../../../state/local_state/signupAtom';
 import {usePasswordInput} from '../../../hooks/input/usePasswordInput';
 import {useConfirmPasswordInput} from '../../../hooks/input/useConfirmPasswordInput';
@@ -12,7 +13,7 @@ import {Input} from '../../../components/common/input/Input';
 import CustomButton from '../../../components/common/CustomButton';
 import Typo from '../../../components/common/Typo';
 import {useInputBase} from '../../../hooks/input/useInputBase';
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useRef} from 'react';
 import {useRoute} from '@react-navigation/native';
 
 //BSKIM IMPORTS ADD
@@ -55,6 +56,7 @@ const SignupStepOne = ({onNext}: Props) => {
   const [isUsernameAvailable, setIsUsernameAvailable] = useState(
     signupInfo.isUsernameAvailable,
   );
+  const scrollViewRef = useRef(null);
   const isPasswordValid = password.isValid;
   const isPasswordMatchValid = confirmPassword.isValid;
   const isFormValid =
@@ -137,93 +139,113 @@ const SignupStepOne = ({onNext}: Props) => {
   }, [available, setSignupInfo]);
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.wrapperContainer}>
-        <View style={styles.formContainer}>
-          <View style={styles.container}>
-            <Typo fontSize={16} style={styles.containerTitle}>
-              아이디
-            </Typo>
-            <View style={styles.authSection}>
-              <Input input={username} placeholder="아이디를 입력하세요" />
-              <CustomButton
-                onPress={handleCheckUsername}
-                style={styles.requestButton}>
-                <Typo color="white" fontSize={14} style={styles.buttonText}>
-                  중복확인
+    <View style={{ flex: 1 }}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <KeyboardAwareScrollView
+          ref={scrollViewRef}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ paddingBottom: 80 }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          enableOnAndroid={true}
+          extraScrollHeight={100}
+          enableAutomaticScroll={true}
+        >
+          <View style={styles.formWrapper}>
+            <View style={styles.formContainer}>
+              <View style={styles.container}>
+                <Typo fontSize={16} style={styles.containerTitle}>
+                  아이디
                 </Typo>
-              </CustomButton>
+                <View style={styles.authSection}>
+                  <Input 
+                    input={username} 
+                    placeholder="아이디를 입력하세요"
+                  />
+                  <CustomButton
+                    onPress={handleCheckUsername}
+                    style={styles.requestButton}>
+                    <Typo color="white" fontSize={14} style={styles.buttonText}>
+                      중복확인
+                    </Typo>
+                  </CustomButton>
+                </View>
+                {message ? (
+                  <Typo
+                    fontSize={12}
+                    color={available ? '#2D81F1' : 'red'}
+                    style={{marginLeft: 10}}>
+                    {message}
+                  </Typo>
+                ) : null}
+              </View>
+              <View style={styles.container}>
+                <Typo fontSize={16} style={styles.containerTitle}>
+                  비밀번호
+                </Typo>
+                <Input
+                  input={password}
+                  placeholder="비밀번호를 입력하세요"
+                  type="password"
+                />
+                {password.touched && password.error ? (
+                  <Typo fontSize={12} color="red" style={{marginLeft: 10}}>
+                    {password.error}
+                  </Typo>
+                ) : null}
+              </View>
+              <View style={styles.container}>
+                <Typo fontSize={16} style={styles.containerTitle}>
+                  비밀번호 확인
+                </Typo>
+                <Input
+                  input={confirmPassword}
+                  label="비밀번호 확인"
+                  placeholder="비밀번호를 다시 입력하세요"
+                  type="password"
+                />
+              {confirmPassword.touched && confirmPassword.error ? (
+                <Typo fontSize={12} color="red" style={{marginLeft: 10}}>
+                  {confirmPassword.error}
+                </Typo>
+              ) : null}
             </View>
-            {message ? (
-              <Typo
-                fontSize={12}
-                color={available ? '#2D81F1' : 'red'}
-                style={{marginLeft: 10}}>
-                {message}
-              </Typo>
-            ) : null}
+            </View>
           </View>
-          <View style={styles.container}>
-            <Typo fontSize={16} style={styles.containerTitle}>
-              비밀번호
-            </Typo>
-            <Input
-              input={password}
-              placeholder="비밀번호를 입력하세요"
-              type="password"
-            />
-            {password.touched && password.error ? (
-              <Typo fontSize={12} color="red" style={{marginLeft: 10}}>
-                {password.error}
-              </Typo>
-            ) : null}
-          </View>
-          <View style={styles.container}>
-            <Typo fontSize={16} style={styles.containerTitle}>
-              비밀번호 확인
-            </Typo>
-            <Input
-              input={confirmPassword}
-              label="비밀번호 확인"
-              placeholder="비밀번호를 다시 입력하세요"
-              type="password"
-            />
-            {confirmPassword.touched && confirmPassword.error ? (
-              <Typo fontSize={12} color="red" style={{marginLeft: 10}}>
-                {confirmPassword.error}
-              </Typo>
-            ) : null}
-          </View>
-        </View>
-
-        <View style={styles.confirmButtonContainer}>
-          <CustomButton
-            onPress={handleNext}
-            style={[
-              styles.confirmButton,
-              !isFormValid && {backgroundColor: '#D3D3D3'},
-            ]}
-            disabled={!isFormValid}>
-            <Typo color="white" fontSize={14} style={styles.confrimButtonText}>
-              다음
-            </Typo>
-          </CustomButton>
-        </View>
+        </KeyboardAwareScrollView>
+      </TouchableWithoutFeedback>
+      
+      <View style={styles.confirmButtonContainer}>
+        <CustomButton
+          onPress={handleNext}
+          style={[
+            styles.confirmButton,
+            !isFormValid && {backgroundColor: '#D3D3D3'},
+          ]}
+          disabled={!isFormValid}>
+          <Typo color="white" fontSize={14} style={styles.confrimButtonText}>
+            다음
+          </Typo>
+        </CustomButton>
       </View>
-    </TouchableWithoutFeedback>
+    </View>
   );
 };
 
 export default SignupStepOne;
-
 const styles = StyleSheet.create({
   wrapperContainer: {
     flex: 1,
     paddingHorizontal: 16,
     paddingVertical: 18,
+    justifyContent: 'space-between',
+  },
+  formWrapper: {
+    paddingHorizontal: 16,
+    paddingVertical: 18,
   },
   formContainer: {
-    flex: 2,
+    flex: 1,
   },
   typeContainer: {
     flexDirection: 'row',
@@ -234,18 +256,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     fontFamily: 'Pretendard-Light',
-    marginBottom: 10,
+    marginBottom: 4,
     marginLeft: 10,
   },
   authContainer: {
     flexDirection: 'column',
   },
-  container: {
-    flexDirection: 'column',
-    marginBottom: 30,
-    gap: 10,
-    flex: 1,
-  },
+      container: {
+      flexDirection: 'column',
+      marginBottom: 25,
+      gap: 8,
+    },
   typeButton: {
     flex: 1,
     paddingVertical: 12,
@@ -281,7 +302,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#4F7CFF',
     padding: 10,
     paddingVertical: 18,
-    borderRadius: 5,
+    borderRadius: 8,
     alignItems: 'center',
   },
   passwordSection: {
@@ -302,9 +323,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   confirmButtonContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    paddingBottom: 10,
+    paddingHorizontal: 16,
+    paddingBottom: 20,
+    paddingTop: 10,
   },
   confirmButton: {
     paddingVertical: 18,
@@ -318,3 +339,4 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard-Light',
   },
 });
+

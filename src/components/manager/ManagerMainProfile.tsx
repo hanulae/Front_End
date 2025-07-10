@@ -1,8 +1,9 @@
 import {useNavigation, CommonActions} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {Pressable, StyleSheet, View} from 'react-native';
+import {Pressable, StyleSheet, View, useWindowDimensions} from 'react-native';
 import Typo from '../common/Typo';
 import Hello from './Hello';
+import {useMemo} from 'react';
 
 interface IManagerMainProfileProps {
   managerName: string;
@@ -10,6 +11,45 @@ interface IManagerMainProfileProps {
 
 const ManagerMainProfile = ({managerName}: IManagerMainProfileProps) => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
+  
+  // 화면 크기 감지
+  const {width} = useWindowDimensions();
+  
+  // 브레이크포인트 정의 (갤럭시 S9 전용 최적화)
+  const deviceType = useMemo(() => {
+    if (width >= 768) return 'tablet';
+    if (width >= 411) return 'large'; // medium phone 기준
+    if (width >= 375) return 'medium'; // iPhone 6/7/8 크기
+    if (width >= 361) return 'small';
+    return 'extraSmall'; // 갤럭시 S9 등 360px 이하
+  }, [width]);
+
+  const responsiveStyles = useMemo(() => {
+    const scale = deviceType === 'extraSmall' ? 0.7 :  // 갤럭시 S9 전용
+                  deviceType === 'small' ? 0.8 : 
+                  deviceType === 'medium' ? 0.9 :
+                  deviceType === 'large' ? 1.0 : 1.2; // tablet
+
+    return {
+      // 폰트 크기
+      nameTextSize: Math.round(34 * scale),
+      roleTextSize: Math.round(20 * scale),
+      buttonTextSize: Math.round(18 * scale),
+      
+      // 패딩과 마진 (갤럭시 S9에서 추가 최적화)
+      containerPadding: deviceType === 'extraSmall' ? 8 : Math.round(16 * scale),
+      nameMarginTop: deviceType === 'extraSmall' ? 6 : Math.round(13 * scale),
+      nameMarginBottom: deviceType === 'extraSmall' ? 8 : Math.round(18 * scale),
+      nameMarginLeft: deviceType === 'extraSmall' ? 8 : Math.round(16 * scale),
+      roleMarginLeft: Math.round(4 * scale),
+      buttonVerticalPadding: deviceType === 'extraSmall' ? 10 : Math.round(16 * scale),
+      buttonHorizontalPadding: deviceType === 'extraSmall' ? 12 : Math.round(20 * scale),
+      buttonMarginTop: deviceType === 'extraSmall' ? 6 : Math.round(16 * scale),
+      
+      // 크기
+      borderRadius: Math.round(20 * scale),
+    };
+  }, [deviceType]);
 
   const goToProfilePage = () => {
     // TabNav의 MyPage 탭으로 이동
@@ -28,14 +68,29 @@ const ManagerMainProfile = ({managerName}: IManagerMainProfileProps) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Hello />
-      <View style={styles.nameContainer}>
-        <Typo style={styles.nameText}>{managerName}</Typo>
-        <Typo style={styles.roleText}>상조팀장님</Typo>
+    <View style={[styles.container, { padding: responsiveStyles.containerPadding }]}>
+      <View style={deviceType === 'extraSmall' ? { transform: [{ scale: 0.8 }] } : {}}>
+        <Hello />
       </View>
-      <Pressable style={styles.profileButton} onPress={goToProfilePage}>
-        <Typo style={styles.profileButtonText}>프로필 보기</Typo>
+      <View style={[styles.nameContainer, { marginLeft: responsiveStyles.nameMarginLeft }]}>
+        <Typo style={[styles.nameText, {
+          fontSize: responsiveStyles.nameTextSize,
+          marginTop: responsiveStyles.nameMarginTop,
+          marginBottom: responsiveStyles.nameMarginBottom,
+          marginLeft: responsiveStyles.nameMarginLeft,
+        }]}>{managerName}</Typo>
+        <Typo style={[styles.roleText, {
+          fontSize: responsiveStyles.roleTextSize,
+          marginLeft: responsiveStyles.roleMarginLeft,
+        }]}>상조팀장님</Typo>
+      </View>
+      <Pressable style={[styles.profileButton, {
+        paddingVertical: responsiveStyles.buttonVerticalPadding,
+        paddingHorizontal: responsiveStyles.buttonHorizontalPadding,
+        borderRadius: responsiveStyles.borderRadius,
+        marginTop: responsiveStyles.buttonMarginTop,
+      }]} onPress={goToProfilePage}>
+        <Typo style={[styles.profileButtonText, { fontSize: responsiveStyles.buttonTextSize }]}>프로필 보기</Typo>
       </Pressable>
     </View>
   );
@@ -45,39 +100,32 @@ export default ManagerMainProfile;
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    // padding은 동적으로 적용됨
   },
   nameContainer: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    marginLeft: 16,
+    // marginLeft는 동적으로 적용됨
   },
   nameText: {
-    fontSize: 34,
     fontWeight: '700',
     color: '#FFFFFF',
-    marginTop: 13,
-    marginBottom: 18,
-    marginLeft: 16,
+    // fontSize, margin은 동적으로 적용됨
   },
   roleText: {
-    fontSize: 20,
     fontWeight: '400',
     color: '#FFFFFF',
-    marginLeft: 4,
+    // fontSize, marginLeft는 동적으로 적용됨
   },
   profileButton: {
     backgroundColor: '#3D8FFB',
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderRadius: 20,
     alignItems: 'center',
-    marginTop: 16,
+    // padding, borderRadius, marginTop은 동적으로 적용됨
   },
   profileButtonText: {
-    fontSize: 18,
     fontWeight: '600',
     color: '#FFFFFF',
     fontFamily: 'Pretendard-Bold',
+    // fontSize는 동적으로 적용됨
   },
 });

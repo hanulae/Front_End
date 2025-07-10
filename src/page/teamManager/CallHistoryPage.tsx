@@ -8,11 +8,12 @@ import {
   View,
   RefreshControl,
 } from 'react-native';
-import DefaultLayout from '../../layout/DefaultLayout';
+
 import {useCallback, useEffect, useState} from 'react';
 import Typo from '../../components/common/Typo';
 import ManagerLayout from '../../layout/ManagerLayout';
 import {useManagerDispatchRequest} from '../../hooks/useManagerDispatchRequest';
+import {useManagerForm} from '../../hooks/useManagerForm';
 import {ActivityIndicator} from 'react-native';
 
 interface ICallHistoryPageProps {
@@ -21,8 +22,9 @@ interface ICallHistoryPageProps {
 
 const CallHistoryPage = ({navigation}: ICallHistoryPageProps) => {
   const [selectedTab, setSelectedTab] = useState<'진행중' | '완료'>('진행중');
-  const {loading, error, getManagerDispatchRequestList} =
+  const {loading, error, getManagerDispatchRequestList, getManagerDispatchRequestDetail} =
     useManagerDispatchRequest();
+  const {getManagerFormList} = useManagerForm();
   const [dispatchList, setDispatchList] = useState<any[]>([]);
   const [filteredList, setFilteredList] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -83,8 +85,39 @@ const CallHistoryPage = ({navigation}: ICallHistoryPageProps) => {
 
   // }
 
-  const goToClientDetailDevMode = () => {
-    navigation.navigate('ClientDetail', {clientId: 1});
+  const goToClientDetail = async (item: any) => {
+    try {
+      // 출동 신청 상세 정보를 가져와서 managerFormId 추출
+      const detailResult = await getManagerDispatchRequestDetail(item.id);
+      
+      if (detailResult && detailResult.dispatchRequest) {
+        // 타입 단언을 사용하여 managerFormId 추출
+        const dispatchRequest = detailResult.dispatchRequest as any;
+        const managerFormId = dispatchRequest.managerFormId || dispatchRequest.data?.managerFormId;
+        
+        // 견적 목록을 가져와서 해당 견적 정보를 찾기
+        const formListResult = await getManagerFormList();
+        
+        if (formListResult && Array.isArray(formListResult)) {
+          const matchingForm = formListResult.find(
+            form => form.managerFormId === managerFormId
+          );
+          
+          if (matchingForm) {
+            // 견적 정보를 찾았으면 그것을 넘김
+            navigation.navigate('ClientDetail', {data: matchingForm});
+            return;
+          }
+        }
+      }
+      
+      // 견적 정보를 찾지 못한 경우 기본 출동 신청 데이터 넘김
+      navigation.navigate('ClientDetail', {data: item});
+    } catch (error) {
+      console.error('견적 상세 정보 가져오기 실패:', error);
+      // 에러 시 기본 출동 신청 데이터 넘김
+      navigation.navigate('ClientDetail', {data: item});
+    }
   };
 
   const handleCardPress = (item: any) => {
@@ -276,9 +309,9 @@ const CallHistoryPage = ({navigation}: ICallHistoryPageProps) => {
                   <TouchableOpacity
                     style={styles.detailButton}
                     onPress={() => {
-                      goToClientDetailDevMode();
+                      goToClientDetail(item);
                     }}>
-                    <Typo style={styles.detailText}>상세보기</Typo>
+                    <Typo style={styles.detailText}>견적서 상세보기</Typo>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -384,6 +417,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   detailButton: {
+    marginTop: 4,
     // paddingVertical: 4,
     // paddingHorizontal: 8,
   },

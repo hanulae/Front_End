@@ -1,4 +1,4 @@
-import {StyleSheet} from 'react-native';
+
 import DefaultLayout from '../../layout/DefaultLayout';
 import {useEffect, useState} from 'react';
 import {useAtom} from 'jotai';
@@ -35,10 +35,14 @@ const SignupPage = () => {
     console.log('회원가입 정보:', signupInfo);
     // 여기에 회원가입 API 호출 로직 추가
   };
+  const getHeaderTitle = () => {
+    return userType === 'manager' ? '상조팀장 회원가입' : '장례식장 회원가입';
+  };
+
   return (
     <DefaultLayout
       headerShown={true}
-      // headerTitle="회원가입"
+      headerTitle={getHeaderTitle()}
       color="white"
       homeButton={true}
       logoutButton={false}
@@ -64,5 +68,3 @@ const SignupPage = () => {
 };
 
 export default SignupPage;
-
-const styles = StyleSheet.create({});

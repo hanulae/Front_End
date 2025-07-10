@@ -160,25 +160,33 @@ const EstimateListPage = () => {
             titleColor="#3287F8" // iOS 텍스트 색상
           />
         }>
-        {managerFormList.length === 0 ? (
+        {managerFormList.filter(item => 
+          (item.formStatus as string) !== 'completed' 
+          // && (item.formStatus as string) !== 'bid_progress'
+        ).length === 0 ? (
           // ✅ 빈 상태
           <View style={styles.centerContainer}>
             <Typo style={styles.emptyText}>견적 내역이 없습니다.</Typo>
           </View>
         ) : (
-          // ✅ 실제 데이터 렌더링
-          managerFormList.map((item, index) => (
-            <EstimateCard
-              key={item.managerFormId}
-              name={item.chiefMournerName}
-              date={formatDate(item.createdAt)}
-              count={item.bidCount}
-              status={getStatusText(item.formStatus)}
-              index={index}
-              onPress={() => goToClientEstimate(item.managerFormId)}
-              data={item}
-            />
-          ))
+          // ✅ 실제 데이터 렌더링 (completed, bid_progress 상태 제외)
+          managerFormList
+            .filter(item => 
+              (item.formStatus as string) !== 'completed' 
+              // && (item.formStatus as string) !== 'bid_progress'
+            )
+            .map((item, index) => (
+              <EstimateCard
+                key={item.managerFormId}
+                name={item.chiefMournerName}
+                date={formatDate(item.createdAt)}
+                count={item.bidCount}
+                status={getStatusText(item.formStatus)}
+                index={index}
+                onPress={() => goToClientEstimate(item.managerFormId)}
+                data={item}
+              />
+            ))
         )}
       </ScrollView>
     </DefaultLayout>

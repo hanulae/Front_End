@@ -23,6 +23,8 @@ import SmallCheckIconOn from '../../../assets/Check/Check_03=Check_03_Active.svg
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import api from '../../../api/config';
+import Toast from 'react-native-toast-message';
+
 interface Props {
   onSubmit: () => void;
   onPrev: () => void;
@@ -243,7 +245,13 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
         name,
       });
 
-      Alert.alert('인증 성공', '계좌 인증이 완료되었습니다.');
+      Toast.show({
+        type: 'success',
+        text1: '인증 성공',
+        text2: '계좌 인증이 완료되었습니다.',
+        position: 'top',
+        topOffset: -150,
+      });
 
       setSignupInfo(prev => ({
         ...prev,
@@ -258,10 +266,13 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
       setVerified(true);
     } catch (err: any) {
       console.log('계좌 인증 실패:', err.response?.data || err.message);
-      Alert.alert(
-        '인증 실패',
-        err.response?.data?.message || '계좌 인증에 실패했습니다.',
-      );
+      Toast.show({
+        type: 'error',
+        text1: '인증 실패',
+        text2: err.response?.data?.message || '계좌 인증에 실패했습니다.',
+        position: 'top',
+        topOffset: -150,
+      });
     }
   };
 
@@ -469,6 +480,7 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
           closeBankSelectSheet();
         }}
       /> */}
+      <Toast />
     </ScrollView>
   );
 };

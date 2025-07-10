@@ -12,10 +12,27 @@ import CustomButton from '../../components/common/CustomButton';
 import Typo from '../../components/common/Typo';
 import StaffCard from '../../components/funeralHall/management/StaffCard';
 import StaffBottomSheet from '../../components/funeralHall/management/StaffBottomSheet';
-import { IStaff } from './StaffManagementPage.types';
 import Toast from 'react-native-toast-message';
 import api from '../../api/config';
 
+interface IPermissions {
+  room_management: boolean;
+  info_edit: boolean;
+  dispatch_history: boolean;
+  dispatch_pending: boolean;
+  estimate_history: boolean;
+  app_settings: boolean;
+  point_history: boolean;
+}
+
+interface IStaff {
+  staffId: string;
+  staffName: string;
+  staffGrade: string;
+  staffPhoneNumber: string;
+  staffPassword: string;
+  permissions: IPermissions[];
+}
 
 
 const StaffManagementPage = () => {

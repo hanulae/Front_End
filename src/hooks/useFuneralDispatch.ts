@@ -56,16 +56,21 @@ export const useFuneralDispatch = () => {
           dispatchRequestId,
         );
 
-      if (response.success && transactionStatus !== null) {
-        return {
-          dispatchRequest: response.data,
-          transactionStatus: transactionStatus,
-        };
-      } else if (transactionStatus === null) {
-        return {
-          dispatchRequest: response.data,
-          transactionStatus: null,
-        };
+      if (response.success) {
+        const detailData = response.data;
+        setDispatchDetail(detailData); // state 업데이트 추가
+
+        if (transactionStatus !== null) {
+          return {
+            dispatchRequest: detailData,
+            transactionStatus: transactionStatus,
+          };
+        } else {
+          return {
+            dispatchRequest: detailData,
+            transactionStatus: null,
+          };
+        }
       } else {
         setError(
           response.message || '출동 신청 내역 상세 조회에 실패했습니다.',

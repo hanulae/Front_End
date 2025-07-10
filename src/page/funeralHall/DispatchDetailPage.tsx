@@ -19,9 +19,11 @@ const DispatchDetailPage = () => {
     }
   }, [dispatchRequestId, fetchDispatchDetail]);
 
-  // dispatchDetail 상태 업데이트
+  // dispatchDetail 상태 업데이트 (null이 아닐 때만)
   useEffect(() => {
-    setDetailData(dispatchDetail);
+    if (dispatchDetail) {
+      setDetailData(dispatchDetail);
+    }
   }, [dispatchDetail]);
 
   if (loading) {
