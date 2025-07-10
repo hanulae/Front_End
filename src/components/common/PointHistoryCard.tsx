@@ -10,6 +10,7 @@ interface IPointHistoryCardProps {
   transactionDate: string;
   amount: number;
   balance: number;
+  status: 'pending' | 'completed';
 }
 
 const PointHistoryCard = ({
@@ -18,19 +19,29 @@ const PointHistoryCard = ({
   transactionDate,
   amount,
   balance,
+  status,
 }: IPointHistoryCardProps) => {
   return (
     <View style={styles.wrapper}>
       <View style={styles.firstRow}>
-        <Typo
-          style={[
-            styles.typeText,
-            transactionType === 'refund'
-              ? styles.typeWithdraw
-              : styles.typeDeposit,
-          ]}>
-          {transactionType === 'refund' ? '출금' : '적립'}
-        </Typo>
+        <View style={styles.typeStatusContainer}>
+          <Typo
+            style={[
+              styles.typeText,
+              transactionType === 'refund'
+                ? styles.typeWithdraw
+                : styles.typeDeposit,
+            ]}>
+            {transactionType === 'refund' ? '출금' : '적립'}
+          </Typo>
+          {status === 'pending' && (
+            <Typo style={styles.pendingText}>대기중</Typo>
+          )}
+          {status === 'completed' && (
+            <Typo style={styles.completedText}>완료</Typo>
+          )}
+        </View>
+
         <View style={styles.amountContainer}>
           <Typo style={styles.amountText}>{amount}</Typo>
           {assetType === 'point' ? <PointIcon /> : <CashGrayIcon />}
@@ -65,6 +76,23 @@ const styles = StyleSheet.create({
     padding: 20,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(167, 169, 176, 0.15)',
+  },
+  typeStatusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  pendingText: {
+    fontSize: 14,
+    fontWeight: 500,
+    color: '#283042',
+    fontFamily: 'Pretendard-Bold',
+  },
+  completedText: {
+    fontSize: 14,
+    fontWeight: 500,
+    color: '#283042',
+    fontFamily: 'Pretendard-Bold',
   },
   amountContainer: {
     flexDirection: 'row',

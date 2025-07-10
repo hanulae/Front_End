@@ -28,6 +28,7 @@ interface ITransaction {
   transactionDate: string;
   amount: number;
   balance: number;
+  status: 'pending' | 'completed';
 }
 
 const PointHistoryPage = () => {
@@ -92,14 +93,13 @@ const PointHistoryPage = () => {
             ? '/manager/cash/history/list'
             : '/funeral/cash/history/list';
           const historyRes = await api.get(historyUrl);
-          console.log('🚀 ~ fetchPointAndCash ~ historyRes:', historyRes);
-          console.log('🚀 ~ historyRes.data:', historyRes.data);
-          console.log('🚀 ~ historyRes.data.data:', historyRes.data.data);
+          // console.log('🚀 ~ fetchPointAndCash ~ historyRes:', historyRes);
+          // console.log('🚀 ~ historyRes.data:', historyRes.data);
+          // console.log('🚀 ~ historyRes.data.data:', historyRes.data.data);
 
           // API 응답 데이터를 PointHistoryCard 형식에 맞게 변환
           const transformedTransactions = (historyRes.data.data || []).map(
             (transaction: any) => {
-              console.log('🚀 ~ processing transaction:', transaction);
               const transformed = {
                 id:
                   transaction.managerCashHistoryId ||
@@ -133,8 +133,8 @@ const PointHistoryPage = () => {
                   transaction.managerCashBalanceAfter ||
                   transaction.funeralCashBalanceAfter ||
                   0,
+                status: transaction.status,
               };
-              console.log('🚀 ~ transformed transaction:', transformed);
               return transformed;
             },
           );
@@ -295,6 +295,7 @@ const PointHistoryPage = () => {
                     transactionDate={item.transactionDate}
                     amount={item.amount}
                     balance={item.balance}
+                    status={item.status as 'pending' | 'completed'}
                   />
                 ))
               );
