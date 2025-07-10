@@ -6,8 +6,9 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
+  ScrollView,
 } from 'react-native';
-import {BankList} from '../../constant/BankList';
+import {BANK_LIST} from '../../constant/BankList';
 import Typo from './Typo';
 
 interface Props {
@@ -33,7 +34,26 @@ const BankSelectBottomSheet = ({visible, onClose, onSelect}: Props) => {
         useNativeDriver: true,
       }).start();
     }
-  }, [visible]);
+  }, [visible, translateY]);
+
+  // 배열을 3개씩 나누는 함수
+  const chunkArray = (array: any[], chunkSize: number) => {
+    const chunks = [];
+    for (let i = 0; i < array.length; i += chunkSize) {
+      chunks.push(array.slice(i, i + chunkSize));
+    }
+    return chunks;
+  };
+
+  const bankRows = chunkArray(BANK_LIST, 3);
+
+  // 괄호가 있으면 줄바꿈 처리하는 함수
+  const formatBankName = (bankName: string) => {
+    if (bankName.includes('(')) {
+      return bankName.replace('(', '\n(');
+    }
+    return bankName;
+  };
 
   return (
     <Modal visible={visible} transparent animationType="slide">
@@ -42,18 +62,28 @@ const BankSelectBottomSheet = ({visible, onClose, onSelect}: Props) => {
       </TouchableWithoutFeedback>
 
       <Animated.View style={[styles.sheet, {transform: [{translateY}]}]}>
-        {BankList.map(bank => (
-          <TouchableOpacity
-            style={styles.bank}
-            key={bank.name}
-            onPress={() => {
-              onSelect(bank.name);
-              onClose();
-            }}>
-            <bank.icon width={24} height={24} />
-            <Typo style={styles.bankName}>{bank.name}</Typo>
-          </TouchableOpacity>
-        ))}
+        <ScrollView
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={false}
+          bounces={false}>
+          {bankRows.map((row, rowIndex) => (
+            <View key={rowIndex} style={styles.bankRow}>
+              {row.map((bank: any) => (
+                <TouchableOpacity
+                  style={styles.bank}
+                  key={bank.name}
+                  onPress={() => {
+                    onSelect(bank.name);
+                    onClose();
+                  }}>
+                  <Typo style={styles.bankName}>
+                    {formatBankName(bank.name)}
+                  </Typo>
+                </TouchableOpacity>
+              ))}
+            </View>
+          ))}
+        </ScrollView>
       </Animated.View>
     </Modal>
   );
@@ -74,18 +104,28 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     paddingVertical: 20,
+    maxHeight: '70%',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  bankRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 5,
   },
   bank: {
-    flexDirection: 'row',
+    flex: 1,
     alignItems: 'center',
-    gap: 10,
     paddingVertical: 14,
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
   },
   bankName: {
     fontSize: 16,
     fontWeight: '500',
     fontFamily: 'PretendardLight',
     color: '#222',
+    textAlign: 'center',
+    lineHeight: 20,
   },
 });

@@ -1,29 +1,47 @@
-import KbIcon from '../assets/Bank/Bank_KB.svg';
-import ShinhanIcon from '../assets/Bank/Bank_SinHan.svg';
-import WooriIcon from '../assets/Bank/Bank_Woori.svg';
-import HanaIcon from '../assets/Bank/Bank_Hana.svg';
-import NHIcon from '../assets/Bank/Bank_NH.svg';
-import KakaobankIcon from '../assets/Bank/Bank_Kakao.svg';
-import CitiIcon from '../assets/Bank/Bank_Citi.svg';
-import PostIcom from '../assets/Bank/Bank_Post.svg';
-import KbankIcon from '../assets/Bank/Bank_Kbank.svg';
-import TossIcom from '../assets/Bank/Bank_Toss.svg';
-import MGIcom from '../assets/Bank/Bank_MG.svg';
-import ShIcon from '../assets/Bank/Bank_Sh.svg';
-import SCIcon from '../assets/Bank/Bank_SC.svg';
-
-export const BankList = [
-  {id: 'kb', name: '국민은행', icon: KbIcon},
-  {id: 'shinhan', name: '신한은행', icon: ShinhanIcon},
-  {id: 'woori', name: '우리은행', icon: WooriIcon},
-  {id: 'hana', name: '하나은행', icon: HanaIcon},
-  {id: 'nh', name: '농협은행', icon: NHIcon},
-  {id: 'kakaobank', name: '카카오뱅크', icon: KakaobankIcon},
-  {id: 'citi', name: '씨티은행', icon: CitiIcon},
-  {id: 'post', name: '우체국', icon: PostIcom},
-  {id: 'kbank', name: '케이뱅크', icon: KbankIcon},
-  {id: 'toss', name: '토스뱅크', icon: TossIcom},
-  {id: 'mg', name: 'MG새마을금고', icon: MGIcom},
-  {id: 'sh', name: 'Sh수협은행', icon: ShIcon},
-  {id: 'sc', name: 'SC제일은행', icon: SCIcon},
+export const BANK_LIST = [
+  {name: 'KB국민은행', code: '004'},
+  {name: 'SC제일은행', code: '023'},
+  {name: '경남은행', code: '039'},
+  {name: '광주은행', code: '034'},
+  {name: '기업은행', code: '003'},
+  {name: '농협', code: '011'},
+  {name: '대구은행', code: '031'},
+  {name: '부산은행', code: '032'},
+  {name: '산업은행', code: '002'},
+  {name: '수협', code: '007'},
+  {name: '신한은행', code: '088'},
+  {name: '신협', code: '048'},
+  {name: '외환은행', code: '005'},
+  {name: '우리은행', code: '020'},
+  {name: '우체국', code: '071'},
+  {name: '전북은행', code: '037'},
+  {name: '제주은행', code: '035'},
+  {name: '축협', code: '012'},
+  {name: '하나은행(서울은행)', code: '081'},
+  {name: '한국씨티은행(한미은행)', code: '027'},
+  {name: 'K뱅크', code: '089'},
+  {name: '카카오뱅크', code: '090'},
+  {name: '유안타증권', code: '209'},
+  {name: '현대증권', code: '218'},
+  {name: '미래에셋증권', code: '230'},
+  {name: '대우증권', code: '238'},
+  {name: '삼성증권', code: '240'},
+  {name: '한국투자증권', code: '243'},
+  {name: '우리투자증권', code: '247'},
+  {name: '교보증권', code: '261'},
+  {name: '하이투자증권', code: '262'},
+  {name: '에이치엠씨투자증권', code: '263'},
+  {name: '키움증권', code: '264'},
+  {name: '이트레이드증권', code: '265'},
+  {name: '에스케이증권', code: '266'},
+  {name: '대신증권', code: '267'},
+  {name: '솔로몬투자증권', code: '268'},
+  {name: '한화증권', code: '269'},
+  {name: '하나대투증권', code: '270'},
+  {name: '굿모닝신한증권', code: '278'},
+  {name: '동부증권', code: '279'},
+  {name: '유진투자증권', code: '280'},
+  {name: '메리츠증권', code: '287'},
+  {name: '엔에이치투자증권', code: '289'},
+  {name: '부국증권', code: '290'},
 ];
