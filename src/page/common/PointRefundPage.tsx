@@ -51,10 +51,9 @@ const PointRefundPage = () => {
     setSelectedAmount(null); // 입력값이 변경되면 선택된 버튼 해제
   };
 
-  const handleRefundRequest = async () => {
-    //TODO: 환급 요청 로직 추가
-    console.log('환급 요청 시도');
-    console.log('현재 포인트:', currentCash);
+  const handleCashCharge = async () => {
+    console.log('캐시 충전 시도');
+    console.log('현재 캐시:', currentCash);
     console.log('입력 금액:', inputAmount);
 
     const amount = parseInt(inputAmount, 10);
@@ -68,20 +67,12 @@ const PointRefundPage = () => {
       });
       return;
     }
+
     console.log('amount:', amount);
-    if (amount > currentCash) {
-      Toast.show({
-        type: 'error',
-        text1: '포인트 초과',
-        text2: '환급 요청 금액이 현재 포인트를 초과했습니다.',
-        position: 'top',
-      });
-      return;
-    }
-    console.log('amount123:', amount);
+
     try {
       const res = await api.post(
-        '/manager/cash/refund',
+        '/funeral/cash/charge',
         { amountCash: amount },
         {
           headers: {
@@ -92,19 +83,19 @@ const PointRefundPage = () => {
 
       Toast.show({
         type: 'success',
-        text1: '환급 요청 완료',
-        text2: '환급 요청이 성공적으로 처리되었습니다.',
+        text1: '충전 완료',
+        text2: '캐시 충전이 성공적으로 처리되었습니다.',
         position: 'top',
       });
 
       setInputAmount('');
       setSelectedAmount(null);
-      setCurrentCash(prev => prev - amount); // UI 반영용
+      setCurrentCash(prev => prev + amount);
     } catch (error: any) {
-      console.error('환급 요청 실패:', error.response?.data || error.message);
+      console.error('캐시 충전 실패:', error.response?.data || error.message);
       Toast.show({
         type: 'error',
-        text1: '환급 요청 실패',
+        text1: '캐시 충전 실패',
         text2: error.response?.data?.message || '오류가 발생했습니다.',
         position: 'top',
       });
@@ -143,7 +134,7 @@ const PointRefundPage = () => {
       backButton={true}
       homeButton={true}
       homeRouteName={variant === 'manager' ? 'ManagerMain' : 'FuneralMain'}
-      headerTitle={variant === 'manager' ? '환급' : '포인트 충전'}>
+      headerTitle={variant === 'manager' ? '환급' : '캐시 충전'}>
       <View style={styles.wrapper}>
         <View style={styles.balanceContainer}>
           <Typo style={styles.balanceTitle}>현재잔액</Typo>
@@ -192,7 +183,7 @@ const PointRefundPage = () => {
 
           <CustomButton
             style={styles.refundButton}
-            onPress={handleRefundRequest}>
+            onPress={handleCashCharge}>
             <Typo style={styles.refundButtonText}>
               {variant === 'manager' ? '환급 신청' : '충전 신청'}
             </Typo>
