@@ -1,9 +1,11 @@
 import {NavigationProp, useFocusEffect} from '@react-navigation/native';
 import {
   ImageBackground,
+  Linking,
   Platform,
   StatusBar,
   StyleSheet,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import Typo from '../../components/common/Typo';
@@ -130,11 +132,15 @@ const ManagerMainPage = ({navigation}: IManagerMainPageProps) => {
               </View>
             </CustomButton>
           </ImageBackground>
-          <View style={styles.footerContainer}>
+          <TouchableOpacity
+            style={styles.footerContainer}
+            onPress={() => Linking.openURL('tel:1661-1897')}>
+            {/* <TouchableOpacity onPress={() => Linking.openURL('tel:1661-1897')}> */}
             <InfoCenterIcon width={21.5} height={22} />
             <Typo style={styles.footerText}>고객센터</Typo>
-            <Typo style={styles.footerNumber}>02-123-4567</Typo>
-          </View>
+            <Typo style={styles.footerNumber}>1661-1897</Typo>
+            {/* </TouchableOpacity> */}
+          </TouchableOpacity>
         </View>
       </View>
     </ManagerLayout>
