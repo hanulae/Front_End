@@ -11,14 +11,65 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
+  Dimensions,
 } from 'react-native';
 import LoginIcon from '../../assets/Header/Header_Login.svg';
-import AlarmIcon from '../../assets/Header/Header_Alarm.svg';
 import MainSearchIcon from '../../assets/Main_FuneralSearch.svg';
 import MainAlarmIcon from '../../assets/Main_Alarm.svg';
 import MoveIcon from '../../components/svg/MoveIcon';
 import InfoCenterIcon from '../../assets/ServiceCenter.svg';
 import UserSelectSheet from '../../components/common/UserSelectSheet';
+
+const { width: screenWidth } = Dimensions.get('window');
+
+// 반응형 디자인 유틸리티 함수들
+const getResponsiveSize = (size: number) => {
+  const baseWidth = 375; // iPhone X 기준 너비
+  return (screenWidth / baseWidth) * size;
+};
+
+const getResponsiveFontSize = (size: number) => {
+  const baseWidth = 375;
+  const scale = screenWidth / baseWidth;
+  const newSize = size * scale;
+  
+  // 최소/최대 크기 제한
+  return Math.max(12, Math.min(newSize, size * 1.3));
+};
+
+// 버튼 텍스트 폰트 크기 조정 (더 작게)
+const getButtonFontSize = (size: number) => {
+  if (screenWidth < 350) return size * 0.7; // 작은 화면에서 더 작게
+  if (screenWidth < 400) return size * 0.8; // 중간 화면에서 조금 작게
+  return size * 0.9; // 큰 화면에서도 조금 작게
+};
+
+// 버튼 타이틀 폰트 크기 조정
+const getButtonTitleFontSize = (size: number) => {
+  if (screenWidth < 350) return size * 0.9; // 작은 화면에서 조금 더 크게
+  if (screenWidth < 400) return size * 1; // 중간 화면에서 더 크게
+  return size * 1; // 큰 화면에서 거의 원래 크기
+};
+
+const getResponsiveMargin = () => {
+  if (screenWidth < 350) return 12; // 작은 화면
+  if (screenWidth < 400) return 16; // 중간 화면
+  return 20; // 큰 화면
+};
+
+const getResponsivePadding = () => {
+  if (screenWidth < 350) return 8; // 작은 화면에서 패딩 줄임
+  if (screenWidth < 400) return 12; // 중간 화면에서 패딩 줄임
+  return 16; // 큰 화면에서도 패딩 줄임
+};
+
+// 버튼 크기 조정
+const getButtonSpacing = () => {
+  if (screenWidth < 350) return 6; // 작은 화면에서 간격 줄임
+  if (screenWidth < 400) return 8; // 중간 화면에서 간격 줄임
+  return 10; // 큰 화면에서도 간격 줄임
+};
+
 interface IMainPageProps {
   navigation: NavigationProp<any>;
 }
@@ -37,10 +88,6 @@ const MainPage = ({navigation}: IMainPageProps): JSX.Element => {
   );
   const goToLoginPage = () => {
     setShowSelectSheet(true);
-  };
-
-  const goToAlarmPage = () => {
-    console.log('Alarm Page');
   };
 
   const goToNoticePage = () => {
@@ -131,33 +178,33 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: '#3287F8',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    paddingBottom: 20,
+    paddingHorizontal: getResponsiveMargin(),
+    paddingTop: Platform.OS === 'ios' ? getResponsiveSize(60) : getResponsiveSize(40),
+    paddingBottom: getResponsiveMargin(),
   },
   appName: {
-    fontSize: 18,
+    fontSize: getResponsiveFontSize(18),
     fontWeight: '300',
     color: '#FFFFFF',
     fontFamily: 'KIMM_Light',
   },
   leftHeaderContainer: {
     flexDirection: 'row',
-    gap: 10,
+    gap: getButtonSpacing(),
   },
   loginButton: {
     flexDirection: 'row',
     // justifyContent: 'center',
     alignItems: 'center',
     // borderWidth: 1,
-    gap: 10,
+    gap: getButtonSpacing(),
     borderColor: '#000',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
+    paddingVertical: getResponsiveSize(5),
+    paddingHorizontal: getResponsiveSize(10),
   },
   buttonText: {
     fontWeight: '500',
-    fontSize: 14,
+    fontSize: getResponsiveFontSize(14),
   },
   alarmButton: {
     // backgroundColor: '#fff',
@@ -172,13 +219,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   mainTitleTextContainer: {
-    marginTop: 55,
-    marginHorizontal: 31,
-    marginBottom: 20,
-    gap: 10,
+    marginTop: getResponsiveSize(55),
+    marginHorizontal: getResponsiveSize(31),
+    marginBottom: getResponsiveMargin(),
+    gap: getButtonSpacing(),
   },
   mainTitleText: {
-    fontSize: 30,
+    fontSize: getResponsiveFontSize(30),
     fontWeight: '500',
     color: '#FFFFFF',
     fontFamily: 'GmarketSansTTFMedium',
@@ -186,11 +233,11 @@ const styles = StyleSheet.create({
   },
   mainSubTextContainer: {
     // marginHorizontal: 31,
-    marginBottom: 60,
-    gap: 5,
+    marginBottom: getResponsiveSize(60),
+    gap: getResponsiveSize(5),
   },
   mainSubText: {
-    fontSize: 14,
+    fontSize: getResponsiveFontSize(14),
     fontWeight: '500',
     color: '#FFFFFF',
     fontFamily: 'Pretendard-Medium',
@@ -201,47 +248,50 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
-    paddingHorizontal: 16,
-    paddingTop: 290,
-    // paddingBottom: 60,
-    gap: 12,
+    paddingHorizontal: getResponsiveSize(16),
+    paddingTop: screenWidth < 350 ? getResponsiveSize(250) : getResponsiveSize(290),
+    paddingBottom: getResponsiveSize(10),
+    gap: getButtonSpacing(),
   },
   innerButtonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 10,
+    gap: getButtonSpacing(),
     width: '100%',
   },
   SearchButton: {
     flex: 1,
     backgroundColor: '#fff',
-    borderRadius: 20,
-    paddingVertical: 20,
-    paddingHorizontal: 20,
+    borderRadius: getResponsiveSize(20),
+    paddingVertical: getResponsivePadding(),
+    paddingHorizontal: getResponsivePadding(),
+    minHeight: screenWidth < 350 ? getResponsiveSize(100) : getResponsiveSize(120),
+    justifyContent: 'flex-start',
   },
   NoticeButton: {
     flex: 1,
     backgroundColor: '#59A1FF',
-    borderRadius: 20,
-    paddingVertical: 20,
-    paddingHorizontal: 20,
+    borderRadius: getResponsiveSize(20),
+    paddingVertical: getResponsivePadding(),
+    paddingHorizontal: getResponsivePadding(),
+    minHeight: screenWidth < 350 ? getResponsiveSize(100) : getResponsiveSize(120),
+    justifyContent: 'flex-start',
   },
   buttonTextContainer: {
     flexDirection: 'column',
-    marginTop: 30,
-    // alignItems: 'center',
-    gap: 10,
+    marginTop: screenWidth < 350 ? getResponsiveSize(10) : getResponsiveSize(20),
+    gap: screenWidth < 350 ? getResponsiveSize(5) : getButtonSpacing(),
   },
   buttonTitle: {
-    fontSize: 20,
+    fontSize: getButtonTitleFontSize(20),
     fontWeight: '700',
     color: '#397CFF',
     fontFamily: 'Pretendard-Medium',
     textAlign: 'left',
   },
   buttonTitle2: {
-    fontSize: 20,
+    fontSize: getButtonTitleFontSize(20),
     fontWeight: '700',
     color: '#FFFFFF',
     fontFamily: 'Pretendard-Medium',
@@ -251,18 +301,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 5,
-    marginTop: 5,
+    gap: getResponsiveSize(5),
+    marginTop: screenWidth < 350 ? getResponsiveSize(2) : getResponsiveSize(5),
   },
   buttonSub: {
-    fontSize: 14,
+    fontSize: getButtonFontSize(14),
     fontWeight: '500',
     color: '#397CFF',
     fontFamily: 'Pretendard-Medium',
     textAlign: 'left',
   },
   buttonSub2: {
-    fontSize: 14,
+    fontSize: getButtonFontSize(14),
     fontWeight: '500',
     color: '#FFFFFF',
     fontFamily: 'Pretendard-Medium',
@@ -272,21 +322,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 12,
-    paddingVertical: 20,
+    gap: getButtonSpacing(),
+    paddingVertical: getResponsiveSize(10),
     backgroundColor: '#3287F8',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    // marginTop: 30,
+    borderTopLeftRadius: getResponsiveSize(20),
+    borderTopRightRadius: getResponsiveSize(20),
   },
   footerText: {
-    fontSize: 16,
+    fontSize: getResponsiveFontSize(16),
     fontWeight: '500',
     color: '#9FC9FF',
     fontFamily: 'Pretendard-Medium',
   },
   footerNumber: {
-    fontSize: 16,
+    fontSize: getResponsiveFontSize(16),
     fontWeight: '400',
     color: '#FFFFFF',
     fontFamily: 'GmarketSansTTFMedium',

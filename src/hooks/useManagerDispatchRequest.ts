@@ -3,6 +3,7 @@ import {
   CreateManagerDispatchRequestParams,
   managerDispatchRequestService,
 } from '../services/api/manager/managerDispatchRequestService';
+import {managerFormService} from '../services/api/manager/managerFormService';
 
 export const useManagerDispatchRequest = () => {
   const [loading, setLoading] = useState(false);
@@ -80,22 +81,29 @@ export const useManagerDispatchRequest = () => {
             dispatchRequestId,
           );
 
-        console.log('result: ', result);
         // 2. 거래 흐름 상태 조회
         const transactionStatus =
           await managerDispatchRequestService.getManagerDispatchRequestTransactionStatus(
             dispatchRequestId,
           );
 
+        // 3. 입찰 내용 조회
+        const getManagerFormBidDetail =
+          await managerFormService.getManagerFormBidDetail(
+            result.data.managerFormBidId,
+          );
+
         if (result.success && transactionStatus !== null) {
           return {
             dispatchRequest: result.data,
             transactionStatus: transactionStatus,
+            managerFormBidDetail: getManagerFormBidDetail,
           };
         } else if (transactionStatus === null) {
           return {
             dispatchRequest: result,
             transactionStatus: null,
+            managerFormBidDetail: getManagerFormBidDetail,
           };
         } else {
           setError(

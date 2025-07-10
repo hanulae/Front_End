@@ -38,7 +38,7 @@ interface ILoginPageProps {
 // interface ILoginPageParam {
 //   userType: 'manager' | 'funeral';
 // }
-const {height} = Dimensions.get('window');
+const {height, width: screenWidth} = Dimensions.get('window');
 const LoginPage = ({navigation}: ILoginPageProps) => {
   useFocusEffect(
     useCallback(() => {
@@ -285,7 +285,7 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
                   styles.tabText,
                   funeralTab === '대표' && styles.tabTextActive,
                 ]}>
-                대표 게정
+                대표 계정
               </Typo>
             </Pressable>
             <Pressable
@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     paddingHorizontal: 20,
     paddingVertical: 18,
-    gap: 35,
+    gap: screenWidth <= 360 ? 60 : 35, // Galaxy S9 등 작은 화면에서 더 큰 gap
     // alignItems: 'center',
   },
   formToolSection: {
@@ -390,6 +390,7 @@ const styles = StyleSheet.create({
     // flex: 3,
     // borderWidth: 1,
     flexDirection: 'column',
+    marginTop: screenWidth <= 360 ? 14 : 0,
     gap: 16,
     marginBottom: 32,
   },
@@ -419,7 +420,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: screenWidth <= 360 ? 14 : 8,
     gap: 12,
     paddingHorizontal: 20,
   },

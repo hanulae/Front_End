@@ -65,7 +65,27 @@ interface IStaffBottomSheetProps {
   onConfirm: () => void;
 }
 
-const {height} = Dimensions.get('window');
+const {height, width} = Dimensions.get('window');
+
+// 반응형 유틸리티 함수
+const getResponsiveValue = (value: number) => {
+  // Medium Phone 기준 너비 (360dp)
+  const baseWidth = 360;
+  const scale = width / baseWidth;
+  // 최소 0.8, 최대 1.2 배율로 제한
+  const clampedScale = Math.max(0.8, Math.min(1.2, scale));
+  return Math.round(value * clampedScale);
+};
+
+const getResponsiveFontSize = (size: number) => {
+  const scale = width / 360;
+  const clampedScale = Math.max(0.9, Math.min(1.1, scale));
+  return Math.round(size * clampedScale);
+};
+
+const getResponsiveHeight = (percentage: number) => {
+  return height * percentage;
+};
 
 const StaffBottomSheet = ({
   visible = false,
@@ -106,7 +126,7 @@ const StaffBottomSheet = ({
         toValue: height,
         duration: 200,
         useNativeDriver: true,
-      }).start(() => onClose());
+      }).start();
     }
   }, [visible, translateY]);
 
@@ -132,6 +152,7 @@ const StaffBottomSheet = ({
     };
 
     fetchUserInfo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -150,6 +171,7 @@ const StaffBottomSheet = ({
     } else if (mode === 'add') {
       staffPassword.onChangeText('Funeral1234!');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, _staff]);
 
   // 인증 요청 함수
@@ -383,7 +405,8 @@ const StaffBottomSheet = ({
     <Modal visible={visible} transparent animationType="none">
       <Pressable style={styles.backdropTouchable} onPress={onClose} />
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
         style={styles.keyboardAvoidingContainer}>
         <Animated.View style={[styles.sheet, {transform: [{translateY}]}]}>
           <ScrollView
@@ -410,6 +433,7 @@ const StaffBottomSheet = ({
               <Typo style={styles.inputTitle}>인증코드</Typo>
               <FuneralInput
                 input={authCode}
+                type="number"
                 placeholder="인증코드를 입력하세요"
               />
               <CustomButton
@@ -422,6 +446,7 @@ const StaffBottomSheet = ({
               <Typo style={styles.inputTitle}>직원 휴대전화번호</Typo>
               <FuneralInput
                 input={staffPhoneNumber}
+                type="phone"
                 placeholder="휴대전화번호을 입력하세요"
               />
               <CustomButton
@@ -534,21 +559,22 @@ const styles = StyleSheet.create({
   },
   sheet: {
     backgroundColor: '#fff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingTop: 24,
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-    height: height * 0.9,
+    borderTopLeftRadius: getResponsiveValue(10),
+    borderTopRightRadius: getResponsiveValue(10),
+    paddingTop: getResponsiveValue(24),
+    paddingHorizontal: getResponsiveValue(14),
+    paddingBottom: getResponsiveValue(10),
+    maxHeight: getResponsiveHeight(0.9),
+    minHeight: getResponsiveHeight(0.6),
   },
   titleContainer: {
-    marginBottom: 16,
+    marginBottom: getResponsiveValue(16),
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   titleText: {
-    fontSize: 18,
+    fontSize: getResponsiveFontSize(18),
     fontWeight: '700',
     color: '#283042',
     fontFamily: 'Pretendard-Black',
@@ -557,114 +583,112 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'flex-start',
     justifyContent: 'center',
-    paddingVertical: 20,
-    gap: 16,
+    paddingVertical: getResponsiveValue(15),
+    gap: getResponsiveValue(12),
   },
   phoneInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 10,
+    gap: getResponsiveValue(10),
   },
   checkButton: {
     alignSelf: 'stretch',
     alignItems: 'center',
-    paddingVertical: 18,
+    paddingVertical: getResponsiveValue(12),
     backgroundColor: '#FFFFFF',
-    borderRadius: 15,
+    borderRadius: getResponsiveValue(10),
     borderWidth: 1,
     borderColor: '#2D81F1',
   },
   button: {
     backgroundColor: 'black',
-    borderRadius: 10,
-    paddingVertical: 18,
-    paddingHorizontal: 20,
+    borderRadius: getResponsiveValue(10),
+    paddingVertical: getResponsiveValue(12),
+    paddingHorizontal: getResponsiveValue(20),
     alignItems: 'center',
     width: '100%',
   },
   buttonText: {
-    fontSize: 16,
+    fontSize: getResponsiveFontSize(16),
     fontWeight: '600',
     color: '#fff',
     fontFamily: 'Pretendard-Black',
   },
   checkButtonText: {
-    fontSize: 16,
+    fontSize: getResponsiveFontSize(16),
     fontWeight: '600',
     color: '#2D81F1',
     fontFamily: 'Pretendard-Black',
   },
   inputTitle: {
-    fontSize: 16,
+    fontSize: getResponsiveFontSize(16),
     fontWeight: '700',
     color: '#283042',
     fontFamily: 'Pretendard-Black',
   },
-
   mockInput: {
-    height: 48,
+    height: getResponsiveValue(48),
     backgroundColor: '#F5F6F8',
-    borderRadius: 8,
-    paddingHorizontal: 12,
+    borderRadius: getResponsiveValue(8),
+    paddingHorizontal: getResponsiveValue(12),
     textAlignVertical: 'center',
     color: '#999',
   },
   buttonContainer: {
-    marginVertical: 16,
+    marginVertical: getResponsiveValue(20),
     justifyContent: 'flex-end',
   },
   confirmButton: {
     backgroundColor: '#3287F8',
-    paddingVertical: 14,
-    borderRadius: 10,
+    paddingVertical: getResponsiveValue(14),
+    borderRadius: getResponsiveValue(10),
     alignItems: 'center',
   },
   confirmText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: getResponsiveFontSize(16),
     fontWeight: '600',
     fontFamily: 'Pretendard-Black',
   },
   scrollContainer: {
-    // flex: 1,
-    flexGrow: 0,
+    flex: 1,
   },
   scrollContent: {
-    paddingBottom: 40,
+    paddingBottom: getResponsiveValue(20),
   },
   permissionContainer: {
     width: '100%',
-    gap: 12,
+    gap: getResponsiveValue(12),
   },
   permissionRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 12,
+    gap: getResponsiveValue(12),
   },
   permissionButton: {
     flex: 1,
-    padding: 12,
+    padding: getResponsiveValue(12),
     backgroundColor: '#F5F6F8',
-    borderRadius: 8,
+    borderRadius: getResponsiveValue(8),
     borderWidth: 1,
     borderColor: '#E6EAF3',
   },
   singlePermissionButton: {
-    flex: 0.45, // 전체 너비의 절반만 차지
-    alignSelf: 'flex-start', // 왼쪽 정렬
+    flex: 0.45,
+    alignSelf: 'flex-start',
   },
   permissionContentWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: getResponsiveValue(8),
   },
   permissionIcon: {
-    width: 18,
-    height: 18,
+    width: getResponsiveValue(18),
+    height: getResponsiveValue(18),
   },
   permissionLabelText: {
-    fontSize: 14,
+    fontSize: getResponsiveFontSize(14),
     fontWeight: '600',
     color: '#283042',
     fontFamily: 'Pretendard-Medium',
@@ -673,14 +697,13 @@ const styles = StyleSheet.create({
   phoneBoxContainer: {
     width: '100%',
     backgroundColor: '#F5F6F8',
-    borderRadius: 8,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    marginBottom: 10,
+    borderRadius: getResponsiveValue(8),
+    paddingVertical: getResponsiveValue(14),
+    paddingHorizontal: getResponsiveValue(16),
+    marginBottom: getResponsiveValue(10),
   },
-
   phoneBoxText: {
-    fontSize: 16,
+    fontSize: getResponsiveFontSize(16),
     color: '#000',
     fontWeight: '500',
     fontFamily: 'Pretendard-Medium',

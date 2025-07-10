@@ -7,12 +7,14 @@ interface IInputProps {
   type?: 'text' | 'password' | 'phone' | 'number' | 'email';
   placeholder?: string;
   label?: string;
+  onFocus?: () => void;
 }
 
 export const Input = ({
   input,
   type = 'text',
   placeholder,
+  onFocus,
 }: // label,
 IInputProps) => {
   // const [secure, setSecure] = useState(type === 'password');
@@ -40,7 +42,10 @@ IInputProps) => {
         input.onBlur();
         setFocused(false);
       }}
-      onFocus={() => setFocused(true)}
+      onFocus={() => {
+        setFocused(true);
+        onFocus?.();
+      }}
       error={input.error}
       secureTextEntry={type === 'password' ? secure : false}
       placeholder={placeholder}

@@ -22,11 +22,14 @@ import {useManagerDispatchRequest} from '../../hooks/useManagerDispatchRequest';
 import Toast from 'react-native-toast-message';
 import {Alert} from 'react-native';
 import {GetManagerDispatchRequestTransactionStatus} from '../../services/api/manager/managerDispatchRequestService';
+import {GetManagerFormBidDetailResponse} from '../../services/api/manager/managerFormService';
 
 const ProceedCallPage = () => {
   const navigation = useNavigation<NavigationProp<any>>();
   const route = useRoute();
   const {callId} = route.params as {callId: string};
+
+  console.log('dispatchRequestId: ', callId);
 
   // API 훅 사용
   const {
@@ -41,6 +44,10 @@ const ProceedCallPage = () => {
   const [dispatchDetail, setDispatchDetail] = useState<any>(null);
   const [transactionStatus, setTransactionStatus] =
     useState<GetManagerDispatchRequestTransactionStatus | null>(null);
+  const [managerFormBidDetail, setManagerFormBidDetail] =
+    useState<GetManagerFormBidDetailResponse | null>(null);
+
+  console.log('!!!! dispatchDetail: ', dispatchDetail);
 
   // 새로고침 상태 추가
   const [refreshing, setRefreshing] = useState(false);
@@ -74,12 +81,86 @@ const ProceedCallPage = () => {
     return dispatchDetail.isApproved;
   };
 
+  // 장례식장 입찰 정보 렌더링
+  const renderBidInfo = () => {
+    if (!managerFormBidDetail?.data) return null;
+
+    const bidData = managerFormBidDetail.data;
+
+    return (
+      <View style={styles.bidInfoSection}>
+        <View style={styles.bidInfoHeader}>
+          <Typo style={styles.bidInfoTitle}>
+            {bidData.funeralName} 입찰정보
+          </Typo>
+        </View>
+
+        <View style={styles.bidInfoContent}>
+          {/* 기본 정보 */}
+          <View style={styles.bidInfoItem}>
+            <Typo style={styles.bidInfoLabelText}>호실명:</Typo>
+            <Typo style={styles.bidInfoValue}>{bidData.funeralHallName}</Typo>
+          </View>
+
+          <View style={styles.bidInfoItem}>
+            <Typo style={styles.bidInfoLabelText}>평수:</Typo>
+            <Typo style={styles.bidInfoValue}>{bidData.funeralHallSize}평</Typo>
+          </View>
+
+          <View style={styles.bidInfoItem}>
+            <Typo style={styles.bidInfoLabelText}>수용인원:</Typo>
+            <Typo style={styles.bidInfoValue}>
+              {bidData.funeralHallNumberOfMourners}명
+            </Typo>
+          </View>
+
+          <View style={styles.bidInfoItem}>
+            <Typo style={styles.bidInfoLabelText}>식장지불금액:</Typo>
+            <Typo style={styles.bidInfoValue}>
+              {bidData.funeralHallDetailPrice}만원
+            </Typo>
+          </View>
+
+          <View style={styles.bidInfoItem}>
+            <Typo style={styles.bidInfoLabelText}>호실사용료:</Typo>
+            <Typo style={styles.bidInfoValue}>
+              {bidData.funeralHallPrice}만원
+            </Typo>
+          </View>
+
+          <View style={styles.bidInfoItem}>
+            <Typo style={styles.bidInfoLabelText}>
+              합계 (시장지불금액 + 호실사용료):
+            </Typo>
+            <Typo style={[styles.bidInfoValue, styles.strikethrough]}>
+              {bidData.funeralHallDetailPrice + bidData.funeralHallPrice}만원
+            </Typo>
+          </View>
+
+          <View style={styles.bidInfoItem}>
+            <Typo style={styles.bidInfoLabelText}>제안가:</Typo>
+            <Typo style={[styles.bidInfoValue, styles.proposalPriceText]}>
+              {bidData.funeralProponentMoney}만원
+            </Typo>
+          </View>
+
+          <View style={styles.bidInfoItem}>
+            <Typo style={styles.bidInfoLabelText}>할인율:</Typo>
+            <Typo style={[styles.bidInfoValue, styles.discountRateText]}>
+              {bidData.funeralDiscount}%
+            </Typo>
+          </View>
+        </View>
+      </View>
+    );
+  };
+
   // 데이터 로드
   const loadDispatchDetail = useCallback(async () => {
     try {
       const result = await getManagerDispatchRequestDetail(callId);
 
-      console.log('result: ', result);
+      console.log('!!!!result: ', result);
 
       if (
         result &&
@@ -88,8 +169,10 @@ const ProceedCallPage = () => {
       ) {
         setDispatchDetail(result.dispatchRequest);
         setTransactionStatus(result.transactionStatus);
+        setManagerFormBidDetail(result.managerFormBidDetail);
       } else if (result && result.dispatchRequest) {
         setDispatchDetail(result.dispatchRequest);
+        setManagerFormBidDetail(result.managerFormBidDetail);
       } else {
         console.log('❌ 출동 신청 상세 정보 로드 실패');
       }
@@ -558,6 +641,15 @@ const ProceedCallPage = () => {
         {/* 데이터 표시 */}
         {!loading && !error && dispatchDetail && (
           <>
+            {/* 장례식장 입찰 정보 */}
+            {renderBidInfo()}
+
+            {/* 출동 신청서 정보 */}
+
+            <View style={styles.dispatchHeader}>
+              <Typo style={styles.dispatchTitle}>출동 신청 내용</Typo>
+            </View>
+
             {/* 주소 정보 */}
             <View style={styles.section}>
               <Typo style={styles.label}>주소</Typo>
@@ -644,6 +736,149 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 40,
+  },
+  // 장례식장 입찰 정보 섹션
+  bidInfoSection: {
+    // margin: 10,
+    padding: 20,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 10,
+  },
+  bidInfoHeader: {
+    marginBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  bidStatusRow: {
+    marginBottom: 20,
+    alignItems: 'flex-start',
+  },
+  bidInfoTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#283042',
+    fontFamily: 'Pretendard-Black',
+    marginBottom: 16,
+  },
+  bidStatusContainer: {
+    backgroundColor: '#E3F2FD',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#42A5F5',
+  },
+  bidStatusText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#1976D2',
+    fontFamily: 'Pretendard-SemiBold',
+  },
+  bidInfoContent: {
+    gap: 8,
+  },
+  bidInfoItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  bidInfoLabel: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  bidInfoLabelText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#666',
+    fontFamily: 'Pretendard-Black',
+  },
+  bidInfoValue: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#283042',
+    fontFamily: 'Pretendard-Black',
+  },
+  strikethrough: {
+    textDecorationLine: 'line-through',
+  },
+  proposalPriceText: {
+    color: '#2D81F1',
+  },
+  discountRateText: {
+    color: '#FF4444',
+  },
+  dispatchSection: {
+    margin: 20,
+    marginBottom: 0,
+    padding: 20,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 10,
+  },
+  dispatchHeader: {
+    marginTop: 16,
+    padding: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    paddingBottom: 12,
+  },
+  dispatchTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#283042',
+    fontFamily: 'Pretendard-Black',
+  },
+  // 가격 정보 섹션
+  priceInfoSection: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 8,
+    padding: 16,
+    marginTop: 16,
+  },
+  priceInfoHeader: {
+    marginBottom: 16,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  priceInfoTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    fontFamily: 'Pretendard-SemiBold',
+  },
+  priceInfoItem: {
+    backgroundColor: '#ffffff',
+    padding: 12,
+    borderRadius: 6,
+    marginBottom: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  priceInfoLabel: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  priceText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#2D81F1',
+    fontFamily: 'Pretendard-Bold',
+  },
+  proponentMoneyText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FF6B35',
+    fontFamily: 'Pretendard-Bold',
+  },
+  discountText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#4CAF50',
+    fontFamily: 'Pretendard-Bold',
   },
   section: {
     marginBottom: 24,

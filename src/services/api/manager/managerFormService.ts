@@ -66,6 +66,7 @@ interface GetManagerFormBidDetailResponse {
     managerFormBidId: string;
     managerFormId: string;
     funeralId: string;
+    funeralName: string;
     funeralHallName: string;
     funeralHallSize: number;
     funeralHallNumberOfMourners: number;
@@ -136,6 +137,9 @@ export const managerFormService = {
       const response = await api.get(
         `/manager/form/bid/detail/${managerFormBidId}`,
       );
+
+      console.log('!!!! response: ', response.data);
+
       return response.data;
     } catch (error: any) {
       console.log('견적 입찰 상세 조회 에러: ', error.message);

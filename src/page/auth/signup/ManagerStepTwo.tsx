@@ -5,6 +5,8 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import {signupAtom, AttachedFile} from '../../../state/local_state/signupAtom';
 import {Input} from '../../../components/common/input/Input';
@@ -14,15 +16,11 @@ import CustomButton from '../../../components/common/CustomButton';
 import Typo from '../../../components/common/Typo';
 import {useState, useMemo, useEffect} from 'react';
 import AlbumBottomSheet from '../../../components/common/AlbumBottomSheet';
-import AlbumIcon from '../../../assets/Attachment/Attach_ImageActive.svg';
-import FileIcon from '../../../assets/Attachment/Attach_FileDisable.svg';
-import ImagePreviewList, {
+import {convertUrisToFiles} from '../../../util/image';
+import {
   IImage,
 } from '../../../components/common/ImagePreviewList';
-import {convertUrisToFiles} from '../../../util/image';
-import {getLocalFileCopies, LocalFile} from '../../../util/file';
-import {pick} from '@react-native-documents/picker';
-import FileList from '../../../components/common/FileList';
+import {LocalFile} from '../../../util/file';
 import Toast from 'react-native-toast-message';
 import api from '../../../api/config';
 
@@ -41,6 +39,7 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
   const [showAlbum, setShowAlbum] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<LocalFile[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
   // 총 첨부파일 개수 계산
   const totalAttachedCount = useMemo(() => {
@@ -51,6 +50,21 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
   const isNextEnabled = useMemo(() => {
     return signupInfo.isPhoneVerified === true;
   }, [signupInfo.isPhoneVerified]);
+
+  // 키보드 이벤트 감지
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
+      setIsKeyboardVisible(true);
+    });
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setIsKeyboardVisible(false);
+    });
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
 
   // signupInfo에서 첨부파일 복원
   useEffect(() => {
@@ -84,22 +98,18 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
     }
   }, [signupInfo.attachedFiles, isInitialized]);
 
-  console.log('selectedFiles', selectedFiles);
   const closeAlbum = () => {
     setShowAlbum(false);
-    // setSelectedUris([]);
   };
 
-  console.log('selectedImages', selectedImages);
-
   const handleNext = () => {
-    console.log('handleNext');
     if (!signupInfo.isPhoneVerified) {
       Toast.show({
         type: 'error',
         text1: '인증 오류',
         text2: '전화번호 인증을 완료해주세요.',
         position: 'top',
+        topOffset: -150,
       });
       return;
     }
@@ -116,81 +126,6 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
     onPrev();
   };
 
-  const handleOpenAlbum = () => {
-    setShowAlbum(true);
-    // albumSheetRef.current?.snapToIndex(0); // BottomSheet 열기
-  };
-
-  const handleAddFile = (newFiles: LocalFile[]) => {
-    const nonDuplicateFiles = newFiles.filter(
-      newFile =>
-        !selectedFiles.some(existingFile => existingFile.uri === newFile.uri),
-    );
-
-    if (nonDuplicateFiles.length === 0) {
-      return;
-    }
-
-    // 최대 개수 체크
-    if (totalAttachedCount + nonDuplicateFiles.length > 10) {
-      Toast.show({
-        type: 'error',
-        text1: '첨부파일 개수 초과',
-        text2: '최대 10개까지만 첨부할 수 있습니다.',
-        position: 'top',
-      });
-      return;
-    }
-
-    const newSelectedFiles = [...selectedFiles, ...nonDuplicateFiles];
-    setSelectedFiles(newSelectedFiles);
-
-    // 즉시 signupInfo 업데이트
-    const attachedFiles: AttachedFile[] = [
-      ...selectedImages.map(img => ({
-        uri: img.uri,
-        name: img.name,
-        type: img.type,
-        file: img.file,
-      })),
-      ...newSelectedFiles.map(file => ({
-        uri: file.uri,
-        name: file.name,
-        type: file.type,
-      })),
-    ];
-
-    setSignupInfo(prev => ({
-      ...prev,
-      attachedFiles,
-    }));
-  };
-
-  const handleDeleteFile = (index: number) => {
-    const newSelectedFiles = selectedFiles.filter((_, i) => i !== index);
-    setSelectedFiles(newSelectedFiles);
-
-    // 즉시 signupInfo 업데이트
-    const attachedFiles: AttachedFile[] = [
-      ...selectedImages.map(img => ({
-        uri: img.uri,
-        name: img.name,
-        type: img.type,
-        file: img.file,
-      })),
-      ...newSelectedFiles.map(file => ({
-        uri: file.uri,
-        name: file.name,
-        type: file.type,
-      })),
-    ];
-
-    setSignupInfo(prev => ({
-      ...prev,
-      attachedFiles,
-    }));
-  };
-
   const handleSelectImages = async (uris: string[]) => {
     const newUris = uris.filter(
       uri => !selectedImages.some(img => img.uri === uri),
@@ -204,6 +139,7 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
         text1: '첨부파일 개수 초과',
         text2: '최대 10개까지만 첨부할 수 있습니다.',
         position: 'top',
+        topOffset: -150,
       });
       return;
     }
@@ -241,42 +177,37 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
   };
 
   const handleRequestCode = async () => {
-    console.log('인증 코드 요청:', phoneNumber.value);
     try {
-      const res = await api.post('/manager/sms/send', {
+      await api.post('/manager/sms/send', {
         phoneNumber: phoneNumber.value,
         userType: 'manager',
         status: 'signup',
       });
-      console.log('📨 인증번호 전송 성공:', res.data);
       Toast.show({
         type: 'success',
         text1: '인증번호가 발송되었습니다.',
         position: 'top',
+        topOffset: -150,
       });
     } catch (error: any) {
-      console.log(
-        '❌ 인증번호 전송 실패:',
-        error.response?.data || error.message,
-      );
       Toast.show({
         type: 'error',
         text1: '인증번호 전송 실패',
         text2: error.response?.data?.message || '오류가 발생했습니다.',
         position: 'top',
+        topOffset: -150,
       });
     }
   };
 
   const handleVerifyCode = async () => {
-    console.log('인증 코드 확인:', authCode.value);
-
     if (!phoneNumber.value || !authCode.value) {
       Toast.show({
         type: 'error',
         text1: '입력 오류',
         text2: '전화번호와 인증코드를 모두 입력해주세요.',
         position: 'top',
+        topOffset: -150,
       });
       return;
     }
@@ -292,6 +223,7 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
           type: 'success',
           text1: '인증 성공',
           position: 'top',
+          topOffset: -150,
         });
 
         // 인증 상태 저장
@@ -306,15 +238,16 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
           text1: '인증 실패',
           text2: '인증코드가 틀렸거나 만료되었습니다.',
           position: 'top',
+          topOffset: -150,
         });
       }
     } catch (error: any) {
-      console.log('❌ 인증 실패:', error.response?.data || error.message);
       Toast.show({
         type: 'error',
         text1: '서버 오류',
         text2: error.response?.data?.message || '잠시 후 다시 시도해주세요.',
         position: 'top',
+        topOffset: -150,
       });
     }
   };
@@ -337,136 +270,100 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
   // };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.wrapper}>
-        <View style={styles.formContainer}>
-          {/* 휴대전화번호 인증 */}
-          <View style={styles.container}>
-            <Typo fontSize={16} style={styles.containerTitle}>
-              휴대전화번호 인증
-            </Typo>
-            <View style={styles.authSection}>
-              <Input
-                input={phoneNumber}
-                placeholder="전화번호를 입력하세요."
-                type="phone"
-              />
-              <CustomButton
-                onPress={handleRequestCode}
-                style={[styles.requestButton, { backgroundColor: '#2D81F1' }]}
-              >
-                <Typo color="white" fontSize={14} style={{ fontWeight: '700' }}>
-                  인증코드받기
+    <KeyboardAvoidingView
+      style={styles.keyboardAvoidingView}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.wrapper}>
+            <View style={styles.formContainer}>
+              {/* 휴대전화번호 인증 */}
+              <View style={styles.container}>
+                <Typo fontSize={16} style={styles.containerTitle}>
+                  휴대전화번호 인증
                 </Typo>
-              </CustomButton>
-            </View>
-          </View>
-          {/* 인증코드 확인 */}
-          <View style={styles.container}>
-            <Typo fontSize={16} style={styles.containerTitle}>
-              인증코드 확인
-            </Typo>
-            <View style={styles.verifySection}>
-              <Input
-                input={authCode}
-                placeholder="인증코드를 입력하세요."
-                type="number"
-              />
-              <CustomButton
-                onPress={handleVerifyCode}
-                style={[styles.requestButton, { backgroundColor: '#2D81F1' }]}
-              >
-                <Typo color="white" fontSize={14} style={{ fontWeight: '700' }}>
-                  인증코드확인
+                <View style={styles.authSection}>
+                  <Input
+                    input={phoneNumber}
+                    placeholder="전화번호를 입력하세요."
+                    type="phone"
+                  />
+                  <CustomButton
+                    onPress={handleRequestCode}
+                    style={[styles.requestButton, { backgroundColor: '#2D81F1' }]}
+                  >
+                    <Typo color="white" fontSize={14} style={{ fontWeight: '700' }}>
+                      인증코드받기
+                    </Typo>
+                  </CustomButton>
+                </View>
+              </View>
+              {/* 인증코드 확인 */}
+              <View style={styles.container}>
+                <Typo fontSize={16} style={styles.containerTitle}>
+                  인증코드 확인
                 </Typo>
-              </CustomButton>
+                <View style={styles.verifySection}>
+                  <Input
+                    input={authCode}
+                    placeholder="인증코드를 입력하세요."
+                    type="number"
+                  />
+                  <CustomButton
+                    onPress={handleVerifyCode}
+                    style={[styles.requestButton, { backgroundColor: '#2D81F1' }]}
+                  >
+                    <Typo color="white" fontSize={14} style={{ fontWeight: '700' }}>
+                      인증코드확인
+                    </Typo>
+                  </CustomButton>
+                </View>
+              </View>
             </View>
-          </View>
-          {/* 첨부파일 */}
-          {/* <View style={styles.container}>
-          <Typo fontSize={16} style={styles.containerTitle}>
-            첨부파일 ({totalAttachedCount}/10)
-          </Typo>
-          <View style={styles.imagePreviewContainer}>
-            <ImagePreviewList
-              images={selectedImages}
-              onDelete={index => {
-                const newSelectedImages = selectedImages.filter(
-                  (_, i) => i !== index,
-                );
-                setSelectedImages(newSelectedImages);
+            {/* 키보드가 보이지 않을 때만 버튼 표시 */}
+            {!isKeyboardVisible && (
+              <View style={styles.bottomButtonContainer}>
+                <CustomButton onPress={handlePrev} style={styles.button}>
+                  <Typo style={styles.buttonText}>이전</Typo>
+                </CustomButton>
 
-                // 즉시 signupInfo 업데이트
-                const attachedFiles: AttachedFile[] = [
-                  ...newSelectedImages.map(img => ({
-                    uri: img.uri,
-                    name: img.name,
-                    type: img.type,
-                    file: img.file,
-                  })),
-                  ...selectedFiles.map(file => ({
-                    uri: file.uri,
-                    name: file.name,
-                    type: file.type,
-                  })),
-                ];
-
-                setSignupInfo(prev => ({
-                  ...prev,
-                  attachedFiles,
-                }));
-              }}
-              scrollEnabled={true}
-            />
+                <CustomButton
+                  onPress={handleNext}
+                  style={[
+                    styles.button,
+                    {backgroundColor: isNextEnabled ? '#2D81F1' : '#C0C0C0'}, // 비활성 시 회색
+                  ]}
+                  disabled={!isNextEnabled}>
+                  <Typo style={styles.buttonText}>다음</Typo>
+                </CustomButton>
+              </View>
+            )}
           </View>
-          <FileList files={selectedFiles} onDelete={handleDeleteFile} />
-          <View style={styles.buttonContainer}>
-            <CustomButton style={styles.imageButton} onPress={handleOpenAlbum}>
-              <AlbumIcon width={24} height={24} />
-              <Typo fontSize={14} style={styles.imageButtonText}>
-                사진첨부
-              </Typo>
-            </CustomButton>
-            <CustomButton style={styles.fileButton} onPress={handlePickFiles}>
-              <FileIcon width={24} height={24} />
-              <Typo fontSize={14} style={styles.fileButtonText}>
-                파일첨부
-              </Typo>
-            </CustomButton>
-          </View>
+          <AlbumBottomSheet
+            onSelect={handleSelectImages}
+            visible={showAlbum}
+            onClose={closeAlbum}
+          />
           <Toast />
-        </View> */}
-        </View>
-        {/* 버튼 */}
-        <View style={styles.bottomButtonContainer}>
-          <CustomButton onPress={handlePrev} style={styles.button}>
-            <Typo style={styles.buttonText}>이전</Typo>
-          </CustomButton>
-
-          <CustomButton
-            onPress={handleNext}
-            style={[
-              styles.button,
-              {backgroundColor: isNextEnabled ? '#2D81F1' : '#C0C0C0'}, // 비활성 시 회색
-            ]}
-            disabled={!isNextEnabled}>
-            <Typo style={styles.buttonText}>다음</Typo>
-          </CustomButton>
-        </View>
-        <AlbumBottomSheet
-          onSelect={handleSelectImages}
-          visible={showAlbum}
-          onClose={closeAlbum}
-        />
-        <Toast />
-      </View>
-    </TouchableWithoutFeedback>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
 
 export default ManagerStepTwo;
 
 const styles = StyleSheet.create({
+  keyboardAvoidingView: {
+    flex: 1,
+  },
+  scrollContainer: {
+    flexGrow: 1,
+  },
   wrapper: {
     flexGrow: 1,
     padding: 16,

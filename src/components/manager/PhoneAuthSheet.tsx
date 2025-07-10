@@ -98,7 +98,7 @@ const PhoneAuthSheet = ({
         '/manager/sms/update/send',
         { managerPhone: phone,
           userType: 'manager'
-         }
+        }
       );
   
       console.log('📨 인증번호 전송 성공:', res.data);
@@ -132,7 +132,7 @@ const PhoneAuthSheet = ({
     };
 
     fetchManagerPhoneNumber();
-  }, []);
+  }, [phoneNumber]);
 
   useEffect(() => {
     Animated.timing(translateY, {
@@ -140,7 +140,7 @@ const PhoneAuthSheet = ({
       duration: 300,
       useNativeDriver: true,
     }).start();
-  }, [visible]);
+  }, [visible, translateY]);
 
   if (!visible) {
     return null;
@@ -163,7 +163,7 @@ const PhoneAuthSheet = ({
             </Typo>
           </View>
           <View style={styles.authSection}>
-            <Input input={phoneNumber} placeholder="전화번호를 입력하세요." />
+            <Input input={phoneNumber} type="phone" placeholder="전화번호를 입력하세요." />
             <Pressable
               onPressIn={() => setIsPressed(true)}
               onPressOut={() => setIsPressed(false)}
@@ -183,7 +183,7 @@ const PhoneAuthSheet = ({
             </Typo>
           </View>
           <View style={styles.authSection}>
-            <Input input={authCode} placeholder="인증코드를 입력하세요." />
+            <Input input={authCode} type="number" placeholder="인증코드를 입력하세요." />
           </View>
           <View style={styles.authSection}>
             <CustomButton onPress={confirmCode} style={styles.confirmButton}>
