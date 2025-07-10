@@ -263,7 +263,7 @@ const PointHistoryPage = () => {
               style={styles.actionButton}
               onPress={handlePointCharge}>
               <Typo style={styles.actionButtonText}>
-                {variant === 'manager' ? '캐시 환급' : '포인트 충전'}
+                {variant === 'manager' ? '캐시 환급' : '캐시 충전'}
               </Typo>
             </CustomButton>
           </View>

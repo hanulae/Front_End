@@ -143,7 +143,7 @@ const PointRefundPage = () => {
       backButton={true}
       homeButton={true}
       homeRouteName={variant === 'manager' ? 'ManagerMain' : 'FuneralMain'}
-      headerTitle={variant === 'manager' ? '환급' : '포인트 충전'}>
+      headerTitle={variant === 'manager' ? '환급' : '캐시 충전'}>
       <View style={styles.wrapper}>
         <View style={styles.balanceContainer}>
           <Typo style={styles.balanceTitle}>현재잔액</Typo>
