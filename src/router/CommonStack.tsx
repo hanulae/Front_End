@@ -8,6 +8,8 @@ import FuneralSearchPage from '../page/common/FuneralSearchPage';
 import AgreementDetailPage from '../page/auth/signup/AgreementDetialPage';
 import SignupComplete from '../page/auth/signup/SignupComplete';
 import FuneralDetailPage from '../page/teamManager/FuneralDetailPage';
+import NoticePage from '../page/common/NoticePage';
+import NoticeDetailPage from '../page/common/NoticeDetailPage';
 
 const Stack = createNativeStackNavigator();
 
@@ -25,6 +27,8 @@ const CommonStack = () => {
       <Stack.Screen name="FindFuneral" component={FuneralSearchPage} />
       <Stack.Screen name="AgreementDetail" component={AgreementDetailPage} />
       <Stack.Screen name="FuneralDetail" component={FuneralDetailPage} />
+      <Stack.Screen name="Notice" component={NoticePage} />
+      <Stack.Screen name="NoticeDetail" component={NoticeDetailPage} />
     </Stack.Navigator>
   );
 };

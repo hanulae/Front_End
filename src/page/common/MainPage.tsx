@@ -20,7 +20,7 @@ import MoveIcon from '../../components/svg/MoveIcon';
 import InfoCenterIcon from '../../assets/ServiceCenter.svg';
 import UserSelectSheet from '../../components/common/UserSelectSheet';
 
-const { width: screenWidth } = Dimensions.get('window');
+const {width: screenWidth} = Dimensions.get('window');
 
 // 반응형 디자인 유틸리티 함수들
 const getResponsiveSize = (size: number) => {
@@ -32,7 +32,7 @@ const getResponsiveFontSize = (size: number) => {
   const baseWidth = 375;
   const scale = screenWidth / baseWidth;
   const newSize = size * scale;
-  
+
   // 최소/최대 크기 제한
   return Math.max(12, Math.min(newSize, size * 1.3));
 };
@@ -92,6 +92,7 @@ const MainPage = ({navigation}: IMainPageProps): JSX.Element => {
 
   const goToNoticePage = () => {
     console.log('Notice Page');
+    navigation.navigate('Notice');
   };
 
   const goToSearchPage = () => {
@@ -179,7 +180,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#3287F8',
     alignItems: 'center',
     paddingHorizontal: getResponsiveMargin(),
-    paddingTop: Platform.OS === 'ios' ? getResponsiveSize(60) : getResponsiveSize(40),
+    paddingTop:
+      Platform.OS === 'ios' ? getResponsiveSize(60) : getResponsiveSize(40),
     paddingBottom: getResponsiveMargin(),
   },
   appName: {
@@ -249,7 +251,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-end',
     paddingHorizontal: getResponsiveSize(16),
-    paddingTop: screenWidth < 350 ? getResponsiveSize(250) : getResponsiveSize(290),
+    paddingTop:
+      screenWidth < 350 ? getResponsiveSize(250) : getResponsiveSize(290),
     paddingBottom: getResponsiveSize(10),
     gap: getButtonSpacing(),
   },
@@ -266,7 +269,8 @@ const styles = StyleSheet.create({
     borderRadius: getResponsiveSize(20),
     paddingVertical: getResponsivePadding(),
     paddingHorizontal: getResponsivePadding(),
-    minHeight: screenWidth < 350 ? getResponsiveSize(100) : getResponsiveSize(120),
+    minHeight:
+      screenWidth < 350 ? getResponsiveSize(100) : getResponsiveSize(120),
     justifyContent: 'flex-start',
   },
   NoticeButton: {
@@ -275,12 +279,14 @@ const styles = StyleSheet.create({
     borderRadius: getResponsiveSize(20),
     paddingVertical: getResponsivePadding(),
     paddingHorizontal: getResponsivePadding(),
-    minHeight: screenWidth < 350 ? getResponsiveSize(100) : getResponsiveSize(120),
+    minHeight:
+      screenWidth < 350 ? getResponsiveSize(100) : getResponsiveSize(120),
     justifyContent: 'flex-start',
   },
   buttonTextContainer: {
     flexDirection: 'column',
-    marginTop: screenWidth < 350 ? getResponsiveSize(10) : getResponsiveSize(20),
+    marginTop:
+      screenWidth < 350 ? getResponsiveSize(10) : getResponsiveSize(20),
     gap: screenWidth < 350 ? getResponsiveSize(5) : getButtonSpacing(),
   },
   buttonTitle: {

@@ -2,66 +2,54 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {StyleSheet, View} from 'react-native';
 import Typo from '../common/Typo';
-import PointIcon from '../../assets/Bullet/Bullet_PointCircle.svg';
-import CashIcon from '../../assets/Bullet/Bullet_CoinYellow.svg';
 import CustomButton from '../common/CustomButton';
 
 // BSK ADD IMPORTS
-import { useEffect, useState } from 'react';
+import {useEffect, useState} from 'react';
 import api from '../../api/config';
-import { useAtomValue } from 'jotai';
-import { loginAtom } from '../../state/local_state/loginAtom';
+import {useAtomValue} from 'jotai';
+import {loginAtom} from '../../state/local_state/loginAtom';
 import Hello from './Hello';
 
 interface IManagerProfileStatProps {
-  point: number;
-  cash: number;
   managerName: string;
 }
 
-const ManagerProfileStat = ({
-  point,
-  cash,
-  managerName,
-}: IManagerProfileStatProps) => {
+const ManagerProfileStat = ({managerName}: IManagerProfileStatProps) => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const route = useRoute();
 
-  const goToPointHistory = () => {
-    console.log('Point History');
-  };
-  const goToChargePoint = () => {
-    console.log('Charge Point');
-  };
-
   // BSK ADD LOGIN INFO
   const loginInfo = useAtomValue(loginAtom);
-  const [currentPoint, setCurrentPoint] = useState<number>(point ?? 0);
-  const [currentCash, setCurrentCash] = useState<number>(cash ?? 0);
+  const [_currentPoint, setCurrentPoint] = useState<number>(0);
+  const [currentCash, setCurrentCash] = useState<number>(0);
 
   useEffect(() => {
     const fetchCurrentPointAndCash = async () => {
       try {
         const [pointRes, cashRes] = await Promise.all([
           api.get('/manager/point/current', {
-            headers: { Authorization: `Bearer ${loginInfo.accessToken}` },
+            headers: {Authorization: `Bearer ${loginInfo.accessToken}`},
           }),
           api.get('/manager/cash/current', {
-            headers: { Authorization: `Bearer ${loginInfo.accessToken}` },
+            headers: {Authorization: `Bearer ${loginInfo.accessToken}`},
           }),
         ]);
-  
+
         setCurrentPoint(pointRes.data?.currentPoint ?? 0);
         setCurrentCash(cashRes.data?.currentCash ?? 0);
       } catch (error: any) {
-        console.error('포인트/캐시 조회 실패:', error.response?.data || error.message);
+        console.error(
+          '포인트/캐시 조회 실패:',
+          error.response?.data || error.message,
+        );
         setCurrentPoint(0);
         setCurrentCash(0);
       }
     };
-  
+
     fetchCurrentPointAndCash();
-  }, []);
+  }, [loginInfo.accessToken]);
 
   const goToManagerPage = () => {
     navigation.navigate('MyPage'); // TabNav에 정의된 이름과 일치해야 합니다.
@@ -73,19 +61,23 @@ const ManagerProfileStat = ({
     if (route.name === 'MyPage') {
       return (
         <>
-        <View style={styles.pointContainer}>
-          <Typo style={styles.pointDesc}>보유 포인트</Typo>
-          <View style={styles.flexRow}>
-            <Typo style={styles.pointText}>{(currentPoint ?? 0).toLocaleString()}</Typo>
+          {/* <View style={styles.pointContainer}>
+            <Typo style={styles.pointDesc}>보유 포인트</Typo>
+            <View style={styles.flexRow}>
+              <Typo style={styles.pointText}>
+                {(currentPoint ?? 0).toLocaleString()}
+              </Typo>
+            </View>
+          </View> */}
+          <View style={styles.cashContainer}>
+            <Typo style={styles.cashDesc}>보유 캐쉬</Typo>
+            <View style={styles.flexRow}>
+              <Typo style={styles.cashText}>
+                {(currentCash ?? 0).toLocaleString()}
+              </Typo>
+            </View>
           </View>
-        </View>
-        <View style={styles.cashContainer}>
-          <Typo style={styles.cashDesc}>보유 캐쉬</Typo>
-          <View style={styles.flexRow}>
-            <Typo style={styles.cashText}>{(currentCash ?? 0).toLocaleString()}</Typo>
-          </View>
-        </View>
-      </>
+        </>
       );
     } else {
       return (
@@ -129,7 +121,8 @@ export default ManagerProfileStat;
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingTop: 64,
   },
   nameContainer: {
     flexDirection: 'row',
@@ -183,8 +176,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    borderBottomRightRadius: 20,
-    borderBottomLeftRadius: 20,
+    borderRadius: 20,
   },
   cashDesc: {
     fontSize: 18,

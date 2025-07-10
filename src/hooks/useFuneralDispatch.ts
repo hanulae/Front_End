@@ -138,8 +138,8 @@ export const useFuneralDispatch = () => {
       console.log('장례식장 거래 확정 성공 In hook: ', response);
       return response;
     } catch (err: any) {
-      setError(err.message);
-      console.error('장례식장 거래 확정 에러 In hook: ', err.message);
+      // setError(err.message);
+      // console.error('장례식장 거래 확정 에러 In hook: ', err.message);
       throw err;
     } finally {
       setLoading(false);
