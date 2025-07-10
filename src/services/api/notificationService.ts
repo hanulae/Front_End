@@ -39,7 +39,7 @@ export const getNavigationTarget = (notificationType: string, data: any) => {
       return {
         screen: 'PointHistory',
         params: {
-          variant: data.data.receiverType,
+          variant: data.receiverType,
         },
       };
 
