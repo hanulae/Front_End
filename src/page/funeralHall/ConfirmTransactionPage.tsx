@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Linking,
+  Alert,
 } from 'react-native';
 import FuneralLayout from '../../layout/FuneralLayout';
 import Typo from '../../components/common/Typo';
@@ -307,25 +308,30 @@ const ConfirmTransactionPage = () => {
         console.log('거래 확정 요청 성공:', result);
 
         // 성공 시 메시지 처리
-        const statusMessage =
-          result.status === 'waiting_counterpart'
-            ? '거래 확정을 완료했습니다. 상조팀장의 거래 완료가 필요합니다.'
-            : result.status === 'completed'
-            ? '거래가 성공적으로 완료되었습니다.'
-            : result.message;
+        // const statusMessage =
+        //   'status' in result && result.status === 'waiting_counterpart'
+        //     ? '거래 확정을 완료했습니다. 상조팀장의 거래 완료가 필요합니다.'
+        //     : 'status' in result && result.status === 'completed'
+        //     ? '거래가 성공적으로 완료되었습니다.'
+        //     : result.message || '거래 확정이 완료되었습니다.';
 
-        Toast.show({
-          type: 'success',
-          text1: statusMessage,
-          position: 'top',
-          topOffset: 0,
-        });
+        // Toast.show({
+        //   type: 'success',
+        //   text1: statusMessage,
+        //   position: 'top',
+        //   topOffset: 0,
+        // });
 
-        // 데이터 새로고침
-        await loadDispatchDetail();
+        // 성공 시에만 데이터 새로고침
+        try {
+          await loadDispatchDetail();
+        } catch (refreshError) {
+          console.error('데이터 새로고침 실패:', refreshError);
+          // 새로고침 실패해도 계속 진행
+        }
 
         // 거래가 완전히 완료된 경우에만 뒤로가기
-        if (result.status === 'completed') {
+        if ('status' in result && result.status === 'completed') {
           setTimeout(() => {
             navigation.goBack();
           }, 1500);
@@ -333,12 +339,27 @@ const ConfirmTransactionPage = () => {
       } else {
         console.log('거래 확정 요청 실패:', result);
         const errorMessage = result?.message || '거래 확정에 실패했습니다.';
-        Toast.show({
-          type: 'error',
-          text1: errorMessage,
-          position: 'top',
-          topOffset: 0,
-        });
+        
+        // 캐시 부족 관련 에러 메시지 특별 처리
+        const isCashInsufficientError = errorMessage.includes('캐시') || errorMessage.includes('포인트') || errorMessage.includes('부족');
+
+        // 캐시 부족일 때는 Alert 표시
+        if (isCashInsufficientError) {
+          Alert.alert(
+            '거래확정 불가',
+            '캐시 부족으로 거래확정이 불가능합니다.\n캐시를 충전해주세요.',
+            [
+              {
+                text: '확인',
+                style: 'default',
+              },
+            ],
+            { cancelable: false }
+          );
+        }
+
+        // 에러 발생 시 현재 페이지 유지 - 네비게이션 없음
+        return;
       }
     } catch (err: any) {
       console.error('거래 확정 에러:', err);
@@ -357,13 +378,31 @@ const ConfirmTransactionPage = () => {
         console.log('🔍 Error 객체 메시지:', errorMessage);
       }
 
-      console.log('🔍 최종 에러 메시지:', errorMessage);
-      Toast.show({
-        type: 'error',
-        text1: errorMessage,
-        position: 'top',
-        topOffset: 0,
-      });
+      // 캐시 부족 관련 에러 메시지 특별 처리
+      const isCashInsufficientError = errorMessage.includes('캐시') || errorMessage.includes('포인트') || errorMessage.includes('부족') || errorMessage.includes('insufficient');
+      const finalErrorMessage = isCashInsufficientError
+        ? '캐시 부족으로 거래확정이 불가능합니다.\n캐시를 충전해주세요.'
+        : errorMessage;
+
+      console.log('🔍 최종 에러 메시지:', finalErrorMessage);
+
+      // 캐시 부족일 때는 Alert 표시
+      if (isCashInsufficientError) {
+        Alert.alert(
+          '거래확정 불가',
+          '캐시 부족으로 거래확정이 불가능합니다.\n캐시를 충전해주세요.',
+          [
+            {
+              text: '확인',
+              style: 'default',
+            },
+          ],
+          { cancelable: false }
+        );
+      }
+      // 에러 발생 시 현재 페이지 유지 - 어떤 네비게이션도 수행하지 않음
+      // 현재 상태 유지하여 사용자가 계속 거래확정 페이지에서 작업할 수 있도록 함
+      return;
     }
   };
 
@@ -508,15 +547,6 @@ const ConfirmTransactionPage = () => {
 
     return (
       <View style={styles.statusMessageContainer}>
-        <View style={styles.buttonRow}>
-          <TouchableOpacity
-            style={[styles.phoneButton, loading && styles.disabledButton]}
-            onPress={() => handleCall(dispatchDetail.managerPhoneNumber)}
-            disabled={loading}>
-            <PhoneIcon width={18} height={18} />
-            <Typo style={styles.phoneIconButtonText}>전화</Typo>
-          </TouchableOpacity>
-        </View>
         <Typo style={statusMessage.style}>{statusMessage.text}</Typo>
       </View>
     );
@@ -663,13 +693,21 @@ const ConfirmTransactionPage = () => {
                   styles.topInfoContainer,
                   {marginBottom: responsiveStyles.infoMarginBottom},
                 ]}>
-                <Typo
-                  style={[
-                    styles.topText,
-                    {fontSize: responsiveStyles.topTextSize},
-                  ]}>
-                  팀장연락처
-                </Typo>
+                <View style={styles.labelRow}>
+                  <Typo
+                    style={[
+                      styles.topText,
+                      {fontSize: responsiveStyles.topTextSize},
+                    ]}>
+                    팀장연락처
+                  </Typo>
+                  <TouchableOpacity
+                    style={[styles.inlinePhoneButton, loading && styles.disabledButton]}
+                    onPress={() => handleCall(dispatchDetail?.managerPhoneNumber)}
+                    disabled={loading}>
+                    <PhoneIcon width={16} height={16} />
+                  </TouchableOpacity>
+                </View>
                 <TextInput
                   value={dispatchDetail?.managerPhoneNumber || ''}
                   editable={false}
@@ -1061,5 +1099,23 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     backgroundColor: '#f2f2f2',
+  },
+  labelRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  inlinePhoneButton: {
+    flexDirection: 'row',
+    marginLeft: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  inlinePhoneButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666',
+    fontFamily: 'Pretendard-Bold',
   },
 });
