@@ -174,15 +174,7 @@ const ModifyUserInfoPage = () => {
     }
 
     try {
-      const res = await api.post(
-        '/manager/sms/send',
-        {managerPhone: phone},
-        {
-          headers: {
-            Authorization: `Bearer ${loginInfo.accessToken}`,
-          },
-        },
-      );
+      await api.post('/manager/sms/send', {managerPhone: phone, status: 'signup'});
 
       Toast.show({
         type: 'success',

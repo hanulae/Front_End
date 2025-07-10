@@ -39,7 +39,7 @@ const PointRefundPage = () => {
 
   // BSK ADD LOGIN INFO
   const loginInfo = useAtomValue(loginAtom);
-  const [currentPoint, setCurrentPoint] = useState<number>(0);
+  const [currentCash, setCurrentCash] = useState<number>(0);
 
   const handleAmountSelect = (amount: number) => {
     setSelectedAmount(amount);
@@ -54,7 +54,7 @@ const PointRefundPage = () => {
   const handleRefundRequest = async () => {
     //TODO: 환급 요청 로직 추가
     console.log('환급 요청 시도');
-    console.log('현재 포인트:', currentPoint);
+    console.log('현재 포인트:', currentCash);
     console.log('입력 금액:', inputAmount);
 
     const amount = parseInt(inputAmount, 10);
@@ -69,7 +69,7 @@ const PointRefundPage = () => {
       return;
     }
     console.log('amount:', amount);
-    if (amount > currentPoint) {
+    if (amount > currentCash) {
       Toast.show({
         type: 'error',
         text1: '포인트 초과',
@@ -81,8 +81,8 @@ const PointRefundPage = () => {
     console.log('amount123:', amount);
     try {
       const res = await api.post(
-        '/manager/point/refund',
-        {amountPoint: amount},
+        '/manager/cash/refund',
+        { amountCash: amount },
         {
           headers: {
             Authorization: `Bearer ${loginInfo.accessToken}`,
@@ -99,7 +99,7 @@ const PointRefundPage = () => {
 
       setInputAmount('');
       setSelectedAmount(null);
-      setCurrentPoint(prev => prev - amount); // UI 반영용
+      setCurrentCash(prev => prev - amount); // UI 반영용
     } catch (error: any) {
       console.error('환급 요청 실패:', error.response?.data || error.message);
       Toast.show({
@@ -112,27 +112,27 @@ const PointRefundPage = () => {
   };
 
   useEffect(() => {
-    const fetchCurrentPoint = async () => {
+    const fetchCurrentCash = async () => {
       try {
         const isManager = variant === 'manager';
-        const pointUrl = isManager
-          ? '/manager/point/current'
-          : '/funeral/point/current';
-        const res = await api.get(pointUrl, {
+        const cashUrl = isManager
+          ? '/manager/cash/current'
+          : '/funeral/cash/current';
+        const res = await api.get(cashUrl, {
           headers: {
             Authorization: `Bearer ${loginInfo.accessToken}`,
           },
         });
-        setCurrentPoint(res.data.currentPoint || 0);
+        setCurrentCash(res.data.currentCash || 0); // currentCash로 변경
       } catch (error: any) {
         console.error(
-          '현재 포인트 조회 실패:',
+          '현재 캐시 조회 실패:',
           error.response?.data || error.message,
         );
       }
     };
 
-    fetchCurrentPoint();
+    fetchCurrentCash();
   }, []);
 
   return (
@@ -149,7 +149,7 @@ const PointRefundPage = () => {
           <Typo style={styles.balanceTitle}>현재잔액</Typo>
           <View style={styles.balanceContainer1}>
             <Typo style={styles.balanceValue}>
-              {currentPoint.toLocaleString()}
+              {currentCash.toLocaleString()}
             </Typo>
             <CashIcon />
           </View>
