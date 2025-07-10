@@ -31,6 +31,10 @@ export const getNavigationTarget = (notificationType: string, data: any) => {
       return {
         screen: 'PendingDispatch',
       };
+    // case 'dispatch_cancelled':
+    //   return {
+    //     screen:
+    //   }
 
     // 상조팀장
     case 'bid_submitted':
