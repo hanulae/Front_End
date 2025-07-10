@@ -1,49 +1,59 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   NavigationProp,
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
-import {ScrollView, StyleSheet, TouchableOpacity, View, ActivityIndicator, RefreshControl} from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  ActivityIndicator,
+  RefreshControl,
+  Linking,
+} from 'react-native';
 import Typo from '../../components/common/Typo';
 import ManagerLayout from '../../layout/ManagerLayout';
 import SMSIcon from '../../assets/Attachment/Attach_SMSActive.svg';
 import PhoneIcon from '../../assets/Attachment/Attach_PhoneDisable.svg';
 import {isValidPhoneNumber} from '../../util/validation';
-import { useManagerDispatchRequest } from '../../hooks/useManagerDispatchRequest';
+import {useManagerDispatchRequest} from '../../hooks/useManagerDispatchRequest';
 import Toast from 'react-native-toast-message';
-import { Alert } from 'react-native';
-import { GetManagerDispatchRequestTransactionStatus } from '../../services/api/manager/managerDispatchRequestService';
+import {Alert} from 'react-native';
+import {GetManagerDispatchRequestTransactionStatus} from '../../services/api/manager/managerDispatchRequestService';
 
 const ProceedCallPage = () => {
   const navigation = useNavigation<NavigationProp<any>>();
   const route = useRoute();
-  const { callId } = route.params as { callId: string };
+  const {callId} = route.params as {callId: string};
 
   // API 훅 사용
-  const { 
-    loading, 
-    error, 
+  const {
+    loading,
+    error,
     getManagerDispatchRequestDetail,
     cancelManagerDispatchRequest,
-    completeManagerDispatchRequest
+    completeManagerDispatchRequest,
   } = useManagerDispatchRequest();
 
   // 출동 신청 상세 데이터 상태
   const [dispatchDetail, setDispatchDetail] = useState<any>(null);
-  const [transactionStatus, setTransactionStatus] = useState<GetManagerDispatchRequestTransactionStatus | null>(null);
-  
+  const [transactionStatus, setTransactionStatus] =
+    useState<GetManagerDispatchRequestTransactionStatus | null>(null);
+
   // 새로고침 상태 추가
   const [refreshing, setRefreshing] = useState(false);
 
   // 현재 상태 계산 (dispatchDetail과 transactionStatus를 종합)
   const getCurrentStatus = () => {
     if (!dispatchDetail) return null;
-    
+
     // transactionStatus가 있으면 거래 관련 상태 확인
     if (transactionStatus?.data) {
-      const { managerTransactionCompletedAt, funeralTransactionCompletedAt } = transactionStatus.data;
-      
+      const {managerTransactionCompletedAt, funeralTransactionCompletedAt} =
+        transactionStatus.data;
+
       // 매니저는 완료했지만 장례식장이 아직 완료하지 않음
       if (managerTransactionCompletedAt && !funeralTransactionCompletedAt) {
         return 'waiting_funeral_completion';
@@ -53,13 +63,13 @@ const ProceedCallPage = () => {
       if (funeralTransactionCompletedAt && !managerTransactionCompletedAt) {
         return 'waiting_manager_completion';
       }
-      
+
       // 둘 다 완료
       if (managerTransactionCompletedAt && funeralTransactionCompletedAt) {
         return 'transaction_completed';
       }
     }
-    
+
     // 기본 출동 상태 (pending, approved, completed 등)
     return dispatchDetail.isApproved;
   };
@@ -71,7 +81,11 @@ const ProceedCallPage = () => {
 
       console.log('result: ', result);
 
-      if (result && result.transactionStatus !== null && result.dispatchRequest) {
+      if (
+        result &&
+        result.transactionStatus !== null &&
+        result.dispatchRequest
+      ) {
         setDispatchDetail(result.dispatchRequest);
         setTransactionStatus(result.transactionStatus);
       } else if (result && result.dispatchRequest) {
@@ -115,7 +129,7 @@ const ProceedCallPage = () => {
     }
   }, [loadDispatchDetail]);
 
-  const handleMessage = (phoneNumber?: string) => {
+  const handleMessage = async (phoneNumber?: string) => {
     if (!phoneNumber) {
       Toast.show({
         text1: '연락처 정보가 없습니다.',
@@ -126,12 +140,49 @@ const ProceedCallPage = () => {
       return;
     }
 
-    // 실제 문자 보내기 로직 구현
-    console.log('문자 보내기:', phoneNumber);
-    // Linking.openURL(`sms:${phoneNumber}`);
+    try {
+      // 출동 정보를 포함한 맞춤형 메시지 생성
+      const address = dispatchDetail?.address || '주소 미확인';
+      // const currentTime = new Date().toLocaleString('ko-KR', {
+      //   year: 'numeric',
+      //   month: '2-digit',
+      //   day: '2-digit',
+      //   hour: '2-digit',
+      //   minute: '2-digit',
+      // });
+
+      const message = encodeURIComponent(
+        `안녕하세요. 하늘애 상조팀장입니다.\n\n` +
+          `출동 요청 건으로 연락드립니다.\n` +
+          `📍 위치: ${address}\n` +
+          `안녕하세요안녕하세요\n` +
+          `문의사항이 있으시면 언제든지 연락 바랍니다.`,
+      );
+      const smsUrl = `sms:${phoneNumber}?body=${message}`;
+
+      const canOpen = await Linking.canOpenURL(smsUrl);
+      if (canOpen) {
+        await Linking.openURL(smsUrl);
+      } else {
+        Toast.show({
+          text1: 'SMS 앱을 열 수 없습니다.',
+          type: 'error',
+          position: 'top',
+          topOffset: 0,
+        });
+      }
+    } catch (error) {
+      console.error('SMS 앱 열기 실패:', error);
+      Toast.show({
+        text1: 'SMS 앱을 열 수 없습니다.',
+        type: 'error',
+        position: 'top',
+        topOffset: 0,
+      });
+    }
   };
 
-  const handleCall = (phoneNumber?: string) => {
+  const handleCall = async (phoneNumber?: string) => {
     if (!phoneNumber) {
       Toast.show({
         text1: '연락처 정보가 없습니다.',
@@ -152,9 +203,30 @@ const ProceedCallPage = () => {
       return;
     }
 
-    // 실제 전화 걸기 로직 구현
-    console.log('전화 걸기:', phoneNumber);
-    // Linking.openURL(`tel:${phoneNumber}`);
+    try {
+      // 전화 앱을 열어서 전화번호 미리 입력
+      const telUrl = `tel:${phoneNumber}`;
+
+      const canOpen = await Linking.canOpenURL(telUrl);
+      if (canOpen) {
+        await Linking.openURL(telUrl);
+      } else {
+        Toast.show({
+          text1: '전화 앱을 열 수 없습니다.',
+          type: 'error',
+          position: 'top',
+          topOffset: 0,
+        });
+      }
+    } catch (err) {
+      console.error('전화 앱 열기 실패:', err);
+      Toast.show({
+        text1: '전화 앱을 열 수 없습니다.',
+        type: 'error',
+        position: 'top',
+        topOffset: 0,
+      });
+    }
   };
 
   const handleConfirm = () => {
@@ -164,14 +236,15 @@ const ProceedCallPage = () => {
   const handleComplete = async (dispatchRequestId: string) => {
     try {
       const result = await completeManagerDispatchRequest(dispatchRequestId);
-      
+
       if (result) {
         // 성공 시 메시지 처리
-        const statusMessage = result.status === 'waiting_counterpart' 
-          ? '거래 확정을 완료했습니다. 장례식장의 확인을 기다리고 있습니다.'
-          : result.status === 'completed'
-          ? '거래가 성공적으로 완료되었습니다!'
-          : result.message;
+        const statusMessage =
+          result.status === 'waiting_counterpart'
+            ? '거래 확정을 완료했습니다. 장례식장의 확인을 기다리고 있습니다.'
+            : result.status === 'completed'
+            ? '거래가 성공적으로 완료되었습니다!'
+            : result.message;
 
         Toast.show({
           text1: statusMessage,
@@ -182,7 +255,7 @@ const ProceedCallPage = () => {
 
         // 데이터 새로고침
         await loadDispatchDetail();
-        
+
         // 거래가 완전히 완료된 경우에만 뒤로가기
         if (result.status === 'completed') {
           setTimeout(() => {
@@ -225,14 +298,14 @@ const ProceedCallPage = () => {
         onDismiss: () => {
           console.log('출동 취소 대화상자 닫힘');
         },
-      }
+      },
     );
   };
 
   const handleCancel = async (dispatchRequestId: string) => {
     try {
       const result = await cancelManagerDispatchRequest(dispatchRequestId);
-      
+
       if (result) {
         Toast.show({
           text1: '출동이 취소되었습니다.',
@@ -240,7 +313,7 @@ const ProceedCallPage = () => {
           position: 'top',
           topOffset: 0,
         });
-        
+
         // 취소 후 뒤로가기
         setTimeout(() => {
           navigation.goBack();
@@ -315,7 +388,9 @@ const ProceedCallPage = () => {
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.cancelButton, loading && styles.disabledButton]}
-              onPress={() => showCancelConfirmDialog(dispatchDetail.dispatchRequestId)}
+              onPress={() =>
+                showCancelConfirmDialog(dispatchDetail.dispatchRequestId)
+              }
               disabled={loading}>
               <Typo style={styles.cancelButtonText}>
                 {loading ? '처리 중...' : '출동 취소'}
@@ -331,10 +406,7 @@ const ProceedCallPage = () => {
             {/* 거래확정/취소 버튼 */}
             <View style={styles.actionButtons}>
               <TouchableOpacity
-                style={[
-                  styles.confirmButton,
-                  loading && styles.disabledButton
-                ]}
+                style={[styles.confirmButton, loading && styles.disabledButton]}
                 onPress={() => handleComplete(dispatchDetail.dispatchRequestId)}
                 disabled={loading}>
                 <Typo style={styles.confirmButtonText}>
@@ -343,7 +415,9 @@ const ProceedCallPage = () => {
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.cancelButton, loading && styles.disabledButton]}
-                onPress={() => showCancelConfirmDialog(dispatchDetail.dispatchRequestId)}
+                onPress={() =>
+                  showCancelConfirmDialog(dispatchDetail.dispatchRequestId)
+                }
                 disabled={loading}>
                 <Typo style={styles.cancelButtonText}>출동 취소</Typo>
               </TouchableOpacity>
@@ -356,10 +430,14 @@ const ProceedCallPage = () => {
         return (
           <View style={styles.actionButtons}>
             <TouchableOpacity
-              style={[styles.waitingCompletionButton, loading && styles.disabledButton]}
-              disabled={true}
-            >
-              <Typo style={styles.waitingCompletionButtonText}>장례식장 거래완료 대기중</Typo>
+              style={[
+                styles.waitingCompletionButton,
+                loading && styles.disabledButton,
+              ]}
+              disabled={true}>
+              <Typo style={styles.waitingCompletionButtonText}>
+                장례식장 거래완료 대기중
+              </Typo>
             </TouchableOpacity>
           </View>
         );
@@ -369,16 +447,13 @@ const ProceedCallPage = () => {
         return (
           <View style={styles.actionButtons}>
             <TouchableOpacity
-                style={[
-                  styles.confirmButton,
-                  loading && styles.disabledButton
-                ]}
-                onPress={() => handleComplete(dispatchDetail.dispatchRequestId)}
-                disabled={loading}>
-                <Typo style={styles.confirmButtonText}>
-                  {loading ? '거래완료 처리 중...' : '거래완료'}
-                </Typo>
-              </TouchableOpacity>
+              style={[styles.confirmButton, loading && styles.disabledButton]}
+              onPress={() => handleComplete(dispatchDetail.dispatchRequestId)}
+              disabled={loading}>
+              <Typo style={styles.confirmButtonText}>
+                {loading ? '거래완료 처리 중...' : '거래완료'}
+              </Typo>
+            </TouchableOpacity>
           </View>
         );
 
@@ -428,9 +503,7 @@ const ProceedCallPage = () => {
 
         {/* 상태별 안내 메시지 */}
         <View style={styles.statusMessageContainer}>
-          <Typo style={statusMessage.style}>
-            {statusMessage.text}
-          </Typo>
+          <Typo style={statusMessage.style}>{statusMessage.text}</Typo>
         </View>
 
         {/* 상태별 액션 버튼 */}
@@ -447,7 +520,7 @@ const ProceedCallPage = () => {
       homeButton={true}
       homeRouteName="ManagerMain"
       logoutButton={false}>
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={styles.wrapper}
         showsVerticalScrollIndicator={false}
         bounces={true}
@@ -456,7 +529,7 @@ const ProceedCallPage = () => {
             refreshing={refreshing}
             onRefresh={onRefresh}
             colors={['#2D81F1']} // Android
-            tintColor="#2D81F1"   // iOS
+            tintColor="#2D81F1" // iOS
             title="새로고침 중..." // iOS
           />
         }>
@@ -464,7 +537,9 @@ const ProceedCallPage = () => {
         {loading && (
           <View style={styles.centerContainer}>
             <ActivityIndicator size="large" color="#2D81F1" />
-            <Typo style={styles.loadingText}>출동 신청 정보를 불러오는 중...</Typo>
+            <Typo style={styles.loadingText}>
+              출동 신청 정보를 불러오는 중...
+            </Typo>
           </View>
         )}
 
@@ -472,7 +547,9 @@ const ProceedCallPage = () => {
         {error && !loading && (
           <View style={styles.centerContainer}>
             <Typo style={styles.errorText}>{error}</Typo>
-            <TouchableOpacity style={styles.retryButton} onPress={loadDispatchDetail}>
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={loadDispatchDetail}>
               <Typo style={styles.retryButtonText}>다시 시도</Typo>
             </TouchableOpacity>
           </View>
@@ -485,36 +562,57 @@ const ProceedCallPage = () => {
             <View style={styles.section}>
               <Typo style={styles.label}>주소</Typo>
               <View style={styles.inputBox}>
-                <Typo style={[styles.text, dispatchDetail.address && styles.filledText]}>
+                <Typo
+                  style={[
+                    styles.text,
+                    dispatchDetail.address && styles.filledText,
+                  ]}>
                   {dispatchDetail.address || '주소 정보 없음'}
                 </Typo>
               </View>
 
               <Typo style={styles.label}>상세주소</Typo>
               <View style={styles.inputBox}>
-                <Typo style={[styles.text, dispatchDetail.addressDetail && styles.filledText]}>
+                <Typo
+                  style={[
+                    styles.text,
+                    dispatchDetail.addressDetail && styles.filledText,
+                  ]}>
                   {dispatchDetail.addressDetail || '상세주소 정보 없음'}
                 </Typo>
               </View>
 
               <Typo style={styles.label}>가족 연락처</Typo>
               <View style={styles.inputBox}>
-                <Typo style={[styles.text, dispatchDetail.famPhoneNumber && styles.filledText]}>
+                <Typo
+                  style={[
+                    styles.text,
+                    dispatchDetail.famPhoneNumber && styles.filledText,
+                  ]}>
                   {dispatchDetail.famPhoneNumber || '가족 연락처 정보 없음'}
                 </Typo>
               </View>
 
               <Typo style={styles.label}>팀장 연락처</Typo>
               <View style={styles.inputBox}>
-                <Typo style={[styles.text, dispatchDetail.managerPhoneNumber && styles.filledText]}>
+                <Typo
+                  style={[
+                    styles.text,
+                    dispatchDetail.managerPhoneNumber && styles.filledText,
+                  ]}>
                   {dispatchDetail.managerPhoneNumber || '팀장 연락처 정보 없음'}
                 </Typo>
               </View>
 
               <Typo style={styles.label}>비상 연락처</Typo>
               <View style={styles.inputBox}>
-                <Typo style={[styles.text, dispatchDetail.emergencyPhoneNumber && styles.filledText]}>
-                  {dispatchDetail.emergencyPhoneNumber || '비상 연락처 정보 없음'}
+                <Typo
+                  style={[
+                    styles.text,
+                    dispatchDetail.emergencyPhoneNumber && styles.filledText,
+                  ]}>
+                  {dispatchDetail.emergencyPhoneNumber ||
+                    '비상 연락처 정보 없음'}
                 </Typo>
               </View>
             </View>
@@ -527,7 +625,9 @@ const ProceedCallPage = () => {
         {/* 데이터 없음 */}
         {!loading && !error && !dispatchDetail && (
           <View style={styles.centerContainer}>
-            <Typo style={styles.errorText}>출동 신청 정보를 찾을 수 없습니다.</Typo>
+            <Typo style={styles.errorText}>
+              출동 신청 정보를 찾을 수 없습니다.
+            </Typo>
           </View>
         )}
       </ScrollView>

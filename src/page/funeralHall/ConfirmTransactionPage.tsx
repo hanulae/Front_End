@@ -1,29 +1,59 @@
-import {ScrollView, StyleSheet, TextInput, View, useWindowDimensions, RefreshControl, ActivityIndicator, TouchableOpacity} from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  View,
+  useWindowDimensions,
+  RefreshControl,
+  ActivityIndicator,
+  TouchableOpacity,
+  Linking,
+} from 'react-native';
 import FuneralLayout from '../../layout/FuneralLayout';
 import Typo from '../../components/common/Typo';
 import CustomButton from '../../components/common/CustomButton';
 import {useCallback, useEffect, useState} from 'react';
-import {useRoute, useNavigation, NavigationProp} from '@react-navigation/native';
-import { useFuneralDispatch } from '../../hooks/useFuneralDispatch';
-import { DispatchDetail, FuneralHallInfo, GetFuneralDispatchTransactionStatusResponse } from '../../services/api/funeral/funeralDispatchService';
-import { useFocusEffect } from '@react-navigation/native';
+import {
+  useRoute,
+  useNavigation,
+  NavigationProp,
+} from '@react-navigation/native';
+import PhoneIcon from '../../assets/Attachment/Attach_PhoneDisable.svg';
+import {useFuneralDispatch} from '../../hooks/useFuneralDispatch';
+import {
+  DispatchDetail,
+  FuneralHallInfo,
+  GetFuneralDispatchTransactionStatusResponse,
+} from '../../services/api/funeral/funeralDispatchService';
+import {useFocusEffect} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
+import {isValidPhoneNumber} from '../../util/validation';
 
 const ConfirmTransactionPage = () => {
   const route = useRoute();
   const navigation = useNavigation<NavigationProp<any>>();
   const {dispatchRequestId} = route.params as {dispatchRequestId: string};
-  const {loading, error, fetchDispatchDetail, fetchFuneralHallInfo, confirmTransaction} = useFuneralDispatch();
-  const [dispatchDetail, setDispatchDetail] = useState<DispatchDetail | null>(null);
-  const [funeralHallInfo, setFuneralHallInfo] = useState<FuneralHallInfo | null>(null);
-  const [transactionStatus, setTransactionStatus] = useState<GetFuneralDispatchTransactionStatusResponse | null>(null);
+  const {
+    loading,
+    error,
+    fetchDispatchDetail,
+    fetchFuneralHallInfo,
+    confirmTransaction,
+  } = useFuneralDispatch();
+  const [dispatchDetail, setDispatchDetail] = useState<DispatchDetail | null>(
+    null,
+  );
+  const [funeralHallInfo, setFuneralHallInfo] =
+    useState<FuneralHallInfo | null>(null);
+  const [transactionStatus, setTransactionStatus] =
+    useState<GetFuneralDispatchTransactionStatusResponse | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const {width} = useWindowDimensions();
 
   // 화면 크기에 따른 반응형 스타일 계산
   const isTablet = width > 768;
   const isSmallDevice = width < 375;
-  
+
   const responsiveStyles = {
     // 텍스트 크기
     titleSize: isTablet ? 20 : isSmallDevice ? 14 : 16,
@@ -32,27 +62,27 @@ const ConfirmTransactionPage = () => {
     bottomValueTextSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
     buttonTextSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
     inputTextSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
-    
+
     // 패딩 및 마진
     screenPadding: isTablet ? 32 : isSmallDevice ? 16 : 20,
     bottomContainerPadding: isTablet ? 40 : isSmallDevice ? 20 : 30,
     titleBottomPadding: isTablet ? 28 : isSmallDevice ? 16 : 20,
     infoMarginBottom: isTablet ? 28 : isSmallDevice ? 16 : 20,
-    
+
     // 입력 필드
     inputHeight: isTablet ? 60 : isSmallDevice ? 44 : 50,
     inputPadding: isTablet ? 24 : isSmallDevice ? 16 : 20,
     inputTopMargin: isTablet ? 12 : isSmallDevice ? 8 : 10,
-    
+
     // 버튼
     buttonPaddingVertical: isTablet ? 22 : isSmallDevice ? 14 : 18,
     buttonMarginBottom: isTablet ? 32 : isSmallDevice ? 20 : 24,
-    
+
     // 간격
     bottomInfoPaddingVertical: isTablet ? 14 : isSmallDevice ? 8 : 10,
     bottomInfoPaddingTop: isTablet ? 14 : isSmallDevice ? 8 : 10,
     bottomInfoPaddingBottom: isTablet ? 28 : isSmallDevice ? 16 : 20,
-    
+
     // 보더
     borderTopWidth: isTablet ? 6 : isSmallDevice ? 4 : 5,
   };
@@ -60,11 +90,12 @@ const ConfirmTransactionPage = () => {
   // 현재 상태 계산 (장례식장 관점)
   const getCurrentStatus = () => {
     if (!dispatchDetail) return null;
-    
+
     // transactionStatus가 있으면 거래 관련 상태 확인
     if (transactionStatus?.data) {
-      const { managerTransactionCompletedAt, funeralTransactionCompletedAt } = transactionStatus.data;
-      
+      const {managerTransactionCompletedAt, funeralTransactionCompletedAt} =
+        transactionStatus.data;
+
       // 장례식장이 완료했지만 매니저가 아직 완료하지 않음
       if (funeralTransactionCompletedAt && !managerTransactionCompletedAt) {
         return 'waiting_manager_completion';
@@ -74,38 +105,91 @@ const ConfirmTransactionPage = () => {
       if (managerTransactionCompletedAt && !funeralTransactionCompletedAt) {
         return 'waiting_funeral_completion';
       }
-      
+
       // 둘 다 완료
       if (managerTransactionCompletedAt && funeralTransactionCompletedAt) {
         return 'transaction_completed';
       }
     }
-    
+
     // 기본 출동 상태 (pending, approved, completed 등)
     return dispatchDetail.isApproved;
   };
 
-  const loadFuneralHallInfo = useCallback(async (managerFormBidId: string) => {
-    if (!managerFormBidId) {
-      console.log('❌ managerFormBidId가 없어서 장례식장 정보를 로드할 수 없습니다.');
+  // 전화 앱 열기
+  const handleCall = async (phoneNumber?: string) => {
+    if (!phoneNumber) {
+      Toast.show({
+        text1: '연락처 정보가 없습니다.',
+        type: 'error',
+        position: 'top',
+        topOffset: 0,
+      });
       return;
     }
-    
+
+    if (!isValidPhoneNumber(phoneNumber)) {
+      Toast.show({
+        text1: '올바르지 않은 전화번호입니다.',
+        type: 'error',
+        position: 'top',
+        topOffset: 0,
+      });
+      return;
+    }
+
     try {
-      const result = await fetchFuneralHallInfo(managerFormBidId);
-      console.log('loadFuneralHallInfo result', result);
-      if (result) {
-        setFuneralHallInfo(result);
-        console.log('Funeral Hall Info 로드 성공:', result);
+      // 전화 앱을 열어서 전화번호 미리 입력
+      const telUrl = `tel:${phoneNumber}`;
+
+      const canOpen = await Linking.canOpenURL(telUrl);
+      if (canOpen) {
+        await Linking.openURL(telUrl);
       } else {
-        console.log('❌ Funeral Hall Info 로드 실패 - 빈 데이터');
-        setFuneralHallInfo(null);
+        Toast.show({
+          text1: '전화 앱을 열 수 없습니다.',
+          type: 'error',
+          position: 'top',
+          topOffset: 0,
+        });
       }
     } catch (err) {
-      console.error('💥 Funeral Hall Info 로드 에러:', err);
-      setFuneralHallInfo(null);
+      console.error('전화 앱 열기 실패:', err);
+      Toast.show({
+        text1: '전화 앱을 열 수 없습니다.',
+        type: 'error',
+        position: 'top',
+        topOffset: 0,
+      });
     }
-  }, [fetchFuneralHallInfo]);
+  };
+
+  const loadFuneralHallInfo = useCallback(
+    async (managerFormBidId: string) => {
+      if (!managerFormBidId) {
+        console.log(
+          '❌ managerFormBidId가 없어서 장례식장 정보를 로드할 수 없습니다.',
+        );
+        return;
+      }
+
+      try {
+        const result = await fetchFuneralHallInfo(managerFormBidId);
+        console.log('loadFuneralHallInfo result', result);
+        if (result) {
+          setFuneralHallInfo(result);
+          console.log('Funeral Hall Info 로드 성공:', result);
+        } else {
+          console.log('❌ Funeral Hall Info 로드 실패 - 빈 데이터');
+          setFuneralHallInfo(null);
+        }
+      } catch (err) {
+        console.error('💥 Funeral Hall Info 로드 에러:', err);
+        setFuneralHallInfo(null);
+      }
+    },
+    [fetchFuneralHallInfo],
+  );
 
   // 출동 요청 상세 데이터 로드
   const loadDispatchDetail = useCallback(async () => {
@@ -113,12 +197,12 @@ const ConfirmTransactionPage = () => {
       const result = await fetchDispatchDetail(dispatchRequestId);
 
       console.log('loadDispatchDetail result', result);
-      
+
       if (result) {
         setDispatchDetail(result.dispatchRequest);
         setTransactionStatus(result.transactionStatus);
         console.log('출동 요청 상세 데이터 로드 성공:', result);
-        
+
         // 출동 상세 데이터 로드 완료 후 장례식장 정보 로드
         if (result.dispatchRequest.managerFormBidId) {
           await loadFuneralHallInfo(result.dispatchRequest.managerFormBidId);
@@ -137,7 +221,7 @@ const ConfirmTransactionPage = () => {
   useFocusEffect(
     useCallback(() => {
       loadDispatchDetail();
-    }, [loadDispatchDetail])
+    }, [loadDispatchDetail]),
   );
 
   // 에러 발생 시 토스트 표시
@@ -216,18 +300,19 @@ const ConfirmTransactionPage = () => {
   const handleTransactionConfirm = async () => {
     try {
       console.log('거래 확정 요청 시작:', dispatchRequestId);
-      
+
       const result = await confirmTransaction(dispatchRequestId);
-      
+
       if (result && result.success) {
         console.log('거래 확정 요청 성공:', result);
-        
+
         // 성공 시 메시지 처리
-        const statusMessage = result.status === 'waiting_counterpart' 
-          ? '거래 확정을 완료했습니다. 상조팀장의 거래 완료가 필요합니다.'
-          : result.status === 'completed'
-          ? '거래가 성공적으로 완료되었습니다.'
-          : result.message;
+        const statusMessage =
+          result.status === 'waiting_counterpart'
+            ? '거래 확정을 완료했습니다. 상조팀장의 거래 완료가 필요합니다.'
+            : result.status === 'completed'
+            ? '거래가 성공적으로 완료되었습니다.'
+            : result.message;
 
         Toast.show({
           type: 'success',
@@ -235,10 +320,10 @@ const ConfirmTransactionPage = () => {
           position: 'top',
           topOffset: 0,
         });
-        
+
         // 데이터 새로고침
         await loadDispatchDetail();
-        
+
         // 거래가 완전히 완료된 경우에만 뒤로가기
         if (result.status === 'completed') {
           setTimeout(() => {
@@ -258,10 +343,10 @@ const ConfirmTransactionPage = () => {
     } catch (err: any) {
       console.error('거래 확정 에러:', err);
       console.log('🔍 에러 전체 객체:', JSON.stringify(err, null, 2));
-      
+
       // 서버에서 온 구체적인 에러 메시지 추출
       let errorMessage = '거래 확정 중 오류가 발생했습니다.';
-      
+
       if (err.response?.data?.message) {
         // 서버에서 JSON 형태로 에러 메시지를 보낸 경우
         errorMessage = err.response.data.message;
@@ -271,7 +356,7 @@ const ConfirmTransactionPage = () => {
         errorMessage = err.message;
         console.log('🔍 Error 객체 메시지:', errorMessage);
       }
-      
+
       console.log('🔍 최종 에러 메시지:', errorMessage);
       Toast.show({
         type: 'error',
@@ -302,10 +387,14 @@ const ConfirmTransactionPage = () => {
               {
                 paddingVertical: responsiveStyles.buttonPaddingVertical,
                 marginBottom: responsiveStyles.buttonMarginBottom,
-              }
+              },
             ]}
             disabled={loading}>
-            <Typo style={[styles.buttonText, {fontSize: responsiveStyles.buttonTextSize}]}>
+            <Typo
+              style={[
+                styles.buttonText,
+                {fontSize: responsiveStyles.buttonTextSize},
+              ]}>
               {loading ? '거래완료 중...' : '거래완료'}
             </Typo>
           </CustomButton>
@@ -322,18 +411,22 @@ const ConfirmTransactionPage = () => {
               {
                 paddingVertical: responsiveStyles.buttonPaddingVertical,
                 marginBottom: responsiveStyles.buttonMarginBottom,
-              }
+              },
             ]}
             disabled={true}>
-            <Typo style={[styles.buttonTextWaiting, {fontSize: responsiveStyles.buttonTextSize}]}>
+            <Typo
+              style={[
+                styles.buttonTextWaiting,
+                {fontSize: responsiveStyles.buttonTextSize},
+              ]}>
               상조팀장 거래완료 대기중
             </Typo>
           </CustomButton>
         );
 
-        case 'waiting_funeral_completion':
-          return (
-            <CustomButton
+      case 'waiting_funeral_completion':
+        return (
+          <CustomButton
             onPress={handleTransactionConfirm}
             style={[
               styles.button,
@@ -341,14 +434,18 @@ const ConfirmTransactionPage = () => {
               {
                 paddingVertical: responsiveStyles.buttonPaddingVertical,
                 marginBottom: responsiveStyles.buttonMarginBottom,
-              }
+              },
             ]}
             disabled={loading}>
-            <Typo style={[styles.buttonText, {fontSize: responsiveStyles.buttonTextSize}]}>
+            <Typo
+              style={[
+                styles.buttonText,
+                {fontSize: responsiveStyles.buttonTextSize},
+              ]}>
               {loading ? '거래 확정 중...' : '거래 확정'}
             </Typo>
           </CustomButton>
-          )
+        );
 
       case 'transaction_completed':
       case 'completed':
@@ -362,9 +459,13 @@ const ConfirmTransactionPage = () => {
               {
                 paddingVertical: responsiveStyles.buttonPaddingVertical,
                 marginBottom: responsiveStyles.buttonMarginBottom,
-              }
+              },
             ]}>
-            <Typo style={[styles.buttonTextCompleted, {fontSize: responsiveStyles.buttonTextSize}]}>
+            <Typo
+              style={[
+                styles.buttonTextCompleted,
+                {fontSize: responsiveStyles.buttonTextSize},
+              ]}>
               뒤로가기
             </Typo>
           </CustomButton>
@@ -380,10 +481,15 @@ const ConfirmTransactionPage = () => {
               {
                 paddingVertical: responsiveStyles.buttonPaddingVertical,
                 marginBottom: responsiveStyles.buttonMarginBottom,
-              }
+              },
             ]}
             disabled={true}>
-            <Typo style={[styles.buttonText, styles.buttonTextDisabled, {fontSize: responsiveStyles.buttonTextSize}]}>
+            <Typo
+              style={[
+                styles.buttonText,
+                styles.buttonTextDisabled,
+                {fontSize: responsiveStyles.buttonTextSize},
+              ]}>
               상태 확인 중
             </Typo>
           </CustomButton>
@@ -397,14 +503,21 @@ const ConfirmTransactionPage = () => {
 
     const status = getCurrentStatus();
     if (!status) return null;
-    
+
     const statusMessage = getStatusMessage(status);
 
     return (
       <View style={styles.statusMessageContainer}>
-        <Typo style={statusMessage.style}>
-          {statusMessage.text}
-        </Typo>
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={[styles.phoneButton, loading && styles.disabledButton]}
+            onPress={() => handleCall(dispatchDetail.managerPhoneNumber)}
+            disabled={loading}>
+            <PhoneIcon width={18} height={18} />
+            <Typo style={styles.phoneIconButtonText}>전화</Typo>
+          </TouchableOpacity>
+        </View>
+        <Typo style={statusMessage.style}>{statusMessage.text}</Typo>
       </View>
     );
   };
@@ -423,7 +536,9 @@ const ConfirmTransactionPage = () => {
         {loading && !dispatchDetail && (
           <View style={styles.centerContainer}>
             <ActivityIndicator size="large" color="#2D81F1" />
-            <Typo style={styles.loadingText}>출동 신청 정보를 불러오는 중...</Typo>
+            <Typo style={styles.loadingText}>
+              출동 신청 정보를 불러오는 중...
+            </Typo>
           </View>
         )}
 
@@ -431,7 +546,9 @@ const ConfirmTransactionPage = () => {
         {error && !loading && !dispatchDetail && (
           <View style={styles.centerContainer}>
             <Typo style={styles.errorText}>{error}</Typo>
-            <TouchableOpacity style={styles.retryButton} onPress={loadDispatchDetail}>
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={loadDispatchDetail}>
               <Typo style={styles.retryButtonText}>다시 시도</Typo>
             </TouchableOpacity>
           </View>
@@ -440,8 +557,11 @@ const ConfirmTransactionPage = () => {
         {/* 데이터 표시 */}
         {!loading && !error && dispatchDetail && (
           <>
-            <ScrollView 
-              contentContainerStyle={[styles.scrollView, {padding: responsiveStyles.screenPadding}]}
+            <ScrollView
+              contentContainerStyle={[
+                styles.scrollView,
+                {padding: responsiveStyles.screenPadding},
+              ]}
               refreshControl={
                 <RefreshControl
                   refreshing={refreshing}
@@ -449,13 +569,32 @@ const ConfirmTransactionPage = () => {
                   colors={['#2D81F1']}
                   tintColor="#2D81F1"
                 />
-              }
-            >
-              <View style={[styles.topTitleContainer, {paddingBottom: responsiveStyles.titleBottomPadding}]}>
-                <Typo style={[styles.titleText, {fontSize: responsiveStyles.titleSize}]}>출동정보</Typo>
+              }>
+              <View
+                style={[
+                  styles.topTitleContainer,
+                  {paddingBottom: responsiveStyles.titleBottomPadding},
+                ]}>
+                <Typo
+                  style={[
+                    styles.titleText,
+                    {fontSize: responsiveStyles.titleSize},
+                  ]}>
+                  출동정보
+                </Typo>
               </View>
-              <View style={[styles.topInfoContainer, {marginBottom: responsiveStyles.infoMarginBottom}]}>
-                <Typo style={[styles.topText, {fontSize: responsiveStyles.topTextSize}]}>주소</Typo>
+              <View
+                style={[
+                  styles.topInfoContainer,
+                  {marginBottom: responsiveStyles.infoMarginBottom},
+                ]}>
+                <Typo
+                  style={[
+                    styles.topText,
+                    {fontSize: responsiveStyles.topTextSize},
+                  ]}>
+                  주소
+                </Typo>
                 <TextInput
                   value={dispatchDetail?.address || ''}
                   editable={false}
@@ -466,12 +605,14 @@ const ConfirmTransactionPage = () => {
                       paddingHorizontal: responsiveStyles.inputPadding,
                       marginTop: responsiveStyles.inputTopMargin,
                       fontSize: responsiveStyles.inputTextSize,
-                    }
+                    },
                   ]}
                 />
                 <TextInput
                   value={dispatchDetail?.addressDetail || ''}
-                  placeholder={!dispatchDetail?.addressDetail ? '작성하지 않은 항목' : ''}
+                  placeholder={
+                    !dispatchDetail?.addressDetail ? '작성하지 않은 항목' : ''
+                  }
                   placeholderTextColor="#AFB3BB"
                   editable={false}
                   style={[
@@ -482,15 +623,27 @@ const ConfirmTransactionPage = () => {
                       paddingHorizontal: responsiveStyles.inputPadding,
                       marginTop: responsiveStyles.inputTopMargin,
                       fontSize: responsiveStyles.inputTextSize,
-                    }
+                    },
                   ]}
                 />
               </View>
-              <View style={[styles.topInfoContainer, {marginBottom: responsiveStyles.infoMarginBottom}]}>
-                <Typo style={[styles.topText, {fontSize: responsiveStyles.topTextSize}]}>가족연락처</Typo>
+              <View
+                style={[
+                  styles.topInfoContainer,
+                  {marginBottom: responsiveStyles.infoMarginBottom},
+                ]}>
+                <Typo
+                  style={[
+                    styles.topText,
+                    {fontSize: responsiveStyles.topTextSize},
+                  ]}>
+                  가족연락처
+                </Typo>
                 <TextInput
                   value={dispatchDetail?.famPhoneNumber || ''}
-                  placeholder={!dispatchDetail?.famPhoneNumber ? '작성하지 않은 항목' : ''}
+                  placeholder={
+                    !dispatchDetail?.famPhoneNumber ? '작성하지 않은 항목' : ''
+                  }
                   placeholderTextColor="#AFB3BB"
                   editable={false}
                   style={[
@@ -501,12 +654,22 @@ const ConfirmTransactionPage = () => {
                       paddingHorizontal: responsiveStyles.inputPadding,
                       marginTop: responsiveStyles.inputTopMargin,
                       fontSize: responsiveStyles.inputTextSize,
-                    }
+                    },
                   ]}
                 />
               </View>
-              <View style={[styles.topInfoContainer, {marginBottom: responsiveStyles.infoMarginBottom}]}>
-                <Typo style={[styles.topText, {fontSize: responsiveStyles.topTextSize}]}>팀장연락처</Typo>
+              <View
+                style={[
+                  styles.topInfoContainer,
+                  {marginBottom: responsiveStyles.infoMarginBottom},
+                ]}>
+                <Typo
+                  style={[
+                    styles.topText,
+                    {fontSize: responsiveStyles.topTextSize},
+                  ]}>
+                  팀장연락처
+                </Typo>
                 <TextInput
                   value={dispatchDetail?.managerPhoneNumber || ''}
                   editable={false}
@@ -517,15 +680,29 @@ const ConfirmTransactionPage = () => {
                       paddingHorizontal: responsiveStyles.inputPadding,
                       marginTop: responsiveStyles.inputTopMargin,
                       fontSize: responsiveStyles.inputTextSize,
-                    }
+                    },
                   ]}
                 />
               </View>
-              <View style={[styles.topInfoContainer, {marginBottom: responsiveStyles.infoMarginBottom}]}>
-                <Typo style={[styles.topText, {fontSize: responsiveStyles.topTextSize}]}>비상연락처</Typo>
+              <View
+                style={[
+                  styles.topInfoContainer,
+                  {marginBottom: responsiveStyles.infoMarginBottom},
+                ]}>
+                <Typo
+                  style={[
+                    styles.topText,
+                    {fontSize: responsiveStyles.topTextSize},
+                  ]}>
+                  비상연락처
+                </Typo>
                 <TextInput
                   value={dispatchDetail?.emergencyPhoneNumber || ''}
-                  placeholder={!dispatchDetail?.emergencyPhoneNumber ? '작성하지 않은 항목' : ''}
+                  placeholder={
+                    !dispatchDetail?.emergencyPhoneNumber
+                      ? '작성하지 않은 항목'
+                      : ''
+                  }
                   placeholderTextColor="#AFB3BB"
                   editable={false}
                   style={[
@@ -536,50 +713,144 @@ const ConfirmTransactionPage = () => {
                       paddingHorizontal: responsiveStyles.inputPadding,
                       marginTop: responsiveStyles.inputTopMargin,
                       fontSize: responsiveStyles.inputTextSize,
-                    }
+                    },
                   ]}
                 />
               </View>
             </ScrollView>
-            <View style={[
-              styles.bottomContainer,
-              {
-                paddingHorizontal: responsiveStyles.bottomContainerPadding,
-                paddingTop: responsiveStyles.titleBottomPadding,
-                borderTopWidth: responsiveStyles.borderTopWidth,
-              }
-            ]}>
-              <View style={styles.bottomTitleContainer}>
-                <Typo style={[styles.titleText, {fontSize: responsiveStyles.titleSize}]}>견적요약</Typo>
-              </View>
-              <View style={[
-                styles.bottomInfo,
+            <View
+              style={[
+                styles.bottomContainer,
                 {
-                  paddingTop: responsiveStyles.bottomInfoPaddingTop,
-                  paddingBottom: responsiveStyles.bottomInfoPaddingBottom,
-                }
+                  paddingHorizontal: responsiveStyles.bottomContainerPadding,
+                  paddingTop: responsiveStyles.titleBottomPadding,
+                  borderTopWidth: responsiveStyles.borderTopWidth,
+                },
               ]}>
-                <View style={[styles.bottomInfoContainer, {paddingVertical: responsiveStyles.bottomInfoPaddingVertical}]}>
-                  <Typo style={[styles.bottomInfoText, {fontSize: responsiveStyles.bottomInfoTextSize}]}>호실</Typo>
-                  <Typo style={[styles.bottomValueText, {fontSize: responsiveStyles.bottomValueTextSize}]}>{funeralHallInfo?.funeralHallName || ''}</Typo>
+              <View style={styles.bottomTitleContainer}>
+                <Typo
+                  style={[
+                    styles.titleText,
+                    {fontSize: responsiveStyles.titleSize},
+                  ]}>
+                  견적요약
+                </Typo>
+              </View>
+              <View
+                style={[
+                  styles.bottomInfo,
+                  {
+                    paddingTop: responsiveStyles.bottomInfoPaddingTop,
+                    paddingBottom: responsiveStyles.bottomInfoPaddingBottom,
+                  },
+                ]}>
+                <View
+                  style={[
+                    styles.bottomInfoContainer,
+                    {
+                      paddingVertical:
+                        responsiveStyles.bottomInfoPaddingVertical,
+                    },
+                  ]}>
+                  <Typo
+                    style={[
+                      styles.bottomInfoText,
+                      {fontSize: responsiveStyles.bottomInfoTextSize},
+                    ]}>
+                    호실
+                  </Typo>
+                  <Typo
+                    style={[
+                      styles.bottomValueText,
+                      {fontSize: responsiveStyles.bottomValueTextSize},
+                    ]}>
+                    {funeralHallInfo?.funeralHallName || ''}
+                  </Typo>
                 </View>
-                <View style={[styles.bottomInfoContainer, {paddingVertical: responsiveStyles.bottomInfoPaddingVertical}]}>
-                  <Typo style={[styles.bottomInfoText, {fontSize: responsiveStyles.bottomInfoTextSize}]}>식장지불금액 + 호실 사용료</Typo>
-                  <Typo style={[styles.bottomValueText, {fontSize: responsiveStyles.bottomValueTextSize}]}>{(funeralHallInfo?.funeralHallPrice || 0) + (funeralHallInfo?.funeralHallDetailPrice || 0)} 만원</Typo>
+                <View
+                  style={[
+                    styles.bottomInfoContainer,
+                    {
+                      paddingVertical:
+                        responsiveStyles.bottomInfoPaddingVertical,
+                    },
+                  ]}>
+                  <Typo
+                    style={[
+                      styles.bottomInfoText,
+                      {fontSize: responsiveStyles.bottomInfoTextSize},
+                    ]}>
+                    식장지불금액 + 호실 사용료
+                  </Typo>
+                  <Typo
+                    style={[
+                      styles.bottomValueText,
+                      {fontSize: responsiveStyles.bottomValueTextSize},
+                    ]}>
+                    {(funeralHallInfo?.funeralHallPrice || 0) +
+                      (funeralHallInfo?.funeralHallDetailPrice || 0)}{' '}
+                    만원
+                  </Typo>
                 </View>
-                <View style={[styles.bottomInfoContainer, {paddingVertical: responsiveStyles.bottomInfoPaddingVertical}]}>
-                  <Typo style={[styles.bottomInfoText, {fontSize: responsiveStyles.bottomInfoTextSize}]}>제안 최종 가격</Typo>
-                  <Typo style={[styles.bottomValueText2, {fontSize: responsiveStyles.bottomValueTextSize}]}>{funeralHallInfo?.proponentMoney || ''} 만원</Typo>
+                <View
+                  style={[
+                    styles.bottomInfoContainer,
+                    {
+                      paddingVertical:
+                        responsiveStyles.bottomInfoPaddingVertical,
+                    },
+                  ]}>
+                  <Typo
+                    style={[
+                      styles.bottomInfoText,
+                      {fontSize: responsiveStyles.bottomInfoTextSize},
+                    ]}>
+                    제안 최종 가격
+                  </Typo>
+                  <Typo
+                    style={[
+                      styles.bottomValueText2,
+                      {fontSize: responsiveStyles.bottomValueTextSize},
+                    ]}>
+                    {funeralHallInfo?.proponentMoney || ''} 만원
+                  </Typo>
                 </View>
-                <View style={[styles.bottomInfoContainer, {paddingVertical: responsiveStyles.bottomInfoPaddingVertical}]}>
-                  <Typo style={[styles.bottomInfoText, {fontSize: responsiveStyles.bottomInfoTextSize}]}>할인율</Typo>
-                  <Typo style={[styles.bottomValueText, {fontSize: responsiveStyles.bottomValueTextSize}]}>{funeralHallInfo?.discount ?? ''} %</Typo>
+                <View
+                  style={[
+                    styles.bottomInfoContainer,
+                    {
+                      paddingVertical:
+                        responsiveStyles.bottomInfoPaddingVertical,
+                    },
+                  ]}>
+                  <Typo
+                    style={[
+                      styles.bottomInfoText,
+                      {fontSize: responsiveStyles.bottomInfoTextSize},
+                    ]}>
+                    할인율
+                  </Typo>
+                  <Typo
+                    style={[
+                      styles.bottomValueText,
+                      {fontSize: responsiveStyles.bottomValueTextSize},
+                    ]}>
+                    {funeralHallInfo?.discount ?? ''} %
+                  </Typo>
                 </View>
               </View>
-              
+              {/* <View style={styles.buttonRow}>
+                <TouchableOpacity
+                  style={[styles.phoneButton, loading && styles.disabledButton]}
+                  onPress={() => handleCall(dispatchDetail.managerPhoneNumber)}
+                  disabled={loading}>
+                  <PhoneIcon width={18} height={18} />
+                  <Typo style={styles.phoneIconButtonText}>전화</Typo>
+                </TouchableOpacity>
+              </View> */}
               {/* 상태 메시지 */}
               {renderStatusMessage()}
-              
+
               {/* 상태별 버튼 */}
               {renderActionButton()}
             </View>
@@ -589,7 +860,9 @@ const ConfirmTransactionPage = () => {
         {/* 데이터 없음 */}
         {!loading && !error && !dispatchDetail && (
           <View style={styles.centerContainer}>
-            <Typo style={styles.errorText}>출동 신청 정보를 찾을 수 없습니다.</Typo>
+            <Typo style={styles.errorText}>
+              출동 신청 정보를 찾을 수 없습니다.
+            </Typo>
           </View>
         )}
       </View>
@@ -763,5 +1036,30 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: 'Pretendard-Regular',
     lineHeight: 20,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 16,
+    gap: 10,
+  },
+  phoneButton: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 10,
+    flex: 1,
+    backgroundColor: 'rgba(226, 242, 255, 0.5)',
+    paddingVertical: 18,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  phoneIconButtonText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#666',
+    fontFamily: 'Pretendard-Bold',
+  },
+  disabledButton: {
+    backgroundColor: '#f2f2f2',
   },
 });
