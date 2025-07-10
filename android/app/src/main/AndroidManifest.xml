@@ -1,5 +1,20 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools">
+   <!-- ✅ 전화 및 문자 스킴을 위한 queries 추가 -->
+  <queries>
+    <!-- 전화걸기 (tel:) -->
+    <intent>
+      <action android:name="android.intent.action.DIAL" />
+      <data android:scheme="tel" />
+    </intent>
+
+    <!-- 문자보내기 (sms:) -->
+    <intent>
+      <action android:name="android.intent.action.SENDTO" />
+      <data android:scheme="sms" />
+    </intent>
+  </queries>
+
   <uses-permission android:name="android.permission.INTERNET" />
   <uses-permission android:name="android.permission.CAMERA" />
   <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />

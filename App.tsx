@@ -37,7 +37,7 @@ function App(): React.JSX.Element {
   const userType = userInfo?.userType;
   const initialNotificationHandled = useRef(false);
   console.log('isLogin', isLogin);
-
+  console.log('현재 플랫폼 버전', Platform.Version);
   // 알림 권한 요청 함수
   const requestNotificationPermission = async () => {
     try {
@@ -149,6 +149,7 @@ function App(): React.JSX.Element {
 
   // ✅ 앱 종료 상태에서 알림 클릭으로 인한 실행 처리
   useEffect(() => {
+    console.log('1. 앱 종료 상태에서 알림 클릭 으로 useEffect 실행');
     const handleInitialNotification = async () => {
       try {
         if (initialNotificationHandled.current) return;
