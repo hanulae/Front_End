@@ -5,9 +5,11 @@ import {NavigationProp, useFocusEffect} from '@react-navigation/native';
 import Typo from '../../components/common/Typo';
 import {
   ImageBackground,
+  Linking,
   Platform,
   StatusBar,
   StyleSheet,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import LoginIcon from '../../assets/Header/Header_Login.svg';
@@ -105,11 +107,13 @@ const MainPage = ({navigation}: IMainPageProps): JSX.Element => {
             </CustomButton>
           </View>
         </ImageBackground>
-        <View style={styles.footerContainer}>
+        <TouchableOpacity
+          style={styles.footerContainer}
+          onPress={() => Linking.openURL('tel:1661-1897')}>
           <InfoCenterIcon width={21.5} height={22} />
           <Typo style={styles.footerText}>고객센터</Typo>
           <Typo style={styles.footerNumber}>1661-1897</Typo>
-        </View>
+        </TouchableOpacity>
       </View>
       {showSelectSheet && (
         <UserSelectSheet
