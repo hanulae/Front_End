@@ -235,7 +235,7 @@ const PointHistoryPage = () => {
       backButton={true}
       homeButton={true}
       homeRouteName={variant === 'manager' ? 'ManagerMain' : 'FuneralMain'}
-      headerTitle="포인트 내역">
+      headerTitle="캐시 내역">
       <View style={styles.wrapper}>
         <View style={styles.pointSection}>
           <View style={styles.pannel}>
@@ -263,7 +263,7 @@ const PointHistoryPage = () => {
               style={styles.actionButton}
               onPress={handlePointCharge}>
               <Typo style={styles.actionButtonText}>
-                {variant === 'manager' ? '환급' : '포인트 충전'}
+                {variant === 'manager' ? '캐시 환급' : '포인트 충전'}
               </Typo>
             </CustomButton>
           </View>

@@ -149,7 +149,7 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
             <CustomButton onPress={goToPointHistory} style={styles.button}>
               <View style={styles.buttonNameContainer}>
                 <PointRecordIcon width={24} height={24} />
-                <Typo style={styles.buttonText}>포인트 내역</Typo>
+                <Typo style={styles.buttonText}>캐시 내역</Typo>
               </View>
               <MoveGrayIcon width={24} height={24} />
             </CustomButton>
