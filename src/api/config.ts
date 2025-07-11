@@ -9,14 +9,14 @@ import {
 
 // const API_URL = 'http://localhost:3000/api'; // Replace with your API URL
 
-const API_URL =
-  Platform.OS === 'android'
-    ? 'http://10.0.2.2:8000/api'
-    : 'http://localhost:8000/api';
+// const API_URL =
+//   Platform.OS === 'android'
+//     ? 'http://10.0.2.2:8000/api'
+//     : 'http://localhost:8000/api';
 
 //export const API_URL = 'http://15.164.166.8:3000/api';
 
-//export const API_URL = 'https://www.wooricenter.co.kr/api';
+export const API_URL = 'https://www.wooricenter.co.kr/api';
 
 const api = axios.create({
   baseURL: API_URL,

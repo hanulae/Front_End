@@ -77,14 +77,14 @@ const FindPWpage = ({navigation}: IFindPWPageProps) => {
       });
       console.log('Verify code response:', response);
 
-      if (response.data.success === true) {
+      if (response.data.verified === true) {
         setIsPhoneVerified(true);
         Toast.show({
           type: 'success',
           text1: '인증 성공',
           position: 'top',
         });
-        return response.data.success === true;
+        return response.data.verified === true;
       } else {
         Toast.show({
           type: 'error',
