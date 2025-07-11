@@ -3,6 +3,7 @@ import PointIcon from '../../assets/Bullet/Bullet_PointBlue.svg';
 import CashGrayIcon from '../../assets/Bullet/Bullet_CoinGray.svg';
 import CalendarIcon from '../../assets/Bullet/Bullet_Date.svg';
 import Typo from './Typo';
+import { scaleFontSize, scaleSize, isSmallDevice } from '../../utils/responsive';
 
 interface IPointHistoryCardProps {
   assetType: 'point' | 'cash';
@@ -21,6 +22,8 @@ const PointHistoryCard = ({
   balance,
   status,
 }: IPointHistoryCardProps) => {
+  const iconSize = scaleSize(24);
+  
   return (
     <View style={styles.wrapper}>
       <View style={styles.firstRow}>
@@ -44,12 +47,15 @@ const PointHistoryCard = ({
 
         <View style={styles.amountContainer}>
           <Typo style={styles.amountText}>{amount}</Typo>
-          {assetType === 'point' ? <PointIcon /> : <CashGrayIcon />}
+          {assetType === 'point' ? 
+            <PointIcon width={iconSize} height={iconSize} /> : 
+            <CashGrayIcon width={iconSize} height={iconSize} />
+          }
         </View>
       </View>
       <View style={styles.secondRow}>
         <View style={styles.dateContainer}>
-          <CalendarIcon />
+          <CalendarIcon width={iconSize} height={iconSize} />
           <Typo style={styles.dateText}>{transactionDate}</Typo>
         </View>
         <View style={styles.balanceContainer}>
@@ -67,29 +73,29 @@ const styles = StyleSheet.create({
   wrapper: {
     flexDirection: 'column',
     backgroundColor: '#F8F9FB',
-    borderRadius: 10,
+    borderRadius: scaleSize(10),
   },
   firstRow: {
     justifyContent: 'space-between',
     alignItems: 'center',
     flexDirection: 'row',
-    padding: 20,
+    padding: scaleSize(20),
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(167, 169, 176, 0.15)',
   },
   typeStatusContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: scaleSize(10),
   },
   pendingText: {
-    fontSize: 14,
+    fontSize: scaleFontSize(14),
     fontWeight: 500,
     color: '#283042',
     fontFamily: 'Pretendard-Bold',
   },
   completedText: {
-    fontSize: 14,
+    fontSize: scaleFontSize(14),
     fontWeight: 500,
     color: '#283042',
     fontFamily: 'Pretendard-Bold',
@@ -97,10 +103,10 @@ const styles = StyleSheet.create({
   amountContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: scaleSize(10),
   },
   amountText: {
-    fontSize: 17,
+    fontSize: scaleFontSize(isSmallDevice ? 15 : 17),
     fontWeight: 500,
     color: '#283042',
     fontFamily: 'GmarketSansTTFBold',
@@ -109,15 +115,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     flexDirection: 'row',
-    padding: 20,
+    padding: scaleSize(20),
   },
   dateContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: scaleSize(10),
   },
   dateText: {
-    fontSize: 14,
+    fontSize: scaleFontSize(14),
     fontWeight: 500,
     color: '#A7A9B0',
     fontFamily: 'Pretendard-Medium',
@@ -125,22 +131,22 @@ const styles = StyleSheet.create({
   balanceContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 20,
+    gap: scaleSize(20),
   },
   balanceTitle: {
-    fontSize: 14,
+    fontSize: scaleFontSize(14),
     fontWeight: 600,
     color: '#283042',
     fontFamily: 'Pretendard-Bold',
   },
   balanceText: {
-    fontSize: 14,
+    fontSize: scaleFontSize(14),
     fontWeight: 500,
     color: '#6F717D',
     fontFamily: 'Pretendard-Medium',
   },
   typeText: {
-    fontSize: 14,
+    fontSize: scaleFontSize(14),
     fontWeight: 500,
     fontFamily: 'Pretendard-Bold',
   },

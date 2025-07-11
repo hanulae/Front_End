@@ -22,6 +22,7 @@ import {getUserInfo} from '../../utils/tokenStorage';
 import DeviceInfo from 'react-native-device-info';
 import api from '../../api/config';
 import {clearTokens} from '../../utils/tokenStorage';
+import { scaleFontSize, scaleSize, isSmallDevice } from '../../utils/responsive';
 // import Toast from 'react-native-toast-message';
 
 interface IManagerProfilePageProps {
@@ -105,6 +106,9 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
     // navigation.navigate('ManagerMain');
   };
 
+  // SVG 아이콘 크기 조정
+  const iconSize = scaleSize(24);
+
   return (
     <>
       <ManagerLayout
@@ -129,10 +133,10 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
           onPress={goToModifyUserInfo}
           style={styles.floatingButton}>
           <View style={styles.buttonNameContainer}>
-            <ModifyUserInfoIcon width={24} height={24} />
+            <ModifyUserInfoIcon width={iconSize} height={iconSize} />
             <Typo style={styles.topButtonText}>정보 수정</Typo>
           </View>
-          <MoveWhiteIcon width={24} height={24} />
+          <MoveWhiteIcon width={iconSize} height={iconSize} />
         </CustomButton>
         <ScrollView
           style={styles.whiteSection}
@@ -141,31 +145,31 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
           <View style={styles.customButtonContainer}>
             <CustomButton onPress={goToEstimateList} style={styles.button}>
               <View style={styles.buttonNameContainer}>
-                <QuoteIcon width={24} height={24} />
+                <QuoteIcon width={iconSize} height={iconSize} />
                 <Typo style={styles.buttonText}>견적 내역</Typo>
               </View>
-              <MoveGrayIcon width={24} height={24} />
+              <MoveGrayIcon width={iconSize} height={iconSize} />
             </CustomButton>
             <CustomButton onPress={goToPointHistory} style={styles.button}>
               <View style={styles.buttonNameContainer}>
-                <PointRecordIcon width={24} height={24} />
+                <PointRecordIcon width={iconSize} height={iconSize} />
                 <Typo style={styles.buttonText}>캐시 내역</Typo>
               </View>
-              <MoveGrayIcon width={24} height={24} />
+              <MoveGrayIcon width={iconSize} height={iconSize} />
             </CustomButton>
             <CustomButton onPress={goToPointRefund} style={styles.button}>
               <View style={styles.buttonNameContainer}>
-                <PointRefundIcon width={24} height={24} />
+                <PointRefundIcon width={iconSize} height={iconSize} />
                 <Typo style={styles.buttonText}>환급</Typo>
               </View>
-              <MoveGrayIcon width={24} height={24} />
+              <MoveGrayIcon width={iconSize} height={iconSize} />
             </CustomButton>
             <CustomButton onPress={goToAppSetting} style={styles.button}>
               <View style={styles.buttonNameContainer}>
-                <AppSettingIcon width={24} height={24} />
+                <AppSettingIcon width={iconSize} height={iconSize} />
                 <Typo style={styles.buttonText}>앱 설정</Typo>
               </View>
-              <MoveGrayIcon width={24} height={24} />
+              <MoveGrayIcon width={iconSize} height={iconSize} />
             </CustomButton>
           </View>
           <CustomButton onPress={goToCallHistory} style={styles.dispatchButton}>
@@ -183,138 +187,91 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
   );
 };
 
-export default ManagerProfilePage;
-
 const styles = StyleSheet.create({
   topSection: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    bottom: 390,
+    bottom: scaleSize(390),
     backgroundColor: '#3287F8',
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
-    paddingTop: Platform.OS === 'ios' ? 20 : 60,
-    paddingBottom: 40,
-    paddingHorizontal: 20,
+    borderBottomLeftRadius: scaleSize(28),
+    borderBottomRightRadius: scaleSize(28),
+    paddingTop: Platform.OS === 'ios' ? scaleSize(20) : scaleSize(60),
+    paddingBottom: scaleSize(40),
+    paddingHorizontal: scaleSize(20),
     zIndex: 2,
   },
   floatingButton: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 340 : 390,
-    left: 20,
-    right: 20,
+    top: Platform.OS === 'ios' ? scaleSize(340) : scaleSize(390),
+    left: scaleSize(20),
+    right: scaleSize(20),
     zIndex: 6,
     backgroundColor: '#58A1FF',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 30,
-    paddingVertical: 20,
-    borderRadius: 15,
+    paddingHorizontal: scaleSize(30),
+    paddingVertical: scaleSize(20),
+    borderRadius: scaleSize(15),
   },
   container: {
     backgroundColor: '#3287F8',
   },
-  blueBackground: {
-    paddingHorizontal: 20,
-    paddingTop: 40,
-    paddingBottom: 30,
-  },
   whiteSection: {
     flex: 1,
     backgroundColor: '#F5F5F5',
-    marginTop: Platform.OS === 'ios' ? 360 : 400,
-    paddingTop: 20,
+    marginTop: Platform.OS === 'ios' ? scaleSize(360) : scaleSize(400),
+    paddingTop: scaleSize(20),
     zIndex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingHorizontal: scaleSize(20),
+    paddingVertical: scaleSize(20),
     flexGrow: 1,
     justifyContent: 'space-between',
   },
   customButtonContainer: {
-    gap: 5,
-    marginTop: Platform.OS === 'ios' ? 10 : 20,
-  },
-  topButton: {
-    backgroundColor: '#58A1FF',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 30,
-    paddingVertical: 20,
-    borderRadius: 15,
-  },
-  topButtonText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    lineHeight: 20,
+    gap: scaleSize(5),
+    marginTop: Platform.OS === 'ios' ? scaleSize(10) : scaleSize(20),
   },
   button: {
     backgroundColor: '#FFFFFF',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 30,
-    paddingVertical: 20,
-    borderRadius: 15,
+    paddingHorizontal: scaleSize(30),
+    paddingVertical: scaleSize(20),
+    borderRadius: scaleSize(15),
   },
   buttonNameContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 13,
+    gap: scaleSize(13),
   },
   buttonText: {
-    fontSize: 18,
+    fontSize: scaleFontSize(isSmallDevice ? 16 : 18),
     fontWeight: '600',
     color: '#000',
-    lineHeight: 20,
+    lineHeight: scaleFontSize(20),
   },
-  wrapper: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: '#fff',
-  },
-  infoContainer: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 24,
-    alignItems: 'center',
-    backgroundColor: '#f9f9f9',
-  },
-  greetingText: {
-    fontSize: 14,
-    color: '#555',
-    marginBottom: 8,
-  },
-  nameText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
-  },
-  pointText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#4F7CFF',
-  },
-  buttonContainer: {
-    gap: 12,
+  topButtonText: {
+    fontSize: scaleFontSize(isSmallDevice ? 16 : 18),
+    fontWeight: '600',
+    color: '#FFFFFF',
+    lineHeight: scaleFontSize(20),
   },
   dispatchButton: {
     backgroundColor: '#2D81F1',
-    borderRadius: 10,
-    paddingVertical: 18,
+    borderRadius: scaleSize(10),
+    paddingVertical: scaleSize(18),
     alignItems: 'center',
-    // marginBottom: 10,
   },
   dispatchButtonText: {
-    fontSize: 16,
+    fontSize: scaleFontSize(isSmallDevice ? 14 : 16),
     fontWeight: '700',
     color: '#FFFFFF',
     fontFamily: 'Pretendard-Black',
   },
 });
+
+export default ManagerProfilePage;

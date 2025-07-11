@@ -3,6 +3,7 @@ import ManagerLayout from '../../layout/ManagerLayout';
 import Typo from '../../components/common/Typo';
 import CommaIcon from '../../assets/Contents/Content_Comma.svg';
 import {useRoute} from '@react-navigation/native';
+import { scaleFontSize, scaleSize, isSmallDevice } from '../../utils/responsive';
 
 const ClientDetailPage = () => {
   const route = useRoute();
@@ -106,66 +107,64 @@ export default ClientDetailPage;
 
 const styles = StyleSheet.create({
   wrapper: {
-    backgroundColor: '#F5F5F5', // 상단 회색 배경
-    paddingHorizontal: 16,
-    paddingTop: 24,
+    backgroundColor: '#F5F5F5',
+    paddingHorizontal: scaleSize(16),
+    paddingTop: scaleSize(24),
   },
   titleContainer: {
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
-    paddingHorizontal: 20,
-    paddingVertical: 26,
+    borderTopLeftRadius: scaleSize(12),
+    borderTopRightRadius: scaleSize(12),
+    paddingHorizontal: scaleSize(20),
+    paddingVertical: scaleSize(26),
     borderBottomWidth: 1,
     borderBottomColor: '#E5E5E5',
   },
   title: {
-    fontSize: 18,
+    fontSize: scaleFontSize(isSmallDevice ? 16 : 18),
     fontWeight: 'bold',
-    // marginBottom: 20,
     textAlign: 'center',
     color: '#283042',
     fontFamily: 'Pretendard-Bold',
   },
   listContainer: {
     backgroundColor: '#FFFFFF',
-    borderBottomLeftRadius: 12,
-    borderBottomRightRadius: 12,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    // marginBottom: 32,
+    borderBottomLeftRadius: scaleSize(12),
+    borderBottomRightRadius: scaleSize(12),
+    paddingHorizontal: scaleSize(20),
+    paddingVertical: scaleSize(16),
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: {width: 0, height: scaleSize(2)},
     shadowOpacity: 0.05,
-    shadowRadius: 4,
+    shadowRadius: scaleSize(4),
     elevation: 2,
   },
   listItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 22,
+    paddingVertical: scaleSize(22),
     borderBottomColor: '#E5E5E5',
     borderBottomWidth: 1,
   },
   labelContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: scaleSize(8),
   },
   label: {
-    fontSize: 14,
+    fontSize: scaleFontSize(14),
     color: '#283042',
     fontWeight: '500',
     fontFamily: 'Pretendard-Regular',
   },
   value: {
-    fontSize: 16,
+    fontSize: scaleFontSize(isSmallDevice ? 14 : 16),
     fontWeight: '600',
     color: '#283042',
     fontFamily: 'Pretendard-Bold',
   },
   emptyValue: {
-    fontSize: 16,
+    fontSize: scaleFontSize(isSmallDevice ? 14 : 16),
     fontWeight: '500',
     color: '#A7A9B0',
     fontFamily: 'Pretendard-Medium',

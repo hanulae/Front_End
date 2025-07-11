@@ -14,11 +14,9 @@ import CustomButton from '../../components/common/CustomButton';
 import SelectIcon from '../../assets/Icon/Icon_DropDown03.svg';
 import PointHistoryCard from '../../components/common/PointHistoryCard';
 import TypeBottomSheet from '../../components/common/TypeBottomSheet';
+import { scaleFontSize, scaleSize, isSmallDevice } from '../../utils/responsive';
 
 // BSK ADD IMPORTS
-
-import {useAtomValue} from 'jotai';
-import {loginAtom} from '../../state/local_state/loginAtom';
 import api from '../../api/config';
 
 interface ITransaction {
@@ -33,7 +31,7 @@ interface ITransaction {
 
 const PointHistoryPage = () => {
   // BSK ADD LOGIN INFO
-  const loginInfo = useAtomValue(loginAtom);
+  // const loginInfo = useAtomValue(loginAtom); // Remove unused variable
   const [currentPoint, setCurrentPoint] = useState<number>(0);
   const [currentCash, setCurrentCash] = useState<number>(0);
   const [transactions, setTransactions] = useState<ITransaction[]>([]);
@@ -74,18 +72,10 @@ const PointHistoryPage = () => {
           console.log('pointUrl', pointUrl);
           console.log('cashUrl', cashUrl);
 
-          const pointRes = await api.get(pointUrl, {
-            // headers: {
-            //   Authorization: `Bearer ${loginInfo.accessToken}`,
-            // },
-          });
+          const pointRes = await api.get(pointUrl);
           setCurrentPoint(pointRes.data.currentPoint || 0);
 
-          const cashRes = await api.get(cashUrl, {
-            // headers: {
-            //   Authorization: `Bearer ${loginInfo.accessToken}`,
-            // },
-          });
+          const cashRes = await api.get(cashUrl);
           setCurrentCash(cashRes.data.currentCash || 0);
 
           // Fetch transaction history
@@ -154,7 +144,7 @@ const PointHistoryPage = () => {
       };
 
       fetchPointAndCash();
-    }, [variant, loginInfo.accessToken]),
+    }, [variant]),
   );
 
   useFocusEffect(
@@ -239,22 +229,22 @@ const PointHistoryPage = () => {
       <View style={styles.wrapper}>
         <View style={styles.pointSection}>
           <View style={styles.pannel}>
-            <View style={styles.pointContainer}>
+            {/* <View style={styles.pointContainer}>
               <Typo style={styles.titleText}>보유 포인트</Typo>
               <View style={styles.pointValueConainer}>
                 <Typo style={styles.pointValue}>
                   {currentPoint.toLocaleString()}
                 </Typo>
-                <PointIcon />
+                <PointIcon width={scaleSize(24)} height={scaleSize(24)} />
               </View>
-            </View>
+            </View> */}
             <View style={styles.cashContainer}>
               <Typo style={styles.titleText}>캐시 포인트</Typo>
               <View style={styles.cashValueConainer}>
                 <Typo style={styles.cashValue}>
                   {currentCash.toLocaleString()}
                 </Typo>
-                <CashIcon />
+                <CashIcon width={scaleSize(24)} height={scaleSize(24)} />
               </View>
             </View>
           </View>
@@ -274,15 +264,15 @@ const PointHistoryPage = () => {
               style={styles.historySelectorButton}
               onPress={() => setTypeSheetVisible(true)}>
               <Typo style={styles.historySelectorText}>유형</Typo>
-              <SelectIcon width={16} height={16} />
+              <SelectIcon width={scaleSize(16)} height={scaleSize(16)} />
             </CustomButton>
           </View>
           <ScrollView contentContainerStyle={styles.card}>
             {(() => {
               console.log('🚀 ~ rendering transactions:', transactions);
               return transactions.length === 0 ? (
-                <View style={{padding: 20, alignItems: 'center'}}>
-                  <Typo style={{color: '#666', fontSize: 16}}>
+                <View style={{padding: scaleSize(20), alignItems: 'center'}}>
+                  <Typo style={{color: '#666', fontSize: scaleFontSize(16)}}>
                     거래 내역이 없습니다.
                   </Typo>
                 </View>
@@ -326,25 +316,25 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   pointSection: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingHorizontal: scaleSize(20),
+    paddingVertical: scaleSize(20),
     borderBottomWidth: 10,
     borderBottomColor: '#E5E5E5',
   },
   pannel: {
     flexDirection: 'column',
     backgroundColor: '#2D81F1',
-    borderRadius: 15,
-    marginBottom: 16,
+    borderRadius: scaleSize(15),
+    marginBottom: scaleSize(16),
   },
   pointContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 23,
+    paddingHorizontal: scaleSize(20),
+    paddingVertical: scaleSize(23),
   },
   titleText: {
-    fontSize: 14,
+    fontSize: scaleFontSize(14),
     fontWeight: '500',
     color: '#FFFFFF',
     fontFamily: 'Pretendard-Regular',
@@ -352,10 +342,10 @@ const styles = StyleSheet.create({
   pointValueConainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: scaleSize(10),
   },
   pointValue: {
-    fontSize: 20,
+    fontSize: scaleFontSize(isSmallDevice ? 18 : 20),
     fontWeight: '500',
     color: '#FFFFFF',
     fontFamily: 'GmarketSansTTFBold',
@@ -363,10 +353,10 @@ const styles = StyleSheet.create({
   cashValueConainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: scaleSize(10),
   },
   cashValue: {
-    fontSize: 20,
+    fontSize: scaleFontSize(isSmallDevice ? 18 : 20),
     fontWeight: '500',
     color: '#FFFFFF',
     fontFamily: 'GmarketSansTTFBold',
@@ -374,50 +364,50 @@ const styles = StyleSheet.create({
   cashContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 23,
+    paddingHorizontal: scaleSize(20),
+    paddingVertical: scaleSize(23),
     borderTopWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.1)',
   },
   historySection: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingHorizontal: scaleSize(20),
+    paddingVertical: scaleSize(20),
   },
   historySelector: {
     justifyContent: 'flex-start',
-    marginBottom: 20,
+    marginBottom: scaleSize(20),
   },
   historySelectorButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    gap: 24,
+    gap: scaleSize(24),
   },
   historySelectorText: {
-    fontSize: 16,
+    fontSize: scaleFontSize(16),
     fontWeight: 600,
     color: '#000000',
     fontFamily: 'Pretendard-Bold',
   },
   card: {
-    gap: 10,
+    gap: scaleSize(10),
   },
   buttonContainer: {
     flexDirection: 'row',
-    gap: 12,
+    gap: scaleSize(12),
   },
   actionButton: {
     flex: 1,
     backgroundColor: '#F5F5F5',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    borderRadius: scaleSize(8),
+    paddingVertical: scaleSize(12),
+    paddingHorizontal: scaleSize(16),
     alignItems: 'center',
     justifyContent: 'center',
   },
   actionButtonText: {
-    fontSize: 14,
+    fontSize: scaleFontSize(14),
     fontWeight: '600',
     color: '#2D81F1',
     fontFamily: 'Pretendard-SemiBold',

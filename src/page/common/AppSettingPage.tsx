@@ -12,6 +12,7 @@ import CheckOffIcon from '../../assets/Check/Check01=Check01_default.svg';
 import {managerWithdrawalService, funeralWithdrawalService} from '../../services/api/withdrawalService';
 import {clearTokens} from '../../utils/tokenStorage';
 import SMSInputModal from '../../components/common/SMSInputModal';
+import { scaleFontSize, scaleSize, isSmallDevice } from '../../utils/responsive';
 
 interface INotificationSettings {
   appNotification: boolean;
@@ -237,9 +238,9 @@ const AppSettingPage = () => {
           activeOpacity={0.7}
         >
           {withdrawalAgreed ? (
-            <CheckOnIcon width={20} height={20} />
+            <CheckOnIcon width={scaleSize(20)} height={scaleSize(20)} />
           ) : (
-            <CheckOffIcon width={20} height={20} />
+            <CheckOffIcon width={scaleSize(20)} height={scaleSize(20)} />
           )}
           <Typo style={styles.agreementText}>
             회원탈퇴에 동의합니다.
@@ -308,42 +309,42 @@ export default AppSettingPage;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 20,
+    paddingTop: scaleSize(20),
   },
   header: {
-    marginBottom: 32,
-    paddingHorizontal: 16,
+    marginBottom: scaleSize(32),
+    paddingHorizontal: scaleSize(16),
   },
   description: {
-    fontSize: 16,
+    fontSize: scaleFontSize(16),
     color: '#6F717D',
     fontWeight: '600',
     fontFamily: 'Pretendard-Medium',
   },
   section: {
     backgroundColor: '#FFFFFF',
-    paddingVertical: 8,
-    marginBottom: 20,
+    paddingVertical: scaleSize(8),
+    marginBottom: scaleSize(20),
     borderBottomWidth: 5,
     borderBottomColor: 'rgba(205, 209, 215, 0.25)',
   },
   infoSection: {
     backgroundColor: '#FFFFFF',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    marginBottom: 20,
+    paddingVertical: scaleSize(8),
+    paddingHorizontal: scaleSize(16),
+    marginBottom: scaleSize(20),
   },
   settingItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
+    paddingHorizontal: scaleSize(16),
     alignItems: 'center',
-    paddingVertical: 20,
+    paddingVertical: scaleSize(20),
     borderBottomWidth: 1,
     borderBottomColor: '#F5F5F5',
   },
   settingLabel: {
-    fontSize: 16,
+    fontSize: scaleFontSize(isSmallDevice ? 14 : 16),
     fontWeight: '600',
     color: '#283042',
     fontFamily: 'Pretendard-Medium',
@@ -352,50 +353,50 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 20,
+    paddingVertical: scaleSize(20),
   },
   versionLabel: {
-    fontSize: 16,
+    fontSize: scaleFontSize(isSmallDevice ? 14 : 16),
     fontWeight: '600',
     color: '#283042',
     fontFamily: 'Pretendard-Medium',
   },
   versionText: {
-    fontSize: 16,
+    fontSize: scaleFontSize(isSmallDevice ? 14 : 16),
     fontWeight: '600',
     color: '#3287F8',
     fontFamily: 'Pretendard-Medium',
   },
   versionSubText: {
-    fontSize: 14,
+    fontSize: scaleFontSize(14),
     color: '#8990A0',
     fontWeight: '400',
     fontFamily: 'Pretendard-Regular',
     textAlign: 'center',
-    paddingBottom: 16,
+    paddingBottom: scaleSize(16),
   },
   withdrawSection: {
     marginTop: 'auto',
-    paddingBottom: 40,
-    paddingHorizontal: 16,
+    paddingBottom: scaleSize(40),
+    paddingHorizontal: scaleSize(16),
   },
   agreementContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
-    paddingVertical: 10,
+    marginBottom: scaleSize(20),
+    paddingVertical: scaleSize(10),
   },
   agreementText: {
-    fontSize: 14,
+    fontSize: scaleFontSize(14),
     fontWeight: '500',
     color: '#283042',
     fontFamily: 'Pretendard-Medium',
-    marginLeft: 8,
+    marginLeft: scaleSize(8),
   },
   withdrawButton: {
     backgroundColor: 'rgba(205, 209, 215, 0.25)',
-    borderRadius: 10,
-    paddingVertical: 18,
+    borderRadius: scaleSize(10),
+    paddingVertical: scaleSize(18),
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#E6EAF3',
@@ -405,7 +406,7 @@ const styles = StyleSheet.create({
     borderColor: '#F04452',
   },
   withdrawText: {
-    fontSize: 16,
+    fontSize: scaleFontSize(isSmallDevice ? 14 : 16),
     fontWeight: '600',
     color: 'rgba(137, 144, 160, 0.75)',
     fontFamily: 'Pretendard-Medium',
