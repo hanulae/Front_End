@@ -239,7 +239,7 @@ const PointHistoryPage = () => {
       <View style={styles.wrapper}>
         <View style={styles.pointSection}>
           <View style={styles.pannel}>
-            <View style={styles.pointContainer}>
+            {/* <View style={styles.pointContainer}>
               <Typo style={styles.titleText}>보유 포인트</Typo>
               <View style={styles.pointValueConainer}>
                 <Typo style={styles.pointValue}>
@@ -247,7 +247,7 @@ const PointHistoryPage = () => {
                 </Typo>
                 <PointIcon />
               </View>
-            </View>
+            </View> */}
             <View style={styles.cashContainer}>
               <Typo style={styles.titleText}>캐시 포인트</Typo>
               <View style={styles.cashValueConainer}>
