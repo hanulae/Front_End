@@ -1,7 +1,13 @@
-import {StyleSheet, TouchableOpacity, View} from 'react-native';
+import {StyleSheet, TouchableOpacity, View, Dimensions} from 'react-native';
 import Typo from '../common/Typo';
 import CheckActiveIcon from '../../assets/Check/Check01=Check01_Active.svg';
 import CheckinActiveIcon from '../../assets/Check/Check01=Check01_default.svg';
+
+const {width: screenWidth} = Dimensions.get('window');
+
+// 디바이스 크기에 따른 스케일 계산
+const isTablet = screenWidth >= 768;
+const isSmallDevice = screenWidth < 375;
 
 interface IFuneralQuoteCardProps {
   id: string;
@@ -143,8 +149,8 @@ export default FuneralQuoteCard;
 const styles = StyleSheet.create({
   card: {
     borderWidth: 1,
-    borderRadius: 12,
-    marginBottom: 16,
+    borderRadius: isTablet ? 16 : isSmallDevice ? 10 : 12,
+    marginBottom: isTablet ? 24 : isSmallDevice ? 12 : 16,
   },
   cardSelected: {
     borderColor: '#4F7CFF',
@@ -155,12 +161,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9f9f9',
   },
   row: {
-    paddingHorizontal: 24,
-    paddingVertical: 20,
+    paddingHorizontal: isTablet ? 32 : isSmallDevice ? 20 : 24,
+    paddingVertical: isTablet ? 28 : isSmallDevice ? 16 : 20,
     flexDirection: 'column',
     justifyContent: 'flex-start',
     alignItems: 'flex-start',
-    gap: 12,
+    gap: isTablet ? 16 : isSmallDevice ? 10 : 12,
   },
   firstRow: {
     flexDirection: 'row',
@@ -172,13 +178,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'stretch',
-    gap: 12,
+    gap: isTablet ? 16 : isSmallDevice ? 8 : 12,
   },
   nameText: {
-    fontSize: 16,
+    fontSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
     fontWeight: '600',
     color: '#283042',
-    marginBottom: 6,
+    marginBottom: isTablet ? 8 : isSmallDevice ? 4 : 6,
     fontFamily: 'Pretendard-Bold',
   },
   selectedText: {
@@ -186,21 +192,21 @@ const styles = StyleSheet.create({
   },
   addressText: {
     flex: 1,
-    fontSize: 14,
+    fontSize: isTablet ? 16 : isSmallDevice ? 12 : 14,
     fontWeight: '600',
     color: 'rgba(111, 113, 125, 0.75)',
     fontFamily: 'Pretendard-Medium',
   },
   statusButton: {
     alignSelf: 'flex-start',
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    borderRadius: 12,
+    paddingVertical: isTablet ? 6 : isSmallDevice ? 3 : 4,
+    paddingHorizontal: isTablet ? 16 : isSmallDevice ? 10 : 12,
+    borderRadius: isTablet ? 16 : isSmallDevice ? 10 : 12,
     backgroundColor: '#ddd',
     flexShrink: 0,
   },
   statusButtonText: {
-    fontSize: 12,
+    fontSize: isTablet ? 14 : isSmallDevice ? 10 : 12,
     fontWeight: 'bold',
     fontFamily: 'Pretendard-Bold',
   },

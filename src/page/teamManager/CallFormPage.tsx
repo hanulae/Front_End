@@ -16,46 +16,43 @@ type CallFormRouteParams = {
   funeralId: string;
 };
 
-// 반응형 디자인을 위한 유틸리티 함수들
-const getResponsiveSize = (screenWidth: number, baseSize: number) => {
-  const designWidth = 375; // 기준 디자인 폭 (iPhone X 기준)
-  return Math.round((screenWidth / designWidth) * baseSize);
-};
-
-const getResponsiveFontSize = (screenWidth: number, baseFontSize: number) => {
-  const designWidth = 375;
-  const ratio = screenWidth / designWidth;
-  return Math.max(12, Math.min(24, baseFontSize * ratio)); // 최소 12px, 최대 24px
-};
-
-const getResponsivePadding = (screenWidth: number, basePadding: number) => {
-  const designWidth = 375;
-  return Math.round((screenWidth / designWidth) * basePadding);
-};
-
 const CallFormPage = () => {
   const navigation = useNavigation<NavigationProp<any>>();
   const route = useRoute<RouteProp<{params: CallFormRouteParams}, 'params'>>();
   const { width: screenWidth } = useWindowDimensions();
 
+  // 디바이스 크기에 따른 반응형 계산
+  const isTablet = screenWidth >= 768;
+  const isSmallDevice = screenWidth < 375;
+
   // 반응형 크기 계산
   const responsiveSizes = useMemo(() => ({
-    horizontalPadding: getResponsivePadding(screenWidth, 16),
-    verticalPadding: getResponsivePadding(screenWidth, 16),
-    buttonHeight: getResponsiveSize(screenWidth, 18),
-    labelFontSize: getResponsiveFontSize(screenWidth, 16),
-    inputFontSize: getResponsiveFontSize(screenWidth, 16),
-    buttonFontSize: getResponsiveFontSize(screenWidth, 16),
-    searchButtonFontSize: getResponsiveFontSize(screenWidth, 15),
-    borderRadius: getResponsiveSize(screenWidth, 8),
-    searchButtonRadius: getResponsiveSize(screenWidth, 10),
-    inputPadding: getResponsivePadding(screenWidth, 18),
-    inputHorizontalPadding: getResponsivePadding(screenWidth, 20),
-    searchButtonPadding: getResponsivePadding(screenWidth, 24),
-    sectionGap: getResponsiveSize(screenWidth, 8),
-    bottomSectionGap: getResponsiveSize(screenWidth, 8),
-    marginBottom: getResponsiveSize(screenWidth, 24),
-  }), [screenWidth]);
+    // 텍스트 크기
+    labelFontSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
+    inputFontSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
+    buttonFontSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
+    searchButtonFontSize: isTablet ? 16 : isSmallDevice ? 13 : 15,
+
+    // 패딩과 마진
+    horizontalPadding: isTablet ? 28 : isSmallDevice ? 12 : 16,
+    verticalPadding: isTablet ? 24 : isSmallDevice ? 12 : 16,
+    inputPadding: isTablet ? 24 : isSmallDevice ? 14 : 18,
+    inputHorizontalPadding: isTablet ? 28 : isSmallDevice ? 16 : 20,
+    searchButtonPadding: isTablet ? 32 : isSmallDevice ? 20 : 24,
+    labelMarginLeft: isTablet ? 14 : isSmallDevice ? 8 : 10,
+    labelMarginVertical: isTablet ? 20 : isSmallDevice ? 12 : 16,
+
+    // 높이와 간격
+    buttonHeight: isTablet ? 24 : isSmallDevice ? 14 : 18,
+    minHeight: isTablet ? 64 : isSmallDevice ? 48 : 54,
+    sectionGap: isTablet ? 12 : isSmallDevice ? 6 : 8,
+    bottomSectionGap: isTablet ? 12 : isSmallDevice ? 6 : 8,
+    marginBottom: isTablet ? 32 : isSmallDevice ? 20 : 24,
+
+    // 테두리 반경
+    borderRadius: isTablet ? 12 : isSmallDevice ? 6 : 8,
+    searchButtonRadius: isTablet ? 14 : isSmallDevice ? 8 : 10,
+  }), [isTablet, isSmallDevice]);
 
   // 전화번호 입력
   const familyPhone = usePhoneInput();
@@ -256,7 +253,7 @@ const CallFormPage = () => {
       paddingVertical: responsiveSizes.buttonHeight,
       borderRadius: responsiveSizes.borderRadius,
       alignItems: 'center',
-      minHeight: getResponsiveSize(screenWidth, 54), // 최소 터치 영역 확보
+      minHeight: responsiveSizes.minHeight,
     },
     nextButtonText: {
       color: '#fff',
@@ -273,24 +270,24 @@ const CallFormPage = () => {
       fontSize: responsiveSizes.labelFontSize,
       fontWeight: '600',
       fontFamily: 'Pretendard-Bold',
-      marginLeft: getResponsivePadding(screenWidth, 10),
-      marginBottom: responsiveSizes.verticalPadding,
-      marginTop: responsiveSizes.verticalPadding,
+      marginLeft: responsiveSizes.labelMarginLeft,
+      marginBottom: responsiveSizes.labelMarginVertical,
+      marginTop: responsiveSizes.labelMarginVertical,
     },
     addressRow: {
-      flexDirection: screenWidth < 400 ? 'column' : 'row', // 작은 화면에서는 세로 배치
-      alignItems: screenWidth < 400 ? 'stretch' : 'center',
-      marginBottom: getResponsivePadding(screenWidth, 12),
-      gap: screenWidth < 400 ? 8 : 0,
+      flexDirection: isTablet ? 'row' : screenWidth < 400 ? 'column' : 'row',
+      alignItems: isTablet ? 'center' : screenWidth < 400 ? 'stretch' : 'center',
+      marginBottom: responsiveSizes.verticalPadding,
+      gap: isTablet ? 12 : screenWidth < 400 ? 8 : 8,
     },
     addressBox: {
-      flex: screenWidth < 400 ? 0 : 1,
+      flex: isTablet ? 1 : screenWidth < 400 ? 0 : 1,
       paddingVertical: responsiveSizes.inputPadding,
       paddingHorizontal: responsiveSizes.inputHorizontalPadding,
       backgroundColor: '#F5F6F8',
       borderRadius: responsiveSizes.borderRadius,
       justifyContent: 'center',
-      minHeight: getResponsiveSize(screenWidth, 54),
+      minHeight: responsiveSizes.minHeight,
     },
     addressText: {
       fontSize: responsiveSizes.inputFontSize,
@@ -306,15 +303,15 @@ const CallFormPage = () => {
       fontSize: responsiveSizes.inputFontSize,
       fontFamily: 'Pretendard-Regular',
       marginBottom: responsiveSizes.marginBottom,
-      minHeight: getResponsiveSize(screenWidth, 54),
+      minHeight: responsiveSizes.minHeight,
     },
     searchButton: {
-      marginLeft: screenWidth < 400 ? 0 : 8,
+      marginLeft: isTablet ? 12 : screenWidth < 400 ? 0 : 8,
       backgroundColor: '#8990A0',
       borderRadius: responsiveSizes.searchButtonRadius,
       paddingVertical: responsiveSizes.inputPadding,
       paddingHorizontal: responsiveSizes.searchButtonPadding,
-      minHeight: getResponsiveSize(screenWidth, 54),
+      minHeight: responsiveSizes.minHeight,
       justifyContent: 'center',
       alignItems: 'center',
     },
@@ -324,7 +321,7 @@ const CallFormPage = () => {
       color: '#fff',
       fontFamily: 'Pretendard-Black',
     },
-  }), [responsiveSizes, screenWidth]);
+  }), [responsiveSizes, screenWidth, isTablet]);
 
   return (
     <ManagerLayout

@@ -6,6 +6,7 @@ import {
   RefreshControl,
   ActivityIndicator,
   View,
+  Dimensions,
 } from 'react-native';
 import DefaultLayout from '../../layout/DefaultLayout';
 import {
@@ -20,6 +21,12 @@ import FuneralQuoteCard from '../../components/manager/FuneralQuoteCard';
 import CustomButton from '../../components/common/CustomButton';
 import {useManagerForm} from '../../hooks/useManagerForm';
 import {UserManagerFormList} from '../../services/api/manager/managerFormService';
+
+const {width: screenWidth} = Dimensions.get('window');
+
+// 디바이스 크기에 따른 스케일 계산
+const isTablet = screenWidth >= 768;
+const isSmallDevice = screenWidth < 375;
 
 const ClientEstimatePage = () => {
   const navigation = useNavigation<NavigationProp<any>>();
@@ -221,36 +228,36 @@ export default ClientEstimatePage;
 const styles = StyleSheet.create({
   wrapper: {
     flexGrow: 1,
-    padding: 16,
+    padding: isTablet ? 24 : isSmallDevice ? 12 : 16,
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: isTablet ? 28 : isSmallDevice ? 16 : 20,
   },
   loadingText: {
-    marginTop: 16,
-    fontSize: 16,
+    marginTop: isTablet ? 24 : isSmallDevice ? 12 : 16,
+    fontSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
     color: '#666',
   },
   errorText: {
-    fontSize: 16,
+    fontSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
     color: '#ff4444',
     textAlign: 'center',
   },
   emptyText: {
-    fontSize: 16,
+    fontSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
     color: '#999',
     textAlign: 'center',
   },
   submitButton: {
-    marginTop: 20,
-    paddingVertical: 14,
-    marginHorizontal: 16,
-    borderRadius: 8,
+    marginTop: isTablet ? 28 : isSmallDevice ? 16 : 20,
+    paddingVertical: isTablet ? 18 : isSmallDevice ? 12 : 14,
+    marginHorizontal: isTablet ? 24 : isSmallDevice ? 12 : 16,
+    borderRadius: isTablet ? 12 : isSmallDevice ? 6 : 8,
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: isTablet ? 40 : isSmallDevice ? 24 : 32,
   },
   submitButtonEnabled: {
     backgroundColor: '#4F7CFF',
@@ -261,6 +268,6 @@ const styles = StyleSheet.create({
   submitButtonText: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
   },
 });

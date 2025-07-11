@@ -1,6 +1,7 @@
 import {StyleSheet, TouchableOpacity, View} from 'react-native';
 import Typo from '../common/Typo';
 import CustomButton from '../common/CustomButton';
+import {scaleFontSize, scaleSize} from '../../utils/responsive';
 
 interface IPendingDispatchCardProps {
   index: number;
@@ -64,61 +65,57 @@ export default PendingDispatchCard;
 const styles = StyleSheet.create({
   card: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    // padding: 16,
-    marginBottom: 16,
+    borderRadius: scaleSize(12),
+    marginBottom: scaleSize(16),
   },
   topRow: {
     flexDirection: 'row',
-    borderTopLeftRadius: 15,
-    borderTopRightRadius: 15,
+    borderTopLeftRadius: scaleSize(15),
+    borderTopRightRadius: scaleSize(15),
     borderBottomColor: '#eee',
     borderBottomWidth: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 30,
+    paddingVertical: scaleSize(10),
+    paddingHorizontal: scaleSize(30),
     justifyContent: 'flex-start',
-    // alignContent: 'center',
-    // alignItems: 'center',
-    // borderWidth: 1,
   },
   clientName: {
-    fontSize: 18,
-    lineHeight: 24,
+    fontSize: scaleFontSize(18),
+    lineHeight: scaleFontSize(24),
     fontWeight: '700',
     color: '#283042',
     fontFamily: 'Pretendard-Black',
   },
   clientDesc: {
-    fontSize: 18,
-    lineHeight: 24,
+    fontSize: scaleFontSize(18),
+    lineHeight: scaleFontSize(24),
     fontWeight: '600',
     color: '#283042',
     fontFamily: 'Pretendard-Medium',
-    marginLeft: 8,
+    marginLeft: scaleSize(8),
   },
   bottomRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderBottomLeftRadius: 15,
-    borderBottomRightRadius: 15,
-    paddingVertical: 10,
-    paddingHorizontal: 30,
+    borderBottomLeftRadius: scaleSize(15),
+    borderBottomRightRadius: scaleSize(15),
+    paddingVertical: scaleSize(10),
+    paddingHorizontal: scaleSize(30),
   },
   detailButton: {
-    paddingVertical: 8,
+    paddingVertical: scaleSize(8),
   },
   detailButtonText: {
-    fontSize: 14,
+    fontSize: scaleFontSize(14),
     fontWeight: '500',
     color: '#6F717D',
     fontFamily: 'Pretendard-Medium',
     textDecorationLine: 'underline',
   },
   statusTag: {
-    borderRadius: 100,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    borderRadius: scaleSize(100),
+    paddingHorizontal: scaleSize(10),
+    paddingVertical: scaleSize(5),
     backgroundColor: '#FFFFFF',
   },
   requestDispatchTag: {
@@ -142,23 +139,23 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(40, 48, 66, 0.25)',
   },
   statusText: {
-    fontSize: 14,
+    fontSize: scaleFontSize(14),
     fontWeight: '500',
     fontFamily: 'Pretendard-Black',
   },
   requestDispatchText: {
-    color: '#2D81F1', // 파란색 - 출동 요청
+    color: '#2D81F1',
   },
   approvedText: {
-    color: '#10B981', // 민트색 - 출동 승인
+    color: '#10B981',
   },
   completedText: {
-    color: '#283042', // 검정색 - 출동 완료
+    color: '#283042',
   },
   rejectedText: {
-    color: '#EF4444', // 빨간색 - 출동 거절
+    color: '#EF4444',
   },
   cancelledText: {
-    color: '#EF4444', // 회색 - 출동 취소
+    color: '#EF4444',
   },
 });

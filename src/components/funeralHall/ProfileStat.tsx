@@ -15,6 +15,7 @@ import {useAtomValue} from 'jotai';
 import {loginAtom} from '../../state/local_state/loginAtom';
 import {getUserInfo} from '../../utils/tokenStorage';
 import Toast from 'react-native-toast-message';
+import {scaleFontSize, scaleSize} from '../../utils/responsive';
 
 interface IProfileStatProps {
   point: number;
@@ -147,51 +148,49 @@ export default ProfileStat;
 
 const styles = StyleSheet.create({
   container: {
-    // padding: 8,
+    // padding: scaleSize(8),
   },
   nameContainer: {
     flexDirection: 'column',
     alignItems: 'baseline',
-    // marginLeft: 16,
   },
   nameText: {
-    fontSize: 34,
+    fontSize: scaleFontSize(34),
     fontWeight: '700',
     color: '#FFFFFF',
-    // marginTop: 13,
-    marginBottom: 30,
-    marginLeft: 16,
+    marginBottom: scaleSize(30),
+    marginLeft: scaleSize(16),
   },
   roleText: {
-    fontSize: 20,
+    fontSize: scaleFontSize(20),
     fontWeight: '400',
     color: '#FFFFFF',
-    marginLeft: 18,
-    marginBottom: 12,
+    marginLeft: scaleSize(18),
+    marginBottom: scaleSize(12),
   },
   flexRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    gap: scaleSize(16),
   },
   pointContainer: {
     flexDirection: 'row',
     backgroundColor: '#3D8FFB',
-    paddingVertical: 16,
+    paddingVertical: scaleSize(16),
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    borderTopRightRadius: 20,
-    borderTopLeftRadius: 20,
-    marginBottom: 4,
+    paddingHorizontal: scaleSize(20),
+    borderTopRightRadius: scaleSize(20),
+    borderTopLeftRadius: scaleSize(20),
+    marginBottom: scaleSize(4),
   },
   pointDesc: {
-    fontSize: 18,
+    fontSize: scaleFontSize(18),
     fontWeight: '500',
     color: '#FFFFFF',
     fontFamily: 'Pretendard-Regular',
   },
   pointText: {
-    fontSize: 24,
+    fontSize: scaleFontSize(24),
     fontWeight: '700',
     color: '#FFFFFF',
     fontFamily: 'GMarketSansTTFBold',
@@ -199,20 +198,20 @@ const styles = StyleSheet.create({
   cashContainer: {
     flexDirection: 'row',
     backgroundColor: '#3D8FFB',
-    paddingVertical: 16,
+    paddingVertical: scaleSize(16),
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    marginBottom: 12,
+    paddingHorizontal: scaleSize(20),
+    borderRadius: scaleSize(12),
+    marginBottom: scaleSize(8),
   },
   cashDesc: {
-    fontSize: 18,
+    fontSize: scaleFontSize(18),
     fontWeight: '500',
     color: '#FFFFFF',
     fontFamily: 'Pretendard-Regular',
   },
   cashText: {
-    fontSize: 24,
+    fontSize: scaleFontSize(24),
     fontWeight: '700',
     color: '#FFFFFF',
     fontFamily: 'GMarketSansTTFBold',
@@ -220,31 +219,27 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 8,
-    marginTop: 4,
+    gap: scaleSize(8),
+    // marginTop: scaleSize(2),
   },
   leftbutton: {
     flex: 1,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
+    paddingVertical: scaleSize(16),
+    paddingHorizontal: scaleSize(20),
     backgroundColor: '#4B99FE',
-    borderRadius: 12,
-    marginBottom: 12,
+    borderRadius: scaleSize(12),
+    marginBottom: scaleSize(12),
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    // shadowColor: '#000', // iOS shadow
-    // shadowOpacity: 0.05,
-    // shadowRadius: 5,
-    // shadowOffset: {width: 0, height: 2},
   },
   modifyButton: {
     flex: 1,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
+    paddingVertical: scaleSize(16),
+    paddingHorizontal: scaleSize(20),
     backgroundColor: '#4B99FE',
-    borderRadius: 12,
-    marginBottom: 12,
+    borderRadius: scaleSize(12),
+    marginBottom: scaleSize(12),
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -252,11 +247,11 @@ const styles = StyleSheet.create({
   buttonNameContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 15,
-    marginRight: 29,
+    gap: scaleSize(15),
+    marginRight: scaleSize(29),
   },
   buttonText: {
-    fontSize: 18,
+    fontSize: scaleFontSize(18),
     fontWeight: '600',
     color: '#FFFFFF',
   },

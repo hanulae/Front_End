@@ -8,6 +8,7 @@ import { useFuneralDispatch } from '../../hooks/useFuneralDispatch';
 import { DispatchListItem } from '../../services/api/funeral/funeralDispatchService';
 import Toast from 'react-native-toast-message';
 import Typo from '../../components/common/Typo';
+import {scaleFontSize, scaleSize} from '../../utils/responsive';
 
 const PendingDispatchPage = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
@@ -197,17 +198,18 @@ const styles = StyleSheet.create({
   },
   wrapper: {
     backgroundColor: '#F5F6F8',
-    padding: 20,
+    padding: scaleSize(20),
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 60,
+    paddingVertical: scaleSize(60),
   },
   emptyText: {
-    fontSize: 16,
+    fontSize: scaleFontSize(16),
     color: '#999',
     textAlign: 'center',
+    fontFamily: 'Pretendard-Regular',
   },
 });

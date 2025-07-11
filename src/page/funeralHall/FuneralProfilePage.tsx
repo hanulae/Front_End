@@ -32,6 +32,7 @@ import {clearTokens, getUserInfo} from '../../utils/tokenStorage';
 import api from '../../api/config';
 import DeviceInfo from 'react-native-device-info';
 import {isStaffAtom} from '../../state/local_state/loginAtom';
+import {scaleFontSize, scaleSize} from '../../utils/responsive';
 
 // 권한 타입 정의
 interface IPermissions {
@@ -83,7 +84,7 @@ const FuneralProfilePage = () => {
     };
 
     loadUserInfo();
-  }, []);
+  }, [setIsStaff]);
 
   useEffect(() => {
     if (Platform.OS === 'android') {
@@ -342,83 +343,78 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: '#3287F8',
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    paddingBottom: 40,
-    paddingHorizontal: 20,
+    borderBottomLeftRadius: scaleSize(28),
+    borderBottomRightRadius: scaleSize(28),
+    paddingTop: Platform.OS === 'ios' ? scaleSize(60) : scaleSize(40),
+    paddingBottom: scaleSize(40),
+    paddingHorizontal: scaleSize(20),
     zIndex: 2,
   },
   floatingButton: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 420 : 360, // ProfileStat 아래 적당한 위치로 조정
-    left: 20,
-    right: 20,
+    top: Platform.OS === 'ios' ? scaleSize(420) : scaleSize(360),
+    left: scaleSize(20),
+    right: scaleSize(20),
     zIndex: 5,
     backgroundColor: '#58A1FF',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 30,
-    paddingVertical: 20,
-    borderRadius: 15,
-    // shadowColor: '#000',
-    // shadowOpacity: 0.1,
-    // shadowRadius: 6,
-    // shadowOffset: {width: 0, height: 4},
+    paddingHorizontal: scaleSize(30),
+    paddingVertical: scaleSize(20),
+    borderRadius: scaleSize(15),
   },
   container: {
     flex: 1,
     backgroundColor: '#3287F8',
   },
   blueBackground: {
-    paddingHorizontal: 20,
-    paddingTop: 40,
-    paddingBottom: 30,
+    paddingHorizontal: scaleSize(20),
+    paddingTop: scaleSize(40),
+    paddingBottom: scaleSize(30),
   },
   whiteSection: {
     flex: 1,
     backgroundColor: '#F5F5F5',
-    marginTop: 410, // ProfileStat 높이 만큼 여백 확보
+    marginTop: scaleSize(410),
     zIndex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 40,
-    gap: 5,
+    paddingHorizontal: scaleSize(20),
+    paddingTop: scaleSize(20),
+    paddingBottom: scaleSize(40),
+    gap: scaleSize(5),
   },
   topButton: {
     backgroundColor: '#58A1FF',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 30,
-    paddingVertical: 20,
-    borderRadius: 15,
+    paddingHorizontal: scaleSize(30),
+    paddingVertical: scaleSize(20),
+    borderRadius: scaleSize(15),
   },
   topButtonText: {
-    fontSize: 18,
+    fontSize: scaleFontSize(18),
     fontWeight: '600',
     color: '#FFFFFF',
-    // color: '#000',
-    lineHeight: 20,
+    lineHeight: scaleSize(20),
   },
   button: {
     backgroundColor: '#FFFFFF',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 30,
-    paddingVertical: 20,
-    borderRadius: 15,
+    paddingHorizontal: scaleSize(30),
+    paddingVertical: scaleSize(20),
+    borderRadius: scaleSize(15),
   },
   buttonNameContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 13,
+    gap: scaleSize(13),
   },
   buttonText: {
-    fontSize: 18,
+    fontSize: scaleFontSize(18),
     fontWeight: '600',
     color: '#000',
-    lineHeight: 20,
+    lineHeight: scaleSize(20),
   },
 });

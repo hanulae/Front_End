@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import {Animated, Dimensions, Pressable, StyleSheet, View} from 'react-native';
 import api from '../../../api/config';
 import RegionSelector from './RegionSelector';
+import {scaleSize} from '../../../utils/responsive';
 
 interface IFindCityBottomSheetProps {
     visible: boolean;
@@ -15,6 +16,18 @@ const screenHeight = Dimensions.get('window').height;
 const FindCityBottomSheet = ({visible, onClose, onSelect, selectedRegion}: IFindCityBottomSheetProps) => {
     const [regions, setRegions] = useState<string[]>([]);
     
+    // 반응형 스타일 계산
+    const responsiveStyles = useMemo(() => {
+        return {
+            padding: {
+                horizontal: scaleSize(16),
+                vertical: scaleSize(24),
+            },
+            borderRadius: scaleSize(16),
+            contentGap: scaleSize(16),
+        };
+    }, []);
+
     // 시 / 도 데이터 받아오기
     const fetchCityData = async () => {
         try {
@@ -55,8 +68,18 @@ const FindCityBottomSheet = ({visible, onClose, onSelect, selectedRegion}: IFind
     
     return (
         <Pressable style={styles.backdrop} onPress={onClose}>
-            <Animated.View style={[styles.modalContainer, {transform: [{translateY}]}]}>
-                <View style={styles.content}>
+            <Animated.View 
+                style={[
+                    styles.modalContainer, 
+                    {
+                        transform: [{translateY}],
+                        borderTopLeftRadius: responsiveStyles.borderRadius,
+                        borderTopRightRadius: responsiveStyles.borderRadius,
+                        paddingHorizontal: responsiveStyles.padding.horizontal,
+                        paddingVertical: responsiveStyles.padding.vertical,
+                    }
+                ]}>
+                <View style={[styles.content, {gap: responsiveStyles.contentGap}]}>
                     <RegionSelector
                         regions={regions}
                         selectedRegion={selectedRegion}
@@ -65,7 +88,7 @@ const FindCityBottomSheet = ({visible, onClose, onSelect, selectedRegion}: IFind
                 </View>
             </Animated.View>
         </Pressable>
-    )
+    );
 };
 
 export default FindCityBottomSheet;
@@ -82,14 +105,9 @@ const styles = StyleSheet.create({
     },
     modalContainer: {
         backgroundColor: 'white',
-        borderTopLeftRadius: 16,
-        borderTopRightRadius: 16,
-        paddingHorizontal: 16,
-        paddingVertical: 24,
         height: screenHeight * 0.5,
     },
     content: {
         flex: 1,
-        gap: 16,
     },
 });

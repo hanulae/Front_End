@@ -15,6 +15,7 @@ import CustomButton from '../../components/common/CustomButton';
 import {useFuneralHallInfo} from '../../hooks/useFuneralHallInfo';
 import Toast from 'react-native-toast-message';
 import {FuneralHallDetail} from '../../services/api/funeral/funeralHallInfoService';
+import {scaleFontSize, scaleSize} from '../../utils/responsive';
 
 const AddRoomPage = () => {
   const route = useRoute();
@@ -317,40 +318,40 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 20,
+    paddingBottom: scaleSize(20),
   },
   wrapper: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingHorizontal: scaleSize(20),
+    paddingTop: scaleSize(20),
   },
   roomContainer: {
-    marginBottom: 24,
+    marginBottom: scaleSize(24),
   },
   titleText: {
-    fontSize: 18,
-    marginLeft: 8,
+    fontSize: scaleFontSize(18),
+    marginLeft: scaleSize(8),
     fontWeight: '700',
     color: '#283042',
     fontFamily: 'Pretendard-Black',
-    marginBottom: 10,
+    marginBottom: scaleSize(10),
   },
   buttonContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: scaleSize(20),
+    paddingVertical: scaleSize(16),
     backgroundColor: 'white',
     borderTopWidth: 1,
     borderTopColor: '#f0f0f0',
   },
   button: {
     backgroundColor: '#2D81F1',
-    borderRadius: 10,
-    paddingVertical: 18,
+    borderRadius: scaleSize(10),
+    paddingVertical: scaleSize(18),
   },
   buttonDisabled: {
     backgroundColor: '#ccc',
   },
   buttonText: {
-    fontSize: 16,
+    fontSize: scaleFontSize(16),
     textAlign: 'center',
     fontWeight: '700',
     color: '#FFFFFF',
