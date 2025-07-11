@@ -112,14 +112,14 @@ const ProfileStat = ({point, cash, hallName}: IProfileStatProps) => {
         <Typo style={styles.nameText}>{hallName}</Typo>
         {/* <Typo style={styles.roleText}>장례식장님</Typo> */}
       </View>
-
+      {/* 
       <View style={styles.pointContainer}>
         <Typo style={styles.pointDesc}>보유 포인트</Typo>
         <View style={styles.flexRow}>
           <Typo style={styles.pointText}>{currentPoint.toLocaleString()}</Typo>
           <PointIcon width={24} height={24} />
         </View>
-      </View>
+      </View> */}
 
       <View style={styles.cashContainer}>
         <Typo style={styles.cashDesc}>보유 캐쉬</Typo>
@@ -202,9 +202,8 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    borderBottomRightRadius: 20,
-    borderBottomLeftRadius: 20,
-    marginBottom: 8,
+    borderRadius: 12,
+    marginBottom: 12,
   },
   cashDesc: {
     fontSize: 18,

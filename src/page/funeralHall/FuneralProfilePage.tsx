@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
   },
   floatingButton: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 420 : 440, // ProfileStat 아래 적당한 위치로 조정
+    top: Platform.OS === 'ios' ? 420 : 360, // ProfileStat 아래 적당한 위치로 조정
     left: 20,
     right: 20,
     zIndex: 5,
@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
   whiteSection: {
     flex: 1,
     backgroundColor: '#F5F5F5',
-    marginTop: 490, // ProfileStat 높이 만큼 여백 확보
+    marginTop: 410, // ProfileStat 높이 만큼 여백 확보
     zIndex: 1,
   },
   scrollContent: {
