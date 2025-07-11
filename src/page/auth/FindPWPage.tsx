@@ -324,6 +324,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 16,
+    marginVertical: 16,
   },
   checkSection: {
     flexDirection: 'row',
