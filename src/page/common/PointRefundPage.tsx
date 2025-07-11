@@ -51,11 +51,8 @@ const PointRefundPage = () => {
     setSelectedAmount(null); // 입력값이 변경되면 선택된 버튼 해제
   };
 
-  const handleCashCharge = async () => {
-    console.log('캐시 충전 시도');
-    console.log('현재 캐시:', currentCash);
-    console.log('입력 금액:', inputAmount);
-
+  const handleRefundRequest = async () => {
+    console.log('환급 요청 시도');
     const amount = parseInt(inputAmount, 10);
 
     if (isNaN(amount) || amount <= 0) {
@@ -68,7 +65,51 @@ const PointRefundPage = () => {
       return;
     }
 
-    console.log('amount:', amount);
+    try {
+      const res = await api.post(
+        '/manager/cash/refund',
+        { amountCash: amount },
+        {
+          headers: {
+            Authorization: `Bearer ${loginInfo.accessToken}`,
+          },
+        },
+      );
+
+      Toast.show({
+        type: 'success',
+        text1: '환급 요청 완료',
+        text2: '환급 요청이 성공적으로 처리되었습니다.',
+        position: 'top',
+      });
+
+      setInputAmount('');
+      setSelectedAmount(null);
+      setCurrentCash(prev => prev - amount);
+    } catch (error: any) {
+      console.error('환급 요청 실패:', error.response?.data || error.message);
+      Toast.show({
+        type: 'error',
+        text1: '환급 요청 실패',
+        text2: error.response?.data?.message || '오류가 발생했습니다.',
+        position: 'top',
+      });
+    }
+  };
+
+  const handleCashCharge = async () => {
+    console.log('캐시 충전 시도');
+    const amount = parseInt(inputAmount, 10);
+
+    if (isNaN(amount) || amount <= 0) {
+      Toast.show({
+        type: 'error',
+        text1: '입력 오류',
+        text2: '유효한 금액을 입력해주세요.',
+        position: 'top',
+      });
+      return;
+    }
 
     try {
       const res = await api.post(
@@ -183,7 +224,7 @@ const PointRefundPage = () => {
 
           <CustomButton
             style={styles.refundButton}
-            onPress={handleCashCharge}>
+            onPress={variant === 'manager' ? handleRefundRequest : handleCashCharge}>
             <Typo style={styles.refundButtonText}>
               {variant === 'manager' ? '환급 신청' : '충전 신청'}
             </Typo>
