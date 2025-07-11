@@ -46,8 +46,8 @@ const PhoneAuthSheet = ({
     }
   
     try {
-      const res = await api.post('/manager/sms/verify', {
-        managerPhone: phone,
+      const res = await api.post('/manager/sms/update/verify', {
+        phoneNumber: phone,
         code: code,
       });
   

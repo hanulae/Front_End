@@ -47,8 +47,8 @@ const PhoneAuthSheet = ({
     }
 
     try {
-      const res = await api.post('/funeral/sms/verify/funeral', {
-        funeralPhone: phone,
+      const res = await api.post('/manager/sms/verify', {
+        phoneNumber: phone,
         code: code,
       });
 
@@ -103,8 +103,8 @@ const PhoneAuthSheet = ({
     }
 
     try {
-      const res = await api.post('/funeral/sms/send/funeral', {
-        funeralPhone: phone,
+      const res = await api.post('/manager/sms/send', {
+        phoneNumber: phone,
       });
 
       console.log('📨 인증번호 전송 성공:', res.data);
