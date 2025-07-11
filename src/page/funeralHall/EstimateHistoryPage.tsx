@@ -73,9 +73,12 @@ const EstimateHistoryPage = () => {
     try {
       const result = await fetchEstimateList();
       console.log('pageResult', result);
+
       if (result && Array.isArray(result)) {
-        setEstimateList(result);
-        console.log('견적 내역 로드 성공:', result);
+        const filteredResult = result.filter(item => item.bidStatus !== 'transaction_completed');
+        setEstimateList(filteredResult);
+        
+        console.log('견적 내역 로드 성공(필터링):', filteredResult);
       } else {
         console.log('❌ 견적 내역 로드 실패 - 빈 데이터');
         setEstimateList([]);

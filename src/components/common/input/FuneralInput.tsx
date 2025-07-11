@@ -1,6 +1,8 @@
 import {useState} from 'react';
 import {useInputBase} from '../../../hooks/input/useInputBase';
 import CommonInput from './CommonInput';
+import {View, StyleSheet} from 'react-native';
+import Typo from '../Typo';
 
 interface IFuneralInputProps {
   input: ReturnType<typeof useInputBase>;
@@ -8,6 +10,7 @@ interface IFuneralInputProps {
   placeholder?: string;
   label?: string;
   disabled?: boolean;
+  unit?: string; // 단위 prop 추가
 }
 
 export const FuneralInput = ({
@@ -15,8 +18,8 @@ export const FuneralInput = ({
   type = 'text',
   placeholder,
   disabled = false,
-}: // label,
-IFuneralInputProps) => {
+  unit, // unit prop 추가
+}: IFuneralInputProps) => {
   // const [secure, setSecure] = useState(type === 'password');
   const secure = type === 'password';
   const [_, setFocused] = useState(false);
@@ -35,20 +38,44 @@ IFuneralInputProps) => {
   }
 
   return (
-    <CommonInput
-      disabled={disabled}
-      value={input.value}
-      onChangeText={input.onChangeText}
-      onBlur={() => {
-        input.onBlur();
-        setFocused(false);
-      }}
-      onFocus={() => setFocused(true)}
-      error={input.error}
-      secureTextEntry={type === 'password' ? secure : false}
-      placeholder={placeholder}
-      clearable
-      keyboardType={keyboardType}
-    />
+    <View style={styles.container}>
+      <CommonInput
+        style={[styles.input, unit && styles.inputWithUnit]}
+        disabled={disabled}
+        value={input.value}
+        onChangeText={input.onChangeText}
+        onBlur={() => {
+          input.onBlur();
+          setFocused(false);
+        }}
+        onFocus={() => setFocused(true)}
+        error={input.error}
+        secureTextEntry={type === 'password' ? secure : false}
+        placeholder={placeholder}
+        clearable
+        keyboardType={keyboardType}
+      />
+      {unit && <Typo style={styles.unitText}>{unit}</Typo>}
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  input: {
+    flex: 1,
+  },
+  inputWithUnit: {
+    paddingRight: 40, // 단위 텍스트를 위한 여백
+  },
+  unitText: {
+    position: 'absolute',
+    right: 30,
+    fontSize: 16,
+    color: '#666',
+    fontFamily: 'Pretendard-Regular',
+  },
+});

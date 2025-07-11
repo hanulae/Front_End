@@ -251,6 +251,7 @@ const AddRoomPage = () => {
                 placeholder="평수를 입력하세요"
                 disabled={purpose === 'detail'}
                 type="number"
+                unit="평"
               />
             </View>
             <View style={styles.roomContainer}>
@@ -260,6 +261,7 @@ const AddRoomPage = () => {
                 placeholder="수용인원을 입력하세요"
                 disabled={purpose === 'detail'}
                 type="number"
+                unit="명"
               />
             </View>
             <View style={styles.roomContainer}>
@@ -269,6 +271,7 @@ const AddRoomPage = () => {
                 placeholder="식장지불금액을 입력하세요"
                 disabled={purpose === 'detail'}
                 type="number"
+                unit="만원"
               />
             </View>
             <View style={styles.roomContainer}>
@@ -278,6 +281,7 @@ const AddRoomPage = () => {
                 placeholder="호실사용료를 입력하세요"
                 disabled={purpose === 'detail'}
                 type="number"
+                unit="만원"
               />
             </View>
           </View>
@@ -324,7 +328,7 @@ const styles = StyleSheet.create({
   },
   titleText: {
     fontSize: 18,
-    marginLeft: 20,
+    marginLeft: 8,
     fontWeight: '700',
     color: '#283042',
     fontFamily: 'Pretendard-Black',

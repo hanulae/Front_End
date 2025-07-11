@@ -77,20 +77,22 @@ const FindPWpage = ({navigation}: IFindPWPageProps) => {
       });
       console.log('Verify code response:', response);
 
-      if (response.data.success === true) {
+      if (response.data.verified === true) {
         setIsPhoneVerified(true);
         Toast.show({
           type: 'success',
           text1: '인증 성공',
           position: 'top',
+          topOffset: -150,
         });
-        return response.data.success === true;
+        return response.data.verified === true;
       } else {
         Toast.show({
           type: 'error',
           text1: '인증 실패',
           text2: '인증코드가 틀렸거나 만료되었습니다.',
           position: 'top',
+          topOffset: -150,
         });
         return false;
       }
@@ -101,6 +103,7 @@ const FindPWpage = ({navigation}: IFindPWPageProps) => {
         text1: '서버 오류',
         text2: error.response?.data?.message || '잠시 후 다시 시도해주세요.',
         position: 'top',
+        topOffset: -150,
       });
       return false;
     }
@@ -131,6 +134,7 @@ const FindPWpage = ({navigation}: IFindPWPageProps) => {
           type: 'success',
           text1: '비밀번호 변경 완료',
           position: 'top',
+          topOffset: -150,
         });
         navigation.goBack();
       }
@@ -141,6 +145,7 @@ const FindPWpage = ({navigation}: IFindPWPageProps) => {
         text1: '비밀번호 변경 실패',
         text2: error.response?.data?.message || '다시 시도해주세요.',
         position: 'top',
+        topOffset: -150,
       });
     }
   };

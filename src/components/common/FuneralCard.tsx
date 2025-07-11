@@ -53,14 +53,14 @@ const FuneralCard = ({
     },
     // 텍스트 크기 - 화면 크기에 따라 조정
     nameSize: isTablet ? 22 : isSmallDevice ? 16 : 18,
-    addressSize: isTablet ? 14 : isSmallDevice ? 11 : 12,
-    deleteButtonSize: isTablet ? 16 : isSmallDevice ? 12 : 14,
+    addressSize: isTablet ? 14 : isSmallDevice ? 10 : 12,
+    deleteButtonSize: isTablet ? 16 : isSmallDevice ? 11 : 13,
     // 간격 조정
-    cardPadding: isTablet ? 12 : isSmallDevice ? 6 : 8,
-    checkPadding: isTablet ? 12 : isSmallDevice ? 6 : 8,
-    gap: isTablet ? 24 : isSmallDevice ? 16 : 20,
+    cardPadding: isTablet ? 12 : isSmallDevice ? 4 : 8,
+    checkPadding: isTablet ? 12 : isSmallDevice ? 4 : 8,
+    gap: isTablet ? 24 : isSmallDevice ? 16 : 18,
     // 컨테이너 높이
-    containerHeight: isTablet ? 140 : isSmallDevice ? 90 : 110,
+    containerHeight: isTablet ? 140 : isSmallDevice ? 100 : 120,
   };
 
   return (
@@ -158,9 +158,10 @@ const styles = StyleSheet.create({
   infoAddress: {
     fontWeight: '400',
     color: '#6F717D',
-    fontFamily: 'Pretendard-Black',
-    lineHeight: 16,
+    fontFamily: 'Pretendard-Regular',
+    lineHeight: 18,
     flexWrap: 'wrap',
+    marginBottom: 10,
     flex: 1,
   },
   textDisabled: {

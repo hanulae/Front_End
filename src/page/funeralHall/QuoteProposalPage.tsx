@@ -131,13 +131,24 @@ const QuoteProposalPage = () => {
     return discount.toFixed(1);
   };
 
-  // 날짜 포맷팅 함수 (YYYY/MM/DD 형식)
+  // 기존 날짜 포맷팅 함수는 그대로 두고 (입실일, 퇴실일용)
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
-    return `${year}/${month}/${day}`;
+    return `${year}년 ${month}월 ${day}일`;
+  };
+
+  // 시간까지 표시하는 새로운 포맷팅 함수 추가
+  const formatDateTime = (dateString: string): string => {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}년 ${month}월 ${day}일 ${hours}:${minutes}`;
   };
 
   // bidStatus를 한국어 상태로 변환
@@ -316,21 +327,21 @@ const QuoteProposalPage = () => {
                   {bidDetail.bidSubmittedAt && (
                     <View style={styles.infoRow}>
                       <Typo style={styles.infoLabel}>입찰 제출일:</Typo>
-                      <Typo style={styles.infoValue}>{formatDate(bidDetail.bidSubmittedAt)}</Typo>
+                      <Typo style={styles.infoValue}>{formatDateTime(bidDetail.bidSubmittedAt)}</Typo>
                     </View>
                   )}
                   
                   {bidDetail.bidSelectedAt && (
                     <View style={styles.infoRow}>
                       <Typo style={styles.infoLabel}>입찰 성공일:</Typo>
-                      <Typo style={styles.infoValue}>{formatDate(bidDetail.bidSelectedAt)}</Typo>
+                      <Typo style={styles.infoValue}>{formatDateTime(bidDetail.bidSelectedAt)}</Typo>
                     </View>
                   )}
                   
                   {bidDetail.transactionCompletedAt && (
                     <View style={styles.infoRow}>
                       <Typo style={styles.infoLabel}>거래 완료일:</Typo>
-                      <Typo style={styles.infoValue}>{formatDate(bidDetail.transactionCompletedAt)}</Typo>
+                      <Typo style={styles.infoValue}>{formatDateTime(bidDetail.transactionCompletedAt)}</Typo>
                     </View>
                   )}
                 </>
