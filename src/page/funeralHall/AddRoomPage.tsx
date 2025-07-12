@@ -228,8 +228,7 @@ const AddRoomPage = () => {
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
-        style={{ flex: 1 }}
-      >
+        style={{flex: 1}}>
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
@@ -265,20 +264,20 @@ const AddRoomPage = () => {
               />
             </View>
             <View style={styles.roomContainer}>
-              <Typo style={styles.titleText}>식장지불금액(세부내역)</Typo>
+              <Typo style={styles.titleText}>호실사용료</Typo>
               <FuneralInput
-                input={room_sub_fee}
-                placeholder="식장지불금액을 입력하세요"
+                input={room_main_fee}
+                placeholder="호실사용료를 입력하세요"
                 disabled={purpose === 'detail'}
                 type="number"
                 unit="만원"
               />
             </View>
             <View style={styles.roomContainer}>
-              <Typo style={styles.titleText}>호실사용료</Typo>
+              <Typo style={styles.titleText}>식장지불금액(세부내역)</Typo>
               <FuneralInput
-                input={room_main_fee}
-                placeholder="호실사용료를 입력하세요"
+                input={room_sub_fee}
+                placeholder="식장지불금액을 입력하세요"
                 disabled={purpose === 'detail'}
                 type="number"
                 unit="만원"

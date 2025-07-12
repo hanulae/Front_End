@@ -458,21 +458,21 @@ const StaffBottomSheet = ({
               </CustomButton>
             </View>
             <View style={styles.inputContainer}>
-              <Typo style={styles.inputTitle}>직원 비밀번호</Typo>
+              <Typo style={styles.inputTitle}>직원</Typo>
               <FuneralInput
                 input={staffPassword}
                 placeholder="비밀번호을 입력하세요"
               />
             </View>
             <View style={styles.inputContainer}>
-              <Typo style={styles.inputTitle}>직급</Typo>
+              <Typo style={styles.inputTitle}>직급 *</Typo>
               <FuneralInput
                 input={staffGrade}
                 placeholder="직급을 입력하세요"
               />
             </View>
             <View style={styles.inputContainer}>
-              <Typo style={styles.inputTitle}>이름</Typo>
+              <Typo style={styles.inputTitle}>이름 *</Typo>
               <FuneralInput input={staffName} placeholder="이름을 입력하세요" />
             </View>
             <View style={styles.inputContainer}>
