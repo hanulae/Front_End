@@ -17,9 +17,7 @@ import Typo from '../../../components/common/Typo';
 import {useState, useMemo, useEffect} from 'react';
 import AlbumBottomSheet from '../../../components/common/AlbumBottomSheet';
 import {convertUrisToFiles} from '../../../util/image';
-import {
-  IImage,
-} from '../../../components/common/ImagePreviewList';
+import {IImage} from '../../../components/common/ImagePreviewList';
 import {LocalFile} from '../../../util/file';
 import Toast from 'react-native-toast-message';
 import api from '../../../api/config';
@@ -53,12 +51,18 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
 
   // 키보드 이벤트 감지
   useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
-      setIsKeyboardVisible(true);
-    });
-    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
-      setIsKeyboardVisible(false);
-    });
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        setIsKeyboardVisible(true);
+      },
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        setIsKeyboardVisible(false);
+      },
+    );
 
     return () => {
       keyboardDidShowListener.remove();
@@ -272,13 +276,11 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
   return (
     <KeyboardAvoidingView
       style={styles.keyboardAvoidingView}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView
           contentContainerStyle={styles.scrollContainer}
-          keyboardShouldPersistTaps="handled"
-        >
+          keyboardShouldPersistTaps="handled">
           <View style={styles.wrapper}>
             <View style={styles.formContainer}>
               {/* 휴대전화번호 인증 */}
@@ -294,9 +296,14 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
                   />
                   <CustomButton
                     onPress={handleRequestCode}
-                    style={[styles.requestButton, { backgroundColor: '#2D81F1' }]}
-                  >
-                    <Typo color="white" fontSize={14} style={{ fontWeight: '700' }}>
+                    style={[
+                      styles.requestButton,
+                      {backgroundColor: '#2D81F1'},
+                    ]}>
+                    <Typo
+                      color="white"
+                      fontSize={14}
+                      style={{fontWeight: '700'}}>
                       인증코드받기
                     </Typo>
                   </CustomButton>
@@ -315,9 +322,14 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
                   />
                   <CustomButton
                     onPress={handleVerifyCode}
-                    style={[styles.requestButton, { backgroundColor: '#2D81F1' }]}
-                  >
-                    <Typo color="white" fontSize={14} style={{ fontWeight: '700' }}>
+                    style={[
+                      styles.requestButton,
+                      {backgroundColor: '#2D81F1'},
+                    ]}>
+                    <Typo
+                      color="white"
+                      fontSize={14}
+                      style={{fontWeight: '700'}}>
                       인증코드확인
                     </Typo>
                   </CustomButton>
@@ -445,7 +457,7 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     borderRadius: 10,
     alignItems: 'center',
-    // flex: 1,
+    flex: 1,
   },
   buttonText: {
     fontSize: 16,
@@ -454,10 +466,10 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard-Light',
   },
   bottomButtonContainer: {
-    flex: 1,
-    flexDirection: 'column',
-    justifyContent: 'flex-end',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     gap: 10,
     marginTop: 20,
+    // marginBottom: 20,
   },
 });

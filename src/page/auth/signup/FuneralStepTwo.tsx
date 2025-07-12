@@ -344,10 +344,7 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
             />
             <CustomButton
               onPress={handleRequestCode}
-              style={[
-                styles.requestButton,
-                {backgroundColor: '#2D81F1'},
-              ]}
+              style={[styles.requestButton, {backgroundColor: '#2D81F1'}]}
               activeOpacity={0.5}>
               <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
                 인증코드받기
@@ -367,10 +364,7 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
             />
             <CustomButton
               onPress={handleVerifyCode}
-              style={[
-                styles.requestButton,
-                {backgroundColor: '#2D81F1'},
-              ]}
+              style={[styles.requestButton, {backgroundColor: '#2D81F1'}]}
               activeOpacity={0.5}>
               <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
                 인증코드확인
@@ -392,10 +386,7 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
                   variant: 'signup',
                 });
               }}
-              style={[
-                styles.findButton,
-                {backgroundColor: '#2D81F1'},
-              ]}
+              style={[styles.findButton, {backgroundColor: '#2D81F1'}]}
               activeOpacity={0.5}>
               <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
                 장례식장 찾기
@@ -466,7 +457,10 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
           }}
         /> */}
         <View style={styles.bottomButtonContainer}>
-          <CustomButton onPress={handlePrev} style={styles.button} activeOpacity={0.5}>
+          <CustomButton
+            onPress={handlePrev}
+            style={styles.button}
+            activeOpacity={0.5}>
             <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
               이전
             </Typo>
@@ -598,14 +592,14 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     borderRadius: 10,
     alignItems: 'center',
-    // flex: 1,
+    flex: 1,
   },
   bottomButtonContainer: {
-    flexDirection: 'column',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     gap: 10,
     marginTop: 20,
-    marginBottom: 100,
+    marginBottom: 40,
   },
   imagePreviewContainer: {
     flexGrow: 0,
