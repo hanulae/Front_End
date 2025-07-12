@@ -1,4 +1,9 @@
-import {ImageBackground, StyleSheet, View, useWindowDimensions} from 'react-native';
+import {
+  ImageBackground,
+  StyleSheet,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 import DefaultLayout from '../../../layout/DefaultLayout';
 import Typo from '../../../components/common/Typo';
 import CustomButton from '../../../components/common/CustomButton';
@@ -10,10 +15,10 @@ const SignupComplete = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const route = useRoute();
   const {userType} = route.params as {userType: 'manager' | 'funeral'};
-  
+
   // 화면 크기 감지
   const {width} = useWindowDimensions();
-  
+
   // 브레이크포인트 정의 (갤럭시 S9 호환)
   // 갤럭시 S9: 360px, medium phone: 411px
   const deviceType = useMemo(() => {
@@ -25,14 +30,20 @@ const SignupComplete = () => {
 
   // 반응형 스타일 계산
   const responsiveStyles = useMemo(() => {
-    const scale = deviceType === 'small' ? 0.85 : 
-                  deviceType === 'medium' ? 0.95 :
-                  deviceType === 'large' ? 1.0 : 1.2; // tablet
+    const scale =
+      deviceType === 'small'
+        ? 0.85
+        : deviceType === 'medium'
+        ? 0.95
+        : deviceType === 'large'
+        ? 1.0
+        : 1.2; // tablet
 
     return {
       titleFontSize: Math.round(24 * scale),
       subTitleFontSize: Math.round(14 * scale),
       subTextFontSize: Math.round(14 * scale),
+      sub2TextFontSize: Math.round(16 * scale),
       buttonTextSize: Math.round(16 * scale),
       imageTopPadding: Math.round(120 * scale),
       buttonPadding: Math.round(18 * scale),
@@ -56,40 +67,94 @@ const SignupComplete = () => {
       <View style={styles.wrapper}>
         <ImageBackground
           source={require('../../../assets/signupFinish.png')}
-          style={[styles.imageBackground, { paddingTop: responsiveStyles.imageTopPadding }]}
+          style={[
+            styles.imageBackground,
+            {paddingTop: responsiveStyles.imageTopPadding},
+          ]}
           resizeMode="contain"
         />
         <View style={styles.contentsContainer}>
-          <Typo style={[styles.subTitleText, { 
-            fontSize: responsiveStyles.subTitleFontSize,
-            marginBottom: responsiveStyles.subTitleMarginBottom
-          }]}>가입완료!</Typo>
-          <Typo style={[styles.titleText, { 
-            fontSize: responsiveStyles.titleFontSize,
-            marginBottom: responsiveStyles.titleMarginBottom
-          }]}>회원가입을 축하드립니다.</Typo>
-          <Typo style={[styles.subText, { 
-            fontSize: responsiveStyles.subTextFontSize,
-            marginBottom: responsiveStyles.subTextMarginBottom
-          }]}>하늘애의 소중한 회원이 되신 것을</Typo>
-          <Typo style={[styles.subText, { 
-            fontSize: responsiveStyles.subTextFontSize,
-            marginBottom: responsiveStyles.subTextMarginBottom
-          }]}>진심으로 환영합니다.</Typo>
-          <Typo style={[styles.sub2Text, { 
-            fontSize: responsiveStyles.subTextFontSize,
-            marginTop: responsiveStyles.sub2TextMarginTop
-          }]}>승인까지 1~2일 소요될 수 있습니다.</Typo>
-          <Typo style={[styles.telText, { 
-            fontSize: responsiveStyles.subTextFontSize,
-            marginTop: responsiveStyles.telTextMarginTop
-          }]}>고객센터 1661-1897</Typo>
+          <Typo
+            style={[
+              styles.subTitleText,
+              {
+                fontSize: responsiveStyles.subTitleFontSize,
+                marginBottom: responsiveStyles.subTitleMarginBottom,
+              },
+            ]}>
+            가입완료!
+          </Typo>
+          <Typo
+            style={[
+              styles.titleText,
+              {
+                fontSize: responsiveStyles.titleFontSize,
+                marginBottom: responsiveStyles.titleMarginBottom,
+              },
+            ]}>
+            회원가입을 축하드립니다.
+          </Typo>
+          <Typo
+            style={[
+              styles.subText,
+              {
+                fontSize: responsiveStyles.subTextFontSize,
+                marginBottom: responsiveStyles.subTextMarginBottom,
+              },
+            ]}>
+            하늘애의 소중한 회원이 되신 것을
+          </Typo>
+          <Typo
+            style={[
+              styles.subText,
+              {
+                fontSize: responsiveStyles.subTextFontSize,
+                marginBottom: responsiveStyles.subTextMarginBottom,
+              },
+            ]}>
+            진심으로 환영합니다.
+          </Typo>
+          <Typo
+            style={[
+              styles.sub2Text,
+              {
+                fontSize: responsiveStyles.sub2TextFontSize,
+                marginTop: responsiveStyles.sub2TextMarginTop,
+              },
+            ]}>
+            승인까지 1~2일 소요될 수 있습니다.
+          </Typo>
+          <Typo
+            style={[
+              styles.telText,
+              {
+                fontSize: responsiveStyles.subTextFontSize,
+                marginTop: responsiveStyles.telTextMarginTop,
+              },
+            ]}>
+            고객센터 1661-1897
+          </Typo>
         </View>
-        <View style={[styles.buttonContainer, { paddingHorizontal: responsiveStyles.horizontalPadding }]}>
-          <CustomButton onPress={goToLoginPage} style={[styles.loginButton, { 
-            paddingVertical: responsiveStyles.buttonPadding
-          }]}>
-            <Typo style={[styles.buttonText, { fontSize: responsiveStyles.buttonTextSize }]}>로그인</Typo>
+        <View
+          style={[
+            styles.buttonContainer,
+            {paddingHorizontal: responsiveStyles.horizontalPadding},
+          ]}>
+          <CustomButton
+            onPress={goToLoginPage}
+            style={[
+              styles.loginButton,
+              {
+                paddingVertical: responsiveStyles.buttonPadding,
+              },
+            ]}>
+            <Typo
+              style={[
+                styles.buttonText,
+                {fontSize: responsiveStyles.buttonTextSize},
+              ]}>
+              로그인
+            </Typo>
           </CustomButton>
         </View>
       </View>
@@ -134,8 +199,8 @@ const styles = StyleSheet.create({
     // fontSize, marginBottom은 동적으로 적용됨
   },
   sub2Text: {
-    fontWeight: '400',
-    color: '#6F717D',
+    fontWeight: '700',
+    color: '#2D81F1',
     ...fontBase,
     // fontSize, marginTop은 동적으로 적용됨
   },

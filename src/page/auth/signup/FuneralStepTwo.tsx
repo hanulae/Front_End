@@ -102,7 +102,11 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
   };
 
   const handlePrev = () => {
-    setSignupInfo(prev => ({...prev, phoneNumber: phoneNumber.value}));
+    setSignupInfo(prev => ({
+      ...prev,
+      phoneNumber: phoneNumber.value,
+      isPhoneVerified: isPhoneVerified,
+    }));
     onPrev();
   };
 

@@ -86,6 +86,15 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
     setShowBankSelectSheet(false);
   };
 
+  const handlePrev = () => {
+    setSignupInfo(prev => ({
+      ...prev,
+      phoneNumber: signupInfo.phoneNumber,
+      isPhoneVerified: signupInfo.isPhoneVerified,
+    }));
+    onPrev();
+  };
+
   const navigateMoreInfo = (type: string) => {
     navigation.navigate('AgreementDetail', {
       type: type,
@@ -457,7 +466,7 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
 
       {/* 회원가입 버튼 */}
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.submitButton} onPress={onPrev}>
+        <TouchableOpacity style={styles.submitButton} onPress={handlePrev}>
           <Typo style={styles.buttonText}>이전</Typo>
         </TouchableOpacity>
         <TouchableOpacity

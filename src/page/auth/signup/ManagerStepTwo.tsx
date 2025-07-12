@@ -44,10 +44,10 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
     return selectedImages.length + selectedFiles.length;
   }, [selectedImages.length, selectedFiles.length]);
 
-  // 다음 버튼 활성화 여부
-  const isNextEnabled = useMemo(() => {
-    return signupInfo.isPhoneVerified === true;
-  }, [signupInfo.isPhoneVerified]);
+  // // 다음 버튼 활성화 여부
+  // const isNextEnabled = useMemo(() => {
+  //   return signupInfo.isPhoneVerified === true;
+  // }, [signupInfo.isPhoneVerified]);
 
   // 키보드 이벤트 감지
   useEffect(() => {
@@ -126,7 +126,10 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
   };
 
   const handlePrev = () => {
-    setSignupInfo(prev => ({...prev, phoneNumber: phoneNumber.value}));
+    setSignupInfo(prev => ({
+      ...prev,
+      phoneNumber: phoneNumber.value,
+    }));
     onPrev();
   };
 
@@ -317,7 +320,11 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
                 <View style={styles.verifySection}>
                   <Input
                     input={authCode}
-                    placeholder="인증코드를 입력하세요."
+                    placeholder={
+                      signupInfo.isPhoneVerified
+                        ? '인증코드가 확인되었습니다.'
+                        : '인증코드를 받아주세요.'
+                    }
                     type="number"
                   />
                   <CustomButton
@@ -347,9 +354,9 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
                   onPress={handleNext}
                   style={[
                     styles.button,
-                    {backgroundColor: isNextEnabled ? '#2D81F1' : '#C0C0C0'}, // 비활성 시 회색
+                    !signupInfo.isPhoneVerified && {backgroundColor: '#D3D3D3'}, // 비활성 시 회색
                   ]}
-                  disabled={!isNextEnabled}>
+                  disabled={!signupInfo.isPhoneVerified}>
                   <Typo style={styles.buttonText}>다음</Typo>
                 </CustomButton>
               </View>
