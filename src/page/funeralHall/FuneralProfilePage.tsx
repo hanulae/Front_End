@@ -289,7 +289,7 @@ const FuneralProfilePage = () => {
             <CustomButton onPress={goToDispatchHistory} style={styles.button}>
               <View style={styles.buttonNameContainer}>
                 <DispatchHistoryIcon width={24} height={24} />
-                <Typo style={styles.buttonText}>지난 출동 내역</Typo>
+                <Typo style={styles.buttonText}>거래 완료 내역</Typo>
               </View>
               <MoveGrayIcon width={24} height={24} />
             </CustomButton>
@@ -298,7 +298,7 @@ const FuneralProfilePage = () => {
             <CustomButton onPress={goToDispatchRequest} style={styles.button}>
               <View style={styles.buttonNameContainer}>
                 <DispatchRequestIcon width={24} height={24} />
-                <Typo style={styles.buttonText}>출동 대기 내역</Typo>
+                <Typo style={styles.buttonText}>거래 대기 내역</Typo>
               </View>
               <MoveGrayIcon width={24} height={24} />
             </CustomButton>
