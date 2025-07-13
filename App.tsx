@@ -14,6 +14,8 @@ import {
   Appearance,
   Platform,
   PermissionsAndroid,
+  BackHandler,
+  Alert,
 } from 'react-native';
 import {useAtom} from 'jotai';
 import {userInfoAtom} from './src/state/local_state/userinfoAtom';
@@ -211,6 +213,33 @@ function App(): React.JSX.Element {
       });
     }
   }, [isLogin]);
+
+  // ✅ 뒤로 가기 버튼 눌렀을 때 앱 종료 방지
+  useEffect(() => {
+    const backAction = () => {
+      Alert.alert(
+        "앱 종료",
+        "앱을 종료하시겠습니까?",
+        [
+          {
+            text: "취소",
+            onPress: () => null,
+            style: "cancel"
+          },
+          { text: "확인", onPress: () => BackHandler.exitApp() }
+        ],
+        { cancelable: false }
+      );
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, []);
 
   return (
     <SafeAreaProvider>

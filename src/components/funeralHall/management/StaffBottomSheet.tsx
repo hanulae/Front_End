@@ -135,6 +135,8 @@ const StaffBottomSheet = ({
     isPhoneVerified: false,
   });
 
+  const [isVerifyButtonDisabled, setIsVerifyButtonDisabled] = useState(false);
+
   const phoneNumberInput = useInputBase();
   const authCode = useInputBase();
   const staffGrade = useInputBase();
@@ -312,6 +314,7 @@ const StaffBottomSheet = ({
           phoneNumber: phone,
           isPhoneVerified: true,
         }));
+        setIsVerifyButtonDisabled(true); // Disable the button
       } else {
         Toast.show({
           type: 'error',
@@ -438,7 +441,12 @@ const StaffBottomSheet = ({
               />
               <CustomButton
                 onPress={handleVerifyCode}
-                style={styles.checkButton}>
+                style={[
+                  styles.checkButton,
+                  { backgroundColor: isVerifyButtonDisabled ? '#C0C0C0' : '#FFFFFF' } // Change color when disabled
+                ]}
+                disabled={isVerifyButtonDisabled} // Disable the button
+              >
                 <Typo style={styles.checkButtonText}>인증번호확인</Typo>
               </CustomButton>
             </View>

@@ -7,6 +7,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Dimensions,
 } from 'react-native';
 import {signupAtom, AttachedFile} from '../../../state/local_state/signupAtom';
 import {Input} from '../../../components/common/input/Input';
@@ -29,6 +30,8 @@ interface Props {
   onPrev: () => void;
 }
 
+const { width: screenWidth } = Dimensions.get('window');
+
 const ManagerStepTwo = ({onNext, onPrev}: Props) => {
   const signupInfo = useAtomValue(signupAtom);
   const setSignupInfo = useSetAtom(signupAtom);
@@ -40,6 +43,7 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
   const [selectedFiles, setSelectedFiles] = useState<LocalFile[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  const [isVerifyButtonDisabled, setIsVerifyButtonDisabled] = useState(false);
 
   // 총 첨부파일 개수 계산
   const totalAttachedCount = useMemo(() => {
@@ -226,12 +230,13 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
           topOffset: -150,
         });
 
-        // 인증 상태 저장
+        // 인증 상태 저장 및 버튼 비활성화
         setSignupInfo(prev => ({
           ...prev,
           phoneNumber: phoneNumber.value,
           isPhoneVerified: true,
         }));
+        setIsVerifyButtonDisabled(true);
       } else {
         Toast.show({
           type: 'error',
@@ -315,7 +320,11 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
                   />
                   <CustomButton
                     onPress={handleVerifyCode}
-                    style={[styles.requestButton, { backgroundColor: '#2D81F1' }]}
+                    style={[
+                      styles.requestButton,
+                      { backgroundColor: isVerifyButtonDisabled ? '#C0C0C0' : '#2D81F1' }
+                    ]}
+                    disabled={isVerifyButtonDisabled}
                   >
                     <Typo color="white" fontSize={14} style={{ fontWeight: '700' }}>
                       인증코드확인
@@ -445,7 +454,7 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     borderRadius: 10,
     alignItems: 'center',
-    // flex: 1,
+    width: screenWidth / 4,
   },
   buttonText: {
     fontSize: 16,
@@ -454,9 +463,8 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard-Light',
   },
   bottomButtonContainer: {
-    flex: 1,
-    flexDirection: 'column',
-    justifyContent: 'flex-end',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     gap: 10,
     marginTop: 20,
   },
