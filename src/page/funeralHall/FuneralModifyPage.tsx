@@ -163,6 +163,15 @@ const FuneralModiftyPage = () => {
             funeral_disabled_facility: data.funeralDisabledFacility || false,
           });
 
+          // 홈페이지 주소 설정
+          if (data.funeralHomePage) {
+            funeralWebsite.setValue(data.funeralHomePage);
+          }
+
+          // 대표전화번호 설정
+          if (data.funeralPhoneNumber) {
+            funeralPhone.setValue(data.funeralPhoneNumber);
+          }
           // 주소 설정 - 기본주소만 저장하는 방식
           if (data.funeralAddress) {
             // API에서 받은 주소를 기본주소로 설정
@@ -178,12 +187,6 @@ const FuneralModiftyPage = () => {
             if (funeralAddress && 'setValue' in funeralAddress) {
               funeralAddress.setValue('');
             }
-          }
-          if (funeralWebsite && 'setValue' in funeralWebsite) {
-            funeralWebsite.setValue(data.funeralHomepage || '');
-          }
-          if (funeralPhone && 'setValue' in funeralPhone) {
-            funeralPhone.setValue(data.funeralPhone || '');
           }
         }
       } catch (error) {
@@ -310,8 +313,8 @@ const FuneralModiftyPage = () => {
     formData.append('funeralOperationType', infoData.funeral_operation_type);
     formData.append('funeralStyle', infoData.funeral_style);
     formData.append('funeralAddress', selectedAddress); // 기본주소만 저장 (상세주소 제외)
-    formData.append('funeralHomepage', funeralWebsite.value);
-    formData.append('funeralPhone', funeralPhone.value);
+    formData.append('funeralHomePage', funeralWebsite.value);
+    formData.append('funeralPhoneNumber', funeralPhone.value);
     formData.append('funeralParkingLot', convenienceData.funeral_parking_lot);
     formData.append('funeralStore', convenienceData.funeral_store);
     formData.append(
@@ -352,8 +355,8 @@ const FuneralModiftyPage = () => {
       color="white"
       headerTitle="장례식장 정보 수정">
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 140 : 0} // 헤더 높이만큼 여백 조정
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 140 : 100} // 헤더 높이만큼 여백 조정
         style={{flex: 1}}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.imageContainer}>
