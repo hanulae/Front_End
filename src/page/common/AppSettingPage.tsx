@@ -270,13 +270,13 @@ const AppSettingPage = () => {
           />
         </View>
 
-        <View style={styles.settingItem}>
+        {/* <View style={styles.settingItem}>
           <Typo style={styles.settingLabel}>이메일 알림</Typo>
           <CustomToggle
             isOn={notifications.emailNotification}
             onToggle={() => toggleNotification('emailNotification')}
           />
-        </View>
+        </View> */}
       </View>
 
       {/* 앱 정보 섹션 */}

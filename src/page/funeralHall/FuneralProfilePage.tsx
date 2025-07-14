@@ -242,8 +242,8 @@ const FuneralProfilePage = () => {
         <View style={styles.topSection}>
           <FuneralHeader
             backButtonVisible={false}
-            logoutButton={true}
-            onLogoutPress={logout}
+            // logoutButton={true}
+            // onLogoutPress={logout}
             alarmButton={true}
           />
           <View style={styles.container}>

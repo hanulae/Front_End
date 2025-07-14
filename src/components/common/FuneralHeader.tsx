@@ -1,5 +1,9 @@
-import {CommonActions, useNavigation} from '@react-navigation/native';
-import React, {JSX} from 'react';
+import {
+  CommonActions,
+  useFocusEffect,
+  useNavigation,
+} from '@react-navigation/native';
+import React, {JSX, useCallback, useState} from 'react';
 import {StyleSheet, View} from 'react-native';
 import CustomButton from './CustomButton';
 import Typo from './Typo';
@@ -10,13 +14,15 @@ import BackIcon from '../../assets/Header/Header_Back.svg';
 import HomeIcon from '../../assets/Header/Header_Home.svg';
 import CloseIcon from '../../assets/Icon/Icon_BtnClose01.svg';
 import AlarmIcon from '../../assets/Header/Header_Alarm.svg';
+import AlarmUnreadIcon from '../../assets/Header/Header_AlarmNew.svg';
+import {notificationApiService} from '../../services/api/notificationService';
 
 interface IFuneralHeaderProps {
   title?: string;
   homeButton?: boolean;
   logoutButton?: boolean;
   homeRouteName?: string;
-  onLogoutPress: () => void;
+  onLogoutPress?: () => void;
   color?: string;
   backButtonVisible?: boolean;
   logoutColor?: string;
@@ -55,6 +61,25 @@ const FuneralHeader = ({
       );
     }
   };
+
+  // 읽지 않은 알림 여부 조회
+  const [isUnread, setIsUnread] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchUnreadNotificationCount = async () => {
+        try {
+          const response =
+            await notificationApiService.getUnreadNotificationCount();
+          setIsUnread(response.isUnread);
+        } catch {
+          setIsUnread(false);
+        }
+      };
+      fetchUnreadNotificationCount();
+    }, []),
+  );
+
   const goAlarmPage = () => {
     navigation.navigate('Notification', {variant: 'funeral'});
   };
@@ -84,7 +109,11 @@ const FuneralHeader = ({
         )}
         {alarmButton && (
           <CustomButton onPress={goAlarmPage}>
-            <AlarmIcon width={24} height={24} />
+            {isUnread ? (
+              <AlarmUnreadIcon width={24} height={24} />
+            ) : (
+              <AlarmIcon width={24} height={24} />
+            )}
           </CustomButton>
         )}
         {closeButton && (
