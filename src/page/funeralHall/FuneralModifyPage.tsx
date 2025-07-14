@@ -180,10 +180,10 @@ const FuneralModiftyPage = () => {
             }
           }
           if (funeralWebsite && 'setValue' in funeralWebsite) {
-            funeralWebsite.setValue(data.funeralHomepage || '');
+            funeralWebsite.setValue(data.funeralHomePage || '');
           }
           if (funeralPhone && 'setValue' in funeralPhone) {
-            funeralPhone.setValue(data.funeralPhone || '');
+            funeralPhone.setValue(data.funeralPhoneNumber || '');
           }
         }
       } catch (error) {
@@ -310,8 +310,8 @@ const FuneralModiftyPage = () => {
     formData.append('funeralOperationType', infoData.funeral_operation_type);
     formData.append('funeralStyle', infoData.funeral_style);
     formData.append('funeralAddress', selectedAddress); // 기본주소만 저장 (상세주소 제외)
-    formData.append('funeralHomepage', funeralWebsite.value);
-    formData.append('funeralPhone', funeralPhone.value);
+    formData.append('funeralHomePage', funeralWebsite.value);
+    formData.append('funeralPhoneNumber', funeralPhone.value);
     formData.append('funeralParkingLot', convenienceData.funeral_parking_lot);
     formData.append('funeralStore', convenienceData.funeral_store);
     formData.append(

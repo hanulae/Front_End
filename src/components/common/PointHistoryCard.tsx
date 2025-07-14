@@ -40,6 +40,9 @@ const PointHistoryCard = ({
           {status === 'completed' && (
             <Typo style={styles.completedText}>완료</Typo>
           )}
+          {status === 'cancelled' && (
+            <Typo style={styles.cancelledText}>거절</Typo>
+          )}
         </View>
 
         <View style={styles.amountContainer}>
@@ -149,5 +152,11 @@ const styles = StyleSheet.create({
   },
   typeWithdraw: {
     color: '#F04452', // 출금(빨간색)
+  },
+  cancelledText: {
+    fontSize: 14,
+    fontWeight: 500,
+    color: '#F04452',
+    fontFamily: 'Pretendard-Bold',
   },
 });

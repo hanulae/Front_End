@@ -72,6 +72,8 @@ const FindEmailPage = ({navigation}: IFindEmailPageProps) => {
         });
       }
 
+      console.log("🚀 ~ handleVerifyCode ~ response:", response)
+
       if (response.status === 200 && response.data.verified) {
         setUsername(response.data.username);
         setIsVerifyButtonDisabled(true); // Disable the button
