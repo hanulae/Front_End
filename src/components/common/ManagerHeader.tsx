@@ -121,7 +121,11 @@ const ManagerHeader = ({
       )}
       {alarmButton && (
         <CustomButton onPress={goAlarmPage}>
-          {isUnread ? <AlarmUnreadIcon /> : <AlarmIcon />}
+          {isUnread ? (
+            <AlarmUnreadIcon width={24} height={24} />
+          ) : (
+            <AlarmIcon width={24} height={24} />
+          )}
         </CustomButton>
       )}
     </View>

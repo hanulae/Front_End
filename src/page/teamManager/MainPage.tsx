@@ -15,7 +15,6 @@ import {useAtomValue, useSetAtom} from 'jotai';
 import {userInfoAtom} from '../../state/local_state/userinfoAtom';
 import ManagerLayout from '../../layout/ManagerLayout';
 import {useCallback, useMemo, useState} from 'react';
-import LoginIcon from '../../assets/Header/Header_Login.svg';
 import AlarmIcon from '../../assets/Header/Header_Alarm.svg';
 import AlarmUnreadIcon from '../../assets/Header/Header_AlarmNew.svg';
 import MainSearchIcon from '../../assets/Main_FuneralSearch.svg';
@@ -23,10 +22,6 @@ import MainAlarmIcon from '../../assets/Main_Alarm.svg';
 import MoveIcon from '../../components/svg/MoveIcon';
 import InfoCenterIcon from '../../assets/ServiceCenter.svg';
 import ManagerMainProfile from '../../components/manager/ManagerMainProfile';
-import {getUserInfo} from '../../utils/tokenStorage';
-import DeviceInfo from 'react-native-device-info';
-import api from '../../api/config';
-import {clearTokens} from '../../utils/tokenStorage';
 import {notificationApiService} from '../../services/api/notificationService';
 
 interface IManagerMainPageProps {
@@ -180,7 +175,11 @@ const ManagerMainPage = ({navigation}: IManagerMainPageProps) => {
                 paddingHorizontal: responsiveStyles.buttonHorizontalPadding,
               },
             ]}>
-            {isUnread ? <AlarmUnreadIcon /> : <AlarmIcon />}
+            {isUnread ? (
+              <AlarmUnreadIcon width={24} height={24} />
+            ) : (
+              <AlarmIcon width={24} height={24} />
+            )}
           </CustomButton>
         </View>
       </View>
