@@ -19,7 +19,7 @@ import {
   useNavigation,
   NavigationProp,
 } from '@react-navigation/native';
-import PhoneIcon from '../../assets/Attachment/Attach_PhoneDisable.svg';
+import PhoneIcon from '../../assets/Attachment/Attach_PhoneDisable_green.svg';
 import {useFuneralDispatch} from '../../hooks/useFuneralDispatch';
 import {
   DispatchDetail,
@@ -339,9 +339,12 @@ const ConfirmTransactionPage = () => {
       } else {
         console.log('거래 확정 요청 실패:', result);
         const errorMessage = result?.message || '거래 확정에 실패했습니다.';
-        
+
         // 캐시 부족 관련 에러 메시지 특별 처리
-        const isCashInsufficientError = errorMessage.includes('캐시') || errorMessage.includes('포인트') || errorMessage.includes('부족');
+        const isCashInsufficientError =
+          errorMessage.includes('캐시') ||
+          errorMessage.includes('포인트') ||
+          errorMessage.includes('부족');
 
         // 캐시 부족일 때는 Alert 표시
         if (isCashInsufficientError) {
@@ -354,7 +357,7 @@ const ConfirmTransactionPage = () => {
                 style: 'default',
               },
             ],
-            { cancelable: false }
+            {cancelable: false},
           );
         }
 
@@ -379,7 +382,11 @@ const ConfirmTransactionPage = () => {
       }
 
       // 캐시 부족 관련 에러 메시지 특별 처리
-      const isCashInsufficientError = errorMessage.includes('캐시') || errorMessage.includes('포인트') || errorMessage.includes('부족') || errorMessage.includes('insufficient');
+      const isCashInsufficientError =
+        errorMessage.includes('캐시') ||
+        errorMessage.includes('포인트') ||
+        errorMessage.includes('부족') ||
+        errorMessage.includes('insufficient');
       const finalErrorMessage = isCashInsufficientError
         ? '캐시 부족으로 거래확정이 불가능합니다.\n캐시를 충전해주세요.'
         : errorMessage;
@@ -397,7 +404,7 @@ const ConfirmTransactionPage = () => {
               style: 'default',
             },
           ],
-          { cancelable: false }
+          {cancelable: false},
         );
       }
       // 에러 발생 시 현재 페이지 유지 - 어떤 네비게이션도 수행하지 않음
@@ -702,10 +709,16 @@ const ConfirmTransactionPage = () => {
                     팀장연락처
                   </Typo>
                   <TouchableOpacity
-                    style={[styles.inlinePhoneButton, loading && styles.disabledButton]}
-                    onPress={() => handleCall(dispatchDetail?.managerPhoneNumber)}
+                    style={[
+                      styles.inlinePhoneButton,
+                      loading && styles.disabledButton,
+                    ]}
+                    onPress={() =>
+                      handleCall(dispatchDetail?.managerPhoneNumber)
+                    }
                     disabled={loading}>
                     <PhoneIcon width={16} height={16} />
+                    <Typo style={styles.phoneIconButtonText}>전화하기</Typo>
                   </TouchableOpacity>
                 </View>
                 <TextInput
@@ -1092,9 +1105,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   phoneIconButtonText: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
-    color: '#666',
+    color: '#3ADA00',
     fontFamily: 'Pretendard-Bold',
   },
   disabledButton: {
@@ -1109,6 +1122,7 @@ const styles = StyleSheet.create({
   inlinePhoneButton: {
     flexDirection: 'row',
     marginLeft: 10,
+    gap: 4,
     borderRadius: 8,
     alignItems: 'center',
   },
