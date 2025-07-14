@@ -1,9 +1,10 @@
 import {
   CommonActions,
   NavigationProp,
+  useFocusEffect,
   useNavigation,
 } from '@react-navigation/native';
-import React, {JSX} from 'react';
+import React, {JSX, useCallback, useState} from 'react';
 import {StyleSheet, View} from 'react-native';
 import CustomButton from './CustomButton';
 import Typo from './Typo';
@@ -11,9 +12,12 @@ import Typo from './Typo';
 import HomeIcon from '../../assets/Header/Header_Home.svg';
 import LogoutButtonWhite from '../../assets/Header/Header_DoorWhite.svg';
 import {BackIcon} from '../svg/BackIcon';
+import AlarmIcon from '../../assets/Header/Header_Alarm.svg';
+import AlarmUnreadIcon from '../../assets/Header/Header_AlarmNew.svg';
 import {useAtom, useAtomValue} from 'jotai';
 import {loginAtom} from '../../state/local_state/loginAtom';
 import {userInfoAtom} from '../../state/local_state/userinfoAtom';
+import {notificationApiService} from '../../services/api/notificationService';
 
 interface IManagerHeaderProps {
   title: string;
@@ -23,6 +27,7 @@ interface IManagerHeaderProps {
   homeRouteName?: string;
   onLogoutPress?: () => void;
   color?: string;
+  alarmButton?: boolean;
 }
 
 const ManagerHeader = ({
@@ -32,11 +37,34 @@ const ManagerHeader = ({
   homeButton = false,
   logoutButton = false,
   homeRouteName,
+  alarmButton = false,
   onLogoutPress,
 }: IManagerHeaderProps): JSX.Element => {
   const navigation = useNavigation<NavigationProp<any>>();
   const userInfo = useAtomValue(userInfoAtom);
   const goBack = navigation.goBack;
+  // 읽지 않은 알림 여부 조회
+  const [isUnread, setIsUnread] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchUnreadNotificationCount = async () => {
+        try {
+          const response =
+            await notificationApiService.getUnreadNotificationCount();
+          setIsUnread(response.isUnread);
+        } catch {
+          setIsUnread(false);
+        }
+      };
+      fetchUnreadNotificationCount();
+    }, []),
+  );
+
+  const goAlarmPage = () => {
+    navigation.navigate('Notification', {variant: 'manager'});
+  };
+
   const goHome = () => {
     // homeRouteName이 명시적으로 제공된 경우 우선 사용
     if (homeRouteName) {
@@ -89,6 +117,11 @@ const ManagerHeader = ({
       {logoutButton && (
         <CustomButton onPress={onLogoutPress || (() => {})}>
           <LogoutButtonWhite width={24} height={24} />
+        </CustomButton>
+      )}
+      {alarmButton && (
+        <CustomButton onPress={goAlarmPage}>
+          {isUnread ? <AlarmUnreadIcon /> : <AlarmIcon />}
         </CustomButton>
       )}
     </View>
