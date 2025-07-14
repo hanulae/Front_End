@@ -14,9 +14,10 @@ import CustomButton from '../../components/common/CustomButton';
 import {useAtomValue, useSetAtom} from 'jotai';
 import {userInfoAtom} from '../../state/local_state/userinfoAtom';
 import ManagerLayout from '../../layout/ManagerLayout';
-import {useCallback, useMemo} from 'react';
+import {useCallback, useMemo, useState} from 'react';
 import LoginIcon from '../../assets/Header/Header_Login.svg';
 import AlarmIcon from '../../assets/Header/Header_Alarm.svg';
+import AlarmUnreadIcon from '../../assets/Header/Header_AlarmNew.svg';
 import MainSearchIcon from '../../assets/Main_FuneralSearch.svg';
 import MainAlarmIcon from '../../assets/Main_Alarm.svg';
 import MoveIcon from '../../components/svg/MoveIcon';
@@ -26,6 +27,7 @@ import {getUserInfo} from '../../utils/tokenStorage';
 import DeviceInfo from 'react-native-device-info';
 import api from '../../api/config';
 import {clearTokens} from '../../utils/tokenStorage';
+import {notificationApiService} from '../../services/api/notificationService';
 
 interface IManagerMainPageProps {
   navigation: NavigationProp<any>;
@@ -96,34 +98,23 @@ const ManagerMainPage = ({navigation}: IManagerMainPageProps) => {
     }, []),
   );
 
-  const logout = async () => {
-    try {
-      const userInfos = await getUserInfo();
-      const deviceId = await DeviceInfo.getUniqueId();
-      const response = await api.post('/manager/auth/logout', {
-        userId: userInfos?.userId,
-        userType: userInfos?.userType,
-        deviceId: deviceId,
-      });
-      if (response.status === 200) {
-        // AsyncStorage 정리
-        await clearTokens();
-        // 로그아웃 로직
-        setLogin({
-          userType: null,
-          isLogin: false,
-          userName: '',
-          accessToken: '',
-          refreshToken: '',
-        });
-        console.log('Logout');
-      }
-    } catch (error) {
-      console.error('로그아웃 실패:', error);
-    }
+  // 읽지 않은 알림 여부 조회
+  const [isUnread, setIsUnread] = useState(false);
 
-    // navigation.navigate('ManagerMain');
-  };
+  useFocusEffect(
+    useCallback(() => {
+      const fetchUnreadNotificationCount = async () => {
+        try {
+          const response =
+            await notificationApiService.getUnreadNotificationCount();
+          setIsUnread(response.isUnread);
+        } catch {
+          setIsUnread(false);
+        }
+      };
+      fetchUnreadNotificationCount();
+    }, []),
+  );
 
   const goToNoticePage = () => {
     navigation.navigate('EstimateList');
@@ -160,7 +151,7 @@ const ManagerMainPage = ({navigation}: IManagerMainPageProps) => {
             styles.leftHeaderContainer,
             {gap: responsiveStyles.buttonSpacing},
           ]}>
-          <CustomButton
+          {/* <CustomButton
             onPress={logout}
             style={[
               styles.loginButton,
@@ -179,7 +170,7 @@ const ManagerMainPage = ({navigation}: IManagerMainPageProps) => {
               로그아웃
             </Typo>
             <LoginIcon />
-          </CustomButton>
+          </CustomButton> */}
           <CustomButton
             onPress={goToAlarmPage}
             style={[
@@ -189,7 +180,7 @@ const ManagerMainPage = ({navigation}: IManagerMainPageProps) => {
                 paddingHorizontal: responsiveStyles.buttonHorizontalPadding,
               },
             ]}>
-            <AlarmIcon />
+            {isUnread ? <AlarmUnreadIcon /> : <AlarmIcon />}
           </CustomButton>
         </View>
       </View>

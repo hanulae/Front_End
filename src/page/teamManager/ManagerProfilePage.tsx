@@ -16,12 +16,8 @@ import PointRefundIcon from '../../assets/Button/Button_Refund.svg';
 import AppSettingIcon from '../../assets/Button/Button_AppSettingoff.svg';
 import Toast from 'react-native-toast-message';
 import {userInfoAtom} from '../../state/local_state/userinfoAtom';
-import {useAtomValue, useSetAtom} from 'jotai';
+import {useAtomValue} from 'jotai';
 import ManagerHeader from '../../components/common/ManagerHeader';
-import {getUserInfo} from '../../utils/tokenStorage';
-import DeviceInfo from 'react-native-device-info';
-import api from '../../api/config';
-import {clearTokens} from '../../utils/tokenStorage';
 // import Toast from 'react-native-toast-message';
 
 interface IManagerProfilePageProps {
@@ -44,7 +40,6 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
       };
     }, []),
   );
-  const setLogin = useSetAtom(userInfoAtom);
   const userInfo = useAtomValue(userInfoAtom);
   console.log('StatusBar.currentHeight', StatusBar.currentHeight);
   const [showPhoneAuthSheet, setShowPhoneAuthSheet] = useState(false);
@@ -76,35 +71,6 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
     navigation.navigate('CallHistory');
   };
 
-  const logout = async () => {
-    try {
-      const userInfos = await getUserInfo();
-      const deviceId = await DeviceInfo.getUniqueId();
-      const response = await api.post('/manager/auth/logout', {
-        userId: userInfos?.userId,
-        userType: userInfos?.userType,
-        deviceId: deviceId,
-      });
-      if (response.status === 200) {
-        // AsyncStorage 정리
-        await clearTokens();
-        // 로그아웃 로직
-        setLogin({
-          userType: null,
-          isLogin: false,
-          userName: '',
-          accessToken: '',
-          refreshToken: '',
-        });
-        console.log('Logout');
-      }
-    } catch (error) {
-      console.error('로그아웃 실패:', error);
-    }
-
-    // navigation.navigate('ManagerMain');
-  };
-
   return (
     <>
       <ManagerLayout
@@ -116,9 +82,8 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
         <View style={styles.topSection}>
           <ManagerHeader
             title=""
-            logoutButton={true}
             backIconColor="white"
-            onLogoutPress={logout}
+            alarmButton={true}
             color="transparent"
           />
           <View style={styles.container}>

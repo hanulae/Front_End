@@ -100,6 +100,10 @@ export interface GetNotificationListResponse {
   totalPages: number;
 }
 
+export interface GetUnreadNotificationCountResponse {
+  isUnread: boolean;
+}
+
 export const notificationApiService = {
   // 알림 목록 조회
   getNotificationList: async (
@@ -118,6 +122,31 @@ export const notificationApiService = {
     } catch (error: any) {
       console.error('알림 목록 조회 에러:', error.message);
       throw new Error(`알림 목록 조회 에러: ${error.message}`);
+    }
+  },
+
+  // 읽지 않은 알림 여부 조회
+  getUnreadNotificationCount: async (
+    params: GetNotificationListParams = {},
+  ): Promise<GetUnreadNotificationCountResponse> => {
+    try {
+      const response = await api.get('/common/notification/list', {
+        params: {
+          page: 1,
+          limit: 1, // 읽지 않은 알림 존재 여부만 확인하므로 1개면 충분
+          type: params.type || undefined,
+          unreadOnly: true,
+        },
+      });
+
+      const isUnread = response.data.data.rows.length > 0;
+
+      return {
+        isUnread,
+      };
+    } catch (error: any) {
+      console.error('읽지 않은 알림 여부 조회 에러:', error.message);
+      return {isUnread: false};
     }
   },
 
