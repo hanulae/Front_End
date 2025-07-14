@@ -169,10 +169,10 @@ const FuneralDetailPage = ({
   };
 
   const handleWebsite = () => {
-    if (funeralInfo?.funeralHomepageUrl) {
-      const url = funeralInfo.funeralHomepageUrl.startsWith('http')
-        ? funeralInfo.funeralHomepageUrl
-        : `https://${funeralInfo.funeralHomepageUrl}`;
+    if (funeralInfo?.funeralHomePage) {
+      const url = funeralInfo.funeralHomePage.startsWith('http')
+        ? funeralInfo.funeralHomePage
+        : `https://${funeralInfo.funeralHomePage}`;
       Linking.openURL(url);
     }
   };
