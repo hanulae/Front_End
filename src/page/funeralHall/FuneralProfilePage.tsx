@@ -22,15 +22,12 @@ import QuoteListIcon from '../../assets/Button/Button_QuoteRecordOff.svg';
 import AppSettingIcon from '../../assets/Button/Button_AppSettingoff.svg';
 import Typo from '../../components/common/Typo';
 import FuneralHeader from '../../components/common/FuneralHeader';
-import {useAtom, useSetAtom} from 'jotai';
-import {userInfoAtom} from '../../state/local_state/userinfoAtom';
+import {useAtom} from 'jotai';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import Toast from 'react-native-toast-message';
 import PhoneAuthSheet from '../../components/funeralHall/PhoneAuthSheet';
-import {clearTokens, getUserInfo} from '../../utils/tokenStorage';
-import api from '../../api/config';
-import DeviceInfo from 'react-native-device-info';
+import {getUserInfo} from '../../utils/tokenStorage';
 import {isStaffAtom} from '../../state/local_state/loginAtom';
 import {scaleFontSize, scaleSize} from '../../utils/responsive';
 
@@ -65,7 +62,6 @@ const FuneralProfilePage = () => {
   const [isStaff, setIsStaff] = useAtom(isStaffAtom);
   const [permissions, setPermissions] = useState<IPermissions | null>(null);
   const [funeralName, setFuneralName] = useState('');
-  const setLogin = useSetAtom(userInfoAtom);
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
 
   // 사용자 정보 및 권한 로드
@@ -209,33 +205,36 @@ const FuneralProfilePage = () => {
     navigation.navigate('PointHistory', {variant: 'funeral'});
   };
 
-  const logout = async () => {
-    try {
-      const userInfo = await getUserInfo();
-      const deviceId = await DeviceInfo.getUniqueId();
-      const response = await api.post('/funeral/auth/logout', {
-        userId: userInfo?.userId,
-        userType: userInfo?.userType,
-        deviceId: deviceId,
-      });
-      if (response.status === 200) {
-        // 로그아웃 로직
-        await clearTokens();
-        setLogin({
-          userType: null,
-          isLogin: false,
-          userName: '',
-          accessToken: '',
-          refreshToken: '',
-        });
-        console.log('Logout');
-      }
-    } catch (error) {
-      console.error('로그아웃 실패:', error);
-    }
+  // const logout = async () => {
+  //   try {
+  //     const userInfo = await getUserInfo();
+  //     const deviceId = await DeviceInfo.getUniqueId();
+  //     const response = await api.post('/funeral/auth/logout', {
+  //       userId: userInfo?.userId,
+  //       userType: userInfo?.userType,
+  //       deviceId: deviceId,
+  //     });
+  //     if (response.status === 200) {
+  //       // 로그아웃 로직
+  //       await clearTokens();
+  //       setLogin({
+  //         userType: null,
+  //         isLogin: false,
+  //         userName: '',
+  //         accessToken: '',
+  //         refreshToken: '',
+  //       });
+  //       console.log('Logout');
+  //     }
+  //   } catch (error) {
+  //     console.error('로그아웃 실패:', error);
+  //   }
 
-    // navigation.navigate('ManagerMain');
-  };
+  //   // navigation.navigate('ManagerMain');
+  // };
+
+  // 반응형 아이콘 크기
+  const iconSize = scaleSize(24);
 
   return (
     <>
@@ -258,10 +257,10 @@ const FuneralProfilePage = () => {
           onPress={goToModifyFuneralInfo}
           style={styles.floatingButton}>
           <View style={styles.buttonNameContainer}>
-            <ModifyInfoIcon width={24} height={24} />
+            <ModifyInfoIcon width={iconSize} height={iconSize} />
             <Typo style={styles.topButtonText}>회원정보 수정</Typo>
           </View>
-          <MoveWhiteIcon width={24} height={24} />
+          <MoveWhiteIcon width={iconSize} height={iconSize} />
         </CustomButton>
 
         <ScrollView
@@ -271,55 +270,55 @@ const FuneralProfilePage = () => {
           {hasPermission('roomManagement') && (
             <CustomButton onPress={goToManageRomms} style={styles.button}>
               <View style={styles.buttonNameContainer}>
-                <ManageRoomIcon width={24} height={24} />
+                <ManageRoomIcon width={iconSize} height={iconSize} />
                 <Typo style={styles.buttonText}>호실 관리</Typo>
               </View>
-              <MoveGrayIcon width={24} height={24} />
+              <MoveGrayIcon width={iconSize} height={iconSize} />
             </CustomButton>
           )}
           {!isStaff && (
             <CustomButton onPress={goToManageMembers} style={styles.button}>
               <View style={styles.buttonNameContainer}>
-                <ManageMemeberIcon width={24} height={24} />
+                <ManageMemeberIcon width={iconSize} height={iconSize} />
                 <Typo style={styles.buttonText}>직원 관리</Typo>
               </View>
-              <MoveGrayIcon width={24} height={24} />
+              <MoveGrayIcon width={iconSize} height={iconSize} />
             </CustomButton>
           )}
           {hasPermission('dispatchHistory') && (
             <CustomButton onPress={goToDispatchHistory} style={styles.button}>
               <View style={styles.buttonNameContainer}>
-                <DispatchHistoryIcon width={24} height={24} />
+                <DispatchHistoryIcon width={iconSize} height={iconSize} />
                 <Typo style={styles.buttonText}>거래 완료 내역</Typo>
               </View>
-              <MoveGrayIcon width={24} height={24} />
+              <MoveGrayIcon width={iconSize} height={iconSize} />
             </CustomButton>
           )}
           {hasPermission('dispatchPending') && (
             <CustomButton onPress={goToDispatchRequest} style={styles.button}>
               <View style={styles.buttonNameContainer}>
-                <DispatchRequestIcon width={24} height={24} />
+                <DispatchRequestIcon width={iconSize} height={iconSize} />
                 <Typo style={styles.buttonText}>거래 대기 내역</Typo>
               </View>
-              <MoveGrayIcon width={24} height={24} />
+              <MoveGrayIcon width={iconSize} height={iconSize} />
             </CustomButton>
           )}
           {hasPermission('estimateHistory') && (
             <CustomButton onPress={goToQuoteList} style={styles.button}>
               <View style={styles.buttonNameContainer}>
-                <QuoteListIcon width={24} height={24} />
+                <QuoteListIcon width={iconSize} height={iconSize} />
                 <Typo style={styles.buttonText}>견적 내역</Typo>
               </View>
-              <MoveGrayIcon width={24} height={24} />
+              <MoveGrayIcon width={iconSize} height={iconSize} />
             </CustomButton>
           )}
           {hasPermission('appSettings') && (
             <CustomButton onPress={goToAppSetting} style={styles.button}>
               <View style={styles.buttonNameContainer}>
-                <AppSettingIcon width={24} height={24} />
+                <AppSettingIcon width={iconSize} height={iconSize} />
                 <Typo style={styles.buttonText}>앱 설정</Typo>
               </View>
-              <MoveGrayIcon width={24} height={24} />
+              <MoveGrayIcon width={iconSize} height={iconSize} />
             </CustomButton>
           )}
         </ScrollView>
@@ -352,7 +351,7 @@ const styles = StyleSheet.create({
   },
   floatingButton: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? scaleSize(420) : scaleSize(360),
+    top: Platform.OS === 'ios' ? scaleSize(420) : scaleSize(400),
     left: scaleSize(20),
     right: scaleSize(20),
     zIndex: 5,
@@ -375,7 +374,7 @@ const styles = StyleSheet.create({
   whiteSection: {
     flex: 1,
     backgroundColor: '#F5F5F5',
-    marginTop: scaleSize(410),
+    marginTop: Platform.OS === 'ios' ? scaleSize(480) : scaleSize(450),
     zIndex: 1,
   },
   scrollContent: {
@@ -396,7 +395,7 @@ const styles = StyleSheet.create({
     fontSize: scaleFontSize(18),
     fontWeight: '600',
     color: '#FFFFFF',
-    lineHeight: scaleSize(20),
+    lineHeight: scaleFontSize(20),
   },
   button: {
     backgroundColor: '#FFFFFF',
@@ -415,6 +414,6 @@ const styles = StyleSheet.create({
     fontSize: scaleFontSize(18),
     fontWeight: '600',
     color: '#000',
-    lineHeight: scaleSize(20),
+    lineHeight: scaleFontSize(20),
   },
 });
