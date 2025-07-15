@@ -34,8 +34,6 @@ const QuoteCard = ({
         return styles.statusSelected;
       case '거래 진행중':
         return styles.statusProgress;
-      case '거래 완료': // 거래 완료
-        return styles.statusCompleted;
       case '입찰 실패':
         return styles.statusRejected;
       case '입찰 마감':
@@ -129,25 +127,22 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard-Black',
   },
   statusPending: {
-    backgroundColor: '#CDD1D7', // 회색 - 입찰 대기
+    backgroundColor: '#aed2ff', // 연한 파란색 - 입찰 대기
   },
   statusSubmitted: {
-    backgroundColor: '#3287F8', // 파란색 - 입찰 완료
+    backgroundColor: '#3B82F6', // 진한 파란색 - 입찰 완료 (대기보다 진하게)
   },
   statusSelected: {
-    backgroundColor: '#10B981', // 초록색 - 입찰 선택됨
+    backgroundColor: '#059669', // 초록색 - 입찰 선택됨 (성공)
   },
   statusProgress: {
-    backgroundColor: '#F59E0B', // 주황색 - 진행중
-  },
-  statusCompleted: {
-    backgroundColor: '#283042', // 검정색 - 거래 완료
+    backgroundColor: '#F59E0B', // 주황색 - 진행중 (활동적)
   },
   statusRejected: {
-    backgroundColor: '#EF4444', // 빨간색 - 거절됨
+    backgroundColor: '#DC2626', // 빨간색 - 거절됨 (실패)
   },
   statusExpired: {
-    backgroundColor: '#EF4444', // 회색 - 만료됨
+    backgroundColor: '#9CA3AF', // 연한 회색 - 만료됨 (비활성)
   },
   statusDefault: {
     backgroundColor: '#6B7280', // 기본 회색 - 상태 불명

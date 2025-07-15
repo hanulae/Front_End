@@ -229,9 +229,13 @@ const QuoteProposalPage = () => {
             onPress: () => navigation.goBack(),
           },
         ]);
+      } else {
+        console.log('response', response);
       }
     } catch (err: any) {
-      Alert.alert('오류', err.message || '입찰 제출 중 오류가 발생했습니다.');
+      const serverMessage = err.message || '입찰 제출 중 오류가 발생했습니다.';
+
+      Alert.alert('입찰 실패', serverMessage);
     }
   };
 
