@@ -124,13 +124,9 @@ export const funeralEstimateService = {
   },
 
   // 견적 상세 정보 조회 (managerFormBid 상세)
-  getEstimateDetail: async (
-    managerFormBidId: string,
-  ): Promise<GetEstimateDetailResponse> => {
+  getEstimateDetail: async (managerFormBidId: string): Promise<GetEstimateDetailResponse> => {
     try {
-      const response = await api.get(
-        `/funeral/form/detail?managerFormBidId=${managerFormBidId}`,
-      );
+      const response = await api.get(`/funeral/form/detail?managerFormBidId=${managerFormBidId}`);
       console.log('견적 상세 정보 조회 성공:', response.data);
       return response.data;
     } catch (error: any) {
@@ -140,14 +136,11 @@ export const funeralEstimateService = {
   },
 
   // 호실 목록 조회 (JWT 토큰에서 funeralId 자동 추출)
-  getFuneralHallList: async (
-    page = 1,
-    limit = 10,
-  ): Promise<GetFuneralHallListResponse> => {
+  getFuneralHallList: async (page = 1, limit = 10): Promise<GetFuneralHallListResponse> => {
     try {
-      const params = {page, limit};
+      const params = { page, limit };
 
-      const response = await api.get('/funeral/hall/list', {params});
+      const response = await api.get('/funeral/hall/list', { params });
       console.log('호실 목록 조회 성공:', response.data);
       return response.data;
     } catch (error: any) {
@@ -160,11 +153,13 @@ export const funeralEstimateService = {
   submitBid: async (bidData: SubmitBidParams): Promise<SubmitBidResponse> => {
     try {
       const response = await api.put('/funeral/form/bid', bidData);
-      console.log('입찰 제출 성공:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('입찰 제출 에러:', error.message);
-      throw new Error(`입찰 제출 에러: ${error.message}`);
+
+      const serverMessage = error.response?.data?.message || error.message;
+
+      throw new Error(serverMessage);
     }
   },
 

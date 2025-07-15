@@ -29,38 +29,33 @@ const EstimateCard = ({
     switch (status) {
       case '견적 발송':
         return {
-          borderColor: '#9E9E9E',
-          textColor: '#616161',
+          borderColor: '#aed2ff', // 연한 파란색 - 대기 상태
+          textColor: '#aed2ff',
         };
       case '입찰 요청':
         return {
-          borderColor: '#2196F3',
-          textColor: '#2196F3',
+          borderColor: '#3B82F6', // 진한 파란색 - 진행 중
+          textColor: '#3B82F6',
         };
       case '출동 신청':
         return {
-          borderColor: '#9C27B0',
-          textColor: '#7B1FA2',
+          borderColor: '#F59E0B', // 주황색 - 신청 상태 (활동적)
+          textColor: '#F59E0B',
         };
       case '출동 승인':
         return {
-          borderColor: '#2196F3',
-          textColor: '#2196F3',
-        };
-      case '거래 완료':
-        return {
-          borderColor: '#4CAF50',
-          textColor: '#388E3C',
+          borderColor: '#10B981', // 초록색 - 승인됨 (성공)
+          textColor: '#10B981',
         };
       case '거래 취소':
         return {
-          borderColor: '#F44336',
-          textColor: '#D32F2F',
+          borderColor: '#DC2626', // 빨간색 - 취소됨 (실패)
+          textColor: '#DC2626',
         };
       default:
         return {
-          borderColor: '#A7A9B0',
-          textColor: '#666666',
+          borderColor: '#9CA3AF', // 연한 회색 - 기본 상태
+          textColor: '#6B7280',
         };
     }
   };

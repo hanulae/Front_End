@@ -1,9 +1,10 @@
 import {useNavigation, CommonActions} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {Pressable, StyleSheet, View, useWindowDimensions} from 'react-native';
+import {Pressable, StyleSheet, View} from 'react-native';
 import Typo from '../common/Typo';
 import Hello from './Hello';
 import {useMemo} from 'react';
+import {scaleFontSize, scaleSize} from '../../utils/responsive';
 
 interface IManagerMainProfileProps {
   managerName: string;
@@ -11,48 +12,31 @@ interface IManagerMainProfileProps {
 
 const ManagerMainProfile = ({managerName}: IManagerMainProfileProps) => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
-  
-  // 화면 크기 감지
-  const {width} = useWindowDimensions();
-  
-  // 브레이크포인트 정의 (갤럭시 S9 전용 최적화)
-  const deviceType = useMemo(() => {
-    if (width >= 768) return 'tablet';
-    if (width >= 411) return 'large'; // medium phone 기준
-    if (width >= 375) return 'medium'; // iPhone 6/7/8 크기
-    if (width >= 361) return 'small';
-    return 'extraSmall'; // 갤럭시 S9 등 360px 이하
-  }, [width]);
 
   const responsiveStyles = useMemo(() => {
-    const scale = deviceType === 'extraSmall' ? 0.7 :  // 갤럭시 S9 전용
-                  deviceType === 'small' ? 0.8 : 
-                  deviceType === 'medium' ? 0.9 :
-                  deviceType === 'large' ? 1.0 : 1.2; // tablet
-
     return {
       // 폰트 크기
-      nameTextSize: Math.round(34 * scale),
-      roleTextSize: Math.round(20 * scale),
-      buttonTextSize: Math.round(18 * scale),
+      nameTextSize: scaleFontSize(34),
+      roleTextSize: scaleFontSize(20),
+      buttonTextSize: scaleFontSize(18),
       
-      // 패딩과 마진 (갤럭시 S9에서 추가 최적화)
-      containerPadding: deviceType === 'extraSmall' ? 8 : Math.round(16 * scale),
-      nameMarginTop: deviceType === 'extraSmall' ? 6 : Math.round(13 * scale),
-      nameMarginBottom: deviceType === 'extraSmall' ? 8 : Math.round(18 * scale),
-      nameMarginLeft: deviceType === 'extraSmall' ? 8 : Math.round(16 * scale),
-      roleMarginLeft: Math.round(4 * scale),
-      buttonVerticalPadding: deviceType === 'extraSmall' ? 10 : Math.round(16 * scale),
-      buttonHorizontalPadding: deviceType === 'extraSmall' ? 12 : Math.round(20 * scale),
-      buttonMarginTop: deviceType === 'extraSmall' ? 6 : Math.round(16 * scale),
+      // 패딩과 마진
+      containerPadding: scaleSize(16),
+      nameMarginTop: scaleSize(13),
+      nameMarginBottom: scaleSize(18),
+      nameMarginLeft: scaleSize(16),
+      roleMarginLeft: scaleSize(4),
+      buttonVerticalPadding: scaleSize(16),
+      buttonHorizontalPadding: scaleSize(20),
+      buttonMarginTop: scaleSize(16),
       
       // 크기
-      borderRadius: Math.round(20 * scale),
+      borderRadius: scaleSize(20),
+      helloScale: scaleSize(1), // Hello 컴포넌트 크기 조절
     };
-  }, [deviceType]);
+  }, []);
 
   const goToProfilePage = () => {
-    // TabNav의 MyPage 탭으로 이동
     navigation.dispatch(
       CommonActions.reset({
         index: 1,
@@ -69,7 +53,7 @@ const ManagerMainProfile = ({managerName}: IManagerMainProfileProps) => {
 
   return (
     <View style={[styles.container, { padding: responsiveStyles.containerPadding }]}>
-      <View style={deviceType === 'extraSmall' ? { transform: [{ scale: 0.8 }] } : {}}>
+      <View style={{ transform: [{ scale: responsiveStyles.helloScale }] }}>
         <Hello />
       </View>
       <View style={[styles.nameContainer, { marginLeft: responsiveStyles.nameMarginLeft }]}>

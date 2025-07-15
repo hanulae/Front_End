@@ -2,7 +2,7 @@ import {FlatList, Platform, StatusBar, StyleSheet, View, Animated, Easing} from 
 import DefaultLayout from '../../layout/DefaultLayout';
 // import {funeralHomeDummyData} from '../../state/local_state/dummy';
 import FuneralCard from '../../components/common/FuneralCard';
-import {useCallback, useEffect, useState, useRef} from 'react';
+import {useCallback, useEffect, useState, useRef, useMemo} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {NavigationProp, useFocusEffect} from '@react-navigation/native';
 import CustomButton from '../../components/common/CustomButton';
@@ -12,6 +12,7 @@ import RequestIcon from '../../assets/Button/Button_RequestQuote.svg';
 import MoveIcon from '../../assets/Button/Button_MoveTransparent.svg';
 import {useManagerCart} from '../../hooks/useManagerCart';
 import Toast from 'react-native-toast-message';
+import {scaleFontSize, scaleSize} from '../../utils/responsive';
 
 interface ICartPageProps {
   navigation: NavigationProp<any>;
@@ -226,8 +227,6 @@ const CartPage = ({navigation}: ICartPageProps) => {
       selectedIds.includes(item.funeralListId)
     );
 
-    console.log('selectedFunerals', selectedFunerals);
-
     navigation.navigate('EstimateForm', {
       selectedFunerals: selectedFunerals, // 다중 선택된 장례식장들 전달
       funeralHallIds: selectedIds, // ID 배열도 함께 전달
@@ -245,6 +244,28 @@ const CartPage = ({navigation}: ICartPageProps) => {
     }
   };
 
+  // 반응형 스타일 계산
+  const responsiveStyles = useMemo(() => {
+    return {
+      // 패딩과 마진
+      containerPadding: scaleSize(16),
+      buttonPadding: {
+        vertical: scaleSize(16),
+        horizontal: scaleSize(24),
+      },
+      
+      // 폰트 크기
+      buttonTextSize: scaleFontSize(16),
+      emptyTextSize: scaleFontSize(16),
+      selectAllTextSize: scaleFontSize(14),
+
+      // 크기
+      borderRadius: scaleSize(10),
+      buttonHeight: scaleSize(56),
+      bottomPadding: Platform.OS === 'ios' ? scaleSize(34) : scaleSize(16),
+    };
+  }, []);
+
   return (
     <ManagerLayout
       headerShown={true}
@@ -253,15 +274,25 @@ const CartPage = ({navigation}: ICartPageProps) => {
       homeButton={true}
       logoutButton={false}
     >
-      <View style={styles.wrapper}>
-        {/* ✅ 전체 선택/해제 버튼 (선택사항) */}
+      <View style={[styles.wrapper, {
+        padding: responsiveStyles.containerPadding,
+      }]}>
+        {/* 전체 선택/해제 버튼 */}
         {(
           <View style={styles.selectAllContainer}>
             <CustomButton 
               onPress={handleSelectAll}
-              style={[styles.selectAllButton, cartItems.length === 0 && {borderColor: '#727272'}]}
+              style={[
+                styles.selectAllButton,
+                cartItems.length === 0 && {borderColor: '#727272'},
+                {borderRadius: responsiveStyles.borderRadius}
+              ]}
             >
-              <Typo style={[styles.selectAllText, cartItems.length === 0 && {color: '#727272'}]}>
+              <Typo style={[
+                styles.selectAllText,
+                cartItems.length === 0 && {color: '#727272'},
+                {fontSize: responsiveStyles.selectAllTextSize}
+              ]}>
                 {selectedIds.length === cartItems.length ? '전체 해제' : '전체 선택'}
                 ({selectedIds.length}/{cartItems.length})
               </Typo>
@@ -272,7 +303,9 @@ const CartPage = ({navigation}: ICartPageProps) => {
         <View style={styles.cartContainer}>
           {cartLoading ? (
             <View style={styles.loadingContainer}>
-              <Typo>장바구니를 불러오는 중...</Typo>
+              <Typo style={{fontSize: responsiveStyles.emptyTextSize}}>
+                장바구니를 불러오는 중...
+              </Typo>
             </View>
           ) : (
             <FlatList
@@ -300,7 +333,6 @@ const CartPage = ({navigation}: ICartPageProps) => {
                         funeralAddress: item.funeralList.funeralAddress,
                         imageUrl: undefined,
                       }}
-                      // ✅ funeralListId 기준으로 선택 확인
                       selected={selectedIds.includes(item.funeralListId)}
                       onPressCheck={() => handleSelect(item.funeralListId)}
                       onPressCard={() => {
@@ -317,18 +349,28 @@ const CartPage = ({navigation}: ICartPageProps) => {
               }}
               ListEmptyComponent={
                 <View style={styles.emptyContainer}>
-                  <Typo style={styles.emptyText}>장바구니가 비어있습니다.</Typo>
+                  <Typo style={[styles.emptyText, {fontSize: responsiveStyles.emptyTextSize}]}>
+                    장바구니가 비어있습니다.
+                  </Typo>
                 </View>
               }
             />
           )}
         </View>
         
-        <View style={styles.buttonContainer}>
+        <View style={[styles.buttonContainer, {
+          paddingTop: scaleSize(8),
+          paddingBottom: responsiveStyles.bottomPadding,
+        }]}>
           <CustomButton 
             onPress={requestEstimate} 
             style={[
               styles.button,
+              {
+                height: responsiveStyles.buttonHeight,
+                borderRadius: responsiveStyles.borderRadius,
+                paddingHorizontal: responsiveStyles.buttonPadding.horizontal,
+              },
               selectedIds.length === 0 && styles.buttonDisabled
             ]}
             disabled={selectedIds.length === 0}
@@ -337,9 +379,9 @@ const CartPage = ({navigation}: ICartPageProps) => {
               <RequestIcon width={24} height={24} />
               <Typo style={[
                 styles.buttonText,
+                {fontSize: responsiveStyles.buttonTextSize},
                 selectedIds.length === 0 && styles.buttonTextDisabled
               ]}>
-                {/* ✅ 선택된 개수 표시 */}
                 견적서 작성 {selectedIds.length > 0 ? `(${selectedIds.length})` : ''}
               </Typo>
             </View>
@@ -356,13 +398,14 @@ export default CartPage;
 
 const styles = StyleSheet.create({
   wrapper: {
-    padding: 16,
     justifyContent: 'space-between',
     flex: 1,
+    position: 'relative', // 추가
   },
   cartContainer: {
     flex: 1,
     flexDirection: 'column',
+    paddingBottom: scaleSize(80), // 하단 버튼 영역만큼 여백 추가
   },
   loadingContainer: {
     flex: 1,
@@ -377,26 +420,28 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     color: '#999',
-    fontSize: 16,
     textAlign: 'center',
   },
   buttonContainer: {
+    position: 'absolute', // 절대 위치로 변경
+    bottom: 0, // 하단에 고정
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    // paddingHorizontal: 16,
-    paddingTop: 8,
-    borderTopWidth: 0.5,
-    borderTopColor: '#dedede',
+    backgroundColor: '#FFFFFF', // 배경색 추가
+    elevation: 5,
+    zIndex: 1000,
+    paddingHorizontal: scaleSize(16),
+    paddingVertical: scaleSize(16),
   },
   button: {
     flexDirection: 'row',
     flex: 1,
     alignItems: 'center',
     backgroundColor: '#2D81F1',
-    borderRadius: 8,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
+    justifyContent: 'space-between',
   },
   buttonDisabled: {
     backgroundColor: '#E0E0E0',
@@ -409,7 +454,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   buttonText: {
-    fontSize: 15,
     fontWeight: '700',
     color: '#FFFFFF',
     fontFamily: 'Pretendard-Black',
@@ -421,7 +465,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderBottomWidth: 0.5,
     borderBottomColor: '#dedede',
-    // marginBottom: 8,
   },
   selectAllButton: {
     alignSelf: 'flex-start',
@@ -430,11 +473,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     borderWidth: 1,
     borderColor: '#2D81F1',
-    borderRadius: 6,
   },
   selectAllText: {
     color: '#2D81F1',
-    fontSize: 14,
     fontWeight: '500',
   },
 });

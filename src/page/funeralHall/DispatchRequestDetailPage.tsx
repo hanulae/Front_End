@@ -1,13 +1,14 @@
 import {useFocusEffect, useNavigation, useRoute} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {StyleSheet, TextInput, View, useWindowDimensions, ScrollView} from 'react-native';
+import {StyleSheet, TextInput, View, ScrollView} from 'react-native';
 import FuneralLayout from '../../layout/FuneralLayout';
 import Typo from '../../components/common/Typo';
 import {useCallback, useEffect, useState} from 'react';
-import CustomButton from '../../components/common/CustomButton';  
-import { useFuneralDispatch } from '../../hooks/useFuneralDispatch';
+import CustomButton from '../../components/common/CustomButton';
+import {useFuneralDispatch} from '../../hooks/useFuneralDispatch';
 import Toast from 'react-native-toast-message';
-import { DispatchDetail } from '../../services/api/funeral/funeralDispatchService';
+import {DispatchDetail} from '../../services/api/funeral/funeralDispatchService';
+import {scaleFontSize, scaleSize} from '../../utils/responsive';
 
 const DispatchRequestDetailPage = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
@@ -16,25 +17,6 @@ const DispatchRequestDetailPage = () => {
   const {loading, error, fetchDispatchDetail, approveDispatch} = useFuneralDispatch();
   const [dispatchDetail, setDispatchDetail] = useState<DispatchDetail | null>(null);
   
-  // 반응형 디자인을 위한 윈도우 크기 감지
-  const {width} = useWindowDimensions();
-  
-  // 디바이스 크기에 따른 스타일 계산
-  const getResponsiveStyles = () => {
-    const isSmallDevice = width < 350;
-    const isMediumDevice = width >= 350 && width < 400;
-    
-    return {
-      horizontalPadding: isSmallDevice ? 15 : isMediumDevice ? 20 : 25,
-      verticalPadding: isSmallDevice ? 15 : isMediumDevice ? 20 : 25,
-      fontSize: isSmallDevice ? 16 : isMediumDevice ? 18 : 20,
-      inputHeight: isSmallDevice ? 45 : isMediumDevice ? 50 : 55,
-      buttonHeight: isSmallDevice ? 45 : isMediumDevice ? 50 : 55,
-    };
-  };
-  
-  const responsiveStyles = getResponsiveStyles();
-
   // 출동 요청 상세 데이터 로드
   const loadDispatchDetail = useCallback(async () => {
     try {
@@ -140,20 +122,12 @@ const DispatchRequestDetailPage = () => {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* <View style={styles.detailContainer}>
-            <Typo style={styles.titleText}>상주이름</Typo>
-            <TextInput
-              value={clientInfo.name}
-              editable={false}
-              style={styles.input}
-            />
-          </View> */}
-          <View style={[styles.detailContainer, {paddingHorizontal: responsiveStyles.horizontalPadding, paddingVertical: responsiveStyles.verticalPadding}]}>
-            <Typo style={[styles.titleText, {fontSize: responsiveStyles.fontSize}]}>주소</Typo>
+          <View style={styles.detailContainer}>
+            <Typo style={styles.titleText}>주소</Typo>
             <TextInput
               value={dispatchDetail?.address || ''}
               editable={false}
-              style={[styles.input, {height: responsiveStyles.inputHeight}]}
+              style={styles.input}
             />
             <TextInput
               value={dispatchDetail?.addressDetail || ''}
@@ -162,13 +136,12 @@ const DispatchRequestDetailPage = () => {
               editable={false}
               style={[
                 styles.input2,
-                {height: responsiveStyles.inputHeight},
                 !dispatchDetail?.addressDetail && styles.inputEmpty,
               ]}
             />
           </View>
-          <View style={[styles.detailContainer, {paddingHorizontal: responsiveStyles.horizontalPadding, paddingVertical: responsiveStyles.verticalPadding}]}>
-            <Typo style={[styles.titleText, {fontSize: responsiveStyles.fontSize}]}>가족연락처</Typo>
+          <View style={styles.detailContainer}>
+            <Typo style={styles.titleText}>가족연락처</Typo>
             <TextInput
               value={dispatchDetail?.famPhoneNumber || ''}
               placeholder={!dispatchDetail?.famPhoneNumber ? '작성하지 않은 항목' : ''}
@@ -176,21 +149,20 @@ const DispatchRequestDetailPage = () => {
               editable={false}
               style={[
                 styles.input,
-                {height: responsiveStyles.inputHeight},
                 !dispatchDetail?.famPhoneNumber && styles.inputEmpty,
               ]}
             />
           </View>
-          <View style={[styles.detailContainer, {paddingHorizontal: responsiveStyles.horizontalPadding, paddingVertical: responsiveStyles.verticalPadding}]}>
-            <Typo style={[styles.titleText, {fontSize: responsiveStyles.fontSize}]}>팀장연락처</Typo>
+          <View style={styles.detailContainer}>
+            <Typo style={styles.titleText}>팀장연락처</Typo>
             <TextInput
               value={dispatchDetail?.managerPhoneNumber || ''}
               editable={false}
-              style={[styles.input, {height: responsiveStyles.inputHeight}]}
+              style={styles.input}
             />
           </View>
-          <View style={[styles.detailContainer, {paddingHorizontal: responsiveStyles.horizontalPadding, paddingVertical: responsiveStyles.verticalPadding}]}>
-            <Typo style={[styles.titleText, {fontSize: responsiveStyles.fontSize}]}>비상연락처</Typo>
+          <View style={styles.detailContainer}>
+            <Typo style={styles.titleText}>비상연락처</Typo>
             <TextInput
               value={dispatchDetail?.emergencyPhoneNumber || ''}
               placeholder={!dispatchDetail?.emergencyPhoneNumber ? '작성하지 않은 항목' : ''}
@@ -198,15 +170,14 @@ const DispatchRequestDetailPage = () => {
               editable={false}
               style={[
                 styles.input,
-                {height: responsiveStyles.inputHeight},
                 !dispatchDetail?.emergencyPhoneNumber && styles.inputEmpty,
               ]}
             />
           </View>
         </ScrollView>
-        <View style={[styles.buttonContainer, {paddingHorizontal: responsiveStyles.horizontalPadding}]}>
+        <View style={styles.buttonContainer}>
           <CustomButton 
-            style={[styles.button, {height: responsiveStyles.buttonHeight}, loading && styles.buttonDisabled]} 
+            style={[styles.button, loading && styles.buttonDisabled]}
             onPress={handleDispatchConfirm}
             disabled={loading}
           >
@@ -231,79 +202,79 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 10,
+    paddingBottom: scaleSize(10),
   },
   detailContainer: {
     flexDirection: 'column',
     alignItems: 'flex-start',
     justifyContent: 'center',
-    paddingVertical: 20,
-    paddingHorizontal: 10,
+    paddingVertical: scaleSize(20),
+    paddingHorizontal: scaleSize(10),
   },
   titleText: {
-    fontSize: 18,
-    marginLeft: 20,
+    fontSize: scaleFontSize(18),
+    marginLeft: scaleSize(20),
     fontWeight: '700',
     color: '#283042',
     fontFamily: 'Pretendard-Black',
-    marginBottom: 10,
+    marginBottom: scaleSize(10),
   },
   input: {
     alignSelf: 'stretch',
-    height: 50,
-    borderRadius: 10,
+    height: scaleSize(50),
+    borderRadius: scaleSize(10),
     backgroundColor: '#F5F6F8',
-    paddingHorizontal: 20,
-    fontSize: 16,
+    paddingHorizontal: scaleSize(20),
+    fontSize: scaleFontSize(16),
     fontFamily: 'Pretendard-Black',
-    marginHorizontal: 10,
+    marginHorizontal: scaleSize(10),
   },
   input2: {
     alignSelf: 'stretch',
-    height: 50,
-    borderRadius: 10,
+    height: scaleSize(50),
+    borderRadius: scaleSize(10),
     backgroundColor: '#F5F6F8',
-    paddingHorizontal: 20,
-    fontSize: 16,
+    paddingHorizontal: scaleSize(20),
+    fontSize: scaleFontSize(16),
     fontFamily: 'Pretendard-Black',
-    marginTop: 10,
-    marginHorizontal: 10,
+    marginTop: scaleSize(10),
+    marginHorizontal: scaleSize(10),
   },
   buttonContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingBottom: 24,
-    paddingTop: 16,
-    paddingHorizontal: 20,
+    paddingBottom: scaleSize(24),
+    paddingTop: scaleSize(16),
+    paddingHorizontal: scaleSize(20),
     backgroundColor: 'white',
     borderTopWidth: 1,
     borderTopColor: '#E5E8EB',
   },
   button: {
     flex: 1,
-    borderRadius: 10,
+    borderRadius: scaleSize(10),
     backgroundColor: '#2D81F1',
-    paddingVertical: 14,
+    paddingVertical: scaleSize(14),
     justifyContent: 'center',
     alignItems: 'center',
   },
   buttonText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: scaleFontSize(16),
     textAlign: 'center',
     fontWeight: '700',
     fontFamily: 'Pretendard-Black',
   },
   inputEmpty: {
     alignSelf: 'stretch',
-    height: 50,
-    borderRadius: 10,
+    height: scaleSize(50),
+    borderRadius: scaleSize(10),
     backgroundColor: '#F5F6F8',
-    paddingHorizontal: 20,
-    fontSize: 16,
+    paddingHorizontal: scaleSize(20),
+    fontSize: scaleFontSize(16),
     fontFamily: 'Pretendard-Black',
-    marginHorizontal: 10,
-    color: '#AFB3BB', // 흐린 글씨 색상
+    marginHorizontal: scaleSize(10),
+    color: '#AFB3BB',
   },
   buttonDisabled: {
     backgroundColor: '#AFB3BB',

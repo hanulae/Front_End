@@ -23,6 +23,7 @@ import MoveIcon from '../../components/svg/MoveIcon';
 import InfoCenterIcon from '../../assets/ServiceCenter.svg';
 import ManagerMainProfile from '../../components/manager/ManagerMainProfile';
 import {notificationApiService} from '../../services/api/notificationService';
+import {scaleFontSize, scaleSize} from '../../utils/responsive';
 
 interface IManagerMainPageProps {
   navigation: NavigationProp<any>;
@@ -31,56 +32,40 @@ interface IManagerMainPageProps {
 const ManagerMainPage = ({navigation}: IManagerMainPageProps) => {
   const setLogin = useSetAtom(userInfoAtom);
   const userInfo = useAtomValue(userInfoAtom);
-
-  // 화면 크기 감지
-  const {width} = useWindowDimensions();
-
-  // 브레이크포인트 정의 (갤럭시 S9 호환)
-  const deviceType = useMemo(() => {
-    if (width >= 768) return 'tablet';
-    if (width >= 411) return 'large'; // medium phone 기준
-    if (width >= 361) return 'medium';
-    return 'small';
-  }, [width]);
+  const {height} = useWindowDimensions();
 
   // 반응형 스타일 계산
   const responsiveStyles = useMemo(() => {
-    const scale =
-      deviceType === 'small'
-        ? 0.85
-        : deviceType === 'medium'
-        ? 0.95
-        : deviceType === 'large'
-        ? 1.0
-        : 1.2; // tablet
+    // 화면 높이에 따른 동적 패딩 계산
+    const dynamicImagePadding = height < 700 ? scaleSize(200) : scaleSize(290);
+    const dynamicButtonPadding = height < 700 ? scaleSize(16) : scaleSize(20);
 
     return {
       // 폰트 크기
-      appNameSize: Math.round(18 * scale),
-      buttonTextSize: Math.round(14 * scale),
-      buttonTitleSize: Math.round(20 * scale),
-      buttonSubSize: Math.round(14 * scale),
-      footerTextSize: Math.round(16 * scale),
+      appNameSize: scaleFontSize(18),
+      buttonTextSize: scaleFontSize(14),
+      buttonTitleSize: scaleFontSize(20),
+      buttonSubSize: scaleFontSize(14),
+      footerTextSize: scaleFontSize(16),
 
       // 패딩과 마진
-      headerPadding: Math.round(20 * scale),
-      headerTopPadding:
-        Platform.OS === 'ios' ? Math.round(60 * scale) : Math.round(40 * scale),
-      buttonPadding: Math.round(20 * scale),
-      containerPadding: Math.round(16 * scale),
-      buttonSpacing: Math.round(12 * scale),
+      headerPadding: scaleSize(20),
+      headerTopPadding: Platform.OS === 'ios' ? scaleSize(60) : scaleSize(40),
+      buttonPadding: dynamicButtonPadding,
+      containerPadding: scaleSize(16),
+      buttonSpacing: scaleSize(12),
 
       // 크기
-      borderRadius: Math.round(20 * scale),
-      buttonTopMargin: Math.round(20 * scale),
-      iconGap: Math.round(5 * scale),
-      imageTopPadding: Math.round(290 * scale),
+      borderRadius: scaleSize(20),
+      buttonTopMargin: scaleSize(16),
+      iconGap: scaleSize(5),
+      imageTopPadding: dynamicImagePadding,
 
       // 버튼 내부 패딩
-      buttonVerticalPadding: Math.round(5 * scale),
-      buttonHorizontalPadding: Math.round(10 * scale),
+      buttonVerticalPadding: scaleSize(5),
+      buttonHorizontalPadding: scaleSize(10),
     };
-  }, [deviceType]);
+  }, [height]);
 
   useFocusEffect(
     useCallback(() => {
@@ -128,193 +113,181 @@ const ManagerMainPage = ({navigation}: IManagerMainPageProps) => {
 
   return (
     <ManagerLayout headerShown={false} color="#3287F8" top={false}>
-      <View
-        style={[
-          styles.headerContainer,
-          {
-            paddingHorizontal: responsiveStyles.headerPadding,
-            paddingTop: responsiveStyles.headerTopPadding,
-            paddingBottom: responsiveStyles.headerPadding,
-          },
-        ]}>
-        <Typo
-          style={[styles.appName, {fontSize: responsiveStyles.appNameSize}]}>
-          하늘애
-        </Typo>
+      <View style={styles.mainWrapper}>
         <View
           style={[
-            styles.leftHeaderContainer,
-            {gap: responsiveStyles.buttonSpacing},
+            styles.headerContainer,
+            {
+              paddingHorizontal: responsiveStyles.headerPadding,
+              paddingTop: responsiveStyles.headerTopPadding,
+              paddingBottom: responsiveStyles.headerPadding,
+            },
           ]}>
-          {/* <CustomButton
-            onPress={logout}
+          <Typo
+            style={[styles.appName, {fontSize: responsiveStyles.appNameSize}]}>
+            하늘애
+          </Typo>
+          <View
             style={[
-              styles.loginButton,
-              {
-                gap: responsiveStyles.buttonSpacing,
-                paddingVertical: responsiveStyles.buttonVerticalPadding,
-                paddingHorizontal: responsiveStyles.buttonHorizontalPadding,
-              },
+              styles.leftHeaderContainer,
+              {gap: responsiveStyles.buttonSpacing},
             ]}>
-            <Typo
-              color="white"
+            <CustomButton
+              onPress={goToAlarmPage}
               style={[
-                styles.buttonText,
-                {fontSize: responsiveStyles.buttonTextSize},
+                styles.alarmButton,
+                {
+                  paddingVertical: responsiveStyles.buttonVerticalPadding,
+                  paddingHorizontal: responsiveStyles.buttonHorizontalPadding,
+                },
               ]}>
-              로그아웃
-            </Typo>
-            <LoginIcon />
-          </CustomButton> */}
-          <CustomButton
-            onPress={goToAlarmPage}
-            style={[
-              styles.alarmButton,
-              {
-                paddingVertical: responsiveStyles.buttonVerticalPadding,
-                paddingHorizontal: responsiveStyles.buttonHorizontalPadding,
-              },
-            ]}>
-            {isUnread ? (
-              <AlarmUnreadIcon width={24} height={24} />
-            ) : (
-              <AlarmIcon width={24} height={24} />
-            )}
-          </CustomButton>
+              {isUnread ? (
+                <AlarmUnreadIcon width={24} height={24} />
+              ) : (
+                <AlarmIcon width={24} height={24} />
+              )}
+            </CustomButton>
+          </View>
         </View>
-      </View>
-      <View style={styles.mainContainer}>
-        <ManagerMainProfile managerName={userInfo.userName} />
-        <View style={{flex: 1, justifyContent: 'flex-end'}}>
-          <ImageBackground
-            style={[
-              styles.buttonContainer,
-              {
-                paddingHorizontal: responsiveStyles.containerPadding,
-                paddingTop: responsiveStyles.imageTopPadding,
-                gap: responsiveStyles.buttonSpacing,
-              },
-            ]}
-            source={require('../../assets/mainImage.png')}
-            resizeMode="contain">
-            <CustomButton
-              onPress={goToSearchPage}
+        <View style={styles.mainContainer}>
+          <View style={styles.profileContainer}>
+            <ManagerMainProfile managerName={userInfo.userName} />
+          </View>
+          <View style={styles.contentContainer}>
+            <ImageBackground
               style={[
-                styles.SearchButton,
+                styles.buttonContainer,
                 {
-                  borderRadius: responsiveStyles.borderRadius,
-                  paddingVertical: responsiveStyles.buttonPadding,
-                  paddingHorizontal: responsiveStyles.buttonPadding,
+                  paddingHorizontal: responsiveStyles.containerPadding,
+                  paddingTop: responsiveStyles.imageTopPadding,
+                  gap: responsiveStyles.buttonSpacing,
+                  flex: 1,
                 },
-              ]}>
-              <MainSearchIcon />
-              <View
+              ]}
+              source={require('../../assets/mainImage.png')}
+              resizeMode="contain">
+              <CustomButton
+                onPress={goToSearchPage}
                 style={[
-                  styles.buttonTextContainer,
+                  styles.SearchButton,
                   {
-                    marginTop: responsiveStyles.buttonTopMargin,
-                    gap: responsiveStyles.buttonSpacing,
+                    borderRadius: responsiveStyles.borderRadius,
+                    paddingVertical: responsiveStyles.buttonPadding,
+                    paddingHorizontal: responsiveStyles.buttonPadding,
+                    minHeight: scaleSize(120), // 최소 높이 설정
                   },
                 ]}>
-                <Typo
-                  style={[
-                    styles.buttonTitle,
-                    {fontSize: responsiveStyles.buttonTitleSize},
-                  ]}>
-                  장례식장
-                </Typo>
+                <MainSearchIcon />
                 <View
                   style={[
-                    styles.buttonTextSubContainer,
+                    styles.buttonTextContainer,
                     {
-                      gap: responsiveStyles.iconGap,
-                      marginTop: responsiveStyles.iconGap,
+                      marginTop: responsiveStyles.buttonTopMargin,
+                      gap: responsiveStyles.buttonSpacing,
                     },
                   ]}>
                   <Typo
                     style={[
-                      styles.buttonSub,
-                      {fontSize: responsiveStyles.buttonSubSize},
+                      styles.buttonTitle,
+                      {fontSize: responsiveStyles.buttonTitleSize},
                     ]}>
-                    찾아보기
+                    장례식장
                   </Typo>
-                  <MoveIcon stroke="#397CFF" color="#397CFF" />
+                  <View
+                    style={[
+                      styles.buttonTextSubContainer,
+                      {
+                        gap: responsiveStyles.iconGap,
+                        marginTop: responsiveStyles.iconGap,
+                      },
+                    ]}>
+                    <Typo
+                      style={[
+                        styles.buttonSub,
+                        {fontSize: responsiveStyles.buttonSubSize},
+                      ]}>
+                      찾아보기
+                    </Typo>
+                    <MoveIcon stroke="#397CFF" color="#397CFF" />
+                  </View>
                 </View>
-              </View>
-            </CustomButton>
-            <CustomButton
-              onPress={goToNoticePage}
-              style={[
-                styles.NoticeButton,
-                {
-                  borderRadius: responsiveStyles.borderRadius,
-                  paddingVertical: responsiveStyles.buttonPadding,
-                  paddingHorizontal: responsiveStyles.buttonPadding,
-                },
-              ]}>
-              <MainAlarmIcon />
-              <View
+              </CustomButton>
+              <CustomButton
+                onPress={goToNoticePage}
                 style={[
-                  styles.buttonTextContainer,
+                  styles.NoticeButton,
                   {
-                    marginTop: responsiveStyles.buttonTopMargin,
-                    gap: responsiveStyles.buttonSpacing,
+                    borderRadius: responsiveStyles.borderRadius,
+                    paddingVertical: responsiveStyles.buttonPadding,
+                    paddingHorizontal: responsiveStyles.buttonPadding,
+                    minHeight: scaleSize(120), // 최소 높이 설정
                   },
                 ]}>
-                <Typo
-                  style={[
-                    styles.buttonTitle2,
-                    {fontSize: responsiveStyles.buttonTitleSize},
-                  ]}>
-                  견적내역
-                </Typo>
+                <MainAlarmIcon />
                 <View
                   style={[
-                    styles.buttonTextSubContainer,
+                    styles.buttonTextContainer,
                     {
-                      gap: responsiveStyles.iconGap,
-                      marginTop: responsiveStyles.iconGap,
+                      marginTop: responsiveStyles.buttonTopMargin,
+                      gap: responsiveStyles.buttonSpacing,
                     },
                   ]}>
                   <Typo
                     style={[
-                      styles.buttonSub2,
-                      {fontSize: responsiveStyles.buttonSubSize},
+                      styles.buttonTitle2,
+                      {fontSize: responsiveStyles.buttonTitleSize},
                     ]}>
-                    확인하기
+                    견적내역
                   </Typo>
-                  <MoveIcon stroke="#FFFFFF" color="#FFFFFF" />
+                  <View
+                    style={[
+                      styles.buttonTextSubContainer,
+                      {
+                        gap: responsiveStyles.iconGap,
+                        marginTop: responsiveStyles.iconGap,
+                      },
+                    ]}>
+                    <Typo
+                      style={[
+                        styles.buttonSub2,
+                        {fontSize: responsiveStyles.buttonSubSize},
+                      ]}>
+                      확인하기
+                    </Typo>
+                    <MoveIcon stroke="#FFFFFF" color="#FFFFFF" />
+                  </View>
                 </View>
-              </View>
-            </CustomButton>
-          </ImageBackground>
-          <TouchableOpacity
-            style={[
-              styles.footerContainer,
-              {
-                gap: responsiveStyles.buttonSpacing,
-                paddingVertical: responsiveStyles.headerPadding,
-                borderTopLeftRadius: responsiveStyles.borderRadius,
-                borderTopRightRadius: responsiveStyles.borderRadius,
-              },
-            ]}
-            onPress={() => Linking.openURL('tel:1661-1897')}>
-            <InfoCenterIcon width={21.5} height={22} />
-            <Typo
+              </CustomButton>
+            </ImageBackground>
+            <TouchableOpacity
               style={[
-                styles.footerText,
-                {fontSize: responsiveStyles.footerTextSize},
-              ]}>
-              고객센터
-            </Typo>
-            <Typo
-              style={[
-                styles.footerNumber,
-                {fontSize: responsiveStyles.footerTextSize},
-              ]}>
-              02-123-4567
-            </Typo>
-          </TouchableOpacity>
+                styles.footerContainer,
+                {
+                  gap: responsiveStyles.buttonSpacing,
+                  paddingVertical: responsiveStyles.headerPadding,
+                  borderTopLeftRadius: responsiveStyles.borderRadius,
+                  borderTopRightRadius: responsiveStyles.borderRadius,
+                  marginTop: 'auto', // 하단에 고정
+                },
+              ]}
+              onPress={() => Linking.openURL('tel:1661-1897')}>
+              <InfoCenterIcon width={21.5} height={22} />
+              <Typo
+                style={[
+                  styles.footerText,
+                  {fontSize: responsiveStyles.footerTextSize},
+                ]}>
+                고객센터
+              </Typo>
+              <Typo
+                style={[
+                  styles.footerNumber,
+                  {fontSize: responsiveStyles.footerTextSize},
+                ]}>
+                02-123-4567
+              </Typo>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </ManagerLayout>
@@ -324,6 +297,9 @@ const ManagerMainPage = ({navigation}: IManagerMainPageProps) => {
 export default ManagerMainPage;
 
 const styles = StyleSheet.create({
+  mainWrapper: {
+    flex: 1,
+  },
   headerContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -359,6 +335,21 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
   },
+  profileContainer: {
+    zIndex: 1, // 프로필을 이미지 위로 올림
+    position: 'relative',
+  },
+  contentContainer: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start', // 상단 정렬로 변경
+    position: 'relative',
+    zIndex: 0, // 이미지를 프로필 아래로
+  },
   container: {
     flex: 1,
     backgroundColor: '#3287F8',
@@ -387,20 +378,16 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard-Medium',
     textAlign: 'center',
   },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    // 패딩과 gap은 동적으로 적용됨
-  },
   SearchButton: {
     flex: 1,
     backgroundColor: '#fff',
+    justifyContent: 'center',
     // borderRadius, padding은 동적으로 적용됨
   },
   NoticeButton: {
     flex: 1,
     backgroundColor: '#59A1FF',
+    justifyContent: 'center',
     // borderRadius, padding은 동적으로 적용됨
   },
   buttonTextContainer: {

@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import {Animated, Dimensions, Pressable, StyleSheet, View} from 'react-native';
 import api from '../../../api/config';
 import DistrictSelector from './DistrictSelector';
+import {scaleSize} from '../../../utils/responsive';
 
 interface IFindGuBottomSheetProps {
     visible: boolean;
@@ -60,10 +61,32 @@ const FindGuBottomSheet = ({visible, onClose, onSelect, selectedDistrict, select
         onClose();
     };
     
+    // 반응형 스타일 계산
+    const responsiveStyles = useMemo(() => {
+        return {
+            padding: {
+                horizontal: scaleSize(16),
+                vertical: scaleSize(24),
+            },
+            borderRadius: scaleSize(16),
+            contentGap: scaleSize(16),
+        };
+    }, []);
+
     return (
         <Pressable style={styles.backdrop} onPress={onClose}>
-            <Animated.View style={[styles.modalContainer, {transform: [{translateY}]}]}>
-                <View style={styles.content}>
+            <Animated.View 
+                style={[
+                    styles.modalContainer, 
+                    {
+                        transform: [{translateY}],
+                        borderTopLeftRadius: responsiveStyles.borderRadius,
+                        borderTopRightRadius: responsiveStyles.borderRadius,
+                        paddingHorizontal: responsiveStyles.padding.horizontal,
+                        paddingVertical: responsiveStyles.padding.vertical,
+                    }
+                ]}>
+                <View style={[styles.content, {gap: responsiveStyles.contentGap}]}>
                     <DistrictSelector
                         districts={districts}
                         selectedDistrict={selectedDistrict}
@@ -72,7 +95,7 @@ const FindGuBottomSheet = ({visible, onClose, onSelect, selectedDistrict, select
                 </View>
             </Animated.View>
         </Pressable>
-    )
+    );
 };
 
 export default FindGuBottomSheet;
@@ -89,14 +112,9 @@ const styles = StyleSheet.create({
     },
     modalContainer: {
         backgroundColor: 'white',
-        borderTopLeftRadius: 16,
-        borderTopRightRadius: 16,
-        paddingHorizontal: 16,
-        paddingVertical: 24,
         height: screenHeight * 0.5,
     },
     content: {
         flex: 1,
-        gap: 16,
     },
 });

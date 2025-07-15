@@ -10,6 +10,7 @@ import MoveIcon from '../../assets/Button/Button_MoveTransparent.svg';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useFuneralHallInfo} from '../../hooks/useFuneralHallInfo';
 import Toast from 'react-native-toast-message';
+import {scaleFontSize, scaleSize} from '../../utils/responsive';
 
 const RoomManagementPage = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
@@ -199,7 +200,7 @@ const RoomManagementPage = () => {
         ) : (
           <ScrollView
             style={styles.cardContainer}
-            contentContainerStyle={{gap: 10}}
+            contentContainerStyle={{gap: scaleSize(10)}}
             refreshControl={
               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }>
@@ -209,7 +210,6 @@ const RoomManagementPage = () => {
                 roomId={hall.funeralHallId}
                 roomName={hall.funeralHallName}
                 isButtonVisible={isEdit}
-                toggleEdit={toggleEdit}
                 handleDelete={() => handleDeletePress(hall.funeralHallId)}
               />
             ))}
@@ -238,49 +238,49 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   editButtonContainer: {
-    padding: 20,
+    padding: scaleSize(20),
   },
   editButton: {
     alignSelf: 'flex-end',
-    borderRadius: 10,
+    borderRadius: scaleSize(10),
     backgroundColor: '#283042',
-    paddingHorizontal: 27,
-    paddingVertical: 10,
+    paddingHorizontal: scaleSize(27),
+    paddingVertical: scaleSize(10),
   },
   editButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: scaleFontSize(16),
     fontWeight: '500',
     fontFamily: 'Pretendard-Black',
   },
   cardContainer: {
     flexDirection: 'column',
-    gap: 10,
-    paddingHorizontal: 20,
+    gap: scaleSize(10),
+    paddingHorizontal: scaleSize(20),
   },
   buttonContainer: {
     position: 'absolute',
-    bottom: 30,
-    left: 20,
-    right: 20,
+    bottom: scaleSize(30),
+    left: scaleSize(20),
+    right: scaleSize(20),
   },
   addRoomButton: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     backgroundColor: '#3287F8',
-    borderRadius: 8,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
+    borderRadius: scaleSize(8),
+    paddingVertical: scaleSize(16),
+    paddingHorizontal: scaleSize(20),
   },
   addRoomButtonContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: scaleSize(8),
     flex: 1,
   },
   addRoomButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: scaleFontSize(16),
     fontWeight: '500',
     fontFamily: 'Pretendard-Black',
   },
@@ -288,42 +288,42 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: scaleSize(20),
   },
   loadingText: {
-    marginTop: 16,
-    fontSize: 16,
+    marginTop: scaleSize(16),
+    fontSize: scaleFontSize(16),
     color: '#666',
     fontFamily: 'Pretendard-Regular',
   },
   errorText: {
-    fontSize: 16,
+    fontSize: scaleFontSize(16),
     color: '#F04452',
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: scaleSize(20),
     fontFamily: 'Pretendard-Regular',
   },
   retryButton: {
     backgroundColor: '#2D81F1',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
+    paddingHorizontal: scaleSize(20),
+    paddingVertical: scaleSize(10),
+    borderRadius: scaleSize(8),
   },
   retryButtonText: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: scaleFontSize(14),
     fontWeight: '600',
     fontFamily: 'Pretendard-SemiBold',
   },
   emptyText: {
-    fontSize: 18,
+    fontSize: scaleFontSize(18),
     color: '#999',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: scaleSize(8),
     fontFamily: 'Pretendard-SemiBold',
   },
   emptySubText: {
-    fontSize: 14,
+    fontSize: scaleFontSize(14),
     color: '#ccc',
     textAlign: 'center',
     fontFamily: 'Pretendard-Regular',

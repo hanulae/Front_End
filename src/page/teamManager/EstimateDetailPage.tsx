@@ -36,31 +36,34 @@ const EstimateDetailPage = () => {
   } | undefined>();
 
   // 화면 크기에 따른 반응형 스타일 계산
-  const isTablet = width > 768;
+  const isTablet = width >= 768;
   const isSmallDevice = width < 375;
   
   const responsiveStyles = {
     // 텍스트 크기
-    titleSize: isTablet ? 22 : isSmallDevice ? 16 : 18,
-    labelSize: isTablet ? 16 : isSmallDevice ? 12 : 14,
-    valueSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
-    buttonTextSize: isTablet ? 16 : isSmallDevice ? 12 : 14,
+    titleSize: isTablet ? 24 : isSmallDevice ? 16 : 20,
+    labelSize: isTablet ? 18 : isSmallDevice ? 13 : 15,
+    valueSize: isTablet ? 20 : isSmallDevice ? 14 : 16,
+    buttonTextSize: isTablet ? 18 : isSmallDevice ? 13 : 15,
     
     // 패딩과 마진
-    containerPadding: isTablet ? 24 : isSmallDevice ? 12 : 16,
-    cardPadding: isTablet ? 28 : isSmallDevice ? 16 : 20,
-    itemPadding: isTablet ? 26 : isSmallDevice ? 18 : 22,
-    buttonPadding: isTablet ? 22 : isSmallDevice ? 14 : 18,
-    topPadding: isTablet ? 32 : isSmallDevice ? 16 : 24,
-    bottomMargin: isTablet ? 32 : isSmallDevice ? 16 : 24,
+    containerPadding: isTablet ? 28 : isSmallDevice ? 12 : 16,
+    cardPadding: isTablet ? 32 : isSmallDevice ? 16 : 20,
+    itemPadding: isTablet ? 28 : isSmallDevice ? 16 : 20,
+    buttonPadding: isTablet ? 24 : isSmallDevice ? 14 : 18,
+    topPadding: isTablet ? 36 : isSmallDevice ? 16 : 24,
+    bottomMargin: isTablet ? 36 : isSmallDevice ? 16 : 24,
     
     // 아이콘 크기
-    iconSize: isTablet ? 28 : isSmallDevice ? 20 : 24,
-    commaIconSize: isTablet ? 8 : isSmallDevice ? 5 : 6,
+    iconSize: isTablet ? 32 : isSmallDevice ? 20 : 24,
+    commaIconSize: isTablet ? 10 : isSmallDevice ? 5 : 6,
     
     // 간격
-    gap: isTablet ? 12 : isSmallDevice ? 6 : 8,
-    buttonGap: isTablet ? 12 : isSmallDevice ? 6 : 8,
+    gap: isTablet ? 14 : isSmallDevice ? 6 : 8,
+    buttonGap: isTablet ? 14 : isSmallDevice ? 6 : 8,
+
+    // 테두리 반경
+    borderRadius: isTablet ? 16 : isSmallDevice ? 8 : 12,
   };
 
   const goToCallFormPage = () => {
@@ -125,12 +128,27 @@ const EstimateDetailPage = () => {
       homeButton={true}
       homeRouteName="ManagerMain"
       logoutButton={false}>
-      <View style={[styles.wrapper, {paddingHorizontal: responsiveStyles.containerPadding, paddingTop: responsiveStyles.topPadding}]}>
-        <View style={[styles.titleContainer, {paddingHorizontal: responsiveStyles.cardPadding, paddingVertical: responsiveStyles.itemPadding}]}>
-          <Typo style={[styles.title, {fontSize: responsiveStyles.titleSize}]}>{`${funeralName} 입찰상세`}</Typo>
+      <View style={[styles.wrapper, {
+        paddingHorizontal: responsiveStyles.containerPadding, 
+        paddingTop: responsiveStyles.topPadding
+      }]}>
+        <View style={[styles.titleContainer, {
+          paddingHorizontal: responsiveStyles.cardPadding, 
+          paddingVertical: responsiveStyles.itemPadding,
+          borderTopLeftRadius: responsiveStyles.borderRadius,
+          borderTopRightRadius: responsiveStyles.borderRadius,
+        }]}>
+          <Typo style={[styles.title, {fontSize: responsiveStyles.titleSize}]}>
+            {`${funeralName} 입찰상세`}
+          </Typo>
         </View>
 
-        <View style={[styles.listContainer, {paddingHorizontal: responsiveStyles.cardPadding, paddingVertical: responsiveStyles.containerPadding}]}>
+        <View style={[styles.listContainer, {
+          paddingHorizontal: responsiveStyles.cardPadding, 
+          paddingVertical: responsiveStyles.containerPadding,
+          borderBottomLeftRadius: responsiveStyles.borderRadius,
+          borderBottomRightRadius: responsiveStyles.borderRadius,
+        }]}>
           <View style={[styles.listItem, {paddingVertical: responsiveStyles.itemPadding}]}>
             <View style={[styles.labelContainer, {gap: responsiveStyles.gap}]}>
               <CommaIcon width={responsiveStyles.commaIconSize} height={responsiveStyles.commaIconSize} />
@@ -208,7 +226,8 @@ const EstimateDetailPage = () => {
               paddingVertical: responsiveStyles.buttonPadding, 
               paddingHorizontal: responsiveStyles.cardPadding,
               marginHorizontal: responsiveStyles.containerPadding,
-              marginBottom: responsiveStyles.bottomMargin
+              marginBottom: responsiveStyles.bottomMargin,
+              borderRadius: responsiveStyles.borderRadius,
             }
           ]}
           disabled={hasBidSelected}
@@ -247,8 +266,6 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E5E5',
   },
@@ -260,8 +277,6 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     backgroundColor: '#FFFFFF',
-    borderBottomLeftRadius: 12,
-    borderBottomRightRadius: 12,
   },
   listItem: {
     flexDirection: 'row',
@@ -299,7 +314,6 @@ const styles = StyleSheet.create({
   button: {
     flexDirection: 'row',
     backgroundColor: '#2D81F1',
-    borderRadius: 12,
     alignItems: 'center',
   },
   disabledButton: {

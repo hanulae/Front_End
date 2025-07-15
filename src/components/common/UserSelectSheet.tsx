@@ -1,7 +1,9 @@
-import React, {useState} from 'react';
-import {View, Pressable, StyleSheet, Animated, Dimensions} from 'react-native';
+import React, {useState, useRef} from 'react';
+import {View, Pressable, StyleSheet, Animated, Dimensions, Platform} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {scaleSize, scaleFontSize, isSmallDevice, isMediumDevice, isLargeDevice} from '../../utils/responsive';
 import Typo from './Typo';
 import FuneralIcon from '../../assets/User/User_FuneralDisable.svg';
 import ManagerIcon from '../../assets/User/User_ManagerDisable.svg';
@@ -17,7 +19,37 @@ const {height} = Dimensions.get('window');
 const UserSelectSheet = ({onClose, targetScreen}: ISelectSheetProps) => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const [selected, setSelected] = useState<'manager' | 'funeral'>('manager');
-  const translateY = new Animated.Value(300);
+  const translateY = useRef(new Animated.Value(300)).current;
+  const insets = useSafeAreaInsets();
+  
+  // Android 네비게이션 바 높이 고려한 bottom padding 계산
+  const getBottomPadding = () => {
+    if (Platform.OS === 'android') {
+      return Math.max(insets.bottom, scaleSize(20));
+    }
+    return Math.max(insets.bottom, scaleSize(10));
+  };
+
+  // 반응형 높이 계산
+  const getSheetHeight = () => {
+    if (isSmallDevice) return height * 0.35;
+    if (isMediumDevice) return height * 0.32;
+    return height * 0.3;
+  };
+
+  // 반응형 패딩 계산
+  const getResponsivePadding = () => {
+    if (isSmallDevice) return scaleSize(16);
+    if (isMediumDevice) return scaleSize(20);
+    return scaleSize(25);
+  };
+
+  // 반응형 간격 계산
+  const getResponsiveGap = () => {
+    if (isSmallDevice) return scaleSize(8);
+    if (isMediumDevice) return scaleSize(10);
+    return scaleSize(12);
+  };
 
   React.useEffect(() => {
     Animated.timing(translateY, {
@@ -25,7 +57,7 @@ const UserSelectSheet = ({onClose, targetScreen}: ISelectSheetProps) => {
       duration: 300,
       useNativeDriver: true,
     }).start();
-  }, []);
+  }, [translateY]);
 
   const handleSelect = (type: 'manager' | 'funeral') => {
     setSelected(type);
@@ -37,11 +69,20 @@ const UserSelectSheet = ({onClose, targetScreen}: ISelectSheetProps) => {
 
   return (
     <Pressable style={styles.overlay} onPress={onClose}>
-      <Animated.View style={[styles.sheet, {transform: [{translateY}]}]}>
+      <Animated.View 
+        style={[
+          styles.sheet, 
+          {
+            transform: [{translateY}], 
+            paddingBottom: getBottomPadding(),
+            height: getSheetHeight(),
+            paddingHorizontal: getResponsivePadding(),
+          }
+        ]}>
         <View style={styles.titleContainer}>
           <Typo style={styles.title}>회원유형을 선택해 주세요.</Typo>
         </View>
-        <View style={styles.optionContainer}>
+        <View style={[styles.optionContainer, {gap: getResponsiveGap()}]}>
           {['manager', 'funeral'].map(type => (
             <Pressable
               key={type}
@@ -57,14 +98,13 @@ const UserSelectSheet = ({onClose, targetScreen}: ISelectSheetProps) => {
                 ]}>
                 {type === 'manager' ? '상조팀장' : '장례식장'}
               </Typo>
-              {/* 아이콘은 SVG나 Image로 추가 가능 */}
               <View style={styles.buttonContainer}>
                 {type === 'manager' ? (
-                  <ManagerIcon width={25} height={25} />
+                  <ManagerIcon width={scaleSize(25)} height={scaleSize(25)} />
                 ) : (
-                  <FuneralIcon width={25} height={25} />
+                  <FuneralIcon width={scaleSize(25)} height={scaleSize(25)} />
                 )}
-                <CheckIcon height={20} />
+                <CheckIcon height={scaleSize(20)} />
               </View>
             </Pressable>
           ))}
@@ -84,46 +124,40 @@ const styles = StyleSheet.create({
   },
   sheet: {
     backgroundColor: 'white',
-    paddingHorizontal: 25,
-    paddingTop: 30,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    height: height * 0.3,
+    paddingTop: scaleSize(30),
+    borderTopLeftRadius: scaleSize(20),
+    borderTopRightRadius: scaleSize(20),
   },
   titleContainer: {
-    // paddingLeft: 10,
-    // paddingTop: 30,
-    paddingBottom: 30,
+    paddingBottom: scaleSize(30),
   },
   title: {
-    fontSize: 20,
+    fontSize: scaleFontSize(20),
     fontWeight: '600',
   },
   optionContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    gap: 12,
   },
   optionBox: {
     flex: 1,
-    gap: 10,
+    gap: scaleSize(10),
     borderWidth: 1,
     borderColor: '#ccc',
-    paddingLeft: 25,
-    paddingVertical: 25,
-    height: 160,
-    width: 150,
+    paddingLeft: scaleSize(25),
+    paddingVertical: scaleSize(25),
+    height: scaleSize(160),
+    width: scaleSize(150),
     flexDirection: 'column',
     justifyContent: 'space-between',
-    // alignItems: 'center',
-    borderRadius: 12,
+    borderRadius: scaleSize(12),
   },
   optionSelected: {
     borderColor: '#397CFF',
     backgroundColor: '#E6F0FF',
   },
   optionText: {
-    fontSize: 20,
+    fontSize: scaleFontSize(20),
     fontWeight: '600',
     fontFamily: 'Pretendard-Medium',
     textAlign: 'left',
@@ -135,8 +169,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'row',
-    paddingRight: 25,
-    // gap: 50,
+    paddingRight: scaleSize(25),
     justifyContent: 'space-between',
   },
 });

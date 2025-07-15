@@ -76,6 +76,7 @@ interface IMainPageProps {
 
 const MainPage = ({navigation}: IMainPageProps): JSX.Element => {
   const [showSelectSheet, setShowSelectSheet] = useState(false);
+  
   useFocusEffect(
     useCallback(() => {
       if (Platform.OS === 'android') {

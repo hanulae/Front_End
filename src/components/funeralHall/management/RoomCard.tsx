@@ -1,16 +1,15 @@
 import {StyleSheet, TouchableOpacity, View} from 'react-native';
-import RoomIconBlue from '../../../assets/Button/Button_ManageRoomBlue.svg';
 import RoomIconBlack from '../../../assets/Button/Button_ManageRoomBlack.svg';
 import Typo from '../../common/Typo';
 import ButtonGroup from './ButtonGroup';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {scaleFontSize, scaleSize} from '../../../utils/responsive';
 
 interface IRoomCardProps {
   roomName: string;
   roomId: string;
   isButtonVisible: boolean;
-  toggleEdit: () => void;
   handleDelete: () => void;
 }
 
@@ -18,7 +17,6 @@ const RoomCard = ({
   roomName,
   roomId,
   isButtonVisible,
-  toggleEdit,
   handleDelete,
 }: IRoomCardProps) => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
@@ -67,20 +65,20 @@ export default RoomCard;
 const styles = StyleSheet.create({
   cardContainer: {
     flexDirection: 'row',
-    borderRadius: 15,
+    borderRadius: scaleSize(15),
     backgroundColor: '#FFFFFF',
-    paddingHorizontal: 20,
-    paddingVertical: 25,
+    paddingHorizontal: scaleSize(20),
+    paddingVertical: scaleSize(25),
   },
   cardContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginLeft: 20,
+    marginLeft: scaleSize(20),
     flex: 1,
   },
   roomName: {
-    fontSize: 18,
+    fontSize: scaleFontSize(18),
     fontWeight: '600',
     color: '#283042',
     fontFamily: 'Pretendard-Black',

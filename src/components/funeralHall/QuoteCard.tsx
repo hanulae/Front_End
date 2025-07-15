@@ -2,6 +2,7 @@ import {StyleSheet, TouchableOpacity, View} from 'react-native';
 import Typo from '../common/Typo';
 import RequestIcon from '../../assets/Contents/Contents_Request.svg';
 import SendIcon from '../../assets/Contents/Contents_Send.svg';
+import {scaleFontSize, scaleSize} from '../../utils/responsive';
 
 interface IQuoteCard {
   id: string;
@@ -33,8 +34,6 @@ const QuoteCard = ({
         return styles.statusSelected;
       case '거래 진행중':
         return styles.statusProgress;
-      case '거래 완료': // 거래 완료
-        return styles.statusCompleted;
       case '입찰 실패':
         return styles.statusRejected;
       case '입찰 마감':
@@ -80,137 +79,134 @@ export default QuoteCard;
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 15,
+    borderRadius: scaleSize(15),
     backgroundColor: '#FFFFFF',
   },
   topRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingTop: 23,
-    paddingHorizontal: 20,
+    paddingTop: scaleSize(23),
+    paddingHorizontal: scaleSize(20),
     alignItems: 'center',
   },
   topRowName: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 15,
+    gap: scaleSize(15),
   },
   name: {
-    fontSize: 16,
+    fontSize: scaleFontSize(16),
     fontWeight: '600',
     color: '#1C212A',
     fontFamily: 'Pretendard-Bold',
-    lineHeight: 20,
+    lineHeight: scaleFontSize(20),
   },
   divider: {
-    fontSize: 16,
+    fontSize: scaleFontSize(16),
     fontWeight: '600',
     color: 'rgba(175, 179, 187, 0.25)',
     fontFamily: 'Pretendard-Black',
-    lineHeight: 20,
+    lineHeight: scaleFontSize(20),
   },
   date: {
-    fontSize: 14,
+    fontSize: scaleFontSize(14),
     fontWeight: '500',
     color: '#8990A0',
     fontFamily: 'Pretendard-Bold',
-    lineHeight: 20,
+    lineHeight: scaleFontSize(20),
   },
   topRowStatus: {
-    borderRadius: 100,
-    paddingHorizontal: 10,
+    borderRadius: scaleSize(100),
+    paddingHorizontal: scaleSize(10),
   },
   status: {
-    fontSize: 12,
+    fontSize: scaleFontSize(12),
     fontWeight: '600',
     color: '#FFFFFF',
-    lineHeight: 30,
+    lineHeight: scaleFontSize(30),
     fontFamily: 'Pretendard-Black',
   },
   statusPending: {
-    backgroundColor: '#CDD1D7', // 회색 - 입찰 대기
+    backgroundColor: '#aed2ff', // 연한 파란색 - 입찰 대기
   },
   statusSubmitted: {
-    backgroundColor: '#3287F8', // 파란색 - 입찰 완료
+    backgroundColor: '#3B82F6', // 진한 파란색 - 입찰 완료 (대기보다 진하게)
   },
   statusSelected: {
-    backgroundColor: '#10B981', // 초록색 - 입찰 선택됨
+    backgroundColor: '#059669', // 초록색 - 입찰 선택됨 (성공)
   },
   statusProgress: {
-    backgroundColor: '#F59E0B', // 주황색 - 진행중
-  },
-  statusCompleted: {
-    backgroundColor: '#283042', // 검정색 - 거래 완료
+    backgroundColor: '#F59E0B', // 주황색 - 진행중 (활동적)
   },
   statusRejected: {
-    backgroundColor: '#EF4444', // 빨간색 - 거절됨
+    backgroundColor: '#DC2626', // 빨간색 - 거절됨 (실패)
   },
   statusExpired: {
-    backgroundColor: '#EF4444', // 회색 - 만료됨
+    backgroundColor: '#9CA3AF', // 연한 회색 - 만료됨 (비활성)
   },
   statusDefault: {
     backgroundColor: '#6B7280', // 기본 회색 - 상태 불명
   },
   bottomRow: {
     flexDirection: 'row',
-    paddingVertical: 16,
-    paddingHorizontal: 20,
+    paddingVertical: scaleSize(16),
+    paddingHorizontal: scaleSize(20),
   },
   requestBox: {
     flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingVertical: scaleSize(10),
+    paddingHorizontal: scaleSize(16),
     backgroundColor: 'rgba(231, 232, 242, 0.2)',
-    borderTopLeftRadius: 10,
-    borderBottomLeftRadius: 10,
-    minHeight: 60,
+    borderTopLeftRadius: scaleSize(10),
+    borderBottomLeftRadius: scaleSize(10),
+    minHeight: scaleSize(60),
     justifyContent: 'center',
   },
   requestTitle: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: scaleSize(4),
   },
   requestDate: {
-    fontSize: 12,
+    fontSize: scaleFontSize(12),
     fontWeight: '500',
-    lineHeight: 20,
+    lineHeight: scaleFontSize(20),
     color: '#4B99FE',
     fontFamily: 'Pretendard-Bold',
     textAlign: 'center',
   },
   sendBox: {
     flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingVertical: scaleSize(10),
+    paddingHorizontal: scaleSize(16),
     backgroundColor: 'rgba(231, 232, 242, 0.2)',
-    borderTopRightRadius: 10,
-    borderBottomRightRadius: 10,
+    borderTopRightRadius: scaleSize(10),
+    borderBottomRightRadius: scaleSize(10),
     borderLeftWidth: 1,
     borderLeftColor: 'rgba(90, 90, 90, 0.2)',
-    minHeight: 60,
+    minHeight: scaleSize(60),
     justifyContent: 'center',
   },
   sendTitle: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: scaleSize(4),
   },
   sendDate: {
-    fontSize: 12,
+    fontSize: scaleFontSize(12),
     fontWeight: '500',
-    lineHeight: 20,
+    lineHeight: scaleFontSize(20),
     color: '#4B99FE',
     fontFamily: 'Pretendard-Bold',
     textAlign: 'center',
   },
   bottomText: {
-    fontSize: 12,
+    fontSize: scaleFontSize(12),
     fontWeight: '700',
     color: '#283042',
     fontFamily: 'Pretendard-Black',
-    lineHeight: 20,
+    lineHeight: scaleFontSize(20),
   },
 });
