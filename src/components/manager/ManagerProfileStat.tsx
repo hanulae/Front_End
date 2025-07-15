@@ -1,12 +1,16 @@
-import {useNavigation, useRoute} from '@react-navigation/native';
+import {
+  useNavigation,
+  useRoute,
+  useFocusEffect,
+} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {StyleSheet, View} from 'react-native';
 import Typo from '../common/Typo';
 import CustomButton from '../common/CustomButton';
-import { scaleFontSize, scaleSize, isSmallDevice } from '../../utils/responsive';
+import {scaleFontSize, scaleSize, isSmallDevice} from '../../utils/responsive';
 
 // BSK ADD IMPORTS
-import {useEffect, useState} from 'react';
+import {useState, useCallback} from 'react';
 import api from '../../api/config';
 import {useAtomValue} from 'jotai';
 import {loginAtom} from '../../state/local_state/loginAtom';
@@ -25,32 +29,34 @@ const ManagerProfileStat = ({managerName}: IManagerProfileStatProps) => {
   const [_currentPoint, setCurrentPoint] = useState<number>(0);
   const [currentCash, setCurrentCash] = useState<number>(0);
 
-  useEffect(() => {
-    const fetchCurrentPointAndCash = async () => {
-      try {
-        const [pointRes, cashRes] = await Promise.all([
-          api.get('/manager/point/current', {
-            headers: {Authorization: `Bearer ${loginInfo.accessToken}`},
-          }),
-          api.get('/manager/cash/current', {
-            headers: {Authorization: `Bearer ${loginInfo.accessToken}`},
-          }),
-        ]);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchCurrentPointAndCash = async () => {
+        try {
+          const [pointRes, cashRes] = await Promise.all([
+            api.get('/manager/point/current', {
+              headers: {Authorization: `Bearer ${loginInfo.accessToken}`},
+            }),
+            api.get('/manager/cash/current', {
+              headers: {Authorization: `Bearer ${loginInfo.accessToken}`},
+            }),
+          ]);
 
-        setCurrentPoint(pointRes.data?.currentPoint ?? 0);
-        setCurrentCash(cashRes.data?.currentCash ?? 0);
-      } catch (error: any) {
-        console.error(
-          '포인트/캐시 조회 실패:',
-          error.response?.data || error.message,
-        );
-        setCurrentPoint(0);
-        setCurrentCash(0);
-      }
-    };
+          setCurrentPoint(pointRes.data?.currentPoint ?? 0);
+          setCurrentCash(cashRes.data?.currentCash ?? 0);
+        } catch (error: any) {
+          console.error(
+            '포인트/캐시 조회 실패:',
+            error.response?.data || error.message,
+          );
+          setCurrentPoint(0);
+          setCurrentCash(0);
+        }
+      };
 
-    fetchCurrentPointAndCash();
-  }, [loginInfo.accessToken]);
+      fetchCurrentPointAndCash();
+    }, [loginInfo.accessToken]),
+  );
 
   const goToManagerPage = () => {
     navigation.navigate('MyPage'); // TabNav에 정의된 이름과 일치해야 합니다.
