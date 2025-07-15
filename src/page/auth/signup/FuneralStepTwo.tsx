@@ -5,6 +5,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ScrollView,
+  Dimensions,
 } from 'react-native';
 import {useState, useMemo, useEffect} from 'react';
 import {signupAtom, AttachedFile} from '../../../state/local_state/signupAtom';
@@ -28,6 +29,8 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import Toast from 'react-native-toast-message';
 import api from '../../../api/config';
 
+const {width: screenWidth} = Dimensions.get('window');
+
 interface Props {
   onNext: () => void;
   onPrev: () => void;
@@ -45,6 +48,7 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
   const [selectedFiles, setSelectedFiles] = useState<LocalFile[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
+  const [isVerifyButtonDisabled, setIsVerifyButtonDisabled] = useState(false);
 
   // 선택한 장례식장 이름 가져오기
   const selectedFuneralName =
@@ -297,6 +301,7 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
         }));
 
         setIsPhoneVerified(true);
+        setIsVerifyButtonDisabled(true); // Disable the button
       } else {
         Toast.show({
           type: 'error',
@@ -368,7 +373,15 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
             />
             <CustomButton
               onPress={handleVerifyCode}
-              style={[styles.requestButton, {backgroundColor: '#2D81F1'}]}
+              style={[
+                styles.requestButton,
+                {
+                  backgroundColor: isVerifyButtonDisabled
+                    ? '#C0C0C0'
+                    : '#2D81F1',
+                }, // Change color when disabled
+              ]}
+              disabled={isVerifyButtonDisabled} // Disable button
               activeOpacity={0.5}>
               <Typo color="white" fontSize={14} style={{fontWeight: '700'}}>
                 인증코드확인

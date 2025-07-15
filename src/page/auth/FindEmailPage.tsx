@@ -9,7 +9,7 @@ import BaseInput from '../../components/common/input/BaseInput';
 import {NavigationProp, useRoute} from '@react-navigation/native';
 import {request} from 'react-native-permissions';
 import api from '../../api/config';
-import {useState} from 'react';
+import React, { useState } from 'react';
 import Toast from 'react-native-toast-message';
 
 interface IFindEmailPageProps {
@@ -23,6 +23,7 @@ const FindEmailPage = ({navigation}: IFindEmailPageProps) => {
   const authCode = useInputBase();
 
   const [username, setUsername] = useState<string | null>(null);
+  const [isVerifyButtonDisabled, setIsVerifyButtonDisabled] = useState(false);
 
   const handleRequestCode = async () => {
     try {
@@ -71,8 +72,11 @@ const FindEmailPage = ({navigation}: IFindEmailPageProps) => {
         });
       }
 
+      console.log("🚀 ~ handleVerifyCode ~ response:", response)
+
       if (response.status === 200 && response.data.verified) {
         setUsername(response.data.username);
+        setIsVerifyButtonDisabled(true); // Disable the button
         Toast.show({
           type: 'success',
           text1: '성공',
@@ -138,7 +142,12 @@ const FindEmailPage = ({navigation}: IFindEmailPageProps) => {
             />
             <CustomButton
               onPress={handleVerifyCode}
-              style={styles.verifyButton}>
+              style={[
+                styles.verifyButton,
+                { backgroundColor: isVerifyButtonDisabled ? '#C0C0C0' : '#FFFFFF' } // Change color when disabled
+              ]}
+              disabled={isVerifyButtonDisabled} // Disable the button
+            >
               <Typo color="white" style={styles.verifyButtonText}>
                 인증코드확인
               </Typo>

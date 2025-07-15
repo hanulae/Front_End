@@ -29,6 +29,7 @@ const FindPWpage = ({navigation}: IFindPWPageProps) => {
       ? '상조팀장 비밀번호 변경'
       : '장례식장 비밀번호 변경';
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
+  const [isVerifyButtonDisabled, setIsVerifyButtonDisabled] = useState(false);
   const confirmPassword = useConfirmPasswordInput(
     () => password.value,
     password.value,
@@ -79,6 +80,7 @@ const FindPWpage = ({navigation}: IFindPWPageProps) => {
 
       if (response.data.verified === true) {
         setIsPhoneVerified(true);
+        setIsVerifyButtonDisabled(true); // Disable the button
         Toast.show({
           type: 'success',
           text1: '인증 성공',
@@ -192,7 +194,12 @@ const FindPWpage = ({navigation}: IFindPWPageProps) => {
               onPress={() =>
                 handleVerifyCode(phoneNumber.value, authCode.value)
               }
-              style={styles.verifyButton}>
+              style={[
+                styles.verifyButton,
+                { backgroundColor: isVerifyButtonDisabled ? '#C0C0C0' : '#FFFFFF' } // Change color when disabled
+              ]}
+              disabled={isVerifyButtonDisabled} // Disable the button
+            >
               <Typo color="white" style={styles.verifyButtonText}>
                 인증코드확인
               </Typo>
@@ -285,7 +292,7 @@ const styles = StyleSheet.create({
     marginVertical: 16,
   },
   requestButton: {
-    backgroundColor: '#8990A0',
+    backgroundColor: '#2D81F1', // Change to blue
     padding: 10,
     paddingVertical: 18,
     borderRadius: 10,

@@ -7,6 +7,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Dimensions,
 } from 'react-native';
 import {signupAtom, AttachedFile} from '../../../state/local_state/signupAtom';
 import {Input} from '../../../components/common/input/Input';
@@ -27,6 +28,8 @@ interface Props {
   onPrev: () => void;
 }
 
+const {width: screenWidth} = Dimensions.get('window');
+
 const ManagerStepTwo = ({onNext, onPrev}: Props) => {
   const signupInfo = useAtomValue(signupAtom);
   const setSignupInfo = useSetAtom(signupAtom);
@@ -38,6 +41,7 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
   const [selectedFiles, setSelectedFiles] = useState<LocalFile[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  const [isVerifyButtonDisabled, setIsVerifyButtonDisabled] = useState(false);
 
   // 총 첨부파일 개수 계산
   const totalAttachedCount = useMemo(() => {
@@ -233,12 +237,13 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
           topOffset: -150,
         });
 
-        // 인증 상태 저장
+        // 인증 상태 저장 및 버튼 비활성화
         setSignupInfo(prev => ({
           ...prev,
           phoneNumber: phoneNumber.value,
           isPhoneVerified: true,
         }));
+        setIsVerifyButtonDisabled(true);
       } else {
         Toast.show({
           type: 'error',
@@ -331,8 +336,13 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
                     onPress={handleVerifyCode}
                     style={[
                       styles.requestButton,
-                      {backgroundColor: '#2D81F1'},
-                    ]}>
+                      {
+                        backgroundColor: isVerifyButtonDisabled
+                          ? '#C0C0C0'
+                          : '#2D81F1',
+                      },
+                    ]}
+                    disabled={isVerifyButtonDisabled}>
                     <Typo
                       color="white"
                       fontSize={14}
