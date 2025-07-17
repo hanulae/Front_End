@@ -47,6 +47,7 @@ const AlbumBottomSheet = ({
     if (visible) {
       // 초기화
       setAlbumPhotos([]);
+      console.log('앨범 리스트 초기화 완료');
       setSelectedPhotos(new Set());
       setHasNextPage(true);
       setEndCursor(undefined);
@@ -69,6 +70,8 @@ const AlbumBottomSheet = ({
           const newPhotos = photos.edges.map(edge => ({
             uri: edge.node.image.uri,
           }));
+
+          console.log('newPhotos', newPhotos);
 
           setAlbumPhotos(newPhotos);
           setHasNextPage(photos.page_info.has_next_page);
@@ -117,6 +120,8 @@ const AlbumBottomSheet = ({
 
   const handleOpenCamera = async () => {
     const hasPermission = await requestCameraPermission();
+    console.log('hasPermission', hasPermission);
+    console.log('카메라 클릭됨.');
     if (!hasPermission) {
       Alert.alert('카메라 권한이 필요합니다.');
       return;
@@ -132,7 +137,11 @@ const AlbumBottomSheet = ({
   };
 
   const handleLoadMore = useCallback(async () => {
-    if (!hasNextPage || isLoading) return;
+    console.log('handleLoadMore 호출됨');
+    // 콘텐츠가 충분히 많지 않으면 호출하지 않도록
+    if (!hasNextPage || isLoading || albumPhotos.length < PHOTOS_PER_PAGE) {
+      return;
+    }
 
     const hasPermission = await requestPhotoLibraryPermission();
     if (!hasPermission) {
@@ -164,6 +173,7 @@ const AlbumBottomSheet = ({
   }, [hasNextPage, isLoading, endCursor]);
 
   const renderItem = ({item, index}: {item: {uri: string}; index: number}) => {
+    console.log('renderItem', item, index);
     if (index === 0) {
       return (
         <TouchableOpacity onPress={handleOpenCamera} style={styles.photoBox}>
@@ -212,7 +222,7 @@ const AlbumBottomSheet = ({
             keyExtractor={(item, index) => index.toString()}
             contentContainerStyle={styles.grid}
             onEndReached={handleLoadMore}
-            onEndReachedThreshold={0.5}
+            onEndReachedThreshold={0.8}
             ListFooterComponent={renderFooter}
           />
 
