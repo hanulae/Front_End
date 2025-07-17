@@ -20,7 +20,7 @@ import {
 import {useAtom} from 'jotai';
 import {userInfoAtom} from './src/state/local_state/userinfoAtom';
 import RootStack from './src/router/RootStack';
-import BootSplash from 'react-native-bootsplash';
+// import BootSplash from 'react-native-bootsplash';
 import notificationService from './src/services/notificationService';
 import notifee from '@notifee/react-native';
 import {getNavigationTarget} from './src/services/api/notificationService';
@@ -140,14 +140,14 @@ function App(): React.JSX.Element {
   }, []); // 앱 시작 시 한 번만 실행
 
   // ✅ 부트스플래시 숨기기
-  useEffect(() => {
-    const init = async () => {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      await BootSplash.hide({fade: true});
-    };
+  // useEffect(() => {
+  //   const init = async () => {
+  //     await new Promise(resolve => setTimeout(resolve, 1000));
+  //     await BootSplash.hide({fade: true});
+  //   };
 
-    init();
-  }, []);
+  //   init();
+  // }, []);
 
   // ✅ 앱 종료 상태에서 알림 클릭으로 인한 실행 처리
   useEffect(() => {
@@ -218,24 +218,24 @@ function App(): React.JSX.Element {
   useEffect(() => {
     const backAction = () => {
       Alert.alert(
-        "앱 종료",
-        "앱을 종료하시겠습니까?",
+        '앱 종료',
+        '앱을 종료하시겠습니까?',
         [
           {
-            text: "취소",
+            text: '취소',
             onPress: () => null,
-            style: "cancel"
+            style: 'cancel',
           },
-          { text: "확인", onPress: () => BackHandler.exitApp() }
+          {text: '확인', onPress: () => BackHandler.exitApp()},
         ],
-        { cancelable: false }
+        {cancelable: false},
       );
       return true;
     };
 
     const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      backAction
+      'hardwareBackPress',
+      backAction,
     );
 
     return () => backHandler.remove();

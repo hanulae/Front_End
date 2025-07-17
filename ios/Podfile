@@ -16,13 +16,14 @@ platform :ios, min_ios_version_supported
 prepare_react_native_project!
 
 # Firebase Swift 모듈 지원을 위한 설정
-use_modular_headers!
-
-linkage = ENV['USE_FRAMEWORKS']
-if linkage != nil
-  Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
-  use_frameworks! :linkage => linkage.to_sym
-end
+# use_modular_headers!
+use_frameworks! :linkage => :dynamic # 동적 프레임워크 사용
+# use_frameworks!: linkage => :static
+#linkage = ENV['USE_FRAMEWORKS']
+#if linkage != nil
+#  Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
+#  use_frameworks! :linkage => linkage.to_sym
+#end
 
 target 'FuneralProject' do
   config = use_native_modules!
@@ -30,8 +31,13 @@ target 'FuneralProject' do
   use_react_native!(
     :path => config[:reactNativePath],
     # An absolute path to your application root.
-    :app_path => "#{Pod::Config.instance.installation_root}/.."
+    :hermes_enabled => false,
+    :app_path => "#{Pod::Config.instance.installation_root}/..",
   )
+
+  pod 'RNFBApp', :path => '../node_modules/@react-native-firebase/app'
+  pod 'RNFBMessaging', :path => '../node_modules/@react-native-firebase/messaging'
+  pod 'RNNotifee', :path => '../node_modules/@notifee/react-native'
 
   setup_permissions([
     'Camera',
@@ -40,12 +46,16 @@ target 'FuneralProject' do
   ])
 
   post_install do |installer|
-    # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
     react_native_post_install(
       installer,
       config[:reactNativePath],
-      :mac_catalyst_enabled => false,
-      # :ccache_enabled => true
+      :mac_catalyst_enabled => false
     )
+  
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
+      end
+    end
   end
 end
