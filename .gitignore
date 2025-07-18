@@ -77,4 +77,4 @@ yarn-error.log
 # Firebase
 android/app/google-services.json
 android/app/src/main/res/values/google-services.xml
-ios/FuneralProject/GoogleService-Info.plist
+ios/GoogleService-Info.plist
