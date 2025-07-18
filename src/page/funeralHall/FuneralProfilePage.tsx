@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
   },
   floatingButton: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? scaleSize(420) : scaleSize(400),
+    top: Platform.OS === 'ios' ? scaleSize(365) : scaleSize(400),
     left: scaleSize(20),
     right: scaleSize(20),
     zIndex: 5,
@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
   whiteSection: {
     flex: 1,
     backgroundColor: '#F5F5F5',
-    marginTop: Platform.OS === 'ios' ? scaleSize(480) : scaleSize(450),
+    marginTop: Platform.OS === 'ios' ? scaleSize(415) : scaleSize(450),
     zIndex: 1,
   },
   scrollContent: {

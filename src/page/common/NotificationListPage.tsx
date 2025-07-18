@@ -17,7 +17,9 @@ import {
   NotificationItem,
 } from '../../services/api/notificationService';
 import NotificationCard from '../../components/common/NotificationCard';
+import notifee from '@notifee/react-native';
 import api from '../../api/config';
+import {handleNotificationRead} from '../../services/notificationService';
 // import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface NotificationListPageProps {
@@ -96,11 +98,12 @@ const NotificationListPage = (_props: NotificationListPageProps) => {
       const navigationTarget = getNavigationTarget(item.notificationType, item);
       console.log('네비게이션 타겟:', navigationTarget);
 
+      await handleNotificationRead(item.notificationId, item.isRead);
       // 알림 읽음 처리는 notificationService에서 자동으로 처리되므로 여기서는 제거
-      const response = await api.put(
-        `/common/notification/${item.notificationId}/read`,
-      );
-      console.log('알림 읽음 처리 결과:', response);
+      // const response = await api.put(
+      //   `/common/notification/${item.notificationId}/read`,
+      // );
+      // console.log('알림 읽음 처리 결과:', response);
 
       if (navigationTarget) {
         // getNavigationTarget에서 반환된 screen과 params로 직접 네비게이션
@@ -108,6 +111,9 @@ const NotificationListPage = (_props: NotificationListPageProps) => {
           navigationTarget.screen,
           navigationTarget.params,
         );
+
+        // notifee 알림 배지 1 감소
+        // await notifee.decrementBadgeCount();
 
         // 알림 읽음 처리 (선택사항)
         // notificationApiService.markNotificationAsRead(item.notificationId);
@@ -130,6 +136,9 @@ const NotificationListPage = (_props: NotificationListPageProps) => {
     try {
       setMarkingAllAsRead(true);
       await notificationApiService.markAllNotificationsAsRead();
+
+      // notifee 알림 배지 초기화
+      await notifee.setBadgeCount(0);
 
       // 로컬 상태 업데이트
       setNotifications(prev =>

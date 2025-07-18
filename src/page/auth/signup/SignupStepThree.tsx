@@ -442,12 +442,12 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
             )}
             <Typo style={styles.termsText}>(필수) 만 14세 이상 동의</Typo>
           </View>
-          <TouchableOpacity onPress={() => navigateMoreInfo('age')}>
+          {/* <TouchableOpacity onPress={() => navigateMoreInfo('age')}>
             <Typo style={styles.moreInfoText}>보기</Typo>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </TouchableOpacity>
 
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.checkboxRow}
           onPress={() => handleToggle('marketing')}>
           <View style={styles.checkTermContainer}>
@@ -461,7 +461,7 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
           <TouchableOpacity onPress={() => navigateMoreInfo('marketing')}>
             <Typo style={styles.moreInfoText}>보기</Typo>
           </TouchableOpacity>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {/* 회원가입 버튼 */}

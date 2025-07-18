@@ -3,6 +3,7 @@ import {ScrollView, StyleSheet, View} from 'react-native';
 import DefaultLayout from '../../../layout/DefaultLayout';
 import Typo from '../../../components/common/Typo';
 import {serviceAgreement} from '../../../constant/agreements/serviceAgreement';
+import {privacyAgreement} from '../../../constant/agreements/privacy';
 
 const AgreementDetailPage = () => {
   const route = useRoute();
@@ -32,7 +33,7 @@ const AgreementDetailPage = () => {
       case 'service':
         return serviceAgreement;
       case 'privacy':
-        return '개인정보 처리방침 내용';
+        return privacyAgreement;
       case 'location':
         return '위치기반 서비스 이용약관 내용';
       case 'age':

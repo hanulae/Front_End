@@ -100,8 +100,8 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
       // ✅ 로그인 성공 후 FCM 토큰 등록
       try {
         // 3. 로그인된 경우 알림 서비스 초기화
-        await notificationService.initialize();
         console.log('🔔 로그인 성공 - FCM 토큰 등록 시작');
+        await notificationService.initialize();
         const success = await notificationService.registerFCMTokenToServer();
         if (success) {
           console.log('✅ FCM 토큰 백엔드 등록 완료');

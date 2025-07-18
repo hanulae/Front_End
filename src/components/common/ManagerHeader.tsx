@@ -48,6 +48,9 @@ const ManagerHeader = ({
 
   useFocusEffect(
     useCallback(() => {
+      if (alarmButton === false) {
+        return;
+      }
       const fetchUnreadNotificationCount = async () => {
         try {
           const response =

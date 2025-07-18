@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: scaleSize(8),
-    // marginTop: scaleSize(2),
+    marginTop: scaleSize(5),
   },
   leftbutton: {
     flex: 1,

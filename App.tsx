@@ -158,7 +158,8 @@ function App(): React.JSX.Element {
 
         const initialNotification = await notifee.getInitialNotification();
         console.log('초기 알림 확인:', initialNotification);
-
+        const curPushAlarm = await notifee.getBadgeCount();
+        console.log('현재 푸시 알림 개수:', curPushAlarm);
         if (initialNotification) {
           initialNotificationHandled.current = true;
           console.log('앱 시작 시 알림으로 인한 실행 감지');
@@ -218,24 +219,24 @@ function App(): React.JSX.Element {
   useEffect(() => {
     const backAction = () => {
       Alert.alert(
-        "앱 종료",
-        "앱을 종료하시겠습니까?",
+        '앱 종료',
+        '앱을 종료하시겠습니까?',
         [
           {
-            text: "취소",
+            text: '취소',
             onPress: () => null,
-            style: "cancel"
+            style: 'cancel',
           },
-          { text: "확인", onPress: () => BackHandler.exitApp() }
+          {text: '확인', onPress: () => BackHandler.exitApp()},
         ],
-        { cancelable: false }
+        {cancelable: false},
       );
       return true;
     };
 
     const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      backAction
+      'hardwareBackPress',
+      backAction,
     );
 
     return () => backHandler.remove();

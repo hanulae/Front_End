@@ -81,7 +81,7 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
         color="#3287F8"
         headerShown={false}
         logoutButton={false}
-        top={false}
+        top={true}
         backIconColor="white">
         <View style={styles.topSection}>
           <ManagerHeader
@@ -162,14 +162,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#3287F8',
     borderBottomLeftRadius: scaleSize(28),
     borderBottomRightRadius: scaleSize(28),
-    paddingTop: Platform.OS === 'ios' ? scaleSize(20) : scaleSize(60),
+    paddingTop: Platform.OS === 'ios' ? scaleSize(15) : scaleSize(60),
     paddingBottom: scaleSize(40),
     paddingHorizontal: scaleSize(20),
     zIndex: 2,
   },
   floatingButton: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? scaleSize(340) : scaleSize(390),
+    top: Platform.OS === 'ios' ? scaleSize(320) : scaleSize(390),
     left: scaleSize(20),
     right: scaleSize(20),
     zIndex: 6,
@@ -186,8 +186,8 @@ const styles = StyleSheet.create({
   whiteSection: {
     flex: 1,
     backgroundColor: '#F5F5F5',
-    marginTop: Platform.OS === 'ios' ? scaleSize(360) : scaleSize(400),
-    paddingTop: scaleSize(20),
+    marginTop: Platform.OS === 'ios' ? scaleSize(330) : scaleSize(400),
+    paddingTop: scaleSize(30),
     zIndex: 1,
   },
   scrollContent: {

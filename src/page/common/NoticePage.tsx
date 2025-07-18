@@ -40,9 +40,9 @@ const NoticePage = ({navigation}: INoticePageProps) => {
     useCallback(() => {
       if (Platform.OS === 'android') {
         StatusBar.setBackgroundColor('#3287F8');
-        StatusBar.setBarStyle('light-content');
+        StatusBar.setBarStyle('dark-content');
       } else {
-        StatusBar.setBarStyle('light-content');
+        StatusBar.setBarStyle('dark-content');
       }
     }, []),
   );

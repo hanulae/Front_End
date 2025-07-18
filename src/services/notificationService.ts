@@ -166,6 +166,10 @@ export const showLocalNotification = async (
         pressAction: {
           id: 'default',
         },
+        sound: 'default', // ✅ Android도 소리 추가
+      },
+      ios: {
+        sound: 'default', // ✅ iOS도 소리 추가
       },
     });
 
@@ -298,6 +302,7 @@ const setupForegroundHandler = (): void => {
           },
         },
         ios: {
+          sound: 'default',
           foregroundPresentationOptions: {
             badge: true,
             sound: true,
@@ -369,6 +374,7 @@ export const setupNotificationListeners = (): void => {
  * 알림 클릭 시 네비게이션 처리
  */
 const handleNotificationPress = async (notification: any): Promise<void> => {
+  // 여기서 notification은 포그라운드 이벤트 리스너에서 호출 시 파라미터인 detail.notification 임.
   // 강력한 중복 처리 방지
   const currentTime = Date.now();
   const notificationId =
@@ -395,17 +401,22 @@ const handleNotificationPress = async (notification: any): Promise<void> => {
   try {
     console.log('=== 알림 클릭 처리 시작 ===');
     // console.log('알림 ID:', notificationId);
-    console.log('알림 데이터:', JSON.stringify(notification?.data, null, 2));
+    console.log(
+      '알림 데이터123123123:',
+      JSON.stringify(notification?.data, null, 2),
+    );
 
     // 알림 읽음 처리
     if (notification?.data) {
       console.log('노티피케이션아이디', notification.data.notificationId);
+      console.log('알림 읽음 여부', notification.data.isRead);
       try {
         const uuidRegex =
           /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
         if (uuidRegex.test(notification.data.notificationId)) {
-          await api.put(
-            `/common/notification/${notification.data.notificationId}/read`,
+          await handleNotificationRead(
+            notification.data.notificationId,
+            notification.data.isRead,
           );
           console.log('알림 읽음 처리 완료');
         }
@@ -479,21 +490,32 @@ const executeNavigation = async (navigationTarget: any): Promise<void> => {
         console.log('네비게이션이 준비되었습니다.');
 
         // 짧은 지연 후 네비게이션 실행 (React Native 렌더링 완료 대기)
-        setTimeout(() => {
-          try {
-            if (navigationRef.current && navigationRef.current.isReady()) {
-              navigationRef.current.navigate(
-                navigationTarget.screen,
-                navigationTarget.params,
-              );
-              console.log('네비게이션 실행 완료:', navigationTarget.screen);
-            } else {
-              console.log('네비게이션 실행 시점에 준비되지 않음');
-            }
-          } catch (navError) {
-            console.error('네비게이션 실행 중 오류:', navError);
-          }
-        }, 100);
+        // setTimeout(() => {
+        //   try {
+        //     if (navigationRef.current && navigationRef.current.isReady()) {
+        //       navigationRef.current.navigate(
+        //         navigationTarget.screen,
+        //         navigationTarget.params,
+        //       );
+        //       console.log('네비게이션 실행 완료:', navigationTarget.screen);
+        //     } else {
+        //       console.log('네비게이션 실행 시점에 준비되지 않음');
+        //     }
+        //   } catch (navError) {
+        //     console.error('네비게이션 실행 중 오류:', navError);
+        //   }
+        // }, 100);
+
+        if (navigationRef.current && navigationRef.current.isReady()) {
+          navigationRef.current.navigate(
+            navigationTarget.screen,
+            navigationTarget.params,
+          );
+          console.log('네비게이션 실행 완료:', navigationTarget.screen);
+        } else {
+          console.log('네비게이션 준비 안됨 → 최대 30초 대기');
+          // while-loop으로 최대 30초 대기 로직을 이미 구현하신 상태이므로 그 안에서 navigate 실행
+        }
 
         return;
       }
@@ -505,6 +527,26 @@ const executeNavigation = async (navigationTarget: any): Promise<void> => {
     console.log('네비게이션 준비 시간 초과');
   } catch (error) {
     console.error('네비게이션 실행 중 오류:', error);
+  }
+};
+
+/**
+ * 알림 읽음 처리 함수
+ * 알림을 읽고, notificationIsRead 로 배지 카운트 감소 여부를 결정해서 처리.
+ */
+export const handleNotificationRead = async (
+  notificationId: string,
+  IsRead: boolean,
+) => {
+  try {
+    if (!IsRead) {
+      await api.put(`/common/notification/${notificationId}/read`);
+      await notifee.decrementBadgeCount();
+    } else {
+      await api.put(`/common/notification/${notificationId}/read`);
+    }
+  } catch (error) {
+    console.error('알림 읽음 처리 실패:', error);
   }
 };
 
