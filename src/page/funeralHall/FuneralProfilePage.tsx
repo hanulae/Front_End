@@ -29,7 +29,7 @@ import Toast from 'react-native-toast-message';
 import PhoneAuthSheet from '../../components/funeralHall/PhoneAuthSheet';
 import {getUserInfo} from '../../utils/tokenStorage';
 import {isStaffAtom} from '../../state/local_state/loginAtom';
-import {scaleFontSize, scaleSize} from '../../utils/responsive';
+import {isSmallDevice, scaleFontSize, scaleSize} from '../../utils/responsive';
 
 // 권한 타입 정의
 interface IPermissions {
@@ -187,18 +187,20 @@ const FuneralProfilePage = () => {
   };
 
   const goToAppSetting = () => {
-    if (!hasPermission('appSettings')) {
-      Toast.show({
-        type: 'error',
-        text1: '접근 권한 없음',
-        text2: '앱 설정에 대한 접근 권한이 없습니다.',
-        position: 'top',
-        visibilityTime: 3000,
-      });
-      return;
-    }
+    // 앱 설정 페이지의 경우에는 누구나 권한 상관없이 접근 가능하도록 수정
+    // 단, 장례식장 직원의 경우에는 회원탈퇴 기능이 제한되도록 설정
+    // if (!hasPermission('appSettings')) {
+    //   Toast.show({
+    //     type: 'error',
+    //     text1: '접근 권한 없음',
+    //     text2: '앱 설정에 대한 접근 권한이 없습니다.',
+    //     position: 'top',
+    //     visibilityTime: 3000,
+    //   });
+    //   return;
+    // }
     console.log('App Setting');
-    navigation.navigate('AppSetting', {userType: 'funeral'});
+    navigation.navigate('AppSetting', {userType: isStaff ? 'staff' : 'funeral'});
   };
 
   const goToPointHistory = () => {
@@ -312,7 +314,6 @@ const FuneralProfilePage = () => {
               <MoveGrayIcon width={iconSize} height={iconSize} />
             </CustomButton>
           )}
-          {hasPermission('appSettings') && (
             <CustomButton onPress={goToAppSetting} style={styles.button}>
               <View style={styles.buttonNameContainer}>
                 <AppSettingIcon width={iconSize} height={iconSize} />
@@ -320,7 +321,6 @@ const FuneralProfilePage = () => {
               </View>
               <MoveGrayIcon width={iconSize} height={iconSize} />
             </CustomButton>
-          )}
         </ScrollView>
         <PhoneAuthSheet
           visible={showPhoneAuthSheet}
@@ -344,7 +344,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#3287F8',
     borderBottomLeftRadius: scaleSize(28),
     borderBottomRightRadius: scaleSize(28),
-    paddingTop: Platform.OS === 'ios' ? scaleSize(60) : scaleSize(40),
+    paddingTop: Platform.OS === 'ios'
+    ? (isSmallDevice ? scaleSize(80) : scaleSize(60))
+    : (isSmallDevice ? scaleSize(80) : scaleSize(40)),
     paddingBottom: scaleSize(40),
     paddingHorizontal: scaleSize(20),
     zIndex: 2,

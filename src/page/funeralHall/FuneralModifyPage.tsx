@@ -436,6 +436,7 @@ const FuneralModiftyPage = () => {
             <View style={styles.inputContainer}>
               <FuneralInput
                 input={funeralPhone}
+                type="number"
                 placeholder="대표전화번호를 입력하세요"
               />
             </View>

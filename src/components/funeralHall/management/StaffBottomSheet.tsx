@@ -53,7 +53,7 @@ const PERMISSION_LABELS: {
   {label: '지난 출동 내역', key: 'dispatch_history'},
   {label: '출동 대기 내역', key: 'dispatch_pending'},
   {label: '견적 내역', key: 'estimate_history'},
-  {label: '앱 설정', key: 'app_settings'},
+  // {label: '앱 설정', key: 'app_settings'},
   {label: '포인트 내역', key: 'point_history'},
 ];
 
@@ -412,133 +412,135 @@ const StaffBottomSheet = ({
         keyboardVerticalOffset={0}
         style={styles.keyboardAvoidingContainer}>
         <Animated.View style={[styles.sheet, {transform: [{translateY}]}]}>
+          <View style={styles.fixedHeader}>
+            <Typo style={styles.titleText}>
+              {mode === 'edit' ? '장례식장 직원 수정' : '장례식장 직원 등록'}
+            </Typo>
+            <Pressable onPress={onClose}>
+              <CloseIcon />
+            </Pressable>
+          </View>
           <ScrollView
             style={styles.scrollContainer}
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
             nestedScrollEnabled>
-            <View style={styles.titleContainer}>
-              <Typo style={styles.titleText}>
-                {mode === 'edit' ? '장례식장 직원 수정' : '장례식장 직원 등록'}
-              </Typo>
-              <Pressable onPress={onClose}>
-                <CloseIcon />
-              </Pressable>
-            </View>
-            <View style={styles.phoneBoxContainer}>
-              <Typo style={styles.phoneBoxText}>{phoneNumberInput.value}</Typo>
-            </View>
-            <CustomButton onPress={handleRequestCode} style={styles.button}>
-              <Typo style={styles.buttonText}>인증코드요청</Typo>
-            </CustomButton>
-            <View style={styles.inputContainer}>
-              <Typo style={styles.inputTitle}>인증코드</Typo>
-              <FuneralInput
-                input={authCode}
-                type="number"
-                placeholder="인증코드를 입력하세요"
-              />
-              <CustomButton
-                onPress={handleVerifyCode}
-                style={[
-                  styles.checkButton,
-                  { backgroundColor: isVerifyButtonDisabled ? '#C0C0C0' : '#FFFFFF' } // Change color when disabled
-                ]}
-                disabled={isVerifyButtonDisabled} // Disable the button
-              >
-                <Typo style={styles.checkButtonText}>인증번호확인</Typo>
-              </CustomButton>
-            </View>
-            <View style={styles.inputContainer}>
-              <Typo style={styles.inputTitle}>직원 휴대전화번호</Typo>
-              <FuneralInput
-                input={staffPhoneNumber}
-                type="phone"
-                placeholder="휴대전화번호을 입력하세요"
-              />
-              <CustomButton
-                onPress={handleCheckPhoneNumber}
-                style={styles.checkButton}>
-                <Typo style={styles.checkButtonText}>
-                  직원 휴대전화 중복 체크
-                </Typo>
-              </CustomButton>
-            </View>
-            <View style={styles.inputContainer}>
-              <Typo style={styles.inputTitle}>직원</Typo>
-              <FuneralInput
-                input={staffPassword}
-                placeholder="비밀번호을 입력하세요"
-              />
-            </View>
-            <View style={styles.inputContainer}>
-              <Typo style={styles.inputTitle}>직급 *</Typo>
-              <FuneralInput
-                input={staffGrade}
-                placeholder="직급을 입력하세요"
-              />
-            </View>
-            <View style={styles.inputContainer}>
-              <Typo style={styles.inputTitle}>이름 *</Typo>
-              <FuneralInput input={staffName} placeholder="이름을 입력하세요" />
-            </View>
-            <View style={styles.inputContainer}>
-              <Typo style={styles.inputTitle}>접근 권한</Typo>
-              <View style={styles.permissionContainer}>
-                {Array.from({length: 4}).map((_, rowIndex) => {
-                  const permissionsInRow = PERMISSION_LABELS.slice(
-                    rowIndex * 2,
-                    rowIndex * 2 + 2,
-                  );
-                  const isLastRow = rowIndex === 3;
-                  const hasSingleButton = permissionsInRow.length === 1;
-
-                  return (
-                    <View key={rowIndex} style={styles.permissionRow}>
-                      {permissionsInRow.map(({label, key}) => (
-                        <TouchableOpacity
-                          key={key}
-                          style={[
-                            styles.permissionButton,
-                            isLastRow &&
-                              hasSingleButton &&
-                              styles.singlePermissionButton,
-                          ]}
-                          onPress={() => togglePermission(key)}>
-                          <View style={styles.permissionContentWrapper}>
-                            {permissions[key] ? (
-                              <CheckCircleOnIcon
-                                width={18}
-                                height={18}
-                                style={styles.permissionIcon}
-                              />
-                            ) : (
-                              <CheckCircleOffIcon
-                                width={18}
-                                height={18}
-                                style={styles.permissionIcon}
-                              />
-                            )}
-                            <Typo style={styles.permissionLabelText}>
-                              {label}
-                            </Typo>
-                          </View>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  );
-                })}
+            <View style={styles.contentContainer}>
+              <View style={styles.phoneBoxContainer}>
+                <Typo style={styles.phoneBoxText}>{phoneNumberInput.value}</Typo>
               </View>
-            </View>
-            <View style={styles.buttonContainer}>
-              <Pressable
-                onPress={handleCreateStaff}
-                style={styles.confirmButton}>
-                <Typo style={styles.confirmText}>
-                  {mode === 'edit' ? '수정' : '등록'}
-                </Typo>
-              </Pressable>
+              <CustomButton onPress={handleRequestCode} style={styles.button}>
+                <Typo style={styles.buttonText}>인증코드요청</Typo>
+              </CustomButton>
+              <View style={styles.inputContainer}>
+                <Typo style={styles.inputTitle}>인증코드</Typo>
+                <FuneralInput
+                  input={authCode}
+                  type="number"
+                  placeholder="인증코드를 입력하세요"
+                />
+                <CustomButton
+                  onPress={handleVerifyCode}
+                  style={[
+                    styles.checkButton,
+                    { backgroundColor: isVerifyButtonDisabled ? '#C0C0C0' : '#FFFFFF' } // Change color when disabled
+                  ]}
+                  disabled={isVerifyButtonDisabled} // Disable the button
+                >
+                  <Typo style={styles.checkButtonText}>인증번호확인</Typo>
+                </CustomButton>
+              </View>
+              <View style={styles.inputContainer}>
+                <Typo style={styles.inputTitle}>직원 휴대전화번호</Typo>
+                <FuneralInput
+                  input={staffPhoneNumber}
+                  type="phone"
+                  placeholder="휴대전화번호을 입력하세요"
+                />
+                <CustomButton
+                  onPress={handleCheckPhoneNumber}
+                  style={styles.checkButton}>
+                  <Typo style={styles.checkButtonText}>
+                    직원 휴대전화 중복 체크
+                  </Typo>
+                </CustomButton>
+              </View>
+              <View style={styles.inputContainer}>
+                <Typo style={styles.inputTitle}>직원</Typo>
+                <FuneralInput
+                  input={staffPassword}
+                  placeholder="비밀번호을 입력하세요"
+                />
+              </View>
+              <View style={styles.inputContainer}>
+                <Typo style={styles.inputTitle}>직급 *</Typo>
+                <FuneralInput
+                  input={staffGrade}
+                  placeholder="직급을 입력하세요"
+                />
+              </View>
+              <View style={styles.inputContainer}>
+                <Typo style={styles.inputTitle}>이름 *</Typo>
+                <FuneralInput input={staffName} placeholder="이름을 입력하세요" />
+              </View>
+              <View style={styles.inputContainer}>
+                <Typo style={styles.inputTitle}>접근 권한</Typo>
+                <View style={styles.permissionContainer}>
+                  {Array.from({length: 4}).map((_, rowIndex) => {
+                    const permissionsInRow = PERMISSION_LABELS.slice(
+                      rowIndex * 2,
+                      rowIndex * 2 + 2,
+                    );
+                    const isLastRow = rowIndex === 3;
+                    const hasSingleButton = permissionsInRow.length === 1;
+
+                    return (
+                      <View key={rowIndex} style={styles.permissionRow}>
+                        {permissionsInRow.map(({label, key}) => (
+                          <TouchableOpacity
+                            key={key}
+                            style={[
+                              styles.permissionButton,
+                              isLastRow &&
+                                hasSingleButton &&
+                                styles.singlePermissionButton,
+                            ]}
+                            onPress={() => togglePermission(key)}>
+                            <View style={styles.permissionContentWrapper}>
+                              {permissions[key] ? (
+                                <CheckCircleOnIcon
+                                  width={18}
+                                  height={18}
+                                  style={styles.permissionIcon}
+                                />
+                              ) : (
+                                <CheckCircleOffIcon
+                                  width={18}
+                                  height={18}
+                                  style={styles.permissionIcon}
+                                />
+                              )}
+                              <Typo style={styles.permissionLabelText}>
+                                {label}
+                              </Typo>
+                            </View>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    );
+                  })}
+                </View>
+              </View>
+              <View style={styles.buttonContainer}>
+                <Pressable
+                  onPress={handleCreateStaff}
+                  style={styles.confirmButton}>
+                  <Typo style={styles.confirmText}>
+                    {mode === 'edit' ? '수정' : '등록'}
+                  </Typo>
+                </Pressable>
+              </View>
             </View>
           </ScrollView>
         </Animated.View>
@@ -569,11 +571,23 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderTopLeftRadius: getResponsiveValue(10),
     borderTopRightRadius: getResponsiveValue(10),
-    paddingTop: getResponsiveValue(24),
-    paddingHorizontal: getResponsiveValue(14),
+    paddingTop: getResponsiveValue(12),
+    paddingHorizontal: getResponsiveValue(10),
     paddingBottom: getResponsiveValue(10),
     maxHeight: getResponsiveHeight(0.9),
-    minHeight: getResponsiveHeight(0.6),
+    minHeight: getResponsiveHeight(0.7),
+  },
+  fixedHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: getResponsiveValue(10),
+    paddingVertical: getResponsiveValue(10),
+    marginBottom: getResponsiveValue(10),
+    // borderBottomWidth: 1,
+    // borderBottomColor: '#E5E5E5',
+    backgroundColor: '#fff',
+    zIndex: 10,
   },
   titleContainer: {
     marginBottom: getResponsiveValue(16),
@@ -663,7 +677,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
+    paddingHorizontal: getResponsiveValue(14),
     paddingBottom: getResponsiveValue(20),
+  },
+  contentContainer: {
+    paddingTop: getResponsiveValue(10),
   },
   permissionContainer: {
     width: '100%',

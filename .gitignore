@@ -77,3 +77,16 @@ yarn-error.log
 # Firebase
 android/app/google-services.json
 android/app/src/main/res/values/google-services.xml
+
+# Keystore files
+android/app/release-key.keystore
+android/app/debug.keystore
+
+# Keystore properties (보안 파일)
+android/keystore.properties
+
+# Build outputs
+android/app/build/
+android/build/
+
+

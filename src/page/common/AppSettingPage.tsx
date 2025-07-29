@@ -58,7 +58,7 @@ const AppSettingPage = () => {
 
   // userType 분기 처리
   const route = useRoute();
-  const {userType} = route.params as {userType: 'manager' | 'funeral'};
+  const {userType} = route.params as {userType: 'manager' | 'funeral' | 'staff'};
 
   // 알림 설정 상태 관리
   const [notifications, setNotifications] = useState<INotificationSettings>({
@@ -294,38 +294,40 @@ const AppSettingPage = () => {
         </View>
       </View>
 
-      {/* 회원탈퇴 섹션 */}
-      <View style={styles.withdrawSection}>
-        {/* 회원탈퇴 동의 체크박스 */}
-        <TouchableOpacity
-          style={styles.agreementContainer}
-          onPress={toggleWithdrawalAgreement}
-          activeOpacity={0.7}>
-          {withdrawalAgreed ? (
-            <CheckOnIcon width={scaleSize(20)} height={scaleSize(20)} />
-          ) : (
-            <CheckOffIcon width={scaleSize(20)} height={scaleSize(20)} />
-          )}
-          <Typo style={styles.agreementText}>회원탈퇴에 동의합니다.</Typo>
-        </TouchableOpacity>
+      {/* 회원탈퇴 섹션 - staff가 아닌 경우에만 표시 */}
+      {userType !== 'staff' && (
+        <View style={styles.withdrawSection}>
+          {/* 회원탈퇴 동의 체크박스 */}
+          <TouchableOpacity
+            style={styles.agreementContainer}
+            onPress={toggleWithdrawalAgreement}
+            activeOpacity={0.7}>
+            {withdrawalAgreed ? (
+              <CheckOnIcon width={scaleSize(20)} height={scaleSize(20)} />
+            ) : (
+              <CheckOffIcon width={scaleSize(20)} height={scaleSize(20)} />
+            )}
+            <Typo style={styles.agreementText}>회원탈퇴에 동의합니다.</Typo>
+          </TouchableOpacity>
 
-        {/* 회원탈퇴 버튼 */}
-        <CustomButton
-          style={[
-            styles.withdrawButton,
-            withdrawalAgreed && styles.withdrawButtonActive,
-          ]}
-          onPress={handleWithdraw}
-          disabled={!withdrawalAgreed}>
-          <Typo
+          {/* 회원탈퇴 버튼 */}
+          <CustomButton
             style={[
-              styles.withdrawText,
-              withdrawalAgreed && styles.withdrawTextActive,
-            ]}>
-            회원탈퇴
-          </Typo>
-        </CustomButton>
-      </View>
+              styles.withdrawButton,
+              withdrawalAgreed && styles.withdrawButtonActive,
+            ]}
+            onPress={handleWithdraw}
+            disabled={!withdrawalAgreed}>
+            <Typo
+              style={[
+                styles.withdrawText,
+                withdrawalAgreed && styles.withdrawTextActive,
+              ]}>
+              회원탈퇴
+            </Typo>
+          </CustomButton>
+        </View>
+      )}
     </View>
   );
 

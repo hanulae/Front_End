@@ -319,6 +319,10 @@ const FuneralSearchPage = () => {
         <View style={[styles.wrapper, {
           paddingHorizontal: responsiveStyles.wrapperPadding.horizontal,
           paddingVertical: responsiveStyles.wrapperPadding.vertical,
+          // 로그인 상태나 회원가입 모드일 때만 하단 여백 추가
+          paddingBottom: (variant === 'main' && isLoggedIn || variant === 'signup') 
+            ? scaleSize(80) 
+            : responsiveStyles.wrapperPadding.vertical,
         }]}>
           {/* ❌ 에러 메시지 표시 */}
           {error && (
@@ -550,7 +554,7 @@ const styles = StyleSheet.create({
   },
   wrapper: {
     flex: 1,
-    paddingBottom: scaleSize(80), // 하단 버튼 영역만큼 여백 추가
+    // paddingBottom: scaleSize(80) 제거
   },
   searchContainer: {
     flexDirection: 'column',

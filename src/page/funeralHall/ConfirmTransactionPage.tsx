@@ -29,6 +29,7 @@ import {
 import {useFocusEffect} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import {isValidPhoneNumber} from '../../util/validation';
+import {isSmallDevice, isMediumDevice, scaleSize, scaleFontSize} from '../../utils/responsive';
 
 const ConfirmTransactionPage = () => {
   const route = useRoute();
@@ -53,39 +54,38 @@ const ConfirmTransactionPage = () => {
 
   // 화면 크기에 따른 반응형 스타일 계산
   const isTablet = width > 768;
-  const isSmallDevice = width < 375;
 
   const responsiveStyles = {
     // 텍스트 크기
-    titleSize: isTablet ? 20 : isSmallDevice ? 14 : 16,
-    topTextSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
-    bottomInfoTextSize: isTablet ? 16 : isSmallDevice ? 12 : 14,
-    bottomValueTextSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
-    buttonTextSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
-    inputTextSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
+    titleSize: isTablet ? 20 : isSmallDevice ? 16 : isMediumDevice ? 20 : 20,
+    topTextSize: isTablet ? 18 : isSmallDevice ? 12 : isMediumDevice ? 16 : 16,
+    bottomInfoTextSize: isTablet ? 16 : isSmallDevice ? 14 : isMediumDevice ? 16 : 16,
+    bottomValueTextSize: isTablet ? 18 : isSmallDevice ? 16 : isMediumDevice ? 18 : 18,
+    buttonTextSize: isTablet ? 18 : isSmallDevice ? 16 : isMediumDevice ? 18 : 18,
+    inputTextSize: isTablet ? 18 : isSmallDevice ? 14 : isMediumDevice ? 16 : 16,
 
     // 패딩 및 마진
-    screenPadding: isTablet ? 32 : isSmallDevice ? 16 : 20,
-    bottomContainerPadding: isTablet ? 40 : isSmallDevice ? 20 : 30,
-    titleBottomPadding: isTablet ? 28 : isSmallDevice ? 16 : 20,
-    infoMarginBottom: isTablet ? 28 : isSmallDevice ? 16 : 20,
+    screenPadding: isTablet ? 32 : isSmallDevice ? 16 : isMediumDevice ? 16 : 16,
+    bottomContainerPadding: isTablet ? 40 : isSmallDevice ? 30 : isMediumDevice ? 30 : 30,
+    titleBottomPadding: isTablet ? 28 : isSmallDevice ? 12 : isMediumDevice ? 12 : 12,
+    infoMarginBottom: isTablet ? 28 : isSmallDevice ? 12 : isMediumDevice ? 16 : 16,
 
     // 입력 필드
-    inputHeight: isTablet ? 60 : isSmallDevice ? 44 : 50,
-    inputPadding: isTablet ? 24 : isSmallDevice ? 16 : 20,
-    inputTopMargin: isTablet ? 12 : isSmallDevice ? 8 : 10,
+    inputHeight: isTablet ? 60 : isSmallDevice ? 42 : isMediumDevice ? 52 : 52,
+    inputPadding: isTablet ? 24 : isSmallDevice ? 12 : isMediumDevice ? 16 : 16,
+    inputTopMargin: isTablet ? 12 : isSmallDevice ? 6 : isMediumDevice ? 8 : 8,
 
     // 버튼
-    buttonPaddingVertical: isTablet ? 22 : isSmallDevice ? 14 : 18,
-    buttonMarginBottom: isTablet ? 32 : isSmallDevice ? 20 : 24,
+    buttonPaddingVertical: isTablet ? 22 : isSmallDevice ? 16 : isMediumDevice ? 16 : 16,
+    buttonMarginBottom: isTablet ? 32 : isSmallDevice ? 20 : isMediumDevice ? 20 : 20,
 
     // 간격
-    bottomInfoPaddingVertical: isTablet ? 14 : isSmallDevice ? 8 : 10,
-    bottomInfoPaddingTop: isTablet ? 14 : isSmallDevice ? 8 : 10,
-    bottomInfoPaddingBottom: isTablet ? 28 : isSmallDevice ? 16 : 20,
+    bottomInfoPaddingVertical: isTablet ? 14 : isSmallDevice ? 6 : isMediumDevice ? 8 : 10,
+    bottomInfoPaddingTop: isTablet ? 14 : isSmallDevice ? 6 : isMediumDevice ? 8 : 10,
+    bottomInfoPaddingBottom: isTablet ? 28 : isSmallDevice ? 12 : isMediumDevice ? 16 : 20,
 
     // 보더
-    borderTopWidth: isTablet ? 6 : isSmallDevice ? 4 : 5,
+    borderTopWidth: isTablet ? 6 : isSmallDevice ? 3 : isMediumDevice ? 4 : 5,
   };
 
   // 현재 상태 계산 (장례식장 관점)
@@ -299,118 +299,121 @@ const ConfirmTransactionPage = () => {
 
   // handle Transaction Confirm
   const handleTransactionConfirm = async () => {
-    try {
-      console.log('거래 확정 요청 시작:', dispatchRequestId);
+    // 먼저 Alert 창으로 확인
+    Alert.alert(
+      '거래완료 확인',
+      '정말 거래를 완료하시겠습니까?\n거래완료 이후에는 취소가 어렵습니다.',
+      [
+        {
+          text: '취소',
+          style: 'cancel',
+        },
+        {
+          text: '확인',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              console.log('거래 확정 요청 시작:', dispatchRequestId);
 
-      const result = await confirmTransaction(dispatchRequestId);
+              const result = await confirmTransaction(dispatchRequestId);
 
-      if (result && result.success) {
-        console.log('거래 확정 요청 성공:', result);
+              if (result && result.success) {
+                console.log('거래 확정 요청 성공:', result);
 
-        // 성공 시 메시지 처리
-        // const statusMessage =
-        //   'status' in result && result.status === 'waiting_counterpart'
-        //     ? '거래 확정을 완료했습니다. 상조팀장의 거래 완료가 필요합니다.'
-        //     : 'status' in result && result.status === 'completed'
-        //     ? '거래가 성공적으로 완료되었습니다.'
-        //     : result.message || '거래 확정이 완료되었습니다.';
+                // 성공 시에만 데이터 새로고침
+                try {
+                  await loadDispatchDetail();
+                } catch (refreshError) {
+                  console.error('데이터 새로고침 실패:', refreshError);
+                  // 새로고침 실패해도 계속 진행
+                }
 
-        // Toast.show({
-        //   type: 'success',
-        //   text1: statusMessage,
-        //   position: 'top',
-        //   topOffset: 0,
-        // });
+                // 거래가 완전히 완료된 경우에만 뒤로가기
+                if ('status' in result && result.status === 'completed') {
+                  setTimeout(() => {
+                    navigation.goBack();
+                  }, 1500);
+                }
+              } else {
+                console.log('거래 확정 요청 실패:', result);
+                const errorMessage = result?.message || '거래 확정에 실패했습니다.';
 
-        // 성공 시에만 데이터 새로고침
-        try {
-          await loadDispatchDetail();
-        } catch (refreshError) {
-          console.error('데이터 새로고침 실패:', refreshError);
-          // 새로고침 실패해도 계속 진행
-        }
+                // 캐시 부족 관련 에러 메시지 특별 처리
+                const isCashInsufficientError =
+                  errorMessage.includes('캐시') ||
+                  errorMessage.includes('포인트') ||
+                  errorMessage.includes('부족');
 
-        // 거래가 완전히 완료된 경우에만 뒤로가기
-        if ('status' in result && result.status === 'completed') {
-          setTimeout(() => {
-            navigation.goBack();
-          }, 1500);
-        }
-      } else {
-        console.log('거래 확정 요청 실패:', result);
-        const errorMessage = result?.message || '거래 확정에 실패했습니다.';
+                // 캐시 부족일 때는 Alert 표시
+                if (isCashInsufficientError) {
+                  Alert.alert(
+                    '거래확정 불가',
+                    '캐시 부족으로 거래확정이 불가능합니다.\n캐시를 충전해주세요.',
+                    [
+                      {
+                        text: '확인',
+                        style: 'default',
+                      },
+                    ],
+                    {cancelable: false},
+                  );
+                }
 
-        // 캐시 부족 관련 에러 메시지 특별 처리
-        const isCashInsufficientError =
-          errorMessage.includes('캐시') ||
-          errorMessage.includes('포인트') ||
-          errorMessage.includes('부족');
+                // 에러 발생 시 현재 페이지 유지 - 네비게이션 없음
+                return;
+              }
+            } catch (err: any) {
+              console.error('거래 확정 에러:', err);
+              console.log('🔍 에러 전체 객체:', JSON.stringify(err, null, 2));
 
-        // 캐시 부족일 때는 Alert 표시
-        if (isCashInsufficientError) {
-          Alert.alert(
-            '거래확정 불가',
-            '캐시 부족으로 거래확정이 불가능합니다.\n캐시를 충전해주세요.',
-            [
-              {
-                text: '확인',
-                style: 'default',
-              },
-            ],
-            {cancelable: false},
-          );
-        }
+              // 서버에서 온 구체적인 에러 메시지 추출
+              let errorMessage = '거래 확정 중 오류가 발생했습니다.';
 
-        // 에러 발생 시 현재 페이지 유지 - 네비게이션 없음
-        return;
-      }
-    } catch (err: any) {
-      console.error('거래 확정 에러:', err);
-      console.log('🔍 에러 전체 객체:', JSON.stringify(err, null, 2));
+              if (err.response?.data?.message) {
+                // 서버에서 JSON 형태로 에러 메시지를 보낸 경우
+                errorMessage = err.response.data.message;
+                console.log('🔍 서버 에러 메시지:', errorMessage);
+              } else if (err.message) {
+                // Error 객체의 message 속성
+                errorMessage = err.message;
+                console.log('🔍 Error 객체 메시지:', errorMessage);
+              }
 
-      // 서버에서 온 구체적인 에러 메시지 추출
-      let errorMessage = '거래 확정 중 오류가 발생했습니다.';
+              // 캐시 부족 관련 에러 메시지 특별 처리
+              const isCashInsufficientError =
+                errorMessage.includes('캐시') ||
+                errorMessage.includes('포인트') ||
+                errorMessage.includes('부족') ||
+                errorMessage.includes('insufficient');
+              const finalErrorMessage = isCashInsufficientError
+                ? '캐시 부족으로 거래확정이 불가능합니다.\n캐시를 충전해주세요.'
+                : errorMessage;
 
-      if (err.response?.data?.message) {
-        // 서버에서 JSON 형태로 에러 메시지를 보낸 경우
-        errorMessage = err.response.data.message;
-        console.log('🔍 서버 에러 메시지:', errorMessage);
-      } else if (err.message) {
-        // Error 객체의 message 속성
-        errorMessage = err.message;
-        console.log('🔍 Error 객체 메시지:', errorMessage);
-      }
+              console.log('🔍 최종 에러 메시지:', finalErrorMessage);
 
-      // 캐시 부족 관련 에러 메시지 특별 처리
-      const isCashInsufficientError =
-        errorMessage.includes('캐시') ||
-        errorMessage.includes('포인트') ||
-        errorMessage.includes('부족') ||
-        errorMessage.includes('insufficient');
-      const finalErrorMessage = isCashInsufficientError
-        ? '캐시 부족으로 거래확정이 불가능합니다.\n캐시를 충전해주세요.'
-        : errorMessage;
-
-      console.log('🔍 최종 에러 메시지:', finalErrorMessage);
-
-      // 캐시 부족일 때는 Alert 표시
-      if (isCashInsufficientError) {
-        Alert.alert(
-          '거래확정 불가',
-          '캐시 부족으로 거래확정이 불가능합니다.\n캐시를 충전해주세요.',
-          [
-            {
-              text: '확인',
-              style: 'default',
-            },
-          ],
-          {cancelable: false},
-        );
-      }
-      // 에러 발생 시 현재 페이지 유지 - 어떤 네비게이션도 수행하지 않음
-      // 현재 상태 유지하여 사용자가 계속 거래확정 페이지에서 작업할 수 있도록 함
-      return;
-    }
+              // 캐시 부족일 때는 Alert 표시
+              if (isCashInsufficientError) {
+                Alert.alert(
+                  '거래확정 불가',
+                  '캐시 부족으로 거래확정이 불가능합니다.\n먼저 캐시를 충전해주세요.',
+                  [
+                    {
+                      text: '확인',
+                      style: 'default',
+                    },
+                  ],
+                  {cancelable: false},
+                );
+              }
+              // 에러 발생 시 현재 페이지 유지 - 어떤 네비게이션도 수행하지 않음
+              // 현재 상태 유지하여 사용자가 계속 거래확정 페이지에서 작업할 수 있도록 함
+              return;
+            }
+          },
+        },
+      ],
+      {cancelable: true},
+    );
   };
 
   const handleGoBack = () => {
@@ -432,7 +435,7 @@ const ConfirmTransactionPage = () => {
               loading && styles.buttonDisabled,
               {
                 paddingVertical: responsiveStyles.buttonPaddingVertical,
-                marginBottom: responsiveStyles.buttonMarginBottom,
+                marginBottom: isSmallDevice ? scaleSize(12) : responsiveStyles.buttonMarginBottom,
               },
             ]}
             disabled={loading}>
@@ -456,7 +459,7 @@ const ConfirmTransactionPage = () => {
               styles.buttonWaiting,
               {
                 paddingVertical: responsiveStyles.buttonPaddingVertical,
-                marginBottom: responsiveStyles.buttonMarginBottom,
+                marginBottom: isSmallDevice ? scaleSize(12) : responsiveStyles.buttonMarginBottom,
               },
             ]}
             disabled={true}>
@@ -479,7 +482,7 @@ const ConfirmTransactionPage = () => {
               loading && styles.buttonDisabled,
               {
                 paddingVertical: responsiveStyles.buttonPaddingVertical,
-                marginBottom: responsiveStyles.buttonMarginBottom,
+                marginBottom: isSmallDevice ? scaleSize(12) : responsiveStyles.buttonMarginBottom,
               },
             ]}
             disabled={loading}>
@@ -504,7 +507,7 @@ const ConfirmTransactionPage = () => {
               styles.buttonCompleted,
               {
                 paddingVertical: responsiveStyles.buttonPaddingVertical,
-                marginBottom: responsiveStyles.buttonMarginBottom,
+                marginBottom: isSmallDevice ? scaleSize(12) : responsiveStyles.buttonMarginBottom,
               },
             ]}>
             <Typo
@@ -526,7 +529,7 @@ const ConfirmTransactionPage = () => {
               styles.buttonDisabled,
               {
                 paddingVertical: responsiveStyles.buttonPaddingVertical,
-                marginBottom: responsiveStyles.buttonMarginBottom,
+                marginBottom: isSmallDevice ? scaleSize(12) : responsiveStyles.buttonMarginBottom,
               },
             ]}
             disabled={true}>
@@ -553,8 +556,10 @@ const ConfirmTransactionPage = () => {
     const statusMessage = getStatusMessage(status);
 
     return (
-      <View style={styles.statusMessageContainer}>
-        <Typo style={statusMessage.style}>{statusMessage.text}</Typo>
+      <View style={[styles.statusMessageContainer, {marginBottom: isSmallDevice ? scaleSize(8) : scaleSize(16)}]}>
+        <Typo style={[statusMessage.style, {fontSize: scaleFontSize(isSmallDevice ? 12 : 14)}]}>
+          {statusMessage.text}
+        </Typo>
       </View>
     );
   };
@@ -573,7 +578,7 @@ const ConfirmTransactionPage = () => {
         {loading && !dispatchDetail && (
           <View style={styles.centerContainer}>
             <ActivityIndicator size="large" color="#2D81F1" />
-            <Typo style={styles.loadingText}>
+            <Typo style={[styles.loadingText, {fontSize: scaleFontSize(isSmallDevice ? 14 : 16)}]}>
               출동 신청 정보를 불러오는 중...
             </Typo>
           </View>
@@ -582,11 +587,15 @@ const ConfirmTransactionPage = () => {
         {/* 에러 상태 */}
         {error && !loading && !dispatchDetail && (
           <View style={styles.centerContainer}>
-            <Typo style={styles.errorText}>{error}</Typo>
+            <Typo style={[styles.errorText, {fontSize: scaleFontSize(isSmallDevice ? 14 : 16)}]}>
+              {error}
+            </Typo>
             <TouchableOpacity
-              style={styles.retryButton}
+              style={[styles.retryButton, {paddingVertical: scaleSize(isSmallDevice ? 8 : 10)}]}
               onPress={loadDispatchDetail}>
-              <Typo style={styles.retryButtonText}>다시 시도</Typo>
+              <Typo style={[styles.retryButtonText, {fontSize: scaleFontSize(isSmallDevice ? 12 : 14)}]}>
+                다시 시도
+              </Typo>
             </TouchableOpacity>
           </View>
         )}
@@ -717,8 +726,8 @@ const ConfirmTransactionPage = () => {
                       handleCall(dispatchDetail?.managerPhoneNumber)
                     }
                     disabled={loading}>
-                    <PhoneIcon width={16} height={16} />
-                    <Typo style={styles.phoneIconButtonText}>전화하기</Typo>
+                    <PhoneIcon width={scaleSize(isSmallDevice ? 14 : 16)} height={scaleSize(isSmallDevice ? 14 : 16)} />
+                    <Typo style={[styles.phoneIconButtonText, {fontSize: scaleFontSize(isSmallDevice ? 12 : 14)}]}>전화하기</Typo>
                   </TouchableOpacity>
                 </View>
                 <TextInput
@@ -792,7 +801,7 @@ const ConfirmTransactionPage = () => {
                   styles.bottomInfo,
                   {
                     paddingTop: responsiveStyles.bottomInfoPaddingTop,
-                    paddingBottom: responsiveStyles.bottomInfoPaddingBottom,
+                    paddingBottom: isSmallDevice ? scaleSize(10) : responsiveStyles.bottomInfoPaddingBottom,
                   },
                 ]}>
                 <View
@@ -890,20 +899,12 @@ const ConfirmTransactionPage = () => {
                   </Typo>
                 </View>
               </View>
-              {/* <View style={styles.buttonRow}>
-                <TouchableOpacity
-                  style={[styles.phoneButton, loading && styles.disabledButton]}
-                  onPress={() => handleCall(dispatchDetail.managerPhoneNumber)}
-                  disabled={loading}>
-                  <PhoneIcon width={18} height={18} />
-                  <Typo style={styles.phoneIconButtonText}>전화</Typo>
-                </TouchableOpacity>
-              </View> */}
               {/* 상태 메시지 */}
               {renderStatusMessage()}
 
               {/* 상태별 버튼 */}
               {renderActionButton()}
+
             </View>
           </>
         )}
@@ -911,7 +912,7 @@ const ConfirmTransactionPage = () => {
         {/* 데이터 없음 */}
         {!loading && !error && !dispatchDetail && (
           <View style={styles.centerContainer}>
-            <Typo style={styles.errorText}>
+            <Typo style={[styles.errorText, {fontSize: scaleFontSize(isSmallDevice ? 14 : 16)}]}>
               출동 신청 정보를 찾을 수 없습니다.
             </Typo>
           </View>
@@ -1023,89 +1024,79 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 60,
+    paddingVertical: scaleSize(isSmallDevice ? 40 : 60),
   },
   loadingText: {
-    marginTop: 16,
-    fontSize: 16,
+    marginTop: scaleSize(isSmallDevice ? 12 : 16),
     color: '#666',
     fontFamily: 'Pretendard-Regular',
   },
   errorText: {
-    fontSize: 16,
     color: '#F04452',
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: scaleSize(isSmallDevice ? 12 : 16),
     fontFamily: 'Pretendard-Regular',
   },
   retryButton: {
     backgroundColor: '#2D81F1',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingHorizontal: scaleSize(isSmallDevice ? 16 : 20),
     borderRadius: 8,
   },
   retryButtonText: {
     color: '#fff',
-    fontSize: 14,
     fontWeight: '600',
     fontFamily: 'Pretendard-SemiBold',
   },
   statusMessageContainer: {
-    marginBottom: 16,
+    marginBottom: scaleSize(16),
   },
   pendingMessage: {
-    fontSize: 14,
     color: '#F57C00',
     textAlign: 'center',
     fontFamily: 'Pretendard-Regular',
-    lineHeight: 20,
+    lineHeight: scaleFontSize(isSmallDevice ? 18 : 20),
   },
   approvedMessage: {
-    fontSize: 14,
     color: '#1976D2',
     textAlign: 'center',
     fontFamily: 'Pretendard-SemiBold',
-    lineHeight: 20,
+    lineHeight: scaleFontSize(isSmallDevice ? 18 : 20),
   },
   waitingMessage: {
-    fontSize: 14,
     color: '#F57C00',
     textAlign: 'center',
     fontFamily: 'Pretendard-SemiBold',
-    lineHeight: 20,
+    lineHeight: scaleFontSize(isSmallDevice ? 18 : 20),
   },
   completedMessage: {
-    fontSize: 14,
     color: '#2E7D32',
     textAlign: 'center',
     fontFamily: 'Pretendard-SemiBold',
-    lineHeight: 20,
+    lineHeight: scaleFontSize(isSmallDevice ? 18 : 20),
   },
   defaultMessage: {
-    fontSize: 14,
     color: '#666',
     textAlign: 'center',
     fontFamily: 'Pretendard-Regular',
-    lineHeight: 20,
+    lineHeight: scaleFontSize(isSmallDevice ? 18 : 20),
   },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: 16,
-    gap: 10,
+    marginBottom: scaleSize(isSmallDevice ? 12 : 16),
+    gap: scaleSize(isSmallDevice ? 8 : 10),
   },
   phoneButton: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 10,
+    gap: scaleSize(isSmallDevice ? 8 : 10),
     flex: 1,
     backgroundColor: 'rgba(226, 242, 255, 0.5)',
-    paddingVertical: 18,
+    paddingVertical: scaleSize(isSmallDevice ? 14 : 18),
     borderRadius: 8,
     alignItems: 'center',
   },
   phoneIconButtonText: {
-    fontSize: 16,
     fontWeight: '600',
     color: '#3ADA00',
     fontFamily: 'Pretendard-Bold',
@@ -1117,17 +1108,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: scaleSize(isSmallDevice ? 6 : 8),
   },
   inlinePhoneButton: {
     flexDirection: 'row',
-    marginLeft: 10,
-    gap: 4,
+    marginLeft: scaleSize(isSmallDevice ? 8 : 10),
+    gap: scaleSize(isSmallDevice ? 2 : 4),
     borderRadius: 8,
     alignItems: 'center',
   },
   inlinePhoneButtonText: {
-    fontSize: 14,
     fontWeight: '600',
     color: '#666',
     fontFamily: 'Pretendard-Bold',
