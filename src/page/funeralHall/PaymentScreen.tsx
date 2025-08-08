@@ -43,9 +43,35 @@ const PaymentScreen = ({ navigation, route }: PaymentScreenProps) => {
   } = route.params;
   
   const userCode = 'imp17160662'; // 실제 포트원 가맹점 코드로 변경 필요
+  //const userCode = 'channel-key-172f8648-39dc-4f87-9a5a-2367f3316600';
 
   const handlePaymentResult = async (response: any) => {
     console.log('결제결과:', response);
+
+    // 상세한 에러 처리
+  if (response.error_code != null) {
+    let errorMessage = '결제에 실패했습니다.';
+    
+    switch (response.error_code) {
+      case 'F2001':
+        errorMessage = '상점개인키 로드오류';
+        break;
+      case 'F2002':
+        errorMessage = '결제 정보가 올바르지 않습니다.';
+        break;
+      default:
+        errorMessage = response.error_msg || '알 수 없는 오류가 발생했습니다.';
+    }
+    
+    (navigation as any).replace('PaymentResult', { 
+      result: '실패', 
+      response,
+      errorMsg: errorMessage,
+      amount,
+      variant,
+    });
+    return;
+  }
     
     try {
       // 포트원 결제 성공 조건을 실제 응답에 맞게 수정
