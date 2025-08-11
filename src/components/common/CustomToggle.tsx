@@ -58,6 +58,7 @@ const CustomToggle = ({
     outputRange: [inactiveColor, activeColor],
   });
 
+  // 트랙 색상 변경
   const thumbPosition = animatedValue.interpolate({
     inputRange: [0, 1],
     outputRange: [

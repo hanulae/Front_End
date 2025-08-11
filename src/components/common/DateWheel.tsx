@@ -14,14 +14,17 @@ const screenHeight = Dimensions.get('window').height;
 const ITEM_HEIGHT = 40;
 // const VISIBLE_ITEMS = 1;
 
+// 년도 범위 생성
 const generateRange = (start: number, end: number) =>
   Array.from({length: end - start + 1}, (_, i) => start + i);
 
+// 요일 변환
 const getKoreanWeekday = (date: Date) => {
   const map = ['일', '월', '화', '수', '목', '금', '토'];
   return map[date.getDay()];
 };
 
+// 날짜 포맷팅
 const formatKoreanDate = (year: number, month: number, day: number) => {
   const date = new Date(year, month - 1, day);
   return `${year}년 ${String(month).padStart(2, '0')}월 ${String(day).padStart(
@@ -30,10 +33,12 @@ const formatKoreanDate = (year: number, month: number, day: number) => {
   )}일 (${getKoreanWeekday(date)})`;
 };
 
+// 월의 마지막 날짜 계산
 const getLastDayOfMonth = (year: number, month: number) => {
   return new Date(year, month, 0).getDate(); // 주의: month는 1-based로 넣고 -1 하지 않음
 };
 
+// 날짜 휠 컴포넌트
 const Wheel = ({data, value, onChange}: any) => {
   const ref = useRef<FlatList>(null);
 
@@ -95,7 +100,7 @@ const DateWheelBottomSheet = ({
 
   // 기본값을 현재 날짜로 설정
   const defaultDate = initialDate || new Date();
-  
+
   const [year, setYear] = useState(defaultDate.getFullYear());
   const [month, setMonth] = useState(defaultDate.getMonth() + 1);
   const [day, setDay] = useState(defaultDate.getDate());
@@ -149,7 +154,7 @@ const DateWheelBottomSheet = ({
   // 일 변경 함수
   const handleDayChange = (direction: 'up' | 'down') => {
     const lastDay = getLastDayOfMonth(year, month);
-    
+
     if (direction === 'up') {
       if (day < lastDay) {
         setDay(day + 1);
@@ -200,7 +205,7 @@ const DateWheelBottomSheet = ({
         <View style={styles.wheelWrapper}>
           {/* year */}
           <View style={styles.wheelColumn}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.arrowButton}
               onPress={() => handleYearChange('up')}
               activeOpacity={0.7}>
@@ -211,7 +216,7 @@ const DateWheelBottomSheet = ({
               value={year}
               onChange={setYear}
             />
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.arrowButton}
               onPress={() => handleYearChange('down')}
               activeOpacity={0.7}>
@@ -221,7 +226,7 @@ const DateWheelBottomSheet = ({
 
           {/* month */}
           <View style={styles.wheelColumn}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.arrowButton}
               onPress={() => handleMonthChange('up')}
               activeOpacity={0.7}>
@@ -232,7 +237,7 @@ const DateWheelBottomSheet = ({
               value={month}
               onChange={setMonth}
             />
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.arrowButton}
               onPress={() => handleMonthChange('down')}
               activeOpacity={0.7}>
@@ -242,7 +247,7 @@ const DateWheelBottomSheet = ({
 
           {/* day */}
           <View style={styles.wheelColumn}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.arrowButton}
               onPress={() => handleDayChange('up')}
               activeOpacity={0.7}>
@@ -253,7 +258,7 @@ const DateWheelBottomSheet = ({
               value={day}
               onChange={setDay}
             />
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.arrowButton}
               onPress={() => handleDayChange('down')}
               activeOpacity={0.7}>

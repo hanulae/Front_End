@@ -29,6 +29,7 @@ const MAX_IMAGE_COUNT = 10;
 const PHOTOS_PER_PAGE = 20; // 한 번에 로드할 사진 개수
 const {height} = Dimensions.get('window');
 
+// 사진 선택을 위한 앨범 바텀시트 컴포넌트
 const AlbumBottomSheet = ({
   visible,
   onClose,
@@ -52,7 +53,7 @@ const AlbumBottomSheet = ({
       setHasNextPage(true);
       setEndCursor(undefined);
 
-      // 초기 로딩을 위한 직접 호출
+      // 앨범 초기 사진 목록을 로드하는 함수
       const loadInitialPhotos = async () => {
         const hasPermission = await requestPhotoLibraryPermission();
         if (!hasPermission) {
@@ -97,6 +98,7 @@ const AlbumBottomSheet = ({
     }
   }, [visible, translateY]);
 
+  // 사진 선택/해제를 토글하는 함수
   const toggleSelect = (uri: string) => {
     setSelectedPhotos(prev => {
       const updated = new Set(prev);
@@ -109,6 +111,7 @@ const AlbumBottomSheet = ({
     });
   };
 
+  // 선택 완료 버튼 클릭 시 실행되는 함수
   const handleDone = () => {
     const result = Array.from(selectedPhotos);
     console.log('Selected photos:', Array.from(selectedPhotos));
@@ -118,6 +121,7 @@ const AlbumBottomSheet = ({
     }, 50);
   };
 
+  // 카메라를 열어 사진을 촬영하는 함수
   const handleOpenCamera = async () => {
     const hasPermission = await requestCameraPermission();
     console.log('hasPermission', hasPermission);
@@ -136,6 +140,7 @@ const AlbumBottomSheet = ({
     });
   };
 
+  // 스크롤 끝에서 추가 사진을 로드하는 함수
   const handleLoadMore = useCallback(async () => {
     console.log('handleLoadMore 호출됨');
     // 콘텐츠가 충분히 많지 않으면 호출하지 않도록
@@ -172,6 +177,7 @@ const AlbumBottomSheet = ({
     }
   }, [hasNextPage, isLoading, endCursor]);
 
+  // FlatList의 각 아이템을 렌더링하는 함수
   const renderItem = ({item, index}: {item: {uri: string}; index: number}) => {
     console.log('renderItem', item, index);
     if (index === 0) {
@@ -192,6 +198,7 @@ const AlbumBottomSheet = ({
     );
   };
 
+  // FlatList 하단에 로딩 인디케이터를 렌더링하는 함수
   const renderFooter = () => {
     if (!isLoading) return null;
     return (

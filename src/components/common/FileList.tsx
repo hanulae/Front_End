@@ -31,6 +31,7 @@ const getIconByFileName = (name: string) => {
   return <PdfIcon width={20} height={20} />;
 };
 
+// 파일 목록 컴포넌트
 const FileList = ({files, onDelete}: Props) => {
   return (
     <FlatList

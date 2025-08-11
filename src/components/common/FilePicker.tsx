@@ -37,6 +37,7 @@ const FilePicker = ({onPick, onClose, visible}: IFilePickerProps) => {
     }
   }, [visible]);
 
+  // 파일 선택 핸들러
   const handlePickFiles = async () => {
     try {
       const picked = await pick({allowMultiSelection: true});
