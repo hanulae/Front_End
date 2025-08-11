@@ -11,6 +11,27 @@ interface IDispatchCardProps {
   onBidDetailPress?: () => void; // 입찰 상세 정보 버튼 클릭
 }
 
+/**
+ * 입찰 카드
+ *
+ * DispatchCard Props 인터페이스
+ * @param name - 고객명
+ * @param date - 날짜
+ * @param index - 인덱스
+ * @param onPress - 카드 전체 클릭 콜백
+ * @param onBidDetailPress - 입찰 상세 정보 버튼 클릭 콜백
+ *
+ * 목적:
+ * - 입찰 정보를 카드 형태로 표시
+ * - 고객명, 날짜, 입찰 상세 정보 버튼 제공
+ *
+ * 관리하는 상태값들:
+ * - 없음 (완전 표시용 컴포넌트)
+ *
+ * 반응형:
+ * - scaleSize/scaleFontSize 유틸로 디바이스 크기에 대응
+ */
+
 const DispatchCard = ({
   name,
   date,
@@ -32,8 +53,8 @@ const DispatchCard = ({
 
       <View style={styles.bottomRow}>
         <View style={styles.leftInfo}>
-          <CustomButton 
-            style={styles.detailButton} 
+          <CustomButton
+            style={styles.detailButton}
             onPress={() => {
               if (onBidDetailPress) {
                 onBidDetailPress();
