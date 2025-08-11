@@ -1,14 +1,31 @@
 import React, {useState, useRef} from 'react';
-import {View, Pressable, StyleSheet, Animated, Dimensions, Platform} from 'react-native';
+import {
+  View,
+  Pressable,
+  StyleSheet,
+  Animated,
+  Dimensions,
+  Platform,
+} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {scaleSize, scaleFontSize, isSmallDevice, isMediumDevice, isLargeDevice} from '../../utils/responsive';
+import {
+  scaleSize,
+  scaleFontSize,
+  isSmallDevice,
+  isMediumDevice,
+} from '../../utils/responsive';
 import Typo from './Typo';
 import FuneralIcon from '../../assets/User/User_FuneralDisable.svg';
 import ManagerIcon from '../../assets/User/User_ManagerDisable.svg';
 import CheckIcon from '../../assets/User/User_Check.svg';
 
+/**
+ * UserSelectSheet Props 인터페이스
+ * @param onClose - 바텀시트 닫기 콜백 함수
+ * @param targetScreen - 이동할 대상 스크린 식별자 ('Login' | 'Signup')
+ */
 interface ISelectSheetProps {
   onClose: () => void;
   targetScreen: 'Login' | 'Signup';
@@ -16,13 +33,24 @@ interface ISelectSheetProps {
 
 const {height} = Dimensions.get('window');
 
+/**
+ * 회원 유형(상조팀장/장례식장) 선택을 위한 바텀시트 컴포넌트
+ *
+ * 관리하는 상태값들:
+ * - selected: 현재 선택된 회원 유형 ('manager' | 'funeral')
+ * - translateY: 바텀시트 표시 애니메이션을 위한 Animated.Value
+ * - insets: 안전영역(노치/홈 인디케이터 등) 정보를 제공하는 훅 값
+ */
 const UserSelectSheet = ({onClose, targetScreen}: ISelectSheetProps) => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const [selected, setSelected] = useState<'manager' | 'funeral'>('manager');
   const translateY = useRef(new Animated.Value(300)).current;
   const insets = useSafeAreaInsets();
-  
-  // Android 네비게이션 바 높이 고려한 bottom padding 계산
+
+  /**
+   * Android 네비게이션 바 높이를 고려하여 하단 패딩을 계산
+   * iOS는 홈 인디케이터 영역을 고려함
+   */
   const getBottomPadding = () => {
     if (Platform.OS === 'android') {
       return Math.max(insets.bottom, scaleSize(20));
@@ -30,27 +58,36 @@ const UserSelectSheet = ({onClose, targetScreen}: ISelectSheetProps) => {
     return Math.max(insets.bottom, scaleSize(10));
   };
 
-  // 반응형 높이 계산
+  /**
+   * 디바이스 크기에 따른 바텀시트 높이 계산
+   */
   const getSheetHeight = () => {
     if (isSmallDevice) return height * 0.35;
     if (isMediumDevice) return height * 0.32;
     return height * 0.3;
   };
 
-  // 반응형 패딩 계산
+  /**
+   * 디바이스 크기에 따른 수평 패딩 계산
+   */
   const getResponsivePadding = () => {
     if (isSmallDevice) return scaleSize(16);
     if (isMediumDevice) return scaleSize(20);
     return scaleSize(25);
   };
 
-  // 반응형 간격 계산
+  /**
+   * 디바이스 크기에 따른 옵션 간격 계산
+   */
   const getResponsiveGap = () => {
     if (isSmallDevice) return scaleSize(8);
     if (isMediumDevice) return scaleSize(10);
     return scaleSize(12);
   };
 
+  /**
+   * 마운트 시 바텀시트가 아래에서 위로 슬라이드 인 되는 애니메이션 처리
+   */
   React.useEffect(() => {
     Animated.timing(translateY, {
       toValue: 0,
@@ -59,6 +96,10 @@ const UserSelectSheet = ({onClose, targetScreen}: ISelectSheetProps) => {
     }).start();
   }, [translateY]);
 
+  /**
+   * 회원 유형을 선택하고 바텀시트를 닫은 뒤 대상 스크린으로 네비게이션
+   * @param type - 선택한 회원 유형 ('manager' | 'funeral')
+   */
   const handleSelect = (type: 'manager' | 'funeral') => {
     setSelected(type);
     setTimeout(() => {
@@ -69,15 +110,15 @@ const UserSelectSheet = ({onClose, targetScreen}: ISelectSheetProps) => {
 
   return (
     <Pressable style={styles.overlay} onPress={onClose}>
-      <Animated.View 
+      <Animated.View
         style={[
-          styles.sheet, 
+          styles.sheet,
           {
-            transform: [{translateY}], 
+            transform: [{translateY}],
             paddingBottom: getBottomPadding(),
             height: getSheetHeight(),
             paddingHorizontal: getResponsivePadding(),
-          }
+          },
         ]}>
         <View style={styles.titleContainer}>
           <Typo style={styles.title}>회원유형을 선택해 주세요.</Typo>

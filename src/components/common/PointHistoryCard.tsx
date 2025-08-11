@@ -3,14 +3,33 @@ import PointIcon from '../../assets/Bullet/Bullet_PointBlue.svg';
 import CashGrayIcon from '../../assets/Bullet/Bullet_CoinGray.svg';
 import CalendarIcon from '../../assets/Bullet/Bullet_Date.svg';
 import Typo from './Typo';
-import { scaleFontSize, scaleSize, isSmallDevice } from '../../utils/responsive';
+import {scaleFontSize, scaleSize, isSmallDevice} from '../../utils/responsive';
 
+/**
+ * 포인트/현금 거래내역 카드
+ *
+ * 목적:
+ * - 거래 타입(적립/환급), 일시, 금액, 잔액, 상태를 한 카드에 표시
+ * - 자산 타입(포인트/현금)에 따라 아이콘 분기
+ *
+ * 관리하는 상태값들:
+ * - 없음 (완전 표시용 컴포넌트)
+ *
+ * 반응형:
+ * - scaleSize/scaleFontSize 유틸로 디바이스 크기에 대응
+ */
 interface IPointHistoryCardProps {
+  /** 자산 타입 (포인트/현금) */
   assetType: 'point' | 'cash';
+  /** 거래 유형 (적립/환급) */
   transactionType: 'earn' | 'refund';
+  /** 거래 일시 */
   transactionDate: string;
+  /** 거래 금액 */
   amount: number;
+  /** 거래 후 잔액 */
   balance: number;
+  /** 상태 (대기/완료) */
   status: 'pending' | 'completed';
 }
 
@@ -22,10 +41,12 @@ const PointHistoryCard = ({
   balance,
   status,
 }: IPointHistoryCardProps) => {
+  /** 아이콘 크기 (반응형) */
   const iconSize = scaleSize(24);
-  
+
   return (
     <View style={styles.wrapper}>
+      {/* 1행: 유형/상태 + 금액/아이콘 */}
       <View style={styles.firstRow}>
         <View style={styles.typeStatusContainer}>
           <Typo
@@ -43,6 +64,7 @@ const PointHistoryCard = ({
           {status === 'completed' && (
             <Typo style={styles.completedText}>완료</Typo>
           )}
+          {/* 상태 추가 대비: cancelled 등의 확장을 고려 */}
           {status === 'cancelled' && (
             <Typo style={styles.cancelledText}>거절</Typo>
           )}
@@ -50,12 +72,15 @@ const PointHistoryCard = ({
 
         <View style={styles.amountContainer}>
           <Typo style={styles.amountText}>{amount}</Typo>
-          {assetType === 'point' ? 
-            <PointIcon width={iconSize} height={iconSize} /> : 
+          {assetType === 'point' ? (
+            <PointIcon width={iconSize} height={iconSize} />
+          ) : (
             <CashGrayIcon width={iconSize} height={iconSize} />
-          }
+          )}
         </View>
       </View>
+
+      {/* 2행: 날짜 + 잔액 */}
       <View style={styles.secondRow}>
         <View style={styles.dateContainer}>
           <CalendarIcon width={iconSize} height={iconSize} />

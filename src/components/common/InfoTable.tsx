@@ -1,18 +1,35 @@
 import {StyleSheet, View, TouchableOpacity} from 'react-native';
 import Typo from './Typo';
 
+/**
+ * 정보 테이블 컴포넌트
+ *
+ * 목적:
+ * - 장례식장 정보(규모/빈소/운영/형태)를 테이블 형태로 표시
+ * - editable 모드일 때 일부 항목은 선택형으로 편집 가능
+ *
+ * 관리하는 상태값들:
+ * - 없음 (완전 제어형 컴포넌트, 변경은 onChange 콜백으로 외부에 위임)
+ *
+ * 주요 포인트:
+ * - '빈소'는 항상 읽기 전용
+ * - '규모/운영/형태'는 editable 모드일 때 선택 버튼 제공
+ */
 interface IInfoTableProps {
+  /** 편집 가능 여부 */
   editable: boolean;
+  /** 표에 표시할 데이터 */
   data: {
     규모: string;
     빈소: string;
     운영: string;
     형태: string;
   };
+  /** 값 변경 콜백 (편집 가능한 항목에 한해 호출) */
   onChange?: (key: keyof IInfoTableProps['data'], value: string) => void;
 }
 
-// 선택 옵션 정의
+/** 선택 옵션 정의 (편집 모드에서만 사용) */
 const SELECT_OPTIONS = {
   규모: ['소형', '중형', '대형'],
   운영: ['공설', '사설'],
@@ -22,11 +39,15 @@ const SELECT_OPTIONS = {
 const InfoTable = ({editable, data, onChange}: IInfoTableProps) => {
   console.log('🏁 data:', data);
 
+  /**
+   * 각 행 렌더러
+   * - label에 따라 읽기 전용/선택형 분기
+   */
   const renderRow = (label: string) => {
     const value = data[label as keyof typeof data];
 
+    // '빈소'는 항상 읽기 전용
     if (label === '빈소') {
-      // 빈소는 항상 읽기 전용
       return (
         <View style={styles.row}>
           <View style={styles.labelContainer}>
@@ -39,8 +60,8 @@ const InfoTable = ({editable, data, onChange}: IInfoTableProps) => {
       );
     }
 
+    // 편집 모드가 아닐 때는 모든 필드 읽기 전용
     if (!editable) {
-      // 편집 모드가 아닐 때는 모든 필드 읽기 전용
       return (
         <View style={styles.row}>
           <View style={styles.labelContainer}>
@@ -53,7 +74,7 @@ const InfoTable = ({editable, data, onChange}: IInfoTableProps) => {
       );
     }
 
-    // 편집 모드에서 규모, 운영, 형태는 선택 옵션
+    // 편집 모드에서 규모, 운영, 형태는 선택 옵션 제공
     if (SELECT_OPTIONS[label as keyof typeof SELECT_OPTIONS]) {
       const options = SELECT_OPTIONS[label as keyof typeof SELECT_OPTIONS];
       return (

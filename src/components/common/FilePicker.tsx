@@ -11,16 +11,37 @@ import {
 } from 'react-native';
 import {useEffect, useRef} from 'react';
 
+/**
+ * FilePicker Props 인터페이스
+ * @param onPick - 파일 선택 완료 시 `LocalFile[]` 전달
+ * @param onClose - 모달 닫기 콜백
+ * @param visible - 모달 표시 여부 (optional)
+ */
 interface IFilePickerProps {
   onPick: (files: LocalFile[]) => void;
   onClose: () => void;
   visible?: boolean;
 }
 
+// 화면 높이 - 슬라이드 애니메이션 시작/끝 위치 계산
 const {height} = Dimensions.get('window');
+
+/**
+ * 문서 파일 선택 바텀시트 모달
+ *
+ * 주요 기능:
+ * - `@react-native-documents/picker`를 사용한 다중 파일 선택
+ * - 선택된 파일을 앱 내부 로컬 경로로 복사하여 반환 (`getLocalFileCopies`)
+ * - 바텀시트 슬라이드 애니메이션
+ */
 const FilePicker = ({onPick, onClose, visible}: IFilePickerProps) => {
+  // 바텀시트 슬라이드 애니메이션 값 (화면 하단 밖에서 시작)
   const translateY = useRef(new Animated.Value(height)).current;
 
+  /**
+   * 모달 표시/숨김 시 슬라이드 애니메이션 처리
+   * visible: true → 위로 슬라이드업, false → 아래로 슬라이드다운
+   */
   useEffect(() => {
     if (visible) {
       Animated.timing(translateY, {
@@ -37,7 +58,13 @@ const FilePicker = ({onPick, onClose, visible}: IFilePickerProps) => {
     }
   }, [visible]);
 
-  // 파일 선택 핸들러
+  /**
+   * 파일 선택 핸들러
+   * 목적:
+   * - 문서 피커로부터 다중 선택 결과 수신
+   * - 파일을 앱이 접근 가능한 로컬 파일로 복사
+   * - 부모 콜백으로 결과 전달
+   */
   const handlePickFiles = async () => {
     try {
       const picked = await pick({allowMultiSelection: true});
@@ -65,7 +92,9 @@ const FilePicker = ({onPick, onClose, visible}: IFilePickerProps) => {
               transform: [{translateY: translateY}],
             },
           ]}>
+          {/* 파일 선택 트리거 버튼 */}
           <Button title="파일 선택하기" onPress={handlePickFiles} />
+          {/* 닫기 버튼 */}
           <Button title="닫기" onPress={onClose} />
         </Animated.View>
       </View>

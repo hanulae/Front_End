@@ -19,6 +19,12 @@ import {CameraRoll} from '@react-native-camera-roll/camera-roll';
 import {launchCamera} from 'react-native-image-picker';
 import Typo from './Typo';
 
+/**
+ * AlbumBottomSheet Props 인터페이스
+ * @param visible - 바텀시트 표시 여부 (boolean, optional)
+ * @param onClose - 바텀시트 닫기 콜백 함수
+ * @param onSelect - 사진 선택 완료 시 선택된 사진 URI 배열을 전달받는 콜백 함수
+ */
 interface IAlbumBottomSheetProps {
   visible?: boolean;
   onClose: () => void;
@@ -29,21 +35,41 @@ const MAX_IMAGE_COUNT = 10;
 const PHOTOS_PER_PAGE = 20; // 한 번에 로드할 사진 개수
 const {height} = Dimensions.get('window');
 
-// 사진 선택을 위한 앨범 바텀시트 컴포넌트
+/**
+ * 사진 선택을 위한 앨범 바텀시트 컴포넌트
+ *
+ * 관리하는 상태값들:
+ * - albumPhotos: 앨범에서 불러온 사진 목록 (uri를 가진 객체 배열)
+ * - selectedPhotos: 사용자가 선택한 사진 URI들의 Set
+ * - isLoading: 사진 로딩 중 여부
+ * - hasNextPage: 추가로 로드할 사진이 있는지 여부
+ * - endCursor: 페이지네이션을 위한 커서 위치
+ */
 const AlbumBottomSheet = ({
   visible,
   onClose,
   onSelect,
 }: IAlbumBottomSheetProps) => {
+  // 앨범에서 불러온 사진 목록을 저장하는 상태
   const [albumPhotos, setAlbumPhotos] = useState<{uri: string}[]>([]);
+  // 사용자가 선택한 사진 URI들을 저장하는 Set 상태
   const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set());
+  // 사진 로딩 중 여부를 관리하는 상태
   const [isLoading, setIsLoading] = useState(false);
+  // 추가로 로드할 사진이 있는지 여부를 관리하는 상태
   const [hasNextPage, setHasNextPage] = useState(true);
+  // 페이지네이션을 위한 커서 위치를 저장하는 상태
   const [endCursor, setEndCursor] = useState<string | undefined>(undefined);
 
+  // 바텀시트 애니메이션을 위한 Animated.Value를 참조하는 useRef 훅
   const translateY = useRef(new Animated.Value(300)).current;
   console.log('AlbumBottomSheet', visible);
 
+  /**
+   * 바텀시트 표시/숨김 상태 변화를 감지하여 초기화 및 애니메이션을 처리하는 useEffect 훅
+   * visible 상태가 true일 때: 사진 목록 초기화, 권한 확인, 초기 사진 로드, 애니메이션 실행
+   * visible 상태가 false일 때: 애니메이션 값 초기화, 선택된 사진 목록 초기화
+   */
   useEffect(() => {
     if (visible) {
       // 초기화
@@ -53,7 +79,10 @@ const AlbumBottomSheet = ({
       setHasNextPage(true);
       setEndCursor(undefined);
 
-      // 앨범 초기 사진 목록을 로드하는 함수
+      /**
+       * 앨범 초기 사진 목록을 로드하는 비동기 함수
+       * 사진 라이브러리 권한을 확인하고 첫 번째 페이지의 사진들을 불러옴
+       */
       const loadInitialPhotos = async () => {
         const hasPermission = await requestPhotoLibraryPermission();
         if (!hasPermission) {
@@ -98,7 +127,11 @@ const AlbumBottomSheet = ({
     }
   }, [visible, translateY]);
 
-  // 사진 선택/해제를 토글하는 함수
+  /**
+   * 사진 선택/해제를 토글하는 함수
+   * @param uri - 선택/해제할 사진의 URI (string)
+   * 목적: 사진을 선택하거나 선택 해제하며, 최대 선택 개수(10개) 제한을 적용
+   */
   const toggleSelect = (uri: string) => {
     setSelectedPhotos(prev => {
       const updated = new Set(prev);
@@ -111,7 +144,10 @@ const AlbumBottomSheet = ({
     });
   };
 
-  // 선택 완료 버튼 클릭 시 실행되는 함수
+  /**
+   * 선택 완료 버튼 클릭 시 실행되는 함수
+   * 목적: 선택된 사진들을 배열로 변환하여 부모 컴포넌트에 전달하고 바텀시트를 닫음
+   */
   const handleDone = () => {
     const result = Array.from(selectedPhotos);
     console.log('Selected photos:', Array.from(selectedPhotos));
@@ -121,7 +157,10 @@ const AlbumBottomSheet = ({
     }, 50);
   };
 
-  // 카메라를 열어 사진을 촬영하는 함수
+  /**
+   * 카메라를 열어 사진을 촬영하는 비동기 함수
+   * 목적: 카메라 권한을 확인하고 카메라를 실행하여 새로운 사진을 촬영하고 자동으로 선택 처리
+   */
   const handleOpenCamera = async () => {
     const hasPermission = await requestCameraPermission();
     console.log('hasPermission', hasPermission);
@@ -140,7 +179,11 @@ const AlbumBottomSheet = ({
     });
   };
 
-  // 스크롤 끝에서 추가 사진을 로드하는 함수
+  /**
+   * 스크롤 끝에서 추가 사진을 로드하는 useCallback 훅으로 최적화된 함수
+   * 목적: FlatList가 끝에 도달했을 때 다음 페이지의 사진들을 추가로 불러와 무한 스크롤 구현
+   * 의존성: [hasNextPage, isLoading, endCursor] - 이 값들이 변경될 때만 함수 재생성
+   */
   const handleLoadMore = useCallback(async () => {
     console.log('handleLoadMore 호출됨');
     // 콘텐츠가 충분히 많지 않으면 호출하지 않도록
@@ -177,7 +220,12 @@ const AlbumBottomSheet = ({
     }
   }, [hasNextPage, isLoading, endCursor]);
 
-  // FlatList의 각 아이템을 렌더링하는 함수
+  /**
+   * FlatList의 각 아이템을 렌더링하는 함수
+   * @param item - 렌더링할 아이템 객체 (uri 속성을 가진 객체)
+   * @param index - 아이템의 인덱스 (number)
+   * 목적: 첫 번째 아이템은 카메라 버튼으로, 나머지는 사진 이미지로 렌더링하며 선택 상태를 시각적으로 표시
+   */
   const renderItem = ({item, index}: {item: {uri: string}; index: number}) => {
     console.log('renderItem', item, index);
     if (index === 0) {
@@ -198,7 +246,10 @@ const AlbumBottomSheet = ({
     );
   };
 
-  // FlatList 하단에 로딩 인디케이터를 렌더링하는 함수
+  /**
+   * FlatList 하단에 로딩 인디케이터를 렌더링하는 함수
+   * 목적: 추가 사진을 로드하는 중일 때 사용자에게 로딩 상태를 시각적으로 표시
+   */
   const renderFooter = () => {
     if (!isLoading) return null;
     return (

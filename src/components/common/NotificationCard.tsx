@@ -3,6 +3,18 @@ import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import AlarmIconOn from '../../assets/Contents/Contents_AlarmOn.svg';
 import AlarmIconOff from '../../assets/Contents/Contents_AlarmOff.svg';
 
+/**
+ * 알림 카드 컴포넌트
+ *
+ * 목적:
+ * - 알림 목록에서 각 알림 항목을 카드 형태로 렌더링
+ * - 읽음/안읽음 상태에 따라 아이콘/스타일 분기
+ * - 눌렀을 때 onPress 콜백 실행
+ *
+ * 주요 포인트:
+ * - 상대 시간 문자열(getTimeAgo)로 생성일 표기
+ * - 알림 타입(notificationType)에 따른 스타일 분류 함수 사용
+ */
 export interface NotificationItem {
   notificationId: string;
   title: string;
@@ -20,12 +32,20 @@ export interface NotificationItem {
   senderType?: string;
 }
 
+/**
+ * NotificationCard Props
+ * @param item - 알림 데이터
+ * @param onPress - 카드 클릭 콜백
+ */
 interface NotificationCardProps {
   item: NotificationItem;
   onPress?: () => void;
 }
 
-// 상대적인 시간 계산 함수
+/**
+ * 상대적인 시간 계산 함수
+ * 예: "12분 전", "3일 전" 등
+ */
 const getTimeAgo = (sentAt: string): string => {
   const now = new Date();
   const createdAt = new Date(sentAt);
@@ -34,22 +54,16 @@ const getTimeAgo = (sentAt: string): string => {
   let timeAgo: string;
 
   if (diff < 60 * 1000) {
-    // 60초 이내
     timeAgo = `${Math.floor(diff / 1000)}초 전`;
   } else if (diff < 3600 * 1000) {
-    // 1시간 이내
     timeAgo = `${Math.floor(diff / (60 * 1000))}분 전`;
   } else if (diff < 86400 * 1000) {
-    // 1일 이내
     timeAgo = `${Math.floor(diff / (3600 * 1000))}시간 전`;
   } else if (diff < 604800 * 1000) {
-    // 1주 이내
     timeAgo = `${Math.floor(diff / (86400 * 1000))}일 전`;
   } else if (diff < 2419200 * 1000) {
-    // 4주 이내
     timeAgo = `${Math.floor(diff / (604800 * 1000))}주 전`;
   } else if (diff < 29030400 * 1000) {
-    // 12개월 이내
     timeAgo = `${Math.floor(diff / (2419200 * 1000))}개월 전`;
   } else {
     timeAgo = `${Math.floor(diff / (29030400 * 1000))}년 전`;
@@ -58,7 +72,10 @@ const getTimeAgo = (sentAt: string): string => {
   return timeAgo;
 };
 
-// 알림 타입 분류 및 스타일 정의
+/**
+ * 알림 타입 분류 및 스타일 정의
+ * - 배경/테두리/아이콘 색상/카테고리 텍스트 결정
+ */
 const getNotificationStyle = (type: string) => {
   switch (type) {
     // 견적/입찰 관련 (파란색 계열)
@@ -118,6 +135,7 @@ const getNotificationStyle = (type: string) => {
 };
 
 const NotificationCard: React.FC<NotificationCardProps> = ({item, onPress}) => {
+  /** 알림 타입에 따른 스타일 객체 (필요 시 사용) */
   const style = getNotificationStyle(item.notificationType);
 
   return (

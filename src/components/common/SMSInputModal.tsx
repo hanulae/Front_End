@@ -9,10 +9,28 @@ import {
   Alert,
 } from 'react-native';
 
+/**
+ * SMS 인증번호 입력 모달
+ *
+ * 목적:
+ * - 6자리 인증번호를 입력 받아 확인 콜백으로 전달
+ * - 취소/확인 버튼 제공
+ *
+ * 관리하는 상태값들:
+ * - smsCode: 입력 중인 인증번호
+ *
+ * UX:
+ * - 열릴 때 자동 포커스
+ * - 기본 유효성 검사 (빈 값, 6자리)
+ */
 interface SMSInputModalProps {
+  /** 표시 여부 */
   visible: boolean;
+  /** 닫기 콜백 */
   onClose: () => void;
+  /** 확인 콜백 (입력된 인증코드 전달) */
   onConfirm: (code: string) => void;
+  /** 인증번호 전송 받는 전화번호 (옵션, 안내 문구 표시) */
   phoneNumber?: string;
 }
 
@@ -22,14 +40,16 @@ const SMSInputModal: React.FC<SMSInputModalProps> = ({
   onConfirm,
   phoneNumber,
 }) => {
+  /** 입력 중인 인증번호 */
   const [smsCode, setSmsCode] = useState('');
 
+  /** 확인 처리 (기본 유효성 검사) */
   const handleConfirm = () => {
     if (!smsCode.trim()) {
       Alert.alert('알림', '인증번호를 입력해주세요.');
       return;
     }
-    
+
     if (smsCode.length !== 6) {
       Alert.alert('알림', '인증번호는 6자리입니다.');
       return;
@@ -39,6 +59,7 @@ const SMSInputModal: React.FC<SMSInputModalProps> = ({
     setSmsCode('');
   };
 
+  /** 닫기 처리 (입력값 초기화 포함) */
   const handleClose = () => {
     setSmsCode('');
     onClose();
@@ -57,7 +78,7 @@ const SMSInputModal: React.FC<SMSInputModalProps> = ({
             인증번호가 발송되었습니다.
             {phoneNumber && `\n(${phoneNumber})`}
           </Text>
-          
+
           <TextInput
             style={styles.input}
             value={smsCode}
@@ -67,13 +88,15 @@ const SMSInputModal: React.FC<SMSInputModalProps> = ({
             maxLength={6}
             autoFocus
           />
-          
+
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.cancelButton} onPress={handleClose}>
               <Text style={styles.cancelButtonText}>취소</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
+
+            <TouchableOpacity
+              style={styles.confirmButton}
+              onPress={handleConfirm}>
               <Text style={styles.confirmButtonText}>확인</Text>
             </TouchableOpacity>
           </View>
@@ -152,4 +175,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SMSInputModal; 
+export default SMSInputModal;
