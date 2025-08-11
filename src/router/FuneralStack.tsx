@@ -16,6 +16,8 @@ import PointRefundPage from '../page/common/PointRefundPage';
 import AppSettingPage from '../page/common/AppSettingPage';
 import ModifyUserInfoPage from '../page/funeralHall/ModifyUserInfoPage';
 import NotificationListPage from '../page/common/NotificationListPage';
+import PaymentScreen from '../page/funeralHall/PaymentScreen.tsx';
+import PaymentResult from '../page/funeralHall/PaymentResult.tsx';
 
 const Stack = createNativeStackNavigator();
 
@@ -47,6 +49,8 @@ const FuneralStack = () => {
       <Stack.Screen name="AppSetting" component={AppSettingPage} />
       <Stack.Screen name="ModifyUserInfo" component={ModifyUserInfoPage} />
       <Stack.Screen name="Notification" component={NotificationListPage} />
+      <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
+      <Stack.Screen name="PaymentResult" component={PaymentResult} />
     </Stack.Navigator>
   );
 };

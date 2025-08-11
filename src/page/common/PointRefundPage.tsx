@@ -1,5 +1,9 @@
 import {Platform, StatusBar, StyleSheet, TextInput, View} from 'react-native';
-import {useFocusEffect, useRoute} from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import {useCallback, useState, useEffect} from 'react';
 import DefaultLayout from '../../layout/DefaultLayout';
 import Typo from '../../components/common/Typo';
@@ -11,7 +15,7 @@ import {useAtomValue} from 'jotai';
 import {loginAtom} from '../../state/local_state/loginAtom';
 import api from '../../api/config';
 import Toast from 'react-native-toast-message'; // 상단 import 필요
-
+import {getUserInfo} from '../../utils/tokenStorage';
 const REFUND_AMOUNTS = [100000, 75000, 50000, 25000, 10000, 5000];
 
 const PointRefundPage = () => {
@@ -32,13 +36,24 @@ const PointRefundPage = () => {
   );
 
   const route = useRoute();
-  const {variant} = route.params as {variant: 'manager' | 'funeral'};
+  const navigation = useNavigation();
+
+  // variant 파라미터 안전하게 처리
+  const routeParams = route.params as {variant?: 'manager' | 'funeral'};
+  const variant = routeParams?.variant || 'funeral';
+
+  // variant가 유효하지 않으면 기본 페이지로 리다이렉트
+  useEffect(() => {
+    if (!routeParams?.variant) {
+      console.warn('variant 파라미터가 없습니다. 기본값을 사용합니다.');
+    }
+  }, [routeParams?.variant]);
 
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [inputAmount, setInputAmount] = useState('');
 
   // BSK ADD LOGIN INFO
-  const loginInfo = useAtomValue(loginAtom);
+  const [userDetailInfo, setUserDetailInfo] = useState<any>(null);
   const [currentCash, setCurrentCash] = useState<number>(0);
 
   const handleAmountSelect = (amount: number) => {
@@ -66,15 +81,7 @@ const PointRefundPage = () => {
     }
 
     try {
-      const res = await api.post(
-        '/manager/cash/refund',
-        { amountCash: amount },
-        {
-          headers: {
-            Authorization: `Bearer ${loginInfo.accessToken}`,
-          },
-        },
-      );
+      await api.post('/manager/cash/refund', {amountCash: amount});
 
       Toast.show({
         type: 'success',
@@ -112,31 +119,34 @@ const PointRefundPage = () => {
     }
 
     try {
-      const res = await api.post(
-        '/funeral/cash/charge',
-        { amountCash: amount },
-        {
-          headers: {
-            Authorization: `Bearer ${loginInfo.accessToken}`,
-          },
-        },
-      );
+      // 결제 전 서버에 결제 정보 미리 저장
+      const merchantUid = `funeral_${new Date().getTime()}`;
 
-      Toast.show({
-        type: 'success',
-        text1: '충전 완료',
-        text2: '캐시 충전이 성공적으로 처리되었습니다.',
-        position: 'top',
+      const response = await api.post('/funeral/payment/prepare', {
+        merchantUid,
+        amount,
       });
+      console.log('결제 준비 완료:', response.data);
 
-      setInputAmount('');
-      setSelectedAmount(null);
-      setCurrentCash(prev => prev + amount);
+      // PaymentScreen으로 네비게이션
+      navigation.navigate('PaymentScreen', {
+        amount,
+        merchantUid,
+        buyerInfo: {
+          email: userDetailInfo?.funeralEmail || 'user@example.com',
+          name: userDetailInfo?.funeralName || '사용자',
+          tel: userDetailInfo?.funeralPhoneNumber || '010-0000-0000',
+          addr: userDetailInfo?.funeralAddress || '서울특별시',
+          postcode: userDetailInfo?.funeralPostcode || '12345',
+        },
+        productName: '캐시 충전',
+        variant: variant, // variant 전달
+      });
     } catch (error: any) {
-      console.error('캐시 충전 실패:', error.response?.data || error.message);
+      console.error('결제 준비 실패:', error.response?.data || error.message);
       Toast.show({
         type: 'error',
-        text1: '캐시 충전 실패',
+        text1: '결제 준비 실패',
         text2: error.response?.data?.message || '오류가 발생했습니다.',
         position: 'top',
       });
@@ -150,11 +160,7 @@ const PointRefundPage = () => {
         const cashUrl = isManager
           ? '/manager/cash/current'
           : '/funeral/cash/current';
-        const res = await api.get(cashUrl, {
-          headers: {
-            Authorization: `Bearer ${loginInfo.accessToken}`,
-          },
-        });
+        const res = await api.get(cashUrl);
         setCurrentCash(res.data.currentCash || 0); // currentCash로 변경
       } catch (error: any) {
         console.error(
@@ -165,6 +171,20 @@ const PointRefundPage = () => {
     };
 
     fetchCurrentCash();
+  }, [variant]);
+
+  useEffect(() => {
+    const loadUserDetailInfo = async () => {
+      try {
+        const userInfo = await getUserInfo();
+        console.log('사용자 상세 정보:', userInfo);
+        setUserDetailInfo(userInfo?.data || null);
+      } catch (error) {
+        console.error('사용자 정보 로드 실패:', error);
+      }
+    };
+
+    loadUserDetailInfo();
   }, []);
 
   return (
@@ -224,7 +244,9 @@ const PointRefundPage = () => {
 
           <CustomButton
             style={styles.refundButton}
-            onPress={variant === 'manager' ? handleRefundRequest : handleCashCharge}>
+            onPress={
+              variant === 'manager' ? handleRefundRequest : handleCashCharge
+            }>
             <Typo style={styles.refundButtonText}>
               {variant === 'manager' ? '환급 신청' : '충전 신청'}
             </Typo>
