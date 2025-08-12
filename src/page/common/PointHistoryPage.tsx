@@ -1,3 +1,10 @@
+/**
+ * 포인트 및 캐시 거래 내역을 조회하고 관리하는 페이지 컴포넌트
+ * 현재 보유 포인트/캐시 표시, 거래 내역 필터링, 충전/환급 페이지 연결 기능 제공
+ *
+ * @props variant - 사용자 타입 ('manager' | 'funeral')
+ * @libraries @react-navigation/native, jotai
+ */
 import {ScrollView, StyleSheet, View} from 'react-native';
 import DefaultLayout from '../../layout/DefaultLayout';
 import {
@@ -14,11 +21,10 @@ import CustomButton from '../../components/common/CustomButton';
 import SelectIcon from '../../assets/Icon/Icon_DropDown03.svg';
 import PointHistoryCard from '../../components/common/PointHistoryCard';
 import TypeBottomSheet from '../../components/common/TypeBottomSheet';
-import { scaleFontSize, scaleSize, isSmallDevice } from '../../utils/responsive';
-
-// BSK ADD IMPORTS
+import {scaleFontSize, scaleSize, isSmallDevice} from '../../utils/responsive';
 import api from '../../api/config';
 
+// 거래 내역 인터페이스 정의
 interface ITransaction {
   id: string;
   assetType: 'point' | 'cash';
@@ -30,25 +36,26 @@ interface ITransaction {
 }
 
 const PointHistoryPage = () => {
-  // BSK ADD LOGIN INFO
-  // const loginInfo = useAtomValue(loginAtom); // Remove unused variable
   const [currentPoint, setCurrentPoint] = useState<number>(0);
   const [currentCash, setCurrentCash] = useState<number>(0);
   const [transactions, setTransactions] = useState<ITransaction[]>([]);
   const [allTransactions, setAllTransactions] = useState<ITransaction[]>([]);
 
-  // BSK ADD VARIANT
   const route = useRoute();
   const navigation = useNavigation<any>();
   const {variant} = route.params as {variant: 'manager' | 'funeral'};
-  console.log('variant', variant);
-  console.log('route.params', route.params);
 
   const [typeSheetVisible, setTypeSheetVisible] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState('전체');
   const [selectedType, setSelectedType] = useState('전체');
   const [selectedOrder, setSelectedOrder] = useState('최신순');
 
+  /**
+   * 화면 포커스 시 포인트/캐시 잔액 및 거래 내역 조회
+   * GET /manager|funeral/point/current - 현재 포인트 잔액을 가져오기 위함
+   * GET /manager|funeral/cash/current - 현재 캐시 잔액을 가져오기 위함
+   * GET /manager|funeral/cash/history/list - 캐시 거래 내역을 가져오기 위함
+   */
   useFocusEffect(
     useCallback(() => {
       console.log('useFocusEffect triggered with variant:', variant);
@@ -56,12 +63,11 @@ const PointHistoryPage = () => {
         console.log('variant is undefined or null');
         return;
       }
+
       const fetchPointAndCash = async () => {
         try {
           const isManager = variant === 'manager';
           console.log('isManager', isManager);
-          console.log('variant type:', typeof variant);
-          console.log('variant value:', variant);
 
           const pointUrl = isManager
             ? '/manager/point/current'
@@ -69,25 +75,22 @@ const PointHistoryPage = () => {
           const cashUrl = isManager
             ? '/manager/cash/current'
             : '/funeral/cash/current';
-          console.log('pointUrl', pointUrl);
-          console.log('cashUrl', cashUrl);
 
+          // 현재 포인트 잔액 조회
           const pointRes = await api.get(pointUrl);
           setCurrentPoint(pointRes.data.currentPoint || 0);
 
+          // 현재 캐시 잔액 조회
           const cashRes = await api.get(cashUrl);
-          setCurrentCash(cashRes.data.currentCash || 0);
+          setCurrentCash(res.data.currentCash || 0);
 
-          // Fetch transaction history
+          // 거래 내역 조회
           const historyUrl = isManager
             ? '/manager/cash/history/list'
             : '/funeral/cash/history/list';
           const historyRes = await api.get(historyUrl);
-          // console.log('🚀 ~ fetchPointAndCash ~ historyRes:', historyRes);
-          // console.log('🚀 ~ historyRes.data:', historyRes.data);
-          // console.log('🚀 ~ historyRes.data.data:', historyRes.data.data);
 
-          // API 응답 데이터를 PointHistoryCard 형식에 맞게 변환
+          // API 응답 데이터를 UI에 맞는 형태로 변환
           const transformedTransactions = (historyRes.data.data || []).map(
             (transaction: any) => {
               const transformed = {
@@ -99,6 +102,7 @@ const PointHistoryPage = () => {
                   : 'point',
                 transactionType: (() => {
                   const type = transaction.transactionType;
+                  // 거래 타입에 따른 분기 처리
                   if (
                     type?.includes('earn_cash') ||
                     type?.includes('service_cash')
@@ -147,6 +151,10 @@ const PointHistoryPage = () => {
     }, [variant]),
   );
 
+  /**
+   * 화면 포커스 시 상태바 스타일 설정
+   * Android와 iOS의 상태바 색상 및 스타일을 플랫폼별로 적용
+   */
   useFocusEffect(
     useCallback(() => {
       if (Platform.OS === 'android') {
@@ -158,21 +166,26 @@ const PointHistoryPage = () => {
 
       return () => {
         // 화면 포커스 해제 시 필요하다면 초기화 작업
-        // 예: StatusBar.setStyle('default')
       };
     }, []),
   );
 
+  /**
+   * 포인트 충전/환급 페이지로 이동
+   * variant에 따라 manager는 환급, funeral은 충전 페이지로 네비게이션
+   */
   const handlePointCharge = () => {
-    // 포인트 충전 페이지로 이동
-    // navigation.navigate('PointCharge', {variant});
     navigation.navigate('PointRefund', {variant});
   };
 
-  // 필터링 함수
+  /**
+   * 거래 내역 필터링 처리
+   * 선택된 유형, 기간, 정렬 조건에 따라 거래 내역을 필터링하고 정렬
+   */
   const filterTransactions = () => {
     let filtered = [...allTransactions];
-    // 유형 필터
+
+    // 유형 필터 적용 (적립/환급)
     if (selectedType !== '전체') {
       filtered = filtered.filter(t =>
         selectedType === '적립'
@@ -180,7 +193,8 @@ const PointHistoryPage = () => {
           : t.transactionType === 'refund',
       );
     }
-    // 기간 필터 (예시: '1개월', '3개월')
+
+    // 기간 필터 적용
     if (selectedPeriod !== '전체') {
       const now = new Date();
       let fromDate = new Date();
@@ -194,7 +208,8 @@ const PointHistoryPage = () => {
         return date >= fromDate && date <= now;
       });
     }
-    // 정렬
+
+    // 정렬 조건 적용 (최신순/오래된순)
     if (selectedOrder === '최신순') {
       filtered.sort((a, b) => {
         const dateA = new Date(a.transactionDate).getTime();
@@ -211,7 +226,10 @@ const PointHistoryPage = () => {
     setTransactions(filtered);
   };
 
-  // TypeBottomSheet 확인 시 필터링 적용
+  /**
+   * 필터 바텀시트 확인 처리
+   * 필터 조건을 적용하고 바텀시트를 닫음
+   */
   const handleTypeSheetConfirm = () => {
     setTypeSheetVisible(false);
     filterTransactions();
@@ -227,17 +245,9 @@ const PointHistoryPage = () => {
       homeRouteName={variant === 'manager' ? 'ManagerMain' : 'FuneralMain'}
       headerTitle="캐시 내역">
       <View style={styles.wrapper}>
+        {/* 포인트/캐시 잔액 표시 섹션 */}
         <View style={styles.pointSection}>
           <View style={styles.pannel}>
-            {/* <View style={styles.pointContainer}>
-              <Typo style={styles.titleText}>보유 포인트</Typo>
-              <View style={styles.pointValueConainer}>
-                <Typo style={styles.pointValue}>
-                  {currentPoint.toLocaleString()}
-                </Typo>
-                <PointIcon width={scaleSize(24)} height={scaleSize(24)} />
-              </View>
-            </View> */}
             <View style={styles.cashContainer}>
               <Typo style={styles.titleText}>캐시 포인트</Typo>
               <View style={styles.cashValueConainer}>
@@ -248,6 +258,8 @@ const PointHistoryPage = () => {
               </View>
             </View>
           </View>
+
+          {/* 충전/환급 버튼 */}
           <View style={styles.buttonContainer}>
             <CustomButton
               style={styles.actionButton}
@@ -258,7 +270,10 @@ const PointHistoryPage = () => {
             </CustomButton>
           </View>
         </View>
+
+        {/* 거래 내역 섹션 */}
         <View style={styles.historySection}>
+          {/* 필터 선택 버튼 */}
           <View style={styles.historySelector}>
             <CustomButton
               style={styles.historySelectorButton}
@@ -267,6 +282,8 @@ const PointHistoryPage = () => {
               <SelectIcon width={scaleSize(16)} height={scaleSize(16)} />
             </CustomButton>
           </View>
+
+          {/* 거래 내역 목록 */}
           <ScrollView contentContainerStyle={styles.card}>
             {(() => {
               console.log('🚀 ~ rendering transactions:', transactions);
@@ -292,6 +309,8 @@ const PointHistoryPage = () => {
             })()}
           </ScrollView>
         </View>
+
+        {/* 필터 바텀시트 */}
         <TypeBottomSheet
           visible={typeSheetVisible}
           onClose={() => setTypeSheetVisible(false)}

@@ -11,16 +11,27 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useMemo} from 'react';
 
+/**
+ * 회원가입 완료 페이지 컴포넌트
+ * - 회원가입 성공 메시지와 로그인 이동 버튼 제공
+ * - 디바이스 크기별 반응형 레이아웃 적용
+ * - 승인 대기 안내 메시지 표시
+ *
+ * Props: 없음 (라우트 파라미터로 userType 수신)
+ * 주요 라이브러리: @react-navigation/native (라우트 처리), react-native (반응형 UI)
+ */
 const SignupComplete = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const route = useRoute();
   const {userType} = route.params as {userType: 'manager' | 'funeral'};
 
-  // 화면 크기 감지
+  // 디바이스 화면 너비 감지를 위한 훅
   const {width} = useWindowDimensions();
 
-  // 브레이크포인트 정의 (갤럭시 S9 호환)
-  // 갤럭시 S9: 360px, medium phone: 411px
+  /**
+   * 디바이스 크기별 타입 구분
+   * 갤럭시 S9(360px) 호환성을 위한 브레이크포인트 설정
+   */
   const deviceType = useMemo(() => {
     if (width >= 768) return 'tablet';
     if (width >= 411) return 'large'; // medium phone 기준
@@ -28,7 +39,10 @@ const SignupComplete = () => {
     return 'small';
   }, [width]);
 
-  // 반응형 스타일 계산
+  /**
+   * 디바이스 타입에 따른 반응형 스타일 계산
+   * 폰트 크기, 여백, 패딩 등을 디바이스 크기에 맞게 스케일링
+   */
   const responsiveStyles = useMemo(() => {
     const scale =
       deviceType === 'small'
@@ -56,6 +70,10 @@ const SignupComplete = () => {
     };
   }, [deviceType]);
 
+  /**
+   * 로그인 페이지로 이동하는 함수
+   * 회원가입에서 수신한 userType을 로그인 페이지에 전달
+   */
   const goToLoginPage = () => {
     navigation.navigate('Login', {
       userType: userType,

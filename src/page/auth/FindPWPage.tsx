@@ -1,3 +1,8 @@
+/**
+ * 비밀번호 찾기 페이지
+ * Props: navigation
+ * 주요 라이브러리: react-native, react-navigation
+ */
 import {NavigationProp, useRoute} from '@react-navigation/native';
 import {StyleSheet, View} from 'react-native';
 import {usePasswordInput} from '../../hooks/input/usePasswordInput';
@@ -37,9 +42,15 @@ const FindPWpage = ({navigation}: IFindPWPageProps) => {
   const isFormValid =
     isPhoneVerified && password.isValid && confirmPassword.isValid;
   // 인증코드 요청 함수
+  /**
+   * 인증코드 요청 처리
+   * 입력: phoneNumber - 전화번호
+   * 출력: 없음 (API 호출 후 토스트 메시지)
+   */
   const handleRequestCode = async (phoneNumber: string) => {
     console.log('🚀 ~ handleRequestCode ~ phoneNumber:', phoneNumber);
     try {
+      // POST: SMS 인증코드 전송 요청
       const response = await api.post('manager/sms/send', {
         phoneNumber: phoneNumber,
         userType: userType,
@@ -66,11 +77,17 @@ const FindPWpage = ({navigation}: IFindPWPageProps) => {
   };
 
   // 인증코드 확인 함수
+  /**
+   * 인증코드 확인 처리
+   * 입력: phoneNumber - 전화번호, authCode - 인증코드
+   * 출력: boolean - 인증 성공 여부
+   */
   const handleVerifyCode = async (
     phoneNumber: string,
     authCode: string,
   ): Promise<boolean> => {
     try {
+      // POST: SMS 인증코드 확인 요청
       const response = await api.post('manager/sms/verify', {
         phoneNumber: phoneNumber,
         code: authCode,
@@ -111,20 +128,26 @@ const FindPWpage = ({navigation}: IFindPWPageProps) => {
     }
   };
 
+  /**
+   * 비밀번호 변경 처리
+   * 입력: 없음
+   * 출력: 없음 (API 호출 후 페이지 이동)
+   */
   const handleChangePassword = async () => {
     try {
       const phone = phoneNumber.value; // phoneNumber 훅의 value
       const newPassword = password.value;
 
       let response;
+      // userType에 따라 다른 API 엔드포인트 호출
       if (userType === 'manager') {
-        // 상조팀장용 비밀번호 변경 API
+        // PATCH: 상조팀장용 비밀번호 변경 요청
         response = await api.patch('manager/auth/update/password/lost', {
           phoneNumber: phone,
           newPassword,
         });
       } else {
-        // 장례식장용 비밀번호 변경 API
+        // PATCH: 장례식장용 비밀번호 변경 요청
         response = await api.patch('funeral/auth/update/password/lost', {
           phoneNumber: phone,
           newPassword,
@@ -196,7 +219,11 @@ const FindPWpage = ({navigation}: IFindPWPageProps) => {
               }
               style={[
                 styles.verifyButton,
-                { backgroundColor: isVerifyButtonDisabled ? '#C0C0C0' : '#FFFFFF' } // Change color when disabled
+                {
+                  backgroundColor: isVerifyButtonDisabled
+                    ? '#C0C0C0'
+                    : '#FFFFFF',
+                }, // Change color when disabled
               ]}
               disabled={isVerifyButtonDisabled} // Disable the button
             >

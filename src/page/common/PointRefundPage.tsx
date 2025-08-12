@@ -1,3 +1,10 @@
+/**
+ * 포인트 환급 및 캐시 충전 페이지 컴포넌트
+ * variant에 따라 manager는 환급, funeral은 충전 기능을 제공하며 결제 연동 포함
+ *
+ * @props variant - 사용자 타입 ('manager' | 'funeral')
+ * @libraries @react-navigation/native, jotai, react-native-toast-message
+ */
 import {Platform, StatusBar, StyleSheet, TextInput, View} from 'react-native';
 import {
   useFocusEffect,
@@ -9,16 +16,20 @@ import DefaultLayout from '../../layout/DefaultLayout';
 import Typo from '../../components/common/Typo';
 import CashIcon from '../../assets/Bullet/Bullet_CoinYellow.svg';
 import CustomButton from '../../components/common/CustomButton';
-
-// BSK ADD IMPORTS
 import {useAtomValue} from 'jotai';
 import {loginAtom} from '../../state/local_state/loginAtom';
 import api from '../../api/config';
-import Toast from 'react-native-toast-message'; // 상단 import 필요
+import Toast from 'react-native-toast-message';
 import {getUserInfo} from '../../utils/tokenStorage';
+
+// 미리 정의된 환급/충전 금액 옵션
 const REFUND_AMOUNTS = [100000, 75000, 50000, 25000, 10000, 5000];
 
 const PointRefundPage = () => {
+  /**
+   * 화면 포커스 시 상태바 스타일 설정
+   * Android와 iOS의 상태바 색상 및 스타일을 플랫폼별로 적용
+   */
   useFocusEffect(
     useCallback(() => {
       if (Platform.OS === 'android') {
@@ -30,7 +41,6 @@ const PointRefundPage = () => {
 
       return () => {
         // 화면 포커스 해제 시 필요하다면 초기화 작업
-        // 예: StatusBar.setStyle('default')
       };
     }, []),
   );
@@ -42,7 +52,10 @@ const PointRefundPage = () => {
   const routeParams = route.params as {variant?: 'manager' | 'funeral'};
   const variant = routeParams?.variant || 'funeral';
 
-  // variant가 유효하지 않으면 기본 페이지로 리다이렉트
+  /**
+   * variant 파라미터 유효성 검증
+   * variant가 없는 경우 경고 로그 출력
+   */
   useEffect(() => {
     if (!routeParams?.variant) {
       console.warn('variant 파라미터가 없습니다. 기본값을 사용합니다.');
@@ -51,25 +64,39 @@ const PointRefundPage = () => {
 
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [inputAmount, setInputAmount] = useState('');
-
-  // BSK ADD LOGIN INFO
   const [userDetailInfo, setUserDetailInfo] = useState<any>(null);
   const [currentCash, setCurrentCash] = useState<number>(0);
 
+  /**
+   * 미리 정의된 금액 버튼 선택 처리
+   * 선택된 금액을 입력 필드에 설정하고 버튼 상태 업데이트
+   * @param amount - 선택된 금액
+   */
   const handleAmountSelect = (amount: number) => {
     setSelectedAmount(amount);
     setInputAmount(amount.toString());
   };
 
+  /**
+   * 직접 입력 금액 변경 처리
+   * 사용자가 직접 입력한 금액으로 상태 업데이트하고 선택된 버튼 해제
+   * @param text - 입력된 텍스트
+   */
   const handleInputChange = (text: string) => {
     setInputAmount(text);
     setSelectedAmount(null); // 입력값이 변경되면 선택된 버튼 해제
   };
 
+  /**
+   * 환급 요청 처리 (매니저용)
+   * 입력된 금액을 검증하고 서버로 환급 요청 전송
+   * POST /manager/cash/refund - 매니저의 캐시 환급 요청을 서버로 전송하기 위함
+   */
   const handleRefundRequest = async () => {
     console.log('환급 요청 시도');
     const amount = parseInt(inputAmount, 10);
 
+    // 금액 유효성 검증
     if (isNaN(amount) || amount <= 0) {
       Toast.show({
         type: 'error',
@@ -90,6 +117,7 @@ const PointRefundPage = () => {
         position: 'top',
       });
 
+      // 입력 필드 초기화 및 현재 캐시 잔액 업데이트
       setInputAmount('');
       setSelectedAmount(null);
       setCurrentCash(prev => prev - amount);
@@ -104,10 +132,16 @@ const PointRefundPage = () => {
     }
   };
 
+  /**
+   * 캐시 충전 처리 (장례식장용)
+   * 결제 정보를 서버에 미리 저장하고 결제 화면으로 이동
+   * POST /funeral/payment/prepare - 결제 전 결제 정보를 서버에 저장하기 위함
+   */
   const handleCashCharge = async () => {
     console.log('캐시 충전 시도');
     const amount = parseInt(inputAmount, 10);
 
+    // 금액 유효성 검증
     if (isNaN(amount) || amount <= 0) {
       Toast.show({
         type: 'error',
@@ -140,7 +174,7 @@ const PointRefundPage = () => {
           postcode: userDetailInfo?.funeralPostcode || '12345',
         },
         productName: '캐시 충전',
-        variant: variant, // variant 전달
+        variant: variant,
       });
     } catch (error: any) {
       console.error('결제 준비 실패:', error.response?.data || error.message);
@@ -153,6 +187,10 @@ const PointRefundPage = () => {
     }
   };
 
+  /**
+   * 현재 캐시 잔액 조회
+   * GET /manager|funeral/cash/current - 사용자 타입에 따른 현재 캐시 잔액을 가져오기 위함
+   */
   useEffect(() => {
     const fetchCurrentCash = async () => {
       try {
@@ -161,7 +199,7 @@ const PointRefundPage = () => {
           ? '/manager/cash/current'
           : '/funeral/cash/current';
         const res = await api.get(cashUrl);
-        setCurrentCash(res.data.currentCash || 0); // currentCash로 변경
+        setCurrentCash(res.data.currentCash || 0);
       } catch (error: any) {
         console.error(
           '현재 캐시 조회 실패:',
@@ -173,6 +211,10 @@ const PointRefundPage = () => {
     fetchCurrentCash();
   }, [variant]);
 
+  /**
+   * 사용자 상세 정보 로드
+   * 토큰 스토리지에서 사용자 정보를 가져와 결제 시 사용할 구매자 정보로 설정
+   */
   useEffect(() => {
     const loadUserDetailInfo = async () => {
       try {
@@ -197,6 +239,7 @@ const PointRefundPage = () => {
       homeRouteName={variant === 'manager' ? 'ManagerMain' : 'FuneralMain'}
       headerTitle={variant === 'manager' ? '환급' : '캐시 충전'}>
       <View style={styles.wrapper}>
+        {/* 현재 잔액 표시 섹션 */}
         <View style={styles.balanceContainer}>
           <Typo style={styles.balanceTitle}>현재잔액</Typo>
           <View style={styles.balanceContainer1}>
@@ -206,7 +249,10 @@ const PointRefundPage = () => {
             <CashIcon />
           </View>
         </View>
+
+        {/* 환급/충전 금액 선택 및 신청 섹션 */}
         <View style={styles.refundContainer}>
+          {/* 미리 정의된 금액 버튼들 */}
           <View style={styles.amountButtonsContainer}>
             {REFUND_AMOUNTS.map((amount, index) => (
               <CustomButton
@@ -227,6 +273,7 @@ const PointRefundPage = () => {
             ))}
           </View>
 
+          {/* 직접 입력 필드 */}
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
@@ -242,6 +289,7 @@ const PointRefundPage = () => {
             />
           </View>
 
+          {/* 환급/충전 신청 버튼 - variant에 따라 다른 함수 호출 */}
           <CustomButton
             style={styles.refundButton}
             onPress={

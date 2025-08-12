@@ -29,6 +29,16 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import Toast from 'react-native-toast-message';
 import api from '../../../api/config';
 
+/**
+ * 장례식장 회원가입 2단계 컴포넌트
+ * - 휴대전화번호 인증, 장례식장 찾기, 첨부파일 업로드 기능을 제공
+ * - 전화번호 SMS 인증을 통한 본인확인 진행
+ * - 이미지/파일 첨부 기능 (최대 10개)
+ *
+ * Props: onNext, onPrev (단계 이동 콜백 함수)
+ * 주요 라이브러리: jotai (상태관리), react-native-image-picker (카메라), @react-native-documents/picker (파일선택)
+ */
+
 const {width: screenWidth} = Dimensions.get('window');
 
 interface Props {
@@ -50,7 +60,7 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
   const [isVerifyButtonDisabled, setIsVerifyButtonDisabled] = useState(false);
 
-  // 선택한 장례식장 이름 가져오기
+  // 선택한 장례식장 이름 가져오기 (signupAtom에서 저장된 장례식장 정보 조회)
   const selectedFuneralName =
     signupInfo.selectedFuneral?.funeralName || '장례식장이 없습니다.';
   console.log(
@@ -58,20 +68,27 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
     selectedFuneralName,
   );
 
-  // 총 첨부파일 개수 계산
+  /**
+   * 총 첨부파일 개수 계산 (이미지 + 일반파일)
+   * 최대 10개 제한을 위한 카운트 계산
+   */
   const totalAttachedCount = useMemo(() => {
     return selectedImages.length + selectedFiles.length;
   }, [selectedImages.length, selectedFiles.length]);
 
-  // signupInfo에서 첨부파일 복원
+  /**
+   * 컴포넌트 초기화 시 signupAtom에 저장된 첨부파일 정보를 로컬 상태로 복원
+   * 이전 단계에서 선택한 파일들을 다시 표시하기 위함
+   */
   useEffect(() => {
     if (!isInitialized && signupInfo.attachedFiles.length > 0) {
       const images: IImage[] = [];
       const files: LocalFile[] = [];
 
+      // 첨부파일 타입별 분류 - file 속성 유무로 이미지/일반파일 구분
       signupInfo.attachedFiles.forEach(file => {
         if (file.file) {
-          // 이미지 파일
+          // 이미지 파일 (카메라/갤러리에서 선택된 파일)
           images.push({
             uri: file.uri,
             name: file.name,
@@ -79,7 +96,7 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
             file: file.file,
           });
         } else {
-          // 일반 파일
+          // 일반 파일 (문서 선택기에서 선택된 파일)
           files.push({
             uri: file.uri,
             name: file.name,
@@ -189,13 +206,19 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
     }));
   };
 
+  /**
+   * 앨범/카메라에서 선택된 이미지 처리
+   * @param uris - 선택된 이미지 URI 배열
+   * 중복 제거, 최대 개수 제한, 파일 변환 등을 처리
+   */
   const handleSelectImages = async (uris: string[]) => {
+    // 중복 이미지 필터링
     const newUris = uris.filter(
       uri => !selectedImages.some(img => img.uri === uri),
     );
     if (newUris.length === 0) return;
 
-    // 최대 개수 체크
+    // 최대 첨부파일 개수(10개) 제한 검사
     if (totalAttachedCount + newUris.length > 10) {
       Toast.show({
         type: 'error',
@@ -206,6 +229,7 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
       return;
     }
 
+    // URI를 실제 파일 객체로 변환 (서버 업로드를 위함)
     const converted = await convertUrisToFiles(newUris);
     const formatted: IImage[] = converted.map(item => ({
       uri: item.uri,
@@ -217,7 +241,7 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
     const newSelectedImages = [...selectedImages, ...formatted];
     setSelectedImages(newSelectedImages);
 
-    // 즉시 signupInfo 업데이트
+    // 전역 상태(signupAtom)에 첨부파일 목록 즉시 동기화
     const attachedFiles: AttachedFile[] = [
       ...newSelectedImages.map(img => ({
         uri: img.uri,
@@ -238,8 +262,11 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
     }));
   };
 
+  /**
+   * SMS 인증번호 요청 API 호출
+   * POST /manager/sms/send - 장례식장 회원가입용 인증번호 발송
+   */
   const handleRequestCode = async () => {
-    // 인증 코드 요청 로직
     console.log('인증 코드 요청:', phoneNumber.value);
     try {
       const res = await api.post('/manager/sms/send', {
@@ -267,9 +294,14 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
     }
   };
 
+  /**
+   * SMS 인증번호 확인 API 호출
+   * POST /manager/sms/verify - 입력받은 인증번호 검증
+   */
   const handleVerifyCode = async () => {
     console.log('인증 코드 확인:', authCode.value);
 
+    // 입력값 유효성 검사
     if (!phoneNumber.value || !authCode.value) {
       Toast.show({
         type: 'error',
@@ -293,7 +325,7 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
           position: 'top',
         });
 
-        // 인증 상태 저장
+        // 인증 성공 시 전역 상태 및 로컬 상태 업데이트
         setSignupInfo(prev => ({
           ...prev,
           phoneNumber: phoneNumber.value,
@@ -301,7 +333,7 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
         }));
 
         setIsPhoneVerified(true);
-        setIsVerifyButtonDisabled(true); // Disable the button
+        setIsVerifyButtonDisabled(true); // 재인증 방지를 위한 버튼 비활성화
       } else {
         Toast.show({
           type: 'error',
@@ -321,6 +353,10 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
     }
   };
 
+  /**
+   * 파일 선택기를 통한 문서 파일 선택 처리
+   * react-native-documents-picker를 사용하여 다중 파일 선택 지원
+   */
   const handlePickFiles = async () => {
     try {
       const picked = await pick({allowMultiSelection: true});
@@ -419,12 +455,13 @@ const FuneralStepTwo = ({onNext, onPrev}: Props) => {
             <ImagePreviewList
               images={selectedImages}
               onDelete={index => {
+                // 선택된 이미지 삭제 처리
                 const newSelectedImages = selectedImages.filter(
                   (_, i) => i !== index,
                 );
                 setSelectedImages(newSelectedImages);
 
-                // 즉시 signupInfo 업데이트
+                // 삭제 후 전역 상태 즉시 동기화
                 const attachedFiles: AttachedFile[] = [
                   ...newSelectedImages.map(img => ({
                     uri: img.uri,

@@ -1,3 +1,9 @@
+/**
+ * 공지사항 상세보기 페이지 컴포넌트
+ * - 특정 공지사항의 상세 내용을 표시
+ * - props: _navigation (NavigationProp, 사용되지 않음)
+ * - 주요 라이브러리: @react-navigation/native
+ */
 import React, {useCallback, useEffect, useState} from 'react';
 import {
   NavigationProp,
@@ -33,6 +39,7 @@ const NoticeDetailPage = ({_navigation}: INoticeDetailPageProps) => {
   const [notice, setNotice] = useState<INotice | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // StatusBar 설정 - 화면 포커스 시 파란색 배경에 어두운 콘텐츠 스타일 적용
   useFocusEffect(
     useCallback(() => {
       if (Platform.OS === 'android') {
@@ -44,9 +51,15 @@ const NoticeDetailPage = ({_navigation}: INoticeDetailPageProps) => {
     }, []),
   );
 
+  // 공지사항 상세 정보 조회 - noticeId로 특정 공지사항의 상세 내용 가져오기
   const fetchNoticeDetail = useCallback(async () => {
     try {
       setLoading(true);
+
+      /**
+       * API 연동: GET 공지사항 상세 조회
+       * - 특정 noticeId에 해당하는 공지사항의 전체 내용을 서버에서 가져옴
+       */
       const response = await api.get(`/common/notice/${noticeId}`);
 
       if (response.data?.data) {
@@ -59,12 +72,14 @@ const NoticeDetailPage = ({_navigation}: INoticeDetailPageProps) => {
     }
   }, [noticeId]);
 
+  // noticeId 변경 시 상세 정보 재조회
   useEffect(() => {
     if (noticeId) {
       fetchNoticeDetail();
     }
   }, [noticeId, fetchNoticeDetail]);
 
+  // 날짜 포맷팅 - YYYY.MM.DD HH:mm 형식으로 변환
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('ko-KR', {
@@ -76,6 +91,7 @@ const NoticeDetailPage = ({_navigation}: INoticeDetailPageProps) => {
     });
   };
 
+  // 사용자 타입 텍스트 변환 - 영문 타입을 한글로 표시
   const getUserTypeText = (userType: string) => {
     switch (userType) {
       case 'manager':
@@ -89,6 +105,7 @@ const NoticeDetailPage = ({_navigation}: INoticeDetailPageProps) => {
     }
   };
 
+  // 로딩 상태 표시
   if (loading) {
     return (
       <DefaultLayout color="#3287F8" headerShown={true} headerTitle="공지사항">
@@ -99,6 +116,7 @@ const NoticeDetailPage = ({_navigation}: INoticeDetailPageProps) => {
     );
   }
 
+  // 공지사항을 찾을 수 없는 경우
   if (!notice) {
     return (
       <DefaultLayout color="#3287F8" headerShown={true} headerTitle="공지사항">

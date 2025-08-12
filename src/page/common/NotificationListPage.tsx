@@ -1,3 +1,10 @@
+/**
+ * 알림 목록을 표시하고 관리하는 페이지 컴포넌트
+ * 알림 클릭 시 해당 페이지로 네비게이션하며, 읽음 처리 및 전체 읽음 처리 기능 제공
+ *
+ * @props variant - 사용자 타입 ('manager' | 'funeralHall')
+ * @libraries @react-navigation/native, @notifee/react-native, react-native-toast-message
+ */
 import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
@@ -33,6 +40,11 @@ const NotificationListPage = (_props: NotificationListPageProps) => {
   const [error, setError] = useState<string | null>(null);
   const [markingAllAsRead, setMarkingAllAsRead] = useState(false);
   const navigation = useNavigation();
+
+  /**
+   * 화면 포커스 시 상태바 스타일 설정
+   * Android와 iOS의 상태바 색상 및 스타일을 플랫폼별로 적용
+   */
   useFocusEffect(
     useCallback(() => {
       if (Platform.OS === 'android') {
@@ -44,12 +56,14 @@ const NotificationListPage = (_props: NotificationListPageProps) => {
 
       return () => {
         // 화면 포커스 해제 시 필요하다면 초기화 작업
-        // 예: StatusBar.setStyle('default')
       };
     }, []),
   );
 
-  // 컴포넌트 마운트 시 한 번만 실행
+  /**
+   * 사용자 정보 로드
+   * 토큰 스토리지에서 사용자 정보를 가져와 상태에 저장
+   */
   useEffect(() => {
     const loadUserInfo = async () => {
       try {
@@ -63,9 +77,12 @@ const NotificationListPage = (_props: NotificationListPageProps) => {
     };
 
     loadUserInfo();
-  }, []); // 빈 의존성 배열로 한 번만 실행
+  }, []);
 
-  // 알림 목록 조회 (useFocusEffect 사용)
+  /**
+   * 알림 목록 조회 (화면 포커스 시마다 실행)
+   * GET /common/notification - 사용자의 알림 목록을 가져오기 위함
+   */
   useFocusEffect(
     useCallback(() => {
       const fetchNotifications = async () => {
@@ -87,36 +104,29 @@ const NotificationListPage = (_props: NotificationListPageProps) => {
     }, []),
   );
 
+  /**
+   * 알림 클릭 처리
+   * 알림을 읽음으로 표시하고 해당 알림의 타입에 따라 적절한 페이지로 네비게이션
+   * @param item - 클릭된 알림 아이템
+   */
   const handleNotificationPress = async (item: NotificationItem) => {
     try {
-      console.log('item1231231231231', item);
       console.log('알림 클릭 - 타입:', item.notificationType);
       console.log('알림 클릭 - 데이터:', item.data);
-      console.log('수신자 타입:', item.receiverType);
 
-      // getNavigationTarget을 기반으로 네비게이션 처리
+      // 알림 타입별 네비게이션 타겟 결정
       const navigationTarget = getNavigationTarget(item.notificationType, item);
       console.log('네비게이션 타겟:', navigationTarget);
 
+      // PUT /common/notification/{id}/read - 개별 알림을 읽음 상태로 변경하기 위함
       await handleNotificationRead(item.notificationId, item.isRead);
-      // 알림 읽음 처리는 notificationService에서 자동으로 처리되므로 여기서는 제거
-      // const response = await api.put(
-      //   `/common/notification/${item.notificationId}/read`,
-      // );
-      // console.log('알림 읽음 처리 결과:', response);
 
+      // 네비게이션 타겟이 있는 경우 해당 페이지로 이동
       if (navigationTarget) {
-        // getNavigationTarget에서 반환된 screen과 params로 직접 네비게이션
         (navigation as any).navigate(
           navigationTarget.screen,
           navigationTarget.params,
         );
-
-        // notifee 알림 배지 1 감소
-        // await notifee.decrementBadgeCount();
-
-        // 알림 읽음 처리 (선택사항)
-        // notificationApiService.markNotificationAsRead(item.notificationId);
       } else {
         console.log(
           '해당 알림 타입에 대한 네비게이션 타겟이 없습니다:',
@@ -128,19 +138,20 @@ const NotificationListPage = (_props: NotificationListPageProps) => {
     }
   };
 
-  console.log('userInfo', userInfo);
-  console.log('알림개수', notifications.length);
-  console.log('notifications', notifications);
-  // 모든 알림 읽음 처리
+  /**
+   * 모든 알림 읽음 처리
+   * 모든 미읽음 알림을 읽음 상태로 변경하고 앱 배지 카운트 초기화
+   * POST /common/notification/read-all - 모든 알림을 읽음 상태로 변경하기 위함
+   */
   const handleMarkAllAsRead = async () => {
     try {
       setMarkingAllAsRead(true);
       await notificationApiService.markAllNotificationsAsRead();
 
-      // notifee 알림 배지 초기화
+      // 앱 배지 카운트 초기화
       await notifee.setBadgeCount(0);
 
-      // 로컬 상태 업데이트
+      // 로컬 상태 업데이트 - 모든 알림을 읽음 상태로 변경
       setNotifications(prev =>
         prev.map(notification => ({
           ...notification,
@@ -151,7 +162,6 @@ const NotificationListPage = (_props: NotificationListPageProps) => {
       console.log('모든 알림 읽음 처리 완료');
     } catch (err: any) {
       console.error('모든 알림 읽음 처리 실패:', err);
-      // 에러 처리 (필요시 토스트 메시지 등 추가)
     } finally {
       setMarkingAllAsRead(false);
     }
@@ -161,7 +171,8 @@ const NotificationListPage = (_props: NotificationListPageProps) => {
   const unreadCount = notifications.filter(
     notification => !notification.isRead,
   ).length;
-  // 로딩 중일 때 표시할 화면
+
+  // 로딩 상태 처리
   if (loading) {
     return (
       <DefaultLayout headerShown={true} headerTitle="알림" homeButton={true}>
@@ -172,7 +183,7 @@ const NotificationListPage = (_props: NotificationListPageProps) => {
     );
   }
 
-  // 에러가 있을 때 표시할 화면
+  // 에러 상태 처리
   if (error) {
     return (
       <DefaultLayout
@@ -197,7 +208,7 @@ const NotificationListPage = (_props: NotificationListPageProps) => {
     );
   }
 
-  // 알림이 없을 때 표시할 화면
+  // 알림이 없는 경우 처리
   if (notifications.length === 0) {
     return (
       <DefaultLayout
@@ -217,6 +228,11 @@ const NotificationListPage = (_props: NotificationListPageProps) => {
     );
   }
 
+  /**
+   * FlatList 아이템 렌더링
+   * @param item - 렌더링할 알림 아이템
+   * @returns NotificationCard 컴포넌트
+   */
   const renderItem = ({item}: {item: NotificationItem}) => (
     <NotificationCard
       item={item}
@@ -233,6 +249,7 @@ const NotificationListPage = (_props: NotificationListPageProps) => {
       homeRouteName={
         userInfo?.userType === 'manager' ? 'ManagerMain' : 'FuneralMain'
       }>
+      {/* 읽지 않은 알림이 있는 경우에만 전체 읽음 버튼 표시 */}
       {unreadCount > 0 && (
         <View style={styles.headerButtonContainer}>
           <TouchableOpacity
@@ -254,7 +271,6 @@ const NotificationListPage = (_props: NotificationListPageProps) => {
         data={notifications}
         renderItem={renderItem}
         keyExtractor={item => item.notificationId}
-        // contentContainerStyle={{gap: 1}}
         showsVerticalScrollIndicator={false}
       />
     </DefaultLayout>

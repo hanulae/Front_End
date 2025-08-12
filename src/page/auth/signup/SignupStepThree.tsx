@@ -1,3 +1,8 @@
+/**
+ * 회원가입 3단계 - 계좌정보 및 약관동의
+ * Props: onSubmit, onPrev, userType
+ * 주요 라이브러리: jotai, axios, react-native
+ */
 import {useAtom, useSetAtom} from 'jotai';
 import axios from 'axios';
 import {useState} from 'react';
@@ -78,14 +83,29 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
     {name: '카카오뱅크', code: '090'},
   ];
 
+  /**
+   * 은행 선택 바텀시트 열기
+   * 입력: 없음
+   * 출력: 없음 (상태 변경)
+   */
   const openBankSelectSheet = () => {
     setShowBankSelectSheet(true);
   };
 
+  /**
+   * 은행 선택 바텀시트 닫기
+   * 입력: 없음
+   * 출력: 없음 (상태 변경)
+   */
   const closeBankSelectSheet = () => {
     setShowBankSelectSheet(false);
   };
 
+  /**
+   * 이전 단계로 이동하면서 현재 정보 저장
+   * 입력: 없음
+   * 출력: 없음 (상태 저장 후 이전 단계 이동)
+   */
   const handlePrev = () => {
     setSignupInfo(prev => ({
       ...prev,
@@ -95,13 +115,24 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
     onPrev();
   };
 
+  /**
+   * 약관 상세 페이지로 이동
+   * 입력: type - 약관 타입
+   * 출력: 없음 (페이지 이동)
+   */
   const navigateMoreInfo = (type: string) => {
     navigation.navigate('AgreementDetail', {
       type: type,
     });
   };
 
+  /**
+   * 약관 동의 체크박스 토글 처리
+   * 입력: key - 토글할 약관 키
+   * 출력: 없음 (상태 변경)
+   */
   const handleToggle = (key: keyof typeof agrees) => {
+    // 전체 동의인 경우 모든 약관을 동일하게 설정
     if (key === 'all') {
       const newState = !agrees.all;
       setAgrees({
@@ -113,6 +144,7 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
         marketing: newState,
       });
     } else {
+      // 개별 약관 토글 시 전체 동의 상태도 업데이트
       const newState = {...agrees, [key]: !agrees[key]};
       newState.all =
         newState.service &&
@@ -127,10 +159,18 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
   const allRequiredAgreements =
     agrees.service && agrees.privacy && agrees.location && agrees.age;
 
+  /**
+   * 회원가입 제출 처리
+   * 입력: 없음
+   * 출력: 없음 (API 호출 후 페이지 이동)
+   */
   const handleSubmit = async () => {
     try {
       const formData = new FormData();
+
+      // userType에 따라 다른 데이터 구조로 FormData 구성
       if (userType === 'manager') {
+        // 상조팀장용 회원가입 데이터
         formData.append('managerUsername', signupInfo.userName);
         formData.append('managerPassword', signupInfo.password);
         formData.append('managerName', name);
@@ -142,6 +182,7 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
         formData.append('managerBankNumber', accountNumber);
         formData.append('agreements', JSON.stringify(agrees));
       } else if (userType === 'funeral') {
+        // 장례식장용 회원가입 데이터
         formData.append('funeralUsername', signupInfo.userName);
         formData.append('funeralPassword', signupInfo.password);
         formData.append('funeralName', signupInfo.selectedFuneral?.funeralName);
@@ -165,6 +206,7 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
       const fileKey =
         userType === 'funeral' ? 'funeralAddFile' : 'managerAddFile';
 
+      // 첨부파일들을 FormData에 추가
       signupInfo.attachedFiles?.forEach((file, index) => {
         formData.append(fileKey, {
           uri: file.uri,
@@ -173,15 +215,13 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
         });
       });
 
-      console.log('userType:', userType);
-      console.log('🚀 ~ handleSubmit ~ formData:', formData);
-
       // ✅ userType에 따라 API 분기
       const endpoint =
         userType === 'manager'
           ? '/manager/user/signup'
           : '/funeral/user/signup';
 
+      // POST: 회원가입 정보를 서버로 전송
       const res = await api.post(endpoint, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -214,7 +254,7 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
     }
 
     /*
-  //회원가입 기존
+  // 이전 로컬 전용 회원가입 로직 (주석 처리)
   const handleSubmit = () => {
     setSignupInfo(prev => ({
       ...prev,
@@ -225,7 +265,7 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
     navigation.navigate('SignupComplete', {
       userType: userType,
     });
-    */
+  */
   };
 
   // const handleSubmit = () => {
@@ -237,17 +277,24 @@ const SignupStepThree = ({onSubmit, onPrev, userType}: Props) => {
 
   // };
 
+  /**
+   * 계좌 인증 처리
+   * 입력: 없음
+   * 출력: 없음 (API 호출 후 상태 변경)
+   */
   const handleAccountVerify = async () => {
     console.log('bankName:', bankName);
     console.log('bankCode:', bankCode);
     console.log('accountNumber:', accountNumber);
     console.log('name:', name);
+    // 필수 입력값 검증
     if (!bankCode || !accountNumber || !name) {
       Alert.alert('입력 오류', '은행, 계좌번호, 이름을 모두 입력해주세요.');
       return;
     }
 
     try {
+      // POST: 계좌 인증을 위해 서버로 인증 정보 전송
       const res = await api.post('/manager/bank/verify', {
         bankCode,
         bankNumber: accountNumber,

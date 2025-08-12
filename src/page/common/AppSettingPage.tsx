@@ -1,3 +1,9 @@
+/**
+ * 앱 설정 페이지 컴포넌트
+ * - 알림 설정, 앱 버전 확인, 로그아웃, 회원탈퇴 기능을 제공
+ * - props: 없음 (route params로 userType 받음)
+ * - 주요 라이브러리: @react-navigation/native, react-native-device-info, jotai
+ */
 import {
   useFocusEffect,
   useNavigation,
@@ -41,7 +47,11 @@ interface INotificationSettings {
 const AppSettingPage = () => {
   const navigation = useNavigation();
   const setLogin = useSetAtom(userInfoAtom);
-  // StatusBar 색상 변경
+
+  /**
+   * StatusBar 색상 설정
+   * - 화면 포커스 시 플랫폼별로 StatusBar 스타일 적용
+   */
   useFocusEffect(
     useCallback(() => {
       if (Platform.OS === 'android') {
@@ -56,7 +66,7 @@ const AppSettingPage = () => {
     }, []),
   );
 
-  // userType 분기 처리
+  // userType 분기 처리 - manager 또는 funeral에 따라 다른 레이아웃과 서비스 사용
   const route = useRoute();
   const {userType} = route.params as {userType: 'manager' | 'funeral'};
 
@@ -77,7 +87,11 @@ const AppSettingPage = () => {
   // 앱 버전 가져오기 (라이브러리 설치 후 사용)
   const appVersion = DeviceInfo.getVersion();
 
-  // 토글 변경 핸들러
+  /**
+   * 알림 설정 토글 핸들러
+   * - 입력: key (알림 타입), 출력: void
+   * - 해당 알림 설정의 활성화/비활성화 상태를 토글
+   */
   const toggleNotification = (key: keyof INotificationSettings) => {
     setNotifications(prev => ({
       ...prev,
@@ -85,35 +99,48 @@ const AppSettingPage = () => {
     }));
   };
 
-  // 회원탈퇴 동의 체크박스 토글
+  /**
+   * 회원탈퇴 동의 체크박스 토글
+   * - 입력: 없음, 출력: void
+   * - 회원탈퇴 동의 상태를 토글
+   */
   const toggleWithdrawalAgreement = () => {
     setWithdrawalAgreed(prev => !prev);
   };
 
-  // 회원탈퇴 핸들러
+  /**
+   * 회원탈퇴 처리 핸들러
+   * - 입력: 없음, 출력: Promise<void>
+   * - 탈퇴 동의 확인 후 탈퇴 가능 여부 체크 및 SMS 인증 진행
+   */
   const handleWithdraw = async () => {
+    // 동의 체크 - 동의하지 않은 경우 탈퇴 불가
     if (!withdrawalAgreed) {
       Alert.alert('알림', '회원탈퇴에 동의해주세요.');
       return;
     }
 
-    // 회원탈퇴 서비스 선택
+    // userType에 따른 탈퇴 서비스 선택 - manager와 funeral은 다른 API 사용
     const withdrawalService =
       userType === 'manager'
         ? managerWithdrawalService
         : funeralWithdrawalService;
 
     try {
-      // 1. 탈퇴 가능 여부 확인
+      /**
+       * API 연동: GET 탈퇴 가능 여부 확인
+       * - 사용자가 탈퇴 가능한 상태인지 서버에서 검증
+       */
       const eligibilityResult =
         await withdrawalService.checkDeletionEligibility();
 
+      // 탈퇴 불가능한 경우 - 진행 중인 거래나 미완료 작업이 있을 수 있음
       if (!eligibilityResult.data.canDelete) {
         Alert.alert('탈퇴 불가', eligibilityResult.data.message);
         return;
       }
 
-      // 2. 탈퇴 확인 및 SMS 인증 진행
+      // 탈퇴 확인 및 SMS 인증 진행 - 최종 확인 후 SMS 인증 단계로 이동
       Alert.alert(
         '회원탈퇴',
         `정말로 탈퇴하시겠습니까?\n${eligibilityResult.data.message}\n${
@@ -137,18 +164,26 @@ const AppSettingPage = () => {
     }
   };
 
-  // SMS 인증 처리
+  /**
+   * SMS 인증 처리
+   * - 입력: 없음, 출력: Promise<void>
+   * - 회원탈퇴를 위한 SMS 인증번호 발송
+   */
   const processSMSAuthentication = async () => {
-    // 회원탈퇴 서비스 선택
+    // userType에 따른 탈퇴 서비스 선택
     const withdrawalService =
       userType === 'manager'
         ? managerWithdrawalService
         : funeralWithdrawalService;
 
     try {
-      // SMS 발송
+      /**
+       * API 연동: POST SMS 발송
+       * - 사용자 휴대폰으로 탈퇴 인증번호 발송
+       */
       const smsResult = await withdrawalService.sendVerificationSMS();
 
+      // SMS 발송 성공 시 인증 모달 표시
       if (smsResult.success) {
         setSmsPhoneNumber(smsResult.phoneNumber || '');
         setSmsModalVisible(true);
@@ -163,16 +198,27 @@ const AppSettingPage = () => {
     }
   };
 
-  // 로그아웃
+  /**
+   * 로그아웃 처리
+   * - 입력: 없음, 출력: Promise<void>
+   * - 서버에 로그아웃 요청 후 로컬 토큰 정리 및 상태 초기화
+   */
   const logout = async () => {
     try {
       const userInfos = await getUserInfo();
       const deviceId = await DeviceInfo.getUniqueId();
+
+      /**
+       * API 연동: POST 로그아웃
+       * - 서버에 로그아웃 처리를 위한 사용자 정보 및 디바이스 ID 전송
+       */
       const response = await api.post('/manager/auth/logout', {
         userId: userInfos?.userId,
         userType: userInfos?.userType,
         deviceId: deviceId,
       });
+
+      // 로그아웃 성공 시 토큰 정리 및 상태 초기화
       if (response.status === 200) {
         // AsyncStorage 정리
         await clearTokens();
@@ -189,34 +235,49 @@ const AppSettingPage = () => {
     } catch (error) {
       console.error('로그아웃 실패:', error);
     }
-
-    // navigation.navigate('ManagerMain');
   };
 
-  // SMS 모달 닫기
+  /**
+   * SMS 모달 닫기
+   * - 입력: 없음, 출력: void
+   * - SMS 인증 모달을 닫고 관련 상태 초기화
+   */
   const handleSMSModalClose = () => {
     setSmsModalVisible(false);
     setSmsPhoneNumber('');
   };
 
-  // SMS 인증번호 확인
+  /**
+   * SMS 인증번호 확인
+   * - 입력: smsCode (인증번호), 출력: void
+   * - 인증번호 확인 후 실제 탈퇴 처리 실행
+   */
   const handleSMSConfirm = (smsCode: string) => {
     setSmsModalVisible(false);
     setSmsPhoneNumber('');
     executeWithdrawal(smsCode);
   };
 
-  // 회원탈퇴 실행
+  /**
+   * 회원탈퇴 실행
+   * - 입력: smsCode (SMS 인증번호), 출력: Promise<void>
+   * - SMS 인증 완료 후 최종 회원탈퇴 처리
+   */
   const executeWithdrawal = async (smsCode: string) => {
-    // 회원탈퇴 서비스 선택
+    // userType에 따른 탈퇴 서비스 선택
     const withdrawalService =
       userType === 'manager'
         ? managerWithdrawalService
         : funeralWithdrawalService;
 
     try {
+      /**
+       * API 연동: DELETE 회원탈퇴
+       * - SMS 인증번호와 함께 최종 회원탈퇴 처리를 위한 서버 요청
+       */
       const result = await withdrawalService.deleteAccount({smsCode});
 
+      // 탈퇴 성공 시 토큰 정리 및 메인 화면으로 이동
       if (result.success) {
         Alert.alert('탈퇴 완료', '회원탈퇴가 완료되었습니다.', [
           {
@@ -244,7 +305,11 @@ const AppSettingPage = () => {
     }
   };
 
-  // 공통 컨텐츠
+  /**
+   * 공통 컨텐츠 렌더링
+   * - 입력: 없음, 출력: JSX.Element
+   * - 알림 설정, 앱 정보, 회원탈퇴 섹션을 포함한 설정 화면 UI
+   */
   const renderContent = () => (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -270,14 +335,6 @@ const AppSettingPage = () => {
             onToggle={() => toggleNotification('smsNotification')}
           />
         </View>
-
-        {/* <View style={styles.settingItem}>
-          <Typo style={styles.settingLabel}>이메일 알림</Typo>
-          <CustomToggle
-            isOn={notifications.emailNotification}
-            onToggle={() => toggleNotification('emailNotification')}
-          />
-        </View> */}
       </View>
 
       {/* 앱 정보 섹션 */}
@@ -329,7 +386,7 @@ const AppSettingPage = () => {
     </View>
   );
 
-  // Layout 분기 처리
+  // userType에 따른 Layout 분기 처리 - manager와 funeral은 다른 레이아웃 사용
   if (userType === 'manager') {
     return (
       <>

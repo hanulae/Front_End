@@ -1,3 +1,8 @@
+/**
+ * 로그인 페이지
+ * Props: navigation
+ * 주요 라이브러리: react-native, react-navigation, jotai
+ */
 import React, {useState} from 'react';
 import {
   Dimensions,
@@ -76,6 +81,11 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
     }
   };
 
+  /**
+   * 로그인 성공 후 처리 (토큰 저장, 사용자 정보 설정, FCM 등록)
+   * 입력: response - 로그인 응답 데이터
+   * 출력: 없음 (상태 변경 및 FCM 토큰 등록)
+   */
   const handleLogin = async (response: any) => {
     try {
       // 토큰 저장
@@ -139,13 +149,22 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
 
   const username = useInputBase({initialValue: ''});
 
+  /**
+   * 비밀번호 유효성 검증
+   * 입력: password - 검증할 비밀번호
+   * 출력: boolean - 유효성 여부
+   */
   const isPasswordValid = (password: string) => {
     const regex =
       /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     return regex.test(password);
   };
 
-  // 로그인 핸들러
+  /**
+   * 로그인 처리
+   * 입력: 없음
+   * 출력: 없음 (API 호출 후 로그인 처리)
+   */
   const handleSignin = async () => {
     console.log('handleSignin');
     if (!username.value || !password.value) {

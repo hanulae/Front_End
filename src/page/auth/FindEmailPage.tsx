@@ -1,3 +1,8 @@
+/**
+ * 아이디 찾기 페이지
+ * Props: navigation
+ * 주요 라이브러리: react-native, react-navigation
+ */
 import {StyleSheet, View, TouchableOpacity} from 'react-native';
 import DefaultLayout from '../../layout/DefaultLayout';
 import {usePhoneInput} from '../../hooks/input/usePhoneInput';
@@ -9,7 +14,7 @@ import BaseInput from '../../components/common/input/BaseInput';
 import {NavigationProp, useRoute} from '@react-navigation/native';
 import {request} from 'react-native-permissions';
 import api from '../../api/config';
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import Toast from 'react-native-toast-message';
 
 interface IFindEmailPageProps {
@@ -25,19 +30,26 @@ const FindEmailPage = ({navigation}: IFindEmailPageProps) => {
   const [username, setUsername] = useState<string | null>(null);
   const [isVerifyButtonDisabled, setIsVerifyButtonDisabled] = useState(false);
 
+  /**
+   * 인증코드 요청 처리
+   * 입력: 없음
+   * 출력: 없음 (API 호출 후 토스트 메시지)
+   */
   const handleRequestCode = async () => {
     try {
       let response;
+      // userType에 따라 다른 API 엔드포인트 호출
       if (userType === 'manager') {
+        // POST: 상조팀장용 인증코드 전송 요청
         response = await api.post('manager/auth/find/username/send', {
           managerPhoneNumber: phoneNumber.value,
         });
       } else {
+        // POST: 장례식장용 인증코드 전송 요청
         response = await api.post('funeral/auth/find/username/send', {
           funeralPhoneNumber: phoneNumber.value,
         });
       }
-
       if (response.status === 200) {
         Toast.show({
           type: 'success',
@@ -57,23 +69,30 @@ const FindEmailPage = ({navigation}: IFindEmailPageProps) => {
   const pageName =
     userType === 'manager' ? '상조팀장 아이디 찾기' : '장례식장 아이디 찾기';
 
+  /**
+   * 인증코드 확인 처리
+   * 입력: 없음
+   * 출력: 없음 (API 호출 후 사용자명 표시)
+   */
   const handleVerifyCode = async () => {
     try {
       let response;
+      // userType에 따라 다른 API 엔드포인트 호출
       if (userType === 'manager') {
+        // POST: 상조팀장용 인증코드 확인 요청
         response = await api.post('manager/auth/find/username/verify', {
           managerPhone: phoneNumber.value,
           code: authCode.value,
         });
       } else {
+        // POST: 장례식장용 인증코드 확인 요청
         response = await api.post('funeral/auth/find/username/verify', {
           funeralPhoneNumber: phoneNumber.value,
           code: authCode.value,
         });
       }
 
-      console.log("🚀 ~ handleVerifyCode ~ response:", response)
-
+      // 인증 성공 시 사용자명 설정 및 버튼 비활성화
       if (response.status === 200 && response.data.verified) {
         setUsername(response.data.username);
         setIsVerifyButtonDisabled(true); // Disable the button
@@ -98,6 +117,11 @@ const FindEmailPage = ({navigation}: IFindEmailPageProps) => {
     }
   };
 
+  /**
+   * 확인 버튼 클릭 시 이전 페이지로 이동
+   * 입력: 없음
+   * 출력: 없음 (페이지 이동)
+   */
   const handleCheckEmail = () => {
     navigation.goBack();
   };
@@ -144,7 +168,11 @@ const FindEmailPage = ({navigation}: IFindEmailPageProps) => {
               onPress={handleVerifyCode}
               style={[
                 styles.verifyButton,
-                { backgroundColor: isVerifyButtonDisabled ? '#C0C0C0' : '#FFFFFF' } // Change color when disabled
+                {
+                  backgroundColor: isVerifyButtonDisabled
+                    ? '#C0C0C0'
+                    : '#FFFFFF',
+                }, // Change color when disabled
               ]}
               disabled={isVerifyButtonDisabled} // Disable the button
             >

@@ -1,3 +1,9 @@
+/**
+ * 메인 페이지 컴포넌트
+ * - 앱의 첫 화면으로 로그인, 장례식장 검색, 공지사항 접근 기능 제공
+ * - props: navigation (NavigationProp)
+ * - 주요 라이브러리: @react-navigation/native, react-native (ImageBackground, Linking)
+ */
 import React, {JSX, useCallback, useState} from 'react';
 import DefaultLayout from '../../layout/DefaultLayout';
 import CustomButton from '../../components/common/CustomButton';
@@ -22,12 +28,13 @@ import UserSelectSheet from '../../components/common/UserSelectSheet';
 
 const {width: screenWidth} = Dimensions.get('window');
 
-// 반응형 디자인 유틸리티 함수들
+// 반응형 디자인 유틸리티 함수들 - 화면 크기에 따른 동적 크기 조정
 const getResponsiveSize = (size: number) => {
   const baseWidth = 375; // iPhone X 기준 너비
   return (screenWidth / baseWidth) * size;
 };
 
+// 폰트 크기 반응형 조정 - 최소/최대 크기 제한
 const getResponsiveFontSize = (size: number) => {
   const baseWidth = 375;
   const scale = screenWidth / baseWidth;
@@ -51,19 +58,21 @@ const getButtonTitleFontSize = (size: number) => {
   return size * 1; // 큰 화면에서 거의 원래 크기
 };
 
+// 화면별 마진 조정
 const getResponsiveMargin = () => {
   if (screenWidth < 350) return 12; // 작은 화면
   if (screenWidth < 400) return 16; // 중간 화면
   return 20; // 큰 화면
 };
 
+// 화면별 패딩 조정
 const getResponsivePadding = () => {
   if (screenWidth < 350) return 8; // 작은 화면에서 패딩 줄임
   if (screenWidth < 400) return 12; // 중간 화면에서 패딩 줄임
   return 16; // 큰 화면에서도 패딩 줄임
 };
 
-// 버튼 크기 조정
+// 버튼 간격 조정
 const getButtonSpacing = () => {
   if (screenWidth < 350) return 6; // 작은 화면에서 간격 줄임
   if (screenWidth < 400) return 8; // 중간 화면에서 간격 줄임
@@ -76,7 +85,8 @@ interface IMainPageProps {
 
 const MainPage = ({navigation}: IMainPageProps): JSX.Element => {
   const [showSelectSheet, setShowSelectSheet] = useState(false);
-  
+
+  // StatusBar 설정 - 화면 포커스 시 파란색 배경에 밝은 콘텐츠 스타일 적용
   useFocusEffect(
     useCallback(() => {
       if (Platform.OS === 'android') {
@@ -87,15 +97,19 @@ const MainPage = ({navigation}: IMainPageProps): JSX.Element => {
       }
     }, []),
   );
+
+  // 로그인 페이지 이동 - 사용자 타입 선택 시트 표시
   const goToLoginPage = () => {
     setShowSelectSheet(true);
   };
 
+  // 공지사항 페이지 이동
   const goToNoticePage = () => {
     console.log('Notice Page');
     navigation.navigate('Notice');
   };
 
+  // 장례식장 검색 페이지 이동 - main variant로 설정하여 일반 검색 모드로 진입
   const goToSearchPage = () => {
     navigation.navigate('FindFuneral', {
       variant: 'main',
@@ -113,10 +127,6 @@ const MainPage = ({navigation}: IMainPageProps): JSX.Element => {
             </Typo>
             <LoginIcon />
           </CustomButton>
-          {/* <CustomButton onPress={goToAlarmPage} style={styles.alarmButton}>
-            <AlarmIcon />
-            {/* <AlarmOff /> */}
-          {/* </CustomButton> */}
         </View>
       </View>
       <View style={styles.mainContainer}>
@@ -129,6 +139,7 @@ const MainPage = ({navigation}: IMainPageProps): JSX.Element => {
           <Typo style={styles.mainSubText}>고품격 서비스를 제공합니다.</Typo>
         </View>
 
+        {/* 메인 버튼 섹션 - 배경 이미지와 함께 장례식장 검색, 공지사항 버튼 배치 */}
         <ImageBackground
           style={styles.buttonContainer}
           source={require('../../assets/mainImage.png')}
@@ -156,6 +167,8 @@ const MainPage = ({navigation}: IMainPageProps): JSX.Element => {
             </CustomButton>
           </View>
         </ImageBackground>
+
+        {/* 고객센터 연결 - 전화번호 클릭 시 전화 앱으로 연결 */}
         <TouchableOpacity
           style={styles.footerContainer}
           onPress={() => Linking.openURL('tel:1661-1897')}>
@@ -164,6 +177,8 @@ const MainPage = ({navigation}: IMainPageProps): JSX.Element => {
           <Typo style={styles.footerNumber}>1661-1897</Typo>
         </TouchableOpacity>
       </View>
+
+      {/* 사용자 타입 선택 시트 - manager 또는 funeral 타입 선택 후 로그인 화면으로 이동 */}
       {showSelectSheet && (
         <UserSelectSheet
           onClose={() => setShowSelectSheet(false)}
@@ -197,9 +212,7 @@ const styles = StyleSheet.create({
   },
   loginButton: {
     flexDirection: 'row',
-    // justifyContent: 'center',
     alignItems: 'center',
-    // borderWidth: 1,
     gap: getButtonSpacing(),
     borderColor: '#000',
     paddingVertical: getResponsiveSize(5),
@@ -210,8 +223,6 @@ const styles = StyleSheet.create({
     fontSize: getResponsiveFontSize(14),
   },
   alarmButton: {
-    // backgroundColor: '#fff',
-    // borderWidth: 1,
     borderColor: '#000',
     paddingVertical: 5,
     paddingHorizontal: 10,
@@ -235,7 +246,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   mainSubTextContainer: {
-    // marginHorizontal: 31,
     marginBottom: getResponsiveSize(60),
     gap: getResponsiveSize(5),
   },

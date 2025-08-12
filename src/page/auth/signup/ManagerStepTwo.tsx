@@ -23,6 +23,15 @@ import {LocalFile} from '../../../util/file';
 import Toast from 'react-native-toast-message';
 import api from '../../../api/config';
 
+/**
+ * 상조팀장 회원가입 2단계 컴포넌트
+ * - 휴대전화번호 SMS 인증 기능 제공
+ * - 키보드 대응 및 반응형 UI 제공
+ * - 인증 완료 후 다음 단계로 진행 가능
+ *
+ * Props: onNext, onPrev (단계 이동 콜백 함수)
+ * 주요 라이브러리: jotai (상태관리), KeyboardAvoidingView (키보드 처리)
+ */
 interface Props {
   onNext: () => void;
   onPrev: () => void;
@@ -30,6 +39,14 @@ interface Props {
 
 const {width: screenWidth} = Dimensions.get('window');
 
+/**
+ * 상조팀장 회원가입 2단계 컴포넌트
+ *
+ * 관리하는 상태값들:
+ * - selectedImages/selectedFiles: 첨부파일 로컬 상태 (현재 비활성화)
+ * - isKeyboardVisible: 키보드 표시 여부 (버튼 UI 제어용)
+ * - isVerifyButtonDisabled: 인증버튼 비활성화 상태
+ */
 const ManagerStepTwo = ({onNext, onPrev}: Props) => {
   const signupInfo = useAtomValue(signupAtom);
   const setSignupInfo = useSetAtom(signupAtom);
@@ -43,7 +60,10 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const [isVerifyButtonDisabled, setIsVerifyButtonDisabled] = useState(false);
 
-  // 총 첨부파일 개수 계산
+  /**
+   * 총 첨부파일 개수 계산 (이미지 + 일반파일)
+   * 상조팀장은 첨부파일 업로드 설정이 비활성화되어 있음
+   */
   const totalAttachedCount = useMemo(() => {
     return selectedImages.length + selectedFiles.length;
   }, [selectedImages.length, selectedFiles.length]);
@@ -53,7 +73,10 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
   //   return signupInfo.isPhoneVerified === true;
   // }, [signupInfo.isPhoneVerified]);
 
-  // 키보드 이벤트 감지
+  /**
+   * 키보드 표시/숨김 상태 감지 리스너 등록
+   * 키보드가 떨 때 하단 버튼을 숨겨 UI 충돌 방지
+   */
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
@@ -187,6 +210,10 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
     }));
   };
 
+  /**
+   * SMS 인증번호 요청 API 호출
+   * POST /manager/sms/send - 상조팀장 회원가입용 인증번호 발송
+   */
   const handleRequestCode = async () => {
     try {
       await api.post('/manager/sms/send', {
@@ -211,7 +238,12 @@ const ManagerStepTwo = ({onNext, onPrev}: Props) => {
     }
   };
 
+  /**
+   * SMS 인증번호 확인 API 호출
+   * POST /manager/sms/verify - 입력받은 인증번호 검증
+   */
   const handleVerifyCode = async () => {
+    // 입력값 유효성 검사
     if (!phoneNumber.value || !authCode.value) {
       Toast.show({
         type: 'error',

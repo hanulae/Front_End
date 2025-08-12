@@ -5,7 +5,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {signupAtom} from '../../../state/local_state/signupAtom';
 import {usePasswordInput} from '../../../hooks/input/usePasswordInput';
 import {useConfirmPasswordInput} from '../../../hooks/input/useConfirmPasswordInput';
@@ -20,16 +20,38 @@ import {useRoute} from '@react-navigation/native';
 import useCheckUsername from '../../../hooks/input/useCheckUsername';
 import Toast from 'react-native-toast-message';
 
+/**
+ * 회원가입 1단계 컴포넌트 (아이디/비밀번호 입력)
+ * - 아이디 중복확인 및 비밀번호 유효성 검사 기능
+ * - 비밀번호 일치 확인 및 실시간 유효성 검증
+ * - 모든 조건을 만족해야 다음 단계 진행 가능
+ *
+ * Props: onNext (다음 단계 이동 콜백 함수)
+ * 주요 라이브러리: jotai (상태관리), react-native-keyboard-aware-scroll-view (키보드 처리)
+ */
 interface Props {
   onNext: () => void;
 }
 
+/**
+ * 회원가입 1단계 컴포넌트
+ *
+ * 관리하는 상태값들:
+ * - username: 아이디 입력 상태 및 유효성 검사
+ * - password: 비밀번호 입력 상태 및 유효성 검사
+ * - confirmPassword: 비밀번호 확인 입력 상태 및 일치 검사
+ * - isUsernameChecked/Available: 아이디 중복확인 상태
+ */
 const SignupStepOne = ({onNext}: Props) => {
   console.log('SignupStepOne');
   const route = useRoute();
   const {userType} = route.params as {userType: 'manager' | 'funeral'};
   const [signupInfo, setSignupInfo] = useAtom(signupAtom);
-  //const email = useEmailPartsInput(signupInfo.email);
+  /**
+   * 아이디 입력값 유효성 검사 함수
+   * @param value - 입력된 아이디 문자열
+   * @returns 유효성 결과와 오류 메시지
+   */
   const validateUsername = (value: string) => {
     if (!value) {
       return {valid: false, message: '아이디를 입력해주세요'};
@@ -59,6 +81,7 @@ const SignupStepOne = ({onNext}: Props) => {
   const scrollViewRef = useRef(null);
   const isPasswordValid = password.isValid;
   const isPasswordMatchValid = confirmPassword.isValid;
+  // 전체 폼 유효성 검사 (아이디 중복확인 + 비밀번호 유효성 + 비밀번호 일치)
   const isFormValid =
     isUsernameChecked &&
     isUsernameAvailable &&
@@ -76,7 +99,12 @@ const SignupStepOne = ({onNext}: Props) => {
     userName: username.value,
     isFormValid,
   });
+  /**
+   * 다음 단계로 이동 처리
+   * 아이디 중복확인 완료 여부를 검사하고 전역 상태 업데이트
+   */
   const handleNext = () => {
+    // 아이디 중복확인 완료 여부 검사
     if (!isUsernameChecked || !isUsernameAvailable) {
       Toast.show({
         type: 'error',
@@ -101,10 +129,14 @@ const SignupStepOne = ({onNext}: Props) => {
     onNext();
   };
 
+  /**
+   * 아이디 중복확인 처리
+   * 사용자 입력 아이디의 중복 여부를 API로 확인
+   */
   const handleCheckUsername = () => {
     if (username.value.trim()) {
-      checkUsername(username.value.trim());
-      // 중복확인 요청 시, 결과를 초기화
+      checkUsername(username.value.trim()); // API 호출
+      // 중복확인 요청 시 기존 결과 초기화
       setSignupInfo(prev => ({
         ...prev,
         isUsernameChecked: false,
@@ -117,40 +149,45 @@ const SignupStepOne = ({onNext}: Props) => {
     console.log('Signup Info:', signupInfo);
   }, [signupInfo]);
 
-  // available 상태 변화 감지하여 isUsernameChecked 업데이트
+  /**
+   * 아이디 중복확인 API 결과 처리
+   * useCheckUsername 훅에서 반환되는 available 상태를 감지하여 전역 상태 업데이트
+   */
   useEffect(() => {
+    // 아이디 중복확인 결과에 따른 상태 업데이트
     if (available === true) {
+      // 사용 가능한 아이디
       setIsUsernameChecked(true);
       setIsUsernameAvailable(true);
       setSignupInfo(prev => ({
         ...prev,
         isUsernameChecked: true,
-        isUsernameAvailable: true, // 추가
+        isUsernameAvailable: true,
       }));
     } else if (available === false) {
+      // 이미 사용 중인 아이디
       setIsUsernameChecked(true);
       setIsUsernameAvailable(false);
       setSignupInfo(prev => ({
         ...prev,
         isUsernameChecked: true,
-        isUsernameAvailable: false, // 추가
+        isUsernameAvailable: false,
       }));
     }
   }, [available, setSignupInfo]);
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{flex: 1}}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <KeyboardAwareScrollView
           ref={scrollViewRef}
-          style={{ flex: 1 }}
-          contentContainerStyle={{ paddingBottom: 80 }}
+          style={{flex: 1}}
+          contentContainerStyle={{paddingBottom: 80}}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
           enableOnAndroid={true}
           extraScrollHeight={100}
-          enableAutomaticScroll={true}
-        >
+          enableAutomaticScroll={true}>
           <View style={styles.formWrapper}>
             <View style={styles.formContainer}>
               <View style={styles.container}>
@@ -158,10 +195,7 @@ const SignupStepOne = ({onNext}: Props) => {
                   아이디
                 </Typo>
                 <View style={styles.authSection}>
-                  <Input 
-                    input={username} 
-                    placeholder="아이디를 입력하세요"
-                  />
+                  <Input input={username} placeholder="아이디를 입력하세요" />
                   <CustomButton
                     onPress={handleCheckUsername}
                     style={styles.requestButton}>
@@ -204,17 +238,17 @@ const SignupStepOne = ({onNext}: Props) => {
                   placeholder="비밀번호를 다시 입력하세요"
                   type="password"
                 />
-              {confirmPassword.touched && confirmPassword.error ? (
-                <Typo fontSize={12} color="red" style={{marginLeft: 10}}>
-                  {confirmPassword.error}
-                </Typo>
-              ) : null}
-            </View>
+                {confirmPassword.touched && confirmPassword.error ? (
+                  <Typo fontSize={12} color="red" style={{marginLeft: 10}}>
+                    {confirmPassword.error}
+                  </Typo>
+                ) : null}
+              </View>
             </View>
           </View>
         </KeyboardAwareScrollView>
       </TouchableWithoutFeedback>
-      
+
       <View style={styles.confirmButtonContainer}>
         <CustomButton
           onPress={handleNext}
@@ -262,11 +296,11 @@ const styles = StyleSheet.create({
   authContainer: {
     flexDirection: 'column',
   },
-      container: {
-      flexDirection: 'column',
-      marginBottom: 25,
-      gap: 8,
-    },
+  container: {
+    flexDirection: 'column',
+    marginBottom: 25,
+    gap: 8,
+  },
   typeButton: {
     flex: 1,
     paddingVertical: 12,
@@ -339,4 +373,3 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard-Light',
   },
 });
-

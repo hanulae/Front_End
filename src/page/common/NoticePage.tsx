@@ -1,3 +1,9 @@
+/**
+ * 공지사항 목록 페이지 컴포넌트
+ * - 사용자 타입별 공지사항 목록 조회 및 상세보기 기능 제공
+ * - props: navigation (NavigationProp)
+ * - 주요 라이브러리: @react-navigation/native, jotai
+ */
 import React, {useCallback, useEffect, useState} from 'react';
 import {NavigationProp, useFocusEffect} from '@react-navigation/native';
 import {
@@ -36,6 +42,7 @@ const NoticePage = ({navigation}: INoticePageProps) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
+  // StatusBar 설정 - 화면 포커스 시 파란색 배경에 어두운 콘텐츠 스타일 적용
   useFocusEffect(
     useCallback(() => {
       if (Platform.OS === 'android') {
@@ -47,11 +54,17 @@ const NoticePage = ({navigation}: INoticePageProps) => {
     }, []),
   );
 
+  // 공지사항 목록 조회 - 사용자 타입에 따라 필터링된 공지사항 가져오기
   const fetchNotices = useCallback(async () => {
     try {
       setLoading(true);
-      // 사용자 타입에 따라 공지사항 필터링
+      // 사용자 타입에 따라 공지사항 필터링 - manager, funeral, all 타입별 분류
       const userType = userInfo.userType || 'all';
+
+      /**
+       * API 연동: GET 공지사항 목록 조회
+       * - 사용자 타입에 맞는 공지사항 목록을 서버에서 가져옴
+       */
       const response = await api.get('/common/notice/list', {
         params: {type: userType},
       });
@@ -66,20 +79,24 @@ const NoticePage = ({navigation}: INoticePageProps) => {
     }
   }, [userInfo.userType]);
 
+  // 새로고침 처리 - 당겨서 새로고침 기능
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchNotices();
     setRefreshing(false);
   };
 
+  // 사용자 타입 변경 시 공지사항 재조회
   useEffect(() => {
     fetchNotices();
   }, [userInfo.userType, fetchNotices]);
 
+  // 공지사항 상세보기 이동
   const goToNoticeDetail = (noticeId: string) => {
     navigation.navigate('NoticeDetail', {noticeId});
   };
 
+  // 날짜 포맷팅 - YYYY.MM.DD 형식으로 변환
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('ko-KR', {
@@ -89,6 +106,7 @@ const NoticePage = ({navigation}: INoticePageProps) => {
     });
   };
 
+  // 사용자 타입 텍스트 변환 - 영문 타입을 한글로 표시
   const getUserTypeText = (userType: string) => {
     switch (userType) {
       case 'manager':
