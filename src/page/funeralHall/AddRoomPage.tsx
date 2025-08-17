@@ -16,7 +16,27 @@ import {useFuneralHallInfo} from '../../hooks/useFuneralHallInfo';
 import Toast from 'react-native-toast-message';
 import {FuneralHallDetail} from '../../services/api/funeral/funeralHallInfoService';
 import {scaleFontSize, scaleSize} from '../../utils/responsive';
-
+/**
+ * 📌 AddRoomPage
+ * - 장례식장 호실(빈소) 정보를 추가/수정/조회하는 페이지
+ * - 모드(purpose)에 따라 다음 동작 수행:
+ *   - 'add'    : 신규 호실 정보 입력 후 저장
+ *   - 'modify' : 기존 호실 정보 수정
+ *   - 'detail' : 호실 상세 정보 조회 (읽기 전용)
+ *
+ * 🔹 주요 사용처:
+ *   - 장례식장 관리 > 호실 관리 화면에서 진입
+ *
+ * 🔹 의존성:
+ *   - useFuneralHallInfo(): API 호출 (상세 조회, 추가, 수정)
+ *   - useInputBase(): 입력 상태 관리
+ *   - FuneralLayout, FuneralInput, CustomButton, Toast
+ *
+ * 🔹 주의사항:
+ *   - 수정 시 version 필드 포함 (동시 수정 충돌 방지)
+ *   - iOS/Android 모두 Toast 위치를 상단으로 고정
+ *   - 입력값 검증 후에만 API 호출
+ */
 const AddRoomPage = () => {
   const route = useRoute();
   const navigation = useNavigation();
@@ -73,14 +93,26 @@ const AddRoomPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchFuneralHallDetail, roomId]);
 
-  // 수정 모드나 상세보기 모드일 때 기존 데이터 로드
+  // 📌 페이지 마운트 시, 수정/상세 모드면 기존 호실 데이터 로드
   useEffect(() => {
     if ((purpose === 'modify' || purpose === 'detail') && roomId) {
+      /**
+       * 📌 loadRoomDetail
+       * - API 호출로 특정 호실(roomId)의 상세 정보를 조회
+       * - 응답 데이터를 상태(roomDetail)에 저장
+       * - 입력 필드(useInputBase)에 초기값 주입
+       * @async
+       */
       loadRoomDetail();
     }
   }, [purpose, roomId, loadRoomDetail]);
 
-  // 입력값 검증
+  /**
+   * 📌 validateInputs
+   * - 필수 입력값(호실명, 평수, 수용인원) 검증
+   * - 누락 시 Toast 알림 표시 후 false 반환
+   * @returns {boolean}
+   */
   const validateInputs = () => {
     if (!room_name.value.trim()) {
       Toast.show({
@@ -118,7 +150,12 @@ const AddRoomPage = () => {
     return true;
   };
 
-  // 호실 추가 처리
+  /**
+   * 📌 handleAddRoom
+   * - 신규 호실 정보 추가 API 호출
+   * - 성공 시 Toast 표시 및 이전 화면으로 이동
+   * - 실패 시 에러 Toast 표시
+   */
   const handleAddRoom = async () => {
     if (!validateInputs()) {
       return;
@@ -159,7 +196,13 @@ const AddRoomPage = () => {
     }
   };
 
-  // 호실 수정 처리
+  /**
+   * 📌 handleUpdateRoom
+   * - 기존 호실 정보 수정 API 호출
+   * - version 포함해 optimistic locking 처리
+   * - 성공 시 Toast 표시 및 이전 화면으로 이동
+   * - 실패 시 에러 Toast 표시
+   */
   const handleUpdateRoom = async () => {
     if (!validateInputs()) return;
 
@@ -200,7 +243,10 @@ const AddRoomPage = () => {
     }
   };
 
-  // 저장 버튼 클릭 핸들러
+  /**
+   * 📌 handleSave
+   * - purpose 값에 따라 Add 또는 Update 실행
+   */
   const handleSave = () => {
     if (purpose === 'add') {
       handleAddRoom();

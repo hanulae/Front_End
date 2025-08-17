@@ -20,7 +20,22 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useFuneralEstimate} from '../../hooks/useFuneralEstimate';
 import Typo from '../../components/common/Typo';
 import Toast from 'react-native-toast-message';
-
+/**
+ * 📌 EstimateHistoryPage
+ * - 장례식장 앱에서 견적 내역을 표시하는 페이지
+ * - 완료된 견적 내역만 필터링하여 표시하고,
+ *   각 견적의 상세 정보를 클릭하여 페이지로 이동할 수 있음.
+ *
+ * 🔹 주요 기능:
+ *   - 견적 내역 목록 조회 (fetchEstimateList)
+ *   - 견적 상세 정보 페이지로 이동 (goToQuoteDetail)
+ *   - 완료된 견적 내역만 필터링
+ *   - 페이지 포커스 시 데이터 새로고침
+ *
+ * 🔹 의존성:
+ *   - useFuneralEstimate 훅 (API 호출)
+ *   - QuoteCard, FuneralLayout, Toast, Typo 등 공통 UI 컴포넌트
+ */
 const EstimateHistoryPage = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const {loading, error, fetchEstimateList} = useFuneralEstimate();
@@ -75,9 +90,11 @@ const EstimateHistoryPage = () => {
       console.log('pageResult', result);
 
       if (result && Array.isArray(result)) {
-        const filteredResult = result.filter(item => item.bidStatus !== 'transaction_completed');
+        const filteredResult = result.filter(
+          item => item.bidStatus !== 'transaction_completed',
+        );
         setEstimateList(filteredResult);
-        
+
         console.log('견적 내역 로드 성공(필터링):', filteredResult);
       } else {
         console.log('❌ 견적 내역 로드 실패 - 빈 데이터');

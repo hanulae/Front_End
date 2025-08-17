@@ -1,3 +1,11 @@
+/**
+ * # component 최상위 주석
+ *
+ * - 장례식장 사용자의 메인 프로필 페이지 컴포넌트 (대표/직원 권한 관리 포함)
+ * - props: 없음 (전역 상태 및 토큰 스토리지에서 사용자 정보 조회)
+ * - 주요 라이브러리: jotai (전역 상태 관리), @react-navigation/native (네비게이션), react-native-toast-message (토스트 메시지)
+ */
+
 import React from 'react';
 import {
   Platform,
@@ -64,7 +72,13 @@ const FuneralProfilePage = () => {
   const [funeralName, setFuneralName] = useState('');
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
 
-  // 사용자 정보 및 권한 로드
+  /**
+   * # 함수/메서드 단 주석
+   *
+   * - 기능 설명: 토큰 스토리지에서 사용자 정보를 불러와 상태에 설정
+   * - 입력 값: 없음
+   * - 출력 값: void (상태 업데이트)
+   */
   useEffect(() => {
     const loadUserInfo = async () => {
       try {
@@ -92,12 +106,31 @@ const FuneralProfilePage = () => {
     }
   }, []);
 
-  // 권한 체크 함수
+  /**
+   * # 함수/메서드 단 주석
+   *
+   * - 기능 설명: 사용자 권한 체크 함수 (대표는 모든 권한, 직원은 부여된 권한만)
+   * - 입력 값: permission (확인할 권한 키)
+   * - 출력 값: boolean (권한 보유 여부)
+   */
   const hasPermission = (permission: keyof IPermissions): boolean => {
+    /**
+     * # 중요 로직 또는 조건부 로직
+     *
+     * - 대표(isStaff가 false)는 모든 권한을 가짐
+     * - 직원은 permissions 객체에서 해당 권한이 true인지 확인
+     */
     if (!isStaff) return true; // 대표는 모든 권한
     return permissions?.[permission] || false;
   };
 
+  /**
+   * # 함수/메서드 단 주석
+   *
+   * - 기능 설명: 개인정보 수정 페이지로 이동 (휴대폰 인증 후)
+   * - 입력 값: 없음
+   * - 출력 값: void (휴대폰 인증 바텀시트 표시)
+   */
   const goToModifyFuneralInfo = () => {
     // if (!hasPermission('infoEdit')) {
     //   Toast.show({
@@ -113,7 +146,20 @@ const FuneralProfilePage = () => {
     setShowPhoneAuthSheet(true);
   };
 
+  /**
+   * # 함수/메서드 단 주석
+   *
+   * - 기능 설명: 호실 관리 페이지로 이동 (권한 체크 후)
+   * - 입력 값: 없음
+   * - 출력 값: void (네비게이션 또는 권한 에러 토스트)
+   */
   const goToManageRomms = () => {
+    /**
+     * # 중요 로직 또는 조건부 로직
+     *
+     * - 호실 관리 권한이 없는 경우 에러 토스트 표시 후 리턴
+     * - 권한이 있는 경우에만 호실 관리 페이지로 네비게이션
+     */
     if (!hasPermission('roomManagement')) {
       Toast.show({
         type: 'error',
@@ -127,8 +173,20 @@ const FuneralProfilePage = () => {
     navigation.navigate('RoomManagement');
   };
 
+  /**
+   * # 함수/메서드 단 주석
+   *
+   * - 기능 설명: 직원 관리 페이지로 이동 (대표만 접근 가능)
+   * - 입력 값: 없음
+   * - 출력 값: void (네비게이션 또는 권한 에러 토스트)
+   */
   const goToManageMembers = () => {
-    // 직원 관리는 대표만 접근 가능
+    /**
+     * # 중요 로직 또는 조건부 로직
+     *
+     * - 직원 관리는 대표만 접근 가능 (isStaff가 true면 접근 불가)
+     * - 직원이 접근 시 권한 없음 토스트 표시
+     */
     if (isStaff) {
       Toast.show({
         type: 'error',
@@ -142,6 +200,13 @@ const FuneralProfilePage = () => {
     navigation.navigate('StaffManagement');
   };
 
+  /**
+   * # 함수/메서드 단 주석
+   *
+   * - 기능 설명: 출동 완료 내역 페이지로 이동 (권한 체크 후)
+   * - 입력 값: 없음
+   * - 출력 값: void (네비게이션 또는 권한 에러 토스트)
+   */
   const goToDispatchHistory = () => {
     if (!hasPermission('dispatchHistory')) {
       Toast.show({
@@ -156,6 +221,13 @@ const FuneralProfilePage = () => {
     navigation.navigate('DispatchHistory');
   };
 
+  /**
+   * # 함수/메서드 단 주석
+   *
+   * - 기능 설명: 출동 대기 내역 페이지로 이동 (권한 체크 후)
+   * - 입력 값: 없음
+   * - 출력 값: void (네비게이션 또는 권한 에러 토스트)
+   */
   const goToDispatchRequest = () => {
     if (!hasPermission('dispatchPending')) {
       Toast.show({
@@ -171,6 +243,13 @@ const FuneralProfilePage = () => {
     navigation.navigate('PendingDispatch');
   };
 
+  /**
+   * # 함수/메서드 단 주석
+   *
+   * - 기능 설명: 견적 내역 페이지로 이동 (권한 체크 후)
+   * - 입력 값: 없음
+   * - 출력 값: void (네비게이션 또는 권한 에러 토스트)
+   */
   const goToQuoteList = () => {
     if (!hasPermission('estimateHistory')) {
       Toast.show({
@@ -186,6 +265,13 @@ const FuneralProfilePage = () => {
     navigation.navigate('EstimateHistory');
   };
 
+  /**
+   * # 함수/메서드 단 주석
+   *
+   * - 기능 설명: 앱 설정 페이지로 이동 (권한 체크 후)
+   * - 입력 값: 없음
+   * - 출력 값: void (네비게이션 또는 권한 에러 토스트)
+   */
   const goToAppSetting = () => {
     if (!hasPermission('appSettings')) {
       Toast.show({
@@ -201,6 +287,13 @@ const FuneralProfilePage = () => {
     navigation.navigate('AppSetting', {userType: 'funeral'});
   };
 
+  /**
+   * # 함수/메서드 단 주석
+   *
+   * - 기능 설명: 포인트 내역 페이지로 이동
+   * - 입력 값: 없음
+   * - 출력 값: void (네비게이션)
+   */
   const goToPointHistory = () => {
     navigation.navigate('PointHistory', {variant: 'funeral'});
   };
@@ -267,6 +360,12 @@ const FuneralProfilePage = () => {
           style={styles.whiteSection}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}>
+          {/**
+           * # 중요 로직 또는 조건부 로직
+           *
+           * - 각 메뉴는 hasPermission 함수로 권한을 확인 후 렌더링
+           * - 직원 관리는 isStaff가 false인 경우(대표)만 렌더링
+           */}
           {hasPermission('roomManagement') && (
             <CustomButton onPress={goToManageRomms} style={styles.button}>
               <View style={styles.buttonNameContainer}>

@@ -1,4 +1,10 @@
-// PaymentResult.tsx
+/**
+ * # component 최상위 주석
+ *
+ * - 결제 완료 후 결과를 표시하는 페이지 컴포넌트 (성공/실패 상태 표시)
+ * - props: route (결제 결과 데이터 - result, response, amount, errorMsg, variant)
+ * - 주요 라이브러리: @react-navigation/native (네비게이션)
+ */
 
 import React from 'react';
 import {View, Text, StyleSheet} from 'react-native';
@@ -9,6 +15,13 @@ const PaymentResult = ({route}) => {
   const {result, response, amount, errorMsg, variant} = route.params;
   const navigation = useNavigation();
 
+  /**
+   * # 함수/메서드 단 주석
+   *
+   * - 기능 설명: 이전 화면으로 돌아가는 네비게이션 함수
+   * - 입력 값: 없음
+   * - 출력 값: void (이전 화면으로 네비게이션)
+   */
   const handleGoBack = () => {
     // goBack()을 사용해서 이전 화면으로 돌아가기
     // 이렇게 하면 PaymentScreen → PaymentResult → PointRefundPage로 돌아감
@@ -21,6 +34,12 @@ const PaymentResult = ({route}) => {
         {result === '성공' ? '✅ 결제 성공' : '❌ 결제 실패'}
       </Text>
 
+      {/**
+       * # 중요 로직 또는 조건부 로직
+       *
+       * - 결제 성공/실패에 따른 UI 분기 처리
+       * - 성공 시 충전 금액과 성공 메시지 표시, 실패 시 에러 메시지 표시
+       */}
       {result === '성공' ? (
         <View style={styles.successContainer}>
           <Text style={styles.amountText}>{amount?.toLocaleString()}원</Text>

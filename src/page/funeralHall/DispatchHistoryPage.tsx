@@ -1,4 +1,11 @@
-import {Platform, ScrollView, StatusBar, StyleSheet, View, ActivityIndicator} from 'react-native';
+import {
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  View,
+  ActivityIndicator,
+} from 'react-native';
 import FuneralLayout from '../../layout/FuneralLayout';
 import DispatchCard from '../../components/funeralHall/DispatchCard';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -7,11 +14,30 @@ import {useCallback, useState, useEffect} from 'react';
 import {useFuneralDispatch} from '../../hooks/useFuneralDispatch';
 import {DispatchListItem} from '../../services/api/funeral/funeralDispatchService';
 import Typo from '../../components/common/Typo';
-
+/**
+ * 📌 DispatchHistoryPage
+ * - 장례식장 앱에서 지난 출동 내역을 표시하는 페이지
+ * - 완료된 출동 내역만 필터링하여 표시하고,
+ *   각 출동의 상세 정보를 클릭하여 페이지로 이동할 수 있음.
+ *
+ * 🔹 주요 기능:
+ *   - 출동 내역 목록 조회 (fetchDispatchList)
+ *   - 출동 상세 정보 페이지로 이동 (goToDispatchDetail)
+ *   - 입찰 상세 정보 페이지로 이동 (goToBidDetail)
+ *   - 완료된 출동 내역만 필터링
+ *   - 페이지 포커스 시 데이터 새로고침
+ *
+ * 🔹 의존성:
+ *   - useFuneralDispatch 훅 (API 호출)
+ *   - DispatchCard, FuneralLayout, Toast, Typo 등 공통 UI 컴포넌트
+ */
 const DispatchHistoryPage = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
-  const {dispatchList, loading, error, fetchDispatchList, fetchDispatchDetail} = useFuneralDispatch();
-  const [completedDispatches, setCompletedDispatches] = useState<DispatchListItem[]>([]);
+  const {dispatchList, loading, error, fetchDispatchList, fetchDispatchDetail} =
+    useFuneralDispatch();
+  const [completedDispatches, setCompletedDispatches] = useState<
+    DispatchListItem[]
+  >([]);
 
   // StatusBar 설정
   useFocusEffect(
@@ -33,33 +59,50 @@ const DispatchHistoryPage = () => {
     fetchDispatchList();
   }, [fetchDispatchList]);
 
-  // 완료된 출동 내역만 필터링
+  /**
+   * 📌 완료된 출동 내역만 필터링
+   * - dispatchList 데이터에서 isApproved가 'completed'인 항목만 필터링하여 상태에 저장
+   */
   useEffect(() => {
-    const completed = dispatchList.filter(item => item.isApproved === 'completed');
+    const completed = dispatchList.filter(
+      item => item.isApproved === 'completed',
+    );
     setCompletedDispatches(completed);
   }, [dispatchList]);
 
-  // 페이지 포커스 시 데이터 새로고침
+  /**
+   * 📌 페이지 포커스 시 데이터 새로고침
+   */
   useFocusEffect(
     useCallback(() => {
       fetchDispatchList();
     }, [fetchDispatchList]),
   );
 
-  // 카드 전체 클릭 시 - 출동 상세 정보 페이지로 이동
-  const goToDispatchDetail = (dispatchRequestId: string, chiefMournerName: string) => {
+  /**
+   * 📌 카드 전체 클릭 시 - 출동 상세 정보 페이지로 이동
+   */
+  const goToDispatchDetail = (
+    dispatchRequestId: string,
+    chiefMournerName: string,
+  ) => {
     navigation.navigate('DispatchDetail', {
       dispatchRequestId: dispatchRequestId,
       chiefMournerName: chiefMournerName,
     });
   };
 
-  // 입찰 상세 정보 버튼 클릭 시 - 입찰 상세 정보 페이지로 이동
-  const goToBidDetail = async (dispatchRequestId: string, chiefMournerName: string) => {
+  /**
+   * 📌 입찰 상세 정보 버튼 클릭 시 - 입찰 상세 정보 페이지로 이동
+   */
+  const goToBidDetail = async (
+    dispatchRequestId: string,
+    chiefMournerName: string,
+  ) => {
     try {
       // 출동 상세정보를 가져와서 managerFormBidId 얻기
       const detailData = await fetchDispatchDetail(dispatchRequestId);
-      
+
       if (detailData && detailData.dispatchRequest.managerFormBidId) {
         // QuoteProposalPage로 네비게이트 (완료된 출동이므로 status는 transaction_completed)
         navigation.navigate('QuoteProposal', {
@@ -85,11 +128,14 @@ const DispatchHistoryPage = () => {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    }).replace(/\./g, '.').replace(/\s/g, '');
+    return date
+      .toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      })
+      .replace(/\./g, '.')
+      .replace(/\s/g, '');
   };
 
   return (
@@ -126,8 +172,15 @@ const DispatchHistoryPage = () => {
                 name={item.chiefMournerName}
                 date={formatDate(item.createdAt)}
                 index={index}
-                onPress={() => goToDispatchDetail(item.dispatchRequestId, item.chiefMournerName)}
-                onBidDetailPress={() => goToBidDetail(item.dispatchRequestId, item.chiefMournerName)}
+                onPress={() =>
+                  goToDispatchDetail(
+                    item.dispatchRequestId,
+                    item.chiefMournerName,
+                  )
+                }
+                onBidDetailPress={() =>
+                  goToBidDetail(item.dispatchRequestId, item.chiefMournerName)
+                }
               />
             ))}
           </ScrollView>

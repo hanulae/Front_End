@@ -1,4 +1,8 @@
-import {useFocusEffect, useNavigation, useRoute} from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {StyleSheet, TextInput, View, ScrollView} from 'react-native';
 import FuneralLayout from '../../layout/FuneralLayout';
@@ -14,9 +18,12 @@ const DispatchRequestDetailPage = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const route = useRoute();
   const {dispatchRequestId} = route.params as {dispatchRequestId: string};
-  const {loading, error, fetchDispatchDetail, approveDispatch} = useFuneralDispatch();
-  const [dispatchDetail, setDispatchDetail] = useState<DispatchDetail | null>(null);
-  
+  const {loading, error, fetchDispatchDetail, approveDispatch} =
+    useFuneralDispatch();
+  const [dispatchDetail, setDispatchDetail] = useState<DispatchDetail | null>(
+    null,
+  );
+
   // 출동 요청 상세 데이터 로드
   const loadDispatchDetail = useCallback(async () => {
     try {
@@ -39,7 +46,7 @@ const DispatchRequestDetailPage = () => {
   useFocusEffect(
     useCallback(() => {
       loadDispatchDetail();
-    }, [loadDispatchDetail])
+    }, [loadDispatchDetail]),
   );
 
   // 에러 발생 시 토스트 표시
@@ -74,13 +81,16 @@ const DispatchRequestDetailPage = () => {
         navigation.reset({
           index: 2,
           routes: [
-            { name: 'FuneralMain'},
-            { name: 'PendingDispatch' },
+            {name: 'FuneralMain'},
+            {name: 'PendingDispatch'},
             {
-              name: 'ConfirmTransaction', params: {
-            dispatchRequestId: dispatchRequestId,
-            dispatchDetail: dispatchDetail,
-          }}],
+              name: 'ConfirmTransaction',
+              params: {
+                dispatchRequestId: dispatchRequestId,
+                dispatchDetail: dispatchDetail,
+              },
+            },
+          ],
         });
         navigation.navigate('ConfirmTransaction', {
           dispatchRequestId: dispatchRequestId,
@@ -116,12 +126,11 @@ const DispatchRequestDetailPage = () => {
       homeRouteName="FuneralMain"
       color="white">
       <View style={styles.wrapper}>
-        <ScrollView 
+        <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
+          keyboardShouldPersistTaps="handled">
           <View style={styles.detailContainer}>
             <Typo style={styles.titleText}>주소</Typo>
             <TextInput
@@ -131,7 +140,9 @@ const DispatchRequestDetailPage = () => {
             />
             <TextInput
               value={dispatchDetail?.addressDetail || ''}
-              placeholder={!dispatchDetail?.addressDetail ? '작성하지 않은 항목' : ''}
+              placeholder={
+                !dispatchDetail?.addressDetail ? '작성하지 않은 항목' : ''
+              }
               placeholderTextColor="#AFB3BB"
               editable={false}
               style={[
@@ -144,7 +155,9 @@ const DispatchRequestDetailPage = () => {
             <Typo style={styles.titleText}>가족연락처</Typo>
             <TextInput
               value={dispatchDetail?.famPhoneNumber || ''}
-              placeholder={!dispatchDetail?.famPhoneNumber ? '작성하지 않은 항목' : ''}
+              placeholder={
+                !dispatchDetail?.famPhoneNumber ? '작성하지 않은 항목' : ''
+              }
               placeholderTextColor="#AFB3BB"
               editable={false}
               style={[
@@ -165,7 +178,11 @@ const DispatchRequestDetailPage = () => {
             <Typo style={styles.titleText}>비상연락처</Typo>
             <TextInput
               value={dispatchDetail?.emergencyPhoneNumber || ''}
-              placeholder={!dispatchDetail?.emergencyPhoneNumber ? '작성하지 않은 항목' : ''}
+              placeholder={
+                !dispatchDetail?.emergencyPhoneNumber
+                  ? '작성하지 않은 항목'
+                  : ''
+              }
               placeholderTextColor="#AFB3BB"
               editable={false}
               style={[
@@ -176,11 +193,10 @@ const DispatchRequestDetailPage = () => {
           </View>
         </ScrollView>
         <View style={styles.buttonContainer}>
-          <CustomButton 
+          <CustomButton
             style={[styles.button, loading && styles.buttonDisabled]}
             onPress={handleDispatchConfirm}
-            disabled={loading}
-          >
+            disabled={loading}>
             <Typo style={styles.buttonText}>
               {loading ? '승인 중...' : '출동 승인'}
             </Typo>

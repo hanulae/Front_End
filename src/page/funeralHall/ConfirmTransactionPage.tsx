@@ -29,7 +29,27 @@ import {
 import {useFocusEffect} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import {isValidPhoneNumber} from '../../util/validation';
-
+/**
+ * 📌 ConfirmTransactionPage
+ * - 장례식장 앱에서 거래 확정(거래완료) 처리 페이지
+ * - 출동 요청 상세 정보와 장례식장 견적 정보를 로드하여 표시하고,
+ *   상태에 따라 거래 확정, 대기, 완료 버튼을 제공함.
+ *
+ * 🔹 주요 기능:
+ *   - 출동 요청 상세 및 거래 상태 조회 (fetchDispatchDetail)
+ *   - 장례식장 정보 조회 (fetchFuneralHallInfo)
+ *   - 거래 확정 요청 (confirmTransaction)
+ *   - 상태별 안내 메시지 및 액션 버튼 렌더링
+ *   - 전화 걸기(연락처 연결) 기능
+ *   - Pull-to-refresh 로 데이터 갱신
+ *
+ * 🔹 페이지 진입 파라미터:
+ *   - dispatchRequestId: string (출동 요청 식별자)
+ *
+ * 🔹 의존성:
+ *   - useFuneralDispatch 훅 (API 호출)
+ *   - FuneralLayout, CustomButton, Toast, Typo 등 공통 UI 컴포넌트
+ */
 const ConfirmTransactionPage = () => {
   const route = useRoute();
   const navigation = useNavigation<NavigationProp<any>>();
@@ -88,7 +108,14 @@ const ConfirmTransactionPage = () => {
     borderTopWidth: isTablet ? 6 : isSmallDevice ? 4 : 5,
   };
 
-  // 현재 상태 계산 (장례식장 관점)
+  /**
+   * getCurrentStatus
+   * - 현재 거래 진행 상태를 계산하여 반환
+   * @returns {'waiting_manager_completion'|'waiting_funeral_completion'|'transaction_completed'|string|null}
+   * @description
+   *   transactionStatus 객체와 dispatchDetail 데이터를 기반으로
+   *   거래 대기, 거래 완료 상태 등을 구분함.
+   */
   const getCurrentStatus = () => {
     if (!dispatchDetail) return null;
 
@@ -117,7 +144,14 @@ const ConfirmTransactionPage = () => {
     return dispatchDetail.isApproved;
   };
 
-  // 전화 앱 열기
+  /**
+   * handleCall
+   * - 전달받은 전화번호로 기본 전화 앱 실행
+   * @param {string} phoneNumber
+   * @description
+   *   - 번호 유효성 검사 후 tel: 링크로 전화 앱 실행
+   *   - 잘못된 번호 또는 전화 앱 실행 불가 시 Toast 표시
+   */
   const handleCall = async (phoneNumber?: string) => {
     if (!phoneNumber) {
       Toast.show({
@@ -164,7 +198,13 @@ const ConfirmTransactionPage = () => {
       });
     }
   };
-
+  /**
+   * loadFuneralHallInfo
+   * - 장례식장 세부 정보 API 호출
+   * @param {string} managerFormBidId - 매니저 견적 식별자
+   * @description
+   *   - 장례식장 이름, 가격, 할인율 등을 조회
+   */
   const loadFuneralHallInfo = useCallback(
     async (managerFormBidId: string) => {
       if (!managerFormBidId) {
@@ -192,7 +232,12 @@ const ConfirmTransactionPage = () => {
     [fetchFuneralHallInfo],
   );
 
-  // 출동 요청 상세 데이터 로드
+  /**
+   * loadDispatchDetail
+   * - 출동 요청 상세 정보와 거래 상태를 로드
+   * @description
+   *   - 출동 상세 데이터 조회 후 장례식장 정보까지 로드
+   */
   const loadDispatchDetail = useCallback(async () => {
     try {
       const result = await fetchDispatchDetail(dispatchRequestId);
@@ -297,7 +342,14 @@ const ConfirmTransactionPage = () => {
     }
   };
 
-  // handle Transaction Confirm
+  /**
+   * handleTransactionConfirm
+   * - 거래 확정 API 호출 처리
+   * @description
+   *   - 성공 시 데이터 새로고침
+   *   - 거래 완료 상태면 뒤로가기
+   *   - 캐시 부족 등 특수 에러 메시지는 Alert로 처리
+   */
   const handleTransactionConfirm = async () => {
     try {
       console.log('거래 확정 요청 시작:', dispatchRequestId);
@@ -417,7 +469,10 @@ const ConfirmTransactionPage = () => {
     navigation.goBack();
   };
 
-  // 상태별 버튼 렌더링
+  /**
+   * renderActionButton
+   * - 현재 거래 상태에 따라 버튼 UI를 반환
+   */
   const renderActionButton = () => {
     const status = getCurrentStatus();
 
@@ -543,7 +598,10 @@ const ConfirmTransactionPage = () => {
     }
   };
 
-  // 상태 메시지 렌더링
+  /**
+   * renderStatusMessage
+   * - 현재 거래 상태에 맞는 안내 메시지 컴포넌트 반환
+   */
   const renderStatusMessage = () => {
     if (!dispatchDetail) return null;
 

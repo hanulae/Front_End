@@ -32,7 +32,24 @@ interface ImageData {
   imageUrl: string;
   // 다른 필요한 속성들...
 }
-
+/**
+ * 📌 FuneralModiftyPage
+ * - 장례식장 정보를 수정하는 페이지
+ * - 장례식장 정보를 수정하고 저장할 수 있음.
+ *
+ * 🔹 주요 기능:
+ *   - 장례식장 정보 조회 (fetchFuneralHomeInfo)
+ *   - 장례식장 정보 수정 (handleSave)
+ *   - 장례식장 정보 저장 (handleSave)
+ *   - 장례식장 정보 삭제 (handleDeleteImage)
+ *   - 장례식장 정보 검색 (handleAddressSearch)
+ *   - 장례식장 정보 선택 (handleAddressSelected)
+ *   - 장례식장 정보 변경 (handleChange)
+ *
+ * 🔹 의존성:
+ *   - fetchFuneralHomeInfo (API 호출)
+ *   - FuneralLayout, Typo, ImagePreviewList, InfoTable, ConvenienceSelector, FuneralInput, CustomButton, DaumPostcodeModal, Toast
+ */
 const FuneralModiftyPage = () => {
   // StatusBar 설정
   useFocusEffect(
