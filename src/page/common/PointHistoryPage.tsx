@@ -82,7 +82,7 @@ const PointHistoryPage = () => {
 
           // 현재 캐시 잔액 조회
           const cashRes = await api.get(cashUrl);
-          setCurrentCash(res.data.currentCash || 0);
+          setCurrentCash(cashRes.data.currentCash || 0);
 
           // 거래 내역 조회
           const historyUrl = isManager

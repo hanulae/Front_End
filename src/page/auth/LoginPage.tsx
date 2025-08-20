@@ -197,14 +197,14 @@ const LoginPage = ({navigation}: ILoginPageProps) => {
           managerPassword: password.value,
         });
       } else if (userType === 'funeral') {
-        // 탭에 따라 다른 API 엔드포인트 호출
+        // 대표 계정 로그인 처리
         if (funeralTab === '대표') {
           response = await api.post('/funeral/auth/login', {
             funeralUsername: username.value,
             funeralPassword: password.value,
           });
         } else {
-          // 직원 로그인 API (실제 엔드포인트는 백엔드에 맞게 조정 필요)
+          // 직원 로그인 처리
           response = await api.post('/funeral/staff/login', {
             funeralStaffPhoneNumber: username.value,
             funeralStaffPassword: password.value,

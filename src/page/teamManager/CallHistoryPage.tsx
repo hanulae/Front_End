@@ -8,7 +8,7 @@ import {
   View,
   RefreshControl,
 } from 'react-native';
-import { scaleFontSize, scaleSize, isSmallDevice } from '../../utils/responsive';
+import {scaleFontSize, scaleSize, isSmallDevice} from '../../utils/responsive';
 
 import {useCallback, useEffect, useState} from 'react';
 import Typo from '../../components/common/Typo';
@@ -21,10 +21,30 @@ interface ICallHistoryPageProps {
   navigation: NavigationProp<any>;
 }
 
+/**
+ * 📌 CallHistoryPage
+ * - 팀장 출동 신청 내역을 표시하는 페이지
+ * - 진행중인 출동 신청과 완료된 출동 신청을 구분하여 표시
+ *
+ * 🔹 주요 기능:
+ *   - 출동 신청 내역 조회 (getManagerDispatchRequestList)
+ *   - 출동 신청 상세 정보 조회 (getManagerDispatchRequestDetail)
+ *   - 출동 신청 상세 정보 페이지로 이동 (goToClientDetail)
+ *
+ * 🔹 의존성:
+ *   - useManagerDispatchRequest (API 호출)
+ *   - useManagerForm (API 호출)
+ *   - ManagerLayout, Typo, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator
+ */
+
 const CallHistoryPage = ({navigation}: ICallHistoryPageProps) => {
   const [selectedTab, setSelectedTab] = useState<'진행중' | '완료'>('진행중');
-  const {loading, error, getManagerDispatchRequestList, getManagerDispatchRequestDetail} =
-    useManagerDispatchRequest();
+  const {
+    loading,
+    error,
+    getManagerDispatchRequestList,
+    getManagerDispatchRequestDetail,
+  } = useManagerDispatchRequest();
   const {getManagerFormList} = useManagerForm();
   const [dispatchList, setDispatchList] = useState<any[]>([]);
   const [filteredList, setFilteredList] = useState<any[]>([]);
@@ -90,20 +110,21 @@ const CallHistoryPage = ({navigation}: ICallHistoryPageProps) => {
     try {
       // 출동 신청 상세 정보를 가져와서 managerFormId 추출
       const detailResult = await getManagerDispatchRequestDetail(item.id);
-      
+
       if (detailResult && detailResult.dispatchRequest) {
         // 타입 단언을 사용하여 managerFormId 추출
         const dispatchRequest = detailResult.dispatchRequest as any;
-        const managerFormId = dispatchRequest.managerFormId || dispatchRequest.data?.managerFormId;
-        
+        const managerFormId =
+          dispatchRequest.managerFormId || dispatchRequest.data?.managerFormId;
+
         // 견적 목록을 가져와서 해당 견적 정보를 찾기
         const formListResult = await getManagerFormList();
-        
+
         if (formListResult && Array.isArray(formListResult)) {
           const matchingForm = formListResult.find(
-            form => form.managerFormId === managerFormId
+            form => form.managerFormId === managerFormId,
           );
-          
+
           if (matchingForm) {
             // 견적 정보를 찾았으면 그것을 넘김
             navigation.navigate('ClientDetail', {data: matchingForm});
@@ -111,7 +132,7 @@ const CallHistoryPage = ({navigation}: ICallHistoryPageProps) => {
           }
         }
       }
-      
+
       // 견적 정보를 찾지 못한 경우 기본 출동 신청 데이터 넘김
       navigation.navigate('ClientDetail', {data: item});
     } catch (error) {

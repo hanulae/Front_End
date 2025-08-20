@@ -1,4 +1,11 @@
-import {StyleSheet, View, ScrollView, Alert, Dimensions, Platform} from 'react-native';
+import {
+  StyleSheet,
+  View,
+  ScrollView,
+  Alert,
+  Dimensions,
+  Platform,
+} from 'react-native';
 import {useInputBase} from '../../hooks/input/useInputBase';
 import {useState} from 'react';
 import Typo from '../../components/common/Typo';
@@ -15,7 +22,7 @@ import {useManagerForm} from '../../hooks/useManagerForm';
 import {useManagerCart} from '../../hooks/useManagerCart';
 
 // 화면 크기 정보 가져오기
-const { width: screenWidth } = Dimensions.get('window');
+const {width: screenWidth} = Dimensions.get('window');
 
 // 기기별 크기 판단
 const isTablet = screenWidth >= 768;
@@ -41,7 +48,7 @@ const EstimateFormPage = () => {
   const [showAdmissionPicker, setShowAdmissionPicker] = useState(false);
   const [showDeparturePicker, setShowDeparturePicker] = useState(false);
   const {deleteFromCart} = useManagerCart();
-  const { loading, createManagerForm } = useManagerForm();
+  const {loading, createManagerForm} = useManagerForm();
 
   const formatSimpleDate = (date: Date) => {
     return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(
@@ -60,7 +67,7 @@ const EstimateFormPage = () => {
   const handleAdmissionConfirm = (date: Date) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     const selectedDate = new Date(date);
     selectedDate.setHours(0, 0, 0, 0);
 
@@ -97,14 +104,16 @@ const EstimateFormPage = () => {
 
     const selectedDate = new Date(date);
     selectedDate.setHours(0, 0, 0, 0);
-    
+
     const admission = new Date(admissionDate);
     admission.setHours(0, 0, 0, 0);
 
     if (selectedDate <= admission) {
       Toast.show({
         type: 'error',
-        text1: `퇴실일자는 ${formatSimpleDate(admissionDate)} 이후로 선택해주세요.`,
+        text1: `퇴실일자는 ${formatSimpleDate(
+          admissionDate,
+        )} 이후로 선택해주세요.`,
         position: 'top',
         topOffset: -150,
       });
@@ -195,7 +204,7 @@ const EstimateFormPage = () => {
           },
         },
       ],
-      { cancelable: false }
+      {cancelable: false},
     );
   };
 
@@ -203,11 +212,15 @@ const EstimateFormPage = () => {
   const sendEstimate = async () => {
     try {
       const formData = {
-        funeralList: selectedFunerals.map((funeral) => funeral.funeralList.funeralListId),
+        funeralList: selectedFunerals.map(
+          funeral => funeral.funeralList.funeralListId,
+        ),
         chiefMournerName: clientName.value.trim(),
         deceasedName: deceasedName.value.trim() || undefined,
         numberOfMourners: parseInt(visitorCount.value),
-        roomSize: squareMeter.value.trim() ? parseInt(squareMeter.value.trim()) : undefined,
+        roomSize: squareMeter.value.trim()
+          ? parseInt(squareMeter.value.trim())
+          : undefined,
         checkInDate: formatServerDate(admissionDate!),
         checkOutDate: formatServerDate(departureDate!),
       };
@@ -246,7 +259,7 @@ const EstimateFormPage = () => {
       Alert.alert(
         '오류',
         '견적서 발송 중 오류가 발생했습니다.\n다시 시도해 주세요.',
-        [{ text: '확인' }]
+        [{text: '확인'}],
       );
     }
   };
@@ -275,16 +288,19 @@ const EstimateFormPage = () => {
       homeRouteName="ManagerMain"
       logoutButton={false}>
       <View style={styles.wrapper}>
-        <ScrollView 
+        <ScrollView
           style={styles.scrollContainer}
           contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
+          showsVerticalScrollIndicator={false}>
           <View style={styles.formContainer}>
             <View style={styles.form}>
               <View style={styles.authContainer}>
                 <Typo fontSize={16} style={styles.containerTitle}>
-                  상주 이름 *
+                  상주 이름
+                  <Typo fontSize={16} style={styles.required}>
+                    {' '}
+                    (필수)*
+                  </Typo>
                 </Typo>
                 <View style={styles.authSection}>
                   <Input
@@ -303,11 +319,14 @@ const EstimateFormPage = () => {
                 </View>
                 <View style={styles.field}>
                   <Typo fontSize={16} style={styles.containerTitle}>
-                    조문객 수 (명) *
+                    조문객 수{' '}
+                    <Typo fontSize={16} style={styles.required}>
+                      (필수)*
+                    </Typo>
                   </Typo>
                   <Input
                     input={visitorCount}
-                    placeholder="예상 조문객 수를 입력하세요."
+                    placeholder="예상 조문객 인원수를 입력하세요."
                     type="number"
                   />
                 </View>
@@ -324,7 +343,10 @@ const EstimateFormPage = () => {
                 <View style={styles.dateField}>
                   <View style={styles.field}>
                     <Typo fontSize={16} style={styles.containerTitle}>
-                      입실일자 *
+                      입실일자{' '}
+                      <Typo fontSize={16} style={styles.required}>
+                        (필수)*
+                      </Typo>
                     </Typo>
                     <CustomButton
                       style={styles.dateButton}
@@ -340,7 +362,10 @@ const EstimateFormPage = () => {
 
                   <View style={styles.field}>
                     <Typo fontSize={16} style={styles.containerTitle}>
-                      퇴실일자 *
+                      퇴실일자{' '}
+                      <Typo fontSize={16} style={styles.required}>
+                        (필수)*
+                      </Typo>
                     </Typo>
                     <CustomButton
                       style={styles.dateButton}
@@ -361,7 +386,9 @@ const EstimateFormPage = () => {
                   {selectedFunerals?.map((funeral, index) => (
                     <View key={index} style={styles.selectedFuneralItem}>
                       <Typo style={styles.selectedFuneralText}>
-                        • {funeral?.funeralList?.funeralName || `장례식장 ${index + 1}`}
+                        •{' '}
+                        {funeral?.funeralList?.funeralName ||
+                          `장례식장 ${index + 1}`}
                       </Typo>
                     </View>
                   ))}
@@ -373,10 +400,7 @@ const EstimateFormPage = () => {
         <View style={styles.buttonContainer}>
           <CustomButton
             onPress={handleDispatchEstimate}
-            style={[
-              styles.button,
-              loading && styles.buttonDisabled
-            ]}
+            style={[styles.button, loading && styles.buttonDisabled]}
             disabled={loading}>
             <View style={styles.buttonIcon}>
               <RequestIcon width={24} height={24} />
@@ -439,6 +463,9 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard-Light',
     marginLeft: isTablet ? 12 : 10,
     marginBottom: isTablet ? 10 : 8,
+  },
+  required: {
+    color: 'red',
   },
   formContainer: {
     flex: 9,
