@@ -7,18 +7,13 @@ import {
   clearTokens,
 } from '../utils/tokenStorage';
 
-// const API_URL = 'http://localhost:3000/api'; // Replace with your API URL
-
+// 로컬 서버 (개발용)
 // const API_URL =
 //   Platform.OS === 'android'
 //     ? 'http://10.0.2.2:8000/api'
 //     : 'http://localhost:8000/api';
 
-// IOS dev
-// export const API_URL = 'http://192.168.0.21:8000/api';
-
-// export const API_URL = 'http://15.164.166.8:3000/api';
-
+// 배포 서버
 export const API_URL = 'https://www.wooricenter.co.kr/api';
 
 const api = axios.create({
