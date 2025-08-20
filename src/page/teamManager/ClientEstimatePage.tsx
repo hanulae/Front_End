@@ -28,6 +28,7 @@ const {width: screenWidth} = Dimensions.get('window');
 const isTablet = screenWidth >= 768;
 const isSmallDevice = screenWidth < 375;
 
+// 고객 견적서 페이지
 const ClientEstimatePage = () => {
   const navigation = useNavigation<NavigationProp<any>>();
   const route = useRoute();
@@ -51,7 +52,7 @@ const ClientEstimatePage = () => {
     }
   }, [getUserManagerFormList, managerFormId]);
 
-  // 풀 투 리프레시 함수
+  // 새로고침 함수
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await loadUserManagerFormList();
@@ -86,7 +87,7 @@ const ClientEstimatePage = () => {
   const goToEstimateDetail = () => {
     // bid_selected 상태가 있는지 체크
     const hasBidSelected = userManagerFormList.some(
-      item => item.bidStatus === 'bid_selected'
+      item => item.bidStatus === 'bid_selected',
     );
 
     navigation.navigate('EstimateDetail', {

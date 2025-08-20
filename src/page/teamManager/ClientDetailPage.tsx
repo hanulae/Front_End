@@ -3,12 +3,14 @@ import ManagerLayout from '../../layout/ManagerLayout';
 import Typo from '../../components/common/Typo';
 import CommaIcon from '../../assets/Contents/Content_Comma.svg';
 import {useRoute} from '@react-navigation/native';
-import { scaleFontSize, scaleSize, isSmallDevice } from '../../utils/responsive';
+import {scaleFontSize, scaleSize, isSmallDevice} from '../../utils/responsive';
 
+// 견적 상세 페이지
 const ClientDetailPage = () => {
   const route = useRoute();
   const {data} = route.params as {data: any};
 
+  // 날짜 포맷팅
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
 

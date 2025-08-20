@@ -25,7 +25,7 @@ import api from '../../api/config';
 import Toast from 'react-native-toast-message';
 import {useAtomValue} from 'jotai';
 import {loginAtom} from '../../state/local_state/loginAtom';
-import { getUserInfo, storeUserInfo } from '../../utils/tokenStorage';
+import {getUserInfo, storeUserInfo} from '../../utils/tokenStorage';
 
 const ModifyUserInfoPage = () => {
   useFocusEffect(
@@ -47,15 +47,9 @@ const ModifyUserInfoPage = () => {
   const confirmPassword = useConfirmPasswordInput(() => newPassword.value);
   const phoneNumber = useInputBase();
   const authCodePhone = useInputBase();
-  const [authCode, setAuthCode] = useState('');
-  // const accountBank = useInputBase(); // 은행선택은 나중에 바꿀 수도 있음
   const [showBankSelectSheet, setShowBankSelectSheet] = useState(false);
   const [bankName, setBankName] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
-  // const accountNumber = useInputBase();
-  const authCodeAccount = useInputBase();
-
-  // BSK ADD LOGIN INFO
   const loginInfo = useAtomValue(loginAtom);
   const [name, setName] = useState('');
   const [bankCode, setBankCode] = useState('');
@@ -91,7 +85,11 @@ const ModifyUserInfoPage = () => {
 
   useEffect(() => {
     // 비밀번호와 비밀번호 확인이 일치할 때 버튼 활성화
-    if (newPassword.value && confirmPassword.value && newPassword.value === confirmPassword.value) {
+    if (
+      newPassword.value &&
+      confirmPassword.value &&
+      newPassword.value === confirmPassword.value
+    ) {
       setIsButtonEnabled(true);
     } else {
       setIsButtonEnabled(false);
@@ -100,10 +98,6 @@ const ModifyUserInfoPage = () => {
 
   const openBankSelectSheet = () => {
     setShowBankSelectSheet(true);
-  };
-
-  const closeBankSelectSheet = () => {
-    setShowBankSelectSheet(false);
   };
 
   const handleChangePassword = async () => {
@@ -174,7 +168,10 @@ const ModifyUserInfoPage = () => {
     }
 
     try {
-      await api.post('/manager/sms/send', {managerPhone: phone, status: 'signup'});
+      await api.post('/manager/sms/send', {
+        managerPhone: phone,
+        status: 'signup',
+      });
 
       Toast.show({
         type: 'success',
@@ -269,13 +266,10 @@ const ModifyUserInfoPage = () => {
     }
 
     try {
-      const res = await api.patch(
-        '/manager/auth/update/phone',
-        {
-          currentPhone,
-          newPhone,
-        },
-      );
+      const res = await api.patch('/manager/auth/update/phone', {
+        currentPhone,
+        newPhone,
+      });
 
       Toast.show({
         type: 'success',
@@ -285,7 +279,7 @@ const ModifyUserInfoPage = () => {
 
       // 현재 사용자 정보 가져오기
       const userInfo = await getUserInfo();
-      console.log("🚀 ~ handleChangePhoneNumber ~ userInfo:", userInfo)
+      console.log('🚀 ~ handleChangePhoneNumber ~ userInfo:', userInfo);
       if (userInfo) {
         // 핸드폰 번호 업데이트
         userInfo.data.managerPhoneNumber = newPhone;
@@ -411,10 +405,10 @@ const ModifyUserInfoPage = () => {
               placeholder="비밀번호를 입력하세요"
             />
             {newPassword.touched && newPassword.error ? (
-            <Typo fontSize={12} color="red" style={{marginLeft: 10}}>
-              {newPassword.error}
-            </Typo>
-          ) : null}
+              <Typo fontSize={12} color="red" style={{marginLeft: 10}}>
+                {newPassword.error}
+              </Typo>
+            ) : null}
           </View>
           <Typo style={styles.label}>새로운 비밀번호 확인</Typo>
           <View style={styles.field}>
@@ -425,10 +419,10 @@ const ModifyUserInfoPage = () => {
               type="password"
             />
             {confirmPassword.touched && confirmPassword.error ? (
-            <Typo fontSize={12} color="red" style={{marginLeft: 10}}>
-              {confirmPassword.error}
-            </Typo>
-          ) : null}
+              <Typo fontSize={12} color="red" style={{marginLeft: 10}}>
+                {confirmPassword.error}
+              </Typo>
+            ) : null}
           </View>
 
           <TouchableOpacity
@@ -470,7 +464,7 @@ const ModifyUserInfoPage = () => {
           <TouchableOpacity
             style={[
               styles.button,
-              { backgroundColor: isPhoneVerified ? '#2D81F1' : '#ccc' }, // Change color based on verification status
+              {backgroundColor: isPhoneVerified ? '#2D81F1' : '#ccc'}, // Change color based on verification status
             ]}
             onPress={handleChangePhoneNumber}
             disabled={!isPhoneVerified} // Disable button if not verified
@@ -569,7 +563,7 @@ const ModifyUserInfoPage = () => {
           <TouchableOpacity
             style={[
               styles.button,
-              { backgroundColor: isAccountVerified ? '#2D81F1' : '#ccc' }, // 인증 상태에 따라 색상 변경
+              {backgroundColor: isAccountVerified ? '#2D81F1' : '#ccc'}, // 인증 상태에 따라 색상 변경
             ]}
             onPress={handleChangeBankInfo}
             disabled={!isAccountVerified} // 인증되지 않으면 버튼 비활성화

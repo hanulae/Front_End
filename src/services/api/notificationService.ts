@@ -17,6 +17,7 @@ export interface NotificationItem {
   senderType?: string;
 }
 
+// 알림 타입에 따라 이동할 화면 및 파라미터 반환
 export const getNavigationTarget = (notificationType: string, data: any) => {
   switch (notificationType) {
     // 장레식장

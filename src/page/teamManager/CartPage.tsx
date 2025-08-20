@@ -1,4 +1,12 @@
-import {FlatList, Platform, StatusBar, StyleSheet, View, Animated, Easing} from 'react-native';
+import {
+  FlatList,
+  Platform,
+  StatusBar,
+  StyleSheet,
+  View,
+  Animated,
+  Easing,
+} from 'react-native';
 import DefaultLayout from '../../layout/DefaultLayout';
 // import {funeralHomeDummyData} from '../../state/local_state/dummy';
 import FuneralCard from '../../components/common/FuneralCard';
@@ -52,7 +60,7 @@ const CartPage = ({navigation}: ICartPageProps) => {
   // ✅ 단일 선택 → 다중 선택으로 변경
   const [selectedIds, setSelectedIds] = useState<string[]>([]); // 배열로 변경
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  
+
   // ✅ 각 아이템별 애니메이션 값을 개별적으로 관리
   const animatedValues = useRef<{[key: string]: Animated.Value}>({}).current;
 
@@ -68,10 +76,10 @@ const CartPage = ({navigation}: ICartPageProps) => {
     try {
       const result = await getCartList();
       console.log('🛒 장바구니 조회 결과:', result);
-      
+
       if (result && Array.isArray(result)) {
         // ✅ 로컬 서비스는 직접 배열을 반환하므로 서버 구조로 변환
-        const cartData = result.map((item) => ({
+        const cartData = result.map(item => ({
           managerCartId: item.funeralListId, // funeralListId를 ID로 사용
           managerId: 'local', // 로컬 저장이므로 고정값
           funeralListId: item.funeralListId,
@@ -97,14 +105,13 @@ const CartPage = ({navigation}: ICartPageProps) => {
             createdAt: item.addedAt,
             updatedAt: item.addedAt,
             deletedAt: null,
-          }
+          },
         }));
-        
-        console.log('🛒 변환된 장바구니 데이터:', cartData);
+
         setCartItems(cartData);
-        
+
         // ✅ 새로운 아이템들에 대한 애니메이션 값 초기화
-        cartData.forEach((item) => {
+        cartData.forEach(item => {
           if (!animatedValues[item.funeralListId]) {
             animatedValues[item.funeralListId] = new Animated.Value(0);
           }
@@ -125,7 +132,6 @@ const CartPage = ({navigation}: ICartPageProps) => {
 
   useFocusEffect(
     useCallback(() => {
-      
       if (Platform.OS === 'android') {
         StatusBar.setBackgroundColor('#3287F8');
         StatusBar.setBarStyle('dark-content');
@@ -173,13 +179,13 @@ const CartPage = ({navigation}: ICartPageProps) => {
         const result = await deleteFromCart([funeralListId]);
 
         if (result) {
-          setCartItems(prevItems => 
-            prevItems.filter(item => item.funeralListId !== funeralListId)
+          setCartItems(prevItems =>
+            prevItems.filter(item => item.funeralListId !== funeralListId),
           );
 
           // ✅ 삭제된 아이템이 선택되어 있었다면 선택에서 제거
-          setSelectedIds(prevSelected => 
-            prevSelected.filter(id => id !== funeralListId)
+          setSelectedIds(prevSelected =>
+            prevSelected.filter(id => id !== funeralListId),
           );
 
           delete animatedValues[funeralListId];
@@ -223,8 +229,8 @@ const CartPage = ({navigation}: ICartPageProps) => {
     }
 
     // ✅ 선택된 장례식장들의 정보 수집 - funeralListId 기준
-    const selectedFunerals = cartItems.filter(item => 
-      selectedIds.includes(item.funeralListId)
+    const selectedFunerals = cartItems.filter(item =>
+      selectedIds.includes(item.funeralListId),
     );
 
     navigation.navigate('EstimateForm', {
@@ -253,7 +259,7 @@ const CartPage = ({navigation}: ICartPageProps) => {
         vertical: scaleSize(16),
         horizontal: scaleSize(24),
       },
-      
+
       // 폰트 크기
       buttonTextSize: scaleFontSize(16),
       emptyTextSize: scaleFontSize(16),
@@ -272,33 +278,38 @@ const CartPage = ({navigation}: ICartPageProps) => {
       headerTitle="장바구니"
       color="white"
       homeButton={true}
-      logoutButton={false}
-    >
-      <View style={[styles.wrapper, {
-        padding: responsiveStyles.containerPadding,
-      }]}>
+      logoutButton={false}>
+      <View
+        style={[
+          styles.wrapper,
+          {
+            padding: responsiveStyles.containerPadding,
+          },
+        ]}>
         {/* 전체 선택/해제 버튼 */}
-        {(
+        {
           <View style={styles.selectAllContainer}>
-            <CustomButton 
+            <CustomButton
               onPress={handleSelectAll}
               style={[
                 styles.selectAllButton,
                 cartItems.length === 0 && {borderColor: '#727272'},
-                {borderRadius: responsiveStyles.borderRadius}
-              ]}
-            >
-              <Typo style={[
-                styles.selectAllText,
-                cartItems.length === 0 && {color: '#727272'},
-                {fontSize: responsiveStyles.selectAllTextSize}
+                {borderRadius: responsiveStyles.borderRadius},
               ]}>
-                {selectedIds.length === cartItems.length ? '전체 해제' : '전체 선택'}
+              <Typo
+                style={[
+                  styles.selectAllText,
+                  cartItems.length === 0 && {color: '#727272'},
+                  {fontSize: responsiveStyles.selectAllTextSize},
+                ]}>
+                {selectedIds.length === cartItems.length
+                  ? '전체 해제'
+                  : '전체 선택'}
                 ({selectedIds.length}/{cartItems.length})
               </Typo>
             </CustomButton>
           </View>
-        )}
+        }
 
         <View style={styles.cartContainer}>
           {cartLoading ? (
@@ -312,19 +323,19 @@ const CartPage = ({navigation}: ICartPageProps) => {
               data={cartItems}
               keyExtractor={item => item.funeralListId}
               renderItem={({item}) => {
-                const slideValue = animatedValues[item.funeralListId] || new Animated.Value(0);
-                
+                const slideValue =
+                  animatedValues[item.funeralListId] || new Animated.Value(0);
+
                 return (
-                  <Animated.View 
+                  <Animated.View
                     style={{
-                      transform: [{ translateX: slideValue }],
+                      transform: [{translateX: slideValue}],
                       opacity: slideValue.interpolate({
                         inputRange: [-400, 0],
                         outputRange: [0, 1],
                         extrapolate: 'clamp',
                       }),
-                    }}
-                  >
+                    }}>
                     <FuneralCard
                       item={{
                         funeralListId: item.funeralList.funeralListId,
@@ -336,7 +347,10 @@ const CartPage = ({navigation}: ICartPageProps) => {
                       selected={selectedIds.includes(item.funeralListId)}
                       onPressCheck={() => handleSelect(item.funeralListId)}
                       onPressCard={() => {
-                        console.log('상세 페이지 이동: ', item.funeralList.funeralName);
+                        console.log(
+                          '상세 페이지 이동: ',
+                          item.funeralList.funeralName,
+                        );
                         navigation.navigate('FuneralDetail', {
                           funeralListId: item.funeralList.funeralListId,
                           funeralId: item.funeralList.funeralId,
@@ -349,7 +363,11 @@ const CartPage = ({navigation}: ICartPageProps) => {
               }}
               ListEmptyComponent={
                 <View style={styles.emptyContainer}>
-                  <Typo style={[styles.emptyText, {fontSize: responsiveStyles.emptyTextSize}]}>
+                  <Typo
+                    style={[
+                      styles.emptyText,
+                      {fontSize: responsiveStyles.emptyTextSize},
+                    ]}>
                     장바구니가 비어있습니다.
                   </Typo>
                 </View>
@@ -357,13 +375,17 @@ const CartPage = ({navigation}: ICartPageProps) => {
             />
           )}
         </View>
-        
-        <View style={[styles.buttonContainer, {
-          paddingTop: scaleSize(8),
-          paddingBottom: responsiveStyles.bottomPadding,
-        }]}>
-          <CustomButton 
-            onPress={requestEstimate} 
+
+        <View
+          style={[
+            styles.buttonContainer,
+            {
+              paddingTop: scaleSize(8),
+              paddingBottom: responsiveStyles.bottomPadding,
+            },
+          ]}>
+          <CustomButton
+            onPress={requestEstimate}
             style={[
               styles.button,
               {
@@ -371,18 +393,19 @@ const CartPage = ({navigation}: ICartPageProps) => {
                 borderRadius: responsiveStyles.borderRadius,
                 paddingHorizontal: responsiveStyles.buttonPadding.horizontal,
               },
-              selectedIds.length === 0 && styles.buttonDisabled
+              selectedIds.length === 0 && styles.buttonDisabled,
             ]}
-            disabled={selectedIds.length === 0}
-          >
+            disabled={selectedIds.length === 0}>
             <View style={styles.buttonIcon}>
               <RequestIcon width={24} height={24} />
-              <Typo style={[
-                styles.buttonText,
-                {fontSize: responsiveStyles.buttonTextSize},
-                selectedIds.length === 0 && styles.buttonTextDisabled
-              ]}>
-                견적서 작성 {selectedIds.length > 0 ? `(${selectedIds.length})` : ''}
+              <Typo
+                style={[
+                  styles.buttonText,
+                  {fontSize: responsiveStyles.buttonTextSize},
+                  selectedIds.length === 0 && styles.buttonTextDisabled,
+                ]}>
+                견적서 작성{' '}
+                {selectedIds.length > 0 ? `(${selectedIds.length})` : ''}
               </Typo>
             </View>
             <MoveIcon width={24} height={24} />

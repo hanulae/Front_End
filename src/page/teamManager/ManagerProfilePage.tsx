@@ -42,7 +42,6 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
     }, []),
   );
   const userInfo = useAtomValue(userInfoAtom);
-  console.log('StatusBar.currentHeight', StatusBar.currentHeight);
   const [showPhoneAuthSheet, setShowPhoneAuthSheet] = useState(false);
   const goToModifyUserInfo = () => {
     console.log('Modify User Info');
@@ -53,13 +52,6 @@ const ManagerProfilePage = ({navigation}: IManagerProfilePageProps) => {
   };
   const goToPointHistory = () => {
     navigation.navigate('PointHistory', {variant: 'manager'});
-    // Toast.show({
-    //   type: 'success',
-    //   text1: '포인트 내역',
-    //   text2: '포인트 내역 페이지로 이동합니다.',
-    //   position: 'top',
-    //   visibilityTime: 2000,
-    // });
   };
   const goToPointRefund = () => {
     navigation.navigate('PointRefund', {variant: 'manager'});
