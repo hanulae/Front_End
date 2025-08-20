@@ -4,8 +4,9 @@ import {useInputBase} from './useInputBase';
 const autoHyphen = (value: string) =>
   value.replace(/[^0-9]/g, '').replace(/^(\d{3})(\d{3,4})(\d{4})$/, `$1-$2-$3`);
 
-export const usePhoneInput = () => {
+export const usePhoneInput = (initialValue?: string) => {
   const hook = useInputBase({
+    initialValue: initialValue ? autoHyphen(initialValue) : '',
     validate: value => ({
       valid: isValidPhoneNumber(value),
       message: '전화번호 형식이 올바르지 않습니다.',
