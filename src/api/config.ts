@@ -11,8 +11,8 @@ import {
 
 const API_URL =
   Platform.OS === 'android'
-    ? 'https://67796a706d83.ngrok-free.app/api'
-    : 'https://67796a706d83.ngrok-free.app/api';
+    ? 'https://www.wooricenter.co.kr/api'
+    : 'https://www.wooricenter.co.kr/api';
 
 // export const API_URL = 'http://15.164.166.8:3000/api';
 
