@@ -4,7 +4,7 @@ import {
   useRoute,
   CommonActions,
 } from '@react-navigation/native';
-import {useCallback, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {
   Platform,
   StatusBar,
@@ -31,6 +31,7 @@ import api from '../../api/config';
 import {userInfoAtom} from '../../state/local_state/userinfoAtom';
 import {useSetAtom} from 'jotai';
 import {scaleFontSize, scaleSize, isSmallDevice} from '../../utils/responsive';
+import * as notificationApiService from '../../services/notificationService';
 
 interface INotificationSettings {
   appNotification: boolean;
@@ -67,6 +68,24 @@ const AppSettingPage = () => {
     emailNotification: false,
   });
 
+  // 컴포넌트 마운트 시 알림 설정 조회
+  useEffect(() => {
+    const fetchNotificationSettings = async () => {
+      try {
+        const settings = await notificationApiService.getNotificationSettings();
+        setNotifications({
+          appNotification: settings.notificationEnabled,
+          smsNotification: settings.smsNotificationEnabled,
+          emailNotification: false,
+        });
+      } catch (error) {
+        console.error('알림 설정 조회 실패:', error);
+      }
+    };
+
+    fetchNotificationSettings();
+  }, []);
+
   // 회원탈퇴 동의 체크박스 상태
   const [withdrawalAgreed, setWithdrawalAgreed] = useState(false);
 
@@ -78,11 +97,33 @@ const AppSettingPage = () => {
   const appVersion = DeviceInfo.getVersion();
 
   // 토글 변경 핸들러
-  const toggleNotification = (key: keyof INotificationSettings) => {
-    setNotifications(prev => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
+  const toggleNotification = async (key: keyof INotificationSettings) => {
+    try {
+      const newValue = !notifications[key];
+
+      // 서버에 업데이트할 설정 객체 생성
+      const updateSettings: any = {};
+
+      if (key === 'appNotification') {
+        updateSettings.notificationEnabled = newValue;
+      } else if (key === 'smsNotification') {
+        updateSettings.smsNotificationEnabled = newValue;
+      }
+
+      // 앱 알림 또는 SMS 알림 설정인 경우 서버에 업데이트
+      if (Object.keys(updateSettings).length > 0) {
+        await notificationApiService.updateNotificationSettings(updateSettings);
+      }
+
+      // 성공 시 로컬 상태 업데이트
+      setNotifications(prev => ({
+        ...prev,
+        [key]: newValue,
+      }));
+    } catch (error) {
+      console.error('알림 설정 업데이트 실패:', error);
+      Alert.alert('오류', '알림 설정 업데이트에 실패했습니다.');
+    }
   };
 
   // 회원탈퇴 동의 체크박스 토글

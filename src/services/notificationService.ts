@@ -1,11 +1,11 @@
-import notifee, {EventType, AndroidImportance} from '@notifee/react-native';
+import notifee, { EventType, AndroidImportance } from '@notifee/react-native';
 import messaging from '@react-native-firebase/messaging';
-import {Platform} from 'react-native';
+import { Platform } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
 import api from '../api/config';
-import {getNavigationTarget} from './api/notificationService';
+import { getNavigationTarget } from './api/notificationService';
 // Navigation types removed as they're not used directly here
-import {navigationRef} from '../util/navigationRef';
+import { navigationRef } from '../util/navigationRef';
 
 export interface NotificationData {
   title: string;
@@ -100,9 +100,7 @@ export const registerFCMTokenToServer = async (): Promise<boolean> => {
         console.log('기기 ID 획득:', deviceId);
       } catch {
         // 모든 방법 실패 시 임시 ID 생성
-        deviceId = `device_${Date.now()}_${Math.random()
-          .toString(36)
-          .substr(2, 9)}`;
+        deviceId = `device_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         console.log('임시 기기 ID 생성:', deviceId);
       }
     }
@@ -142,9 +140,7 @@ export const getCurrentToken = (): string | null => {
 /**
  * 로컬 알림 표시
  */
-export const showLocalNotification = async (
-  notification: NotificationData,
-): Promise<string> => {
+export const showLocalNotification = async (notification: NotificationData): Promise<string> => {
   try {
     console.log('로컬 알림 표시 시작:', notification);
 
@@ -344,7 +340,7 @@ export const setupNotificationListeners = (): void => {
   console.log('네비게이션 준비 상태:', navigationRef?.current?.isReady());
 
   // 포그라운드 이벤트 리스너
-  notifee.onForegroundEvent(({type, detail}) => {
+  notifee.onForegroundEvent(({ type, detail }) => {
     if (type === EventType.PRESS) {
       console.log('detail', detail);
       console.log('=== 포그라운드 알림 터치 ===');
@@ -354,7 +350,7 @@ export const setupNotificationListeners = (): void => {
   });
 
   // 백그라운드 이벤트 리스너
-  notifee.onBackgroundEvent(async ({type, detail}) => {
+  notifee.onBackgroundEvent(async ({ type, detail }) => {
     if (type === EventType.PRESS) {
       console.log('=== 백그라운드 알림 터치 ===');
       console.log('알림 데이터:', detail.notification);
@@ -371,8 +367,7 @@ export const setupNotificationListeners = (): void => {
 const handleNotificationPress = async (notification: any): Promise<void> => {
   // 강력한 중복 처리 방지
   const currentTime = Date.now();
-  const notificationId =
-    notification?.data?.notificationId || notification?.id || '';
+  const notificationId = notification?.data?.notificationId || notification?.id || '';
 
   if ((global as any).notificationHandlers.isProcessing) {
     console.log('이미 처리 중인 알림이 있습니다. 중복 처리 방지.');
@@ -401,12 +396,9 @@ const handleNotificationPress = async (notification: any): Promise<void> => {
     if (notification?.data) {
       console.log('노티피케이션아이디', notification.data.notificationId);
       try {
-        const uuidRegex =
-          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
         if (uuidRegex.test(notification.data.notificationId)) {
-          await api.put(
-            `/common/notification/${notification.data.notificationId}/read`,
-          );
+          await api.put(`/common/notification/${notification.data.notificationId}/read`);
           console.log('알림 읽음 처리 완료');
         }
       } catch (error) {
@@ -423,10 +415,7 @@ const handleNotificationPress = async (notification: any): Promise<void> => {
 
     if (notificationType && notificationData) {
       console.log('네비게이션 타겟 확인 시작');
-      const navigationTarget = getNavigationTarget(
-        notificationType,
-        notificationData,
-      );
+      const navigationTarget = getNavigationTarget(notificationType, notificationData);
       console.log('네비게이션 타겟:', navigationTarget);
 
       if (navigationTarget) {
@@ -471,21 +460,14 @@ const executeNavigation = async (navigationTarget: any): Promise<void> => {
       console.log(`네비게이션 준비 확인 ${attempts}/${maxAttempts}`);
 
       // 네비게이션 참조와 current 상태 확인
-      if (
-        navigationRef &&
-        navigationRef.current &&
-        navigationRef.current.isReady()
-      ) {
+      if (navigationRef && navigationRef.current && navigationRef.current.isReady()) {
         console.log('네비게이션이 준비되었습니다.');
 
         // 짧은 지연 후 네비게이션 실행 (React Native 렌더링 완료 대기)
         setTimeout(() => {
           try {
             if (navigationRef.current && navigationRef.current.isReady()) {
-              navigationRef.current.navigate(
-                navigationTarget.screen,
-                navigationTarget.params,
-              );
+              navigationRef.current.navigate(navigationTarget.screen, navigationTarget.params);
               console.log('네비게이션 실행 완료:', navigationTarget.screen);
             } else {
               console.log('네비게이션 실행 시점에 준비되지 않음');
@@ -499,7 +481,7 @@ const executeNavigation = async (navigationTarget: any): Promise<void> => {
       }
 
       // 0.5초 대기
-      await new Promise(resolve => setTimeout(resolve, waitTime));
+      await new Promise((resolve) => setTimeout(resolve, waitTime));
     }
 
     console.log('네비게이션 준비 시간 초과');
@@ -523,9 +505,7 @@ export const cancelAllNotifications = async (): Promise<void> => {
 /**
  * 특정 알림 취소
  */
-export const cancelNotification = async (
-  notificationId: string,
-): Promise<void> => {
+export const cancelNotification = async (notificationId: string): Promise<void> => {
   try {
     await notifee.cancelNotification(notificationId);
     console.log('알림 취소됨:', notificationId);
@@ -537,9 +517,7 @@ export const cancelNotification = async (
 /**
  * 예약된 알림 취소
  */
-export const cancelTriggerNotification = async (
-  notificationId: string,
-): Promise<void> => {
+export const cancelTriggerNotification = async (notificationId: string): Promise<void> => {
   try {
     await notifee.cancelTriggerNotification(notificationId);
     console.log('예약 알림 취소됨:', notificationId);
@@ -561,6 +539,35 @@ const notificationService = {
   cancelAllNotifications,
   cancelNotification,
   cancelTriggerNotification,
+};
+
+// 알림 설정 조회
+export const getNotificationSettings = async (): Promise<{
+  notificationEnabled: boolean;
+  smsNotificationEnabled: boolean;
+}> => {
+  try {
+    const response = await api.get('/common/notification/setting-info');
+    return response.data.data;
+  } catch (error) {
+    console.error('알림 설정 조회 실패: ', error);
+    throw error;
+  }
+};
+
+// 알림 설정 업데이트
+export const updateNotificationSettings = async (settings: {
+  notificationEnabled: boolean;
+  smsNotificationEnabled: boolean;
+}): Promise<any> => {
+  try {
+    console.log('settings', settings);
+    const response = await api.put('/common/notification/settings', settings);
+    return response.data;
+  } catch (error) {
+    console.error('알림 설정 업데이트 실패: ', error);
+    throw error;
+  }
 };
 
 export default notificationService;
