@@ -590,6 +590,35 @@ export const cancelTriggerNotification = async (
   }
 };
 
+// 알림 설정 조회
+export const getNotificationSettings = async (): Promise<{
+  notificationEnabled: boolean;
+  smsNotificationEnabled: boolean;
+}> => {
+  try {
+    const response = await api.get('/common/notification/setting-info');
+    return response.data.data;
+  } catch (error) {
+    console.error('알림 설정 조회 실패: ', error);
+    throw error;
+  }
+};
+
+// 알림 설정 업데이트
+export const updateNotificationSettings = async (settings: {
+  notificationEnabled: boolean;
+  smsNotificationEnabled: boolean;
+}): Promise<any> => {
+  try {
+    console.log('settings', settings);
+    const response = await api.put('/common/notification/settings', settings);
+    return response.data;
+  } catch (error) {
+    console.error('알림 설정 업데이트 실패: ', error);
+    throw error;
+  }
+};
+
 // 기본 내보내기 객체 (기존 코드와의 호환성을 위해)
 const notificationService = {
   initialize,
@@ -603,6 +632,8 @@ const notificationService = {
   cancelAllNotifications,
   cancelNotification,
   cancelTriggerNotification,
+  getNotificationSettings,
+  updateNotificationSettings,
 };
 
 export default notificationService;
